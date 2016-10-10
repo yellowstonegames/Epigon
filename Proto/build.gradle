@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    dependencies {
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+
+    version = '1.0'
+    ext {
+        appName = "EpigonProto"
+        squidlibVersion = '4863e7dcfd'
+        gdxVersion = '1.9.2'
+        roboVMVersion = '1.12.0'
+        box2DLightsVersion = '1.4'
+        ashleyVersion = '1.7.0'
+        aiVersion = '1.8.0'
+        regexodusVersion = '0.1.7'
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+}
+
+project(":desktop") {
+    dependencies {
+        compile project(":core")
+        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    }
+}
+
+project(":core") {
+    dependencies {
+        compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
+        compile "com.github.tommyettinger:regexodus:$regexodusVersion"
+    }
+}

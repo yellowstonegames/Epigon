@@ -1,0 +1,59 @@
+[
+{	"name": "stone",
+	"plural": "chunks of stone",
+	"represent": "*",
+	"foregroungColor": "gray",
+	"generic": true
+},
+{	"name": "tool stone",
+	"parent": "stone",
+	"plural": "chunks of tool stone",
+	"generic": true
+},
+{	"name": "obsidian",
+	"parent": "tool stone",
+	"plural": "chunks of obsidian"
+},
+{	"name": "chert",
+	"parent": "tool stone",
+	"plural": "chunks of chert"
+},
+{	"name": "gemstone",
+	"parent": "stone",
+	"foregroundColor": "white",
+	"generic": true
+},
+{	"name": "ruby",
+	"parent": "gemstone",
+	"plural": "rubies",
+	"foregroundColor": "red"
+},
+{	"name": "emerald",
+	"parent": "gemstone",
+	"color": "emerald"
+},
+{	"name": "metal ore",
+	"parent": "stone",
+	"plural": "chunks of ore",
+	"generic": true
+},
+{	"name": "malachite",
+	"parent": "metal ore",
+	"plural": "chunks of malachite",
+	"foregroundColor": "malachite"
+},
+{	"name": "iron ore",
+	"parent": "metal ore",
+	"plural": "chunks of iron ore",
+	"foregroundColor": "rust"
+},
+{	"name": "basalt",
+	"parent": "stone"
+},
+{	"name": "coal",
+	"parent": "stone"
+},
+{	"name": "lignite",
+	"parent": "coal"
+}
+]
