@@ -366,8 +366,8 @@ public class DisplayMaster implements Screen {
         viewScrollPane = new ScrollPane(actionBarTable, skin);
         viewScrollPane.setScrollbarsOnTop(false);
         viewScrollPane.setFadeScrollBars(false);
-//        leftTable.add(viewScrollPane).width(width * 0.55f);
-        leftTable.add(actionBarTable).width(width * 0.55f);
+        leftTable.add(viewScrollPane).width(width * 0.55f);
+//        leftTable.add(actionBarTable).width(width * 0.55f);
 
         rightTable = new Table(skin);
         primaryTable.add(rightTable).top().right().width(width * 0.4f).height(height);
