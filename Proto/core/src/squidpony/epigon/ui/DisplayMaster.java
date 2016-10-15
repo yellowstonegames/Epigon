@@ -3,12 +3,13 @@ package squidpony.epigon.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import squidpony.epigon.AOE;
@@ -352,53 +353,53 @@ public class DisplayMaster implements Screen {
         leftTable.row().height(height * 0.1f);
 
         defaultActionTable = new Table(skin);
-//        Image image = new Image(atlas.findRegion("default action"));
-//        image.setScaling(Scaling.fit);
-//        defaultActionTable.add(image);
+        Image image = new Image(atlas.findRegion("default action"));
+        image.setScaling(Scaling.fit);
+        defaultActionTable.add(image);
         leftTable.add(defaultActionTable).width(width * 0.05f);
 
         actionBarTable = new Table(skin);
-//        image = new Image(atlas.findRegion("action bar"));
-//        image.setHeight(height * 0.08f);
-//        image.setScaling(Scaling.fillY);
-//        actionBarTable.add(image);
+        image = new Image(atlas.findRegion("action bar"));
+        image.setHeight(height * 0.08f);
+        image.setScaling(Scaling.fillY);
+        actionBarTable.add(image);
         viewScrollPane = new ScrollPane(actionBarTable, skin);
         viewScrollPane.setScrollbarsOnTop(false);
         viewScrollPane.setFadeScrollBars(false);
-        leftTable.add(viewScrollPane).width(width * 0.55f);
-//        leftTable.add(actionBarTable).width(width * 0.55f);
+//        leftTable.add(viewScrollPane).width(width * 0.55f);
+        leftTable.add(actionBarTable).width(width * 0.55f);
 
         rightTable = new Table(skin);
         primaryTable.add(rightTable).top().right().width(width * 0.4f).height(height);
 
         healthBarTable = new Table(skin);
-//        image = new Image(atlas.findRegion("health bars"));
-//        image.setScaling(Scaling.fit);
-//        healthBarTable.add(image);
+        image = new Image(atlas.findRegion("health bars"));
+        image.setScaling(Scaling.fit);
+        healthBarTable.add(image);
         rightTable.add(healthBarTable).size(width * 0.4f, height * 0.2f);
 
         rightTable.row();
 
         equipmentDummyTable = new Table(skin);
-//        image = new Image(atlas.findRegion("equipment dummies"));
-//        image.setScaling(Scaling.fit);
-//        equipmentDummyTable.add(image);
+        image = new Image(atlas.findRegion("equipment dummies"));
+        image.setScaling(Scaling.fit);
+        equipmentDummyTable.add(image);
         rightTable.add(equipmentDummyTable).size(width * 0.4f, height * 0.12f);
 
         rightTable.row();
 
         multiViewSelectionTable = new Table(skin);
-//        image = new Image(atlas.findRegion("multiview selection"));
-//        image.setScaling(Scaling.fit);
-//        multiViewSelectionTable.add(image);
+        image = new Image(atlas.findRegion("multiview selection"));
+        image.setScaling(Scaling.fit);
+        multiViewSelectionTable.add(image);
         rightTable.add(multiViewSelectionTable).size(width * 0.4f, height * 0.12f);
 
         rightTable.row();
 
         multiAreaTable = new Table(skin);
-//        image = new Image(atlas.findRegion("multiview"));
-//        image.setScaling(Scaling.fit);
-//        multiAreaTable.add(image);
+        image = new Image(atlas.findRegion("multiview"));
+        image.setScaling(Scaling.fit);
+        multiAreaTable.add(image);
         rightTable.add(multiAreaTable).size(width * 0.4f, height * 0.56f);
 
         //set all tables to debug draw if needed
