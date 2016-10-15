@@ -3,7 +3,6 @@ package squidpony.epigon.data.blueprints;
 import java.util.ArrayList;
 import squidpony.epigon.data.BiomeSize;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.generic.TerrainBlueprint;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**

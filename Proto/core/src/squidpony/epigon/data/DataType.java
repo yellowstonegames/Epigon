@@ -14,7 +14,7 @@ import squidpony.epigon.data.generic.Element;
 import squidpony.epigon.data.generic.Profession;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.generic.Strategy;
-import squidpony.epigon.data.generic.TerrainBlueprint;
+import squidpony.epigon.data.blueprints.TerrainBlueprint;
 import squidpony.epigon.data.specific.Biome;
 import squidpony.epigon.data.specific.Body;
 import squidpony.epigon.data.specific.Condition;

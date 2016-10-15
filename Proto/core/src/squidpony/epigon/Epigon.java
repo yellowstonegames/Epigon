@@ -72,8 +72,9 @@ public class Epigon extends Game {
     public void create() {
         System.out.println("Creating new game.");
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
-        
+
         super.setScreen(new DisplayMaster());
+        getScreen().show();
 
 //        // gotta have a random number generator. We can seed an RNG with any long we want, or even a String.
 //        rng = new RNG("SquidLib!");
@@ -198,31 +199,33 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        // standard clear the background routine for libGDX
-        Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-
-        // need to display the map every frame, since we clear the screen to avoid artifacts.
-        putMap();
-
-        // if the user clicked, we have a list of moves to perform.
-        if (!awaitedMoves.isEmpty()) {
-            // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
-            secondsWithoutMoves += Gdx.graphics.getDeltaTime();
-            if (secondsWithoutMoves >= 0.1) {
-                secondsWithoutMoves = 0;
-                Coord m = awaitedMoves.remove(0);
-                toCursor.remove(0);
-                move(Direction.toGoTo(player, m));
-            }
-        } // if we are waiting for the player's input and get input, process it.
-        else if (input.hasNext()) {
-            input.next();
-        }
-
-        //stage has its own batch and must be explicitly told to draw(). this also causes it to act().
-        stage.draw();
+        getScreen().render(0);
+        
+//        // standard clear the background routine for libGDX
+//        Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);
+//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//        Gdx.gl.glEnable(GL20.GL_BLEND);
+//
+//        // need to display the map every frame, since we clear the screen to avoid artifacts.
+//        putMap();
+//
+//        // if the user clicked, we have a list of moves to perform.
+//        if (!awaitedMoves.isEmpty()) {
+//            // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
+//            secondsWithoutMoves += Gdx.graphics.getDeltaTime();
+//            if (secondsWithoutMoves >= 0.1) {
+//                secondsWithoutMoves = 0;
+//                Coord m = awaitedMoves.remove(0);
+//                toCursor.remove(0);
+//                move(Direction.toGoTo(player, m));
+//            }
+//        } // if we are waiting for the player's input and get input, process it.
+//        else if (input.hasNext()) {
+//            input.next();
+//        }
+//
+//        //stage has its own batch and must be explicitly told to draw(). this also causes it to act().
+//        stage.draw();
     }
 
     @Override
@@ -231,7 +234,7 @@ public class Epigon extends Game {
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
 //        input.getMouse().reinitialize((float) width / TOTAL_WIDTH, (float) height / TOTAL_HEIGHT, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
     }
-    
+
     @Override
     public void pause() {
         System.out.println("Pausing game.");

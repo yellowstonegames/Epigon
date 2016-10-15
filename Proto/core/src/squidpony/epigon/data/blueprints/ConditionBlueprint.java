@@ -9,7 +9,6 @@ import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.generic.Element;
 import squidpony.epigon.data.generic.Energy;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.generic.TerrainBlueprint;
 
 /**
  * Blueprint for a Condition.
