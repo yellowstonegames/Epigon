@@ -5,16 +5,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-
 import squidpony.epigon.AOE;
-import squidpony.epigon.dm.Planner;
 import squidpony.epigon.EnvironmentalVariables;
 import squidpony.epigon.data.ConditionChangeType;
 import squidpony.epigon.data.InventoryChangeType;
@@ -24,6 +18,7 @@ import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Item;
 import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.dm.Planner;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.Achievement;
@@ -58,6 +53,7 @@ public class DisplayMaster implements Screen {
     private TextureAtlas atlas;
     private SoundManager sound = SoundManager.getInstance();
     private SquidPanel viewPanel;
+    private TextCellFactory tcf;
 
     /**
      * Sets the view to the map provided and initializes display of the map, with the provided location as close to
@@ -79,8 +75,7 @@ public class DisplayMaster implements Screen {
 
         int w = map.width;
         int h = map.height;
-        TextCellFactory tcf = new TextCellFactory();
-        viewPanel = new SquidPanel(w, h, tcf);
+        viewPanel = new SquidPanel(w, h, tcf.width(25).height(25).initBySize());
 
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
@@ -226,7 +221,6 @@ public class DisplayMaster implements Screen {
      *
      * @param x
      * @param y
-     * @param creature
      * @param killed
      */
     public void indicateCreatureChange(int x, int y, boolean killed) {
@@ -247,8 +241,9 @@ public class DisplayMaster implements Screen {
     /**
      * Indicates an Area-Of-Effect centered at the given location.
      *
+     * @param x
+     * @param y
      * @param aoe
-     * @param point
      */
     public void indicateAOE(int x, int y, AOE aoe) {
         //TODO -- fill out
@@ -329,13 +324,16 @@ public class DisplayMaster implements Screen {
 
     @Override
     public void show() {
+
         atlas = new TextureAtlas("images/textures.txt");
 
         int width = EnvironmentalVariables.getScreenWidth(),
                 height = EnvironmentalVariables.getScreenHeight();
 
+        tcf = new TextCellFactory().font("Inconsolata-LGC-Square-25x25.fnt").width(25).height(25).initBySize();
+
         //set up the display tables
-        skin = new Skin(Gdx.files.local("skin/uiskin.json"));
+        skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 
         primaryTable = new Table(skin);
         primaryTable.setFillParent(true);
@@ -433,6 +431,7 @@ public class DisplayMaster implements Screen {
 
     @Override
     public void resume() {
+
     }
 
     @Override

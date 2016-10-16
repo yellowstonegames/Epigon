@@ -1,10 +1,11 @@
 package squidpony.epigon.ui;
 
-import squidpony.epigon.EnvironmentalVariables;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import java.io.File;
+import com.badlogic.gdx.files.FileHandle;
+import squidpony.epigon.EnvironmentalVariables;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
@@ -33,11 +34,12 @@ public class SoundManager {
     }
 
     private void loadSoundFXResources() {
-        for (File f : (new File("sound fx/")).listFiles()) {
-            String name = f.getName();
+
+        for (FileHandle f : Gdx.files.internal("sound fx").list()) {
+            String name = f.name();
             if (readableFileTypes.contains(name.substring(name.lastIndexOf('.') + 1))) {
-                Sound sound = Gdx.audio.newSound(Gdx.files.local("sound fx/" + name));
-                soundMap.put(f.getName().substring(0, name.lastIndexOf('.')), sound);
+                Sound sound = Gdx.audio.newSound(Gdx.files.internal("sound fx/" + name));
+                soundMap.put(f.nameWithoutExtension(), sound);
             }
         }
 
@@ -81,12 +83,12 @@ public class SoundManager {
     }
 
     private void loadMusicResources() {
-        for (File f : (new File("music")).listFiles()) {
-            String name = f.getName();
+        for (FileHandle f : Gdx.files.internal("music").list()) {
+            String name = f.name();
             if (readableFileTypes.contains(name.substring(name.lastIndexOf('.') + 1))) {
-                Music music = Gdx.audio.newMusic(Gdx.files.local("music/" + name));
+                Music music = Gdx.audio.newMusic(Gdx.files.internal("music/" + name));
                 music.setLooping(true);
-                musicMap.put(f.getName().substring(0, name.lastIndexOf('.')), music);
+                musicMap.put(f.nameWithoutExtension(), music);
             }
         }
 

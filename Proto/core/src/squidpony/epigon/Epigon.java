@@ -1,27 +1,23 @@
 package squidpony.epigon;
 
-import squidpony.epigon.ui.DisplayMaster;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-
-import java.util.ArrayList;
-
+import squidpony.epigon.ui.DisplayMaster;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.gui.gdx.SquidLayers;
+import squidpony.squidgrid.gui.gdx.SquidMouse;
 import squidpony.squidgrid.mapping.DungeonGenerator;
-import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.Coord;
-import squidpony.squidmath.CoordPacker;
 import squidpony.squidmath.RNG;
+
+import java.util.ArrayList;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes. Doesn't use any
@@ -74,7 +70,7 @@ public class Epigon extends Game {
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
 
         super.setScreen(new DisplayMaster());
-        getScreen().show();
+        //getScreen().show();
 
 //        // gotta have a random number generator. We can seed an RNG with any long we want, or even a String.
 //        rng = new RNG("SquidLib!");
@@ -163,8 +159,7 @@ public class Epigon extends Game {
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      * In a fully-fledged game, this would not be organized like this, but this is a one-file demo.
-     * @param xmod
-     * @param ymod
+     * @param dir
      */
     private void move(Direction dir) {
         int newX = player.x + dir.deltaX;
@@ -199,7 +194,7 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        getScreen().render(0);
+        super.render();
         
 //        // standard clear the background routine for libGDX
 //        Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);

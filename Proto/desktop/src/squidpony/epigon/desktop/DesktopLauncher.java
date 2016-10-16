@@ -9,13 +9,13 @@ import squidpony.epigon.Epigon;
 public class DesktopLauncher {
 
     public static void main(String... args) {
-        //start independant creators
+        //start independent creators
         System.out.println("Loading...");
         
         //read in all external data files
         System.out.println("Files loaded!");
 
-        //start independant listeners
+        //start independent listeners
 
         //load and initialize resources
 
