@@ -80,6 +80,7 @@ public class DisplayMaster implements Screen {
         int w = map.width;
         int h = map.height;
         TextCellFactory tcf = new TextCellFactory();
+        tcf.defaultFont();
         viewPanel = new SquidPanel(w, h, tcf);
 
         for (int x = 0; x < w; x++) {
@@ -90,9 +91,8 @@ public class DisplayMaster implements Screen {
         }
 
         mainView.setActor(viewPanel);
-        mainView.setHeight(viewPanel.getHeight());
-        mainView.setWidth(viewPanel.getWidth());
-        mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
+        mainView.size(viewPanel.getWidth(), viewPanel.getHeight());
+        //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
     }
 
     /**
@@ -226,7 +226,6 @@ public class DisplayMaster implements Screen {
      *
      * @param x
      * @param y
-     * @param creature
      * @param killed
      */
     public void indicateCreatureChange(int x, int y, boolean killed) {
@@ -247,8 +246,9 @@ public class DisplayMaster implements Screen {
     /**
      * Indicates an Area-Of-Effect centered at the given location.
      *
+     * @param x
+     * @param y
      * @param aoe
-     * @param point
      */
     public void indicateAOE(int x, int y, AOE aoe) {
         //TODO -- fill out
