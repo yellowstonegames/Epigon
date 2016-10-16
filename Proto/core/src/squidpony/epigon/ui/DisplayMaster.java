@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -42,9 +43,16 @@ public class DisplayMaster implements Screen {
     private EpiMap map;//the currently displayed map
     //
     //UI output fields
-    private Table primaryTable, viewTable, defaultActionTable, actionBarTable,
-            healthBarTable, equipmentDummyTable, multiAreaTable, multiViewSelectionTable,
-            leftTable, rightTable;
+    private Table primaryTable,
+            defaultActionTable,
+            actionBarTable,
+            healthBarTable,
+            equipmentDummyTable,
+            multiAreaTable,
+            multiViewSelectionTable,
+            leftTable,
+            rightTable;
+    private Container mainView;
     private Stage stage;
     private Skin skin;
     private TextureAtlas atlas;
@@ -66,7 +74,7 @@ public class DisplayMaster implements Screen {
         if (viewPanel != null) {
             viewPanel.remove();
         }
-        
+
         this.map = map;
 
         int w = map.width;
@@ -81,10 +89,10 @@ public class DisplayMaster implements Screen {
             }
         }
 
-        viewTable.add(viewPanel);
-        viewTable.setHeight(viewPanel.getHeight());
-        viewTable.setWidth(viewPanel.getWidth());
-        viewTable.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
+        mainView.setActor(viewPanel);
+        mainView.setHeight(viewPanel.getHeight());
+        mainView.setWidth(viewPanel.getWidth());
+        mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
     }
 
     /**
@@ -292,10 +300,6 @@ public class DisplayMaster implements Screen {
         //TODO -- show the achievement
     }
 
-    public Table getViewTable() {
-        return viewTable;
-    }
-
     public SquidPanel getViewPanel() {
         return viewPanel;
     }
@@ -343,9 +347,9 @@ public class DisplayMaster implements Screen {
         leftTable = new Table(skin);
         primaryTable.add(leftTable).width(width * 0.6f).height(height);
 
-        viewTable = new Table(skin);
+        mainView = new Container();
 
-        ScrollPane viewScrollPane = new ScrollPane(viewTable, skin);
+        ScrollPane viewScrollPane = new ScrollPane(mainView, skin);
         viewScrollPane.setScrollbarsOnTop(false);
         viewScrollPane.setFadeScrollBars(false);
         leftTable.add(viewScrollPane).width(width * 0.6f).height(height * 0.9f).colspan(2);
@@ -407,7 +411,7 @@ public class DisplayMaster implements Screen {
             primaryTable.debug();
             leftTable.debug();
             rightTable.debug();
-            viewTable.debug();
+            mainView.debug();
             defaultActionTable.debug();
             actionBarTable.debug();
             healthBarTable.debug();
