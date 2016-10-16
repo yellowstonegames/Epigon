@@ -85,9 +85,8 @@ public class DisplayMaster implements Screen {
         }
 
         mainView.setActor(viewPanel);
-        mainView.setHeight(viewPanel.getHeight());
-        mainView.setWidth(viewPanel.getWidth());
-        mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
+        mainView.size(viewPanel.getWidth(), viewPanel.getHeight());
+        //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
     }
 
     /**
