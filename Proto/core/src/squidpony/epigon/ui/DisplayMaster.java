@@ -23,6 +23,7 @@ import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.Achievement;
 import squidpony.epigon.universe.Rating;
+import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 
@@ -83,10 +84,12 @@ public class DisplayMaster implements Screen {
                 viewPanel.put(x, y, tile.getSymbol(), tile.getForegroundColor());
             }
         }
+        
+        viewPanel.put(startx, starty, '@', SColor.BLACK_DYE);
 
-        mainView.setActor(viewPanel);
         mainView.size(viewPanel.getWidth(), viewPanel.getHeight());
-        //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
+        mainView.setActor(viewPanel);
+        //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), (h -starty) * viewPanel.getTextCellFactory().height());
     }
 
     /**

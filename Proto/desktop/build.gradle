@@ -5,6 +5,10 @@ sourceSets.main.resources.srcDirs += ["../core/assets"]
 project.ext.mainClassName = "squidpony.epigon.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../core/assets");
 
+if (!hasProperty('mainClass')) {
+    ext.mainClass = 'squidpony.epigon.desktop.DesktopLauncher'
+}
+
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
