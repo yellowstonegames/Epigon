@@ -28,6 +28,6 @@ public enum Planner {
      */
     public void launch(DisplayMaster display) {
         System.out.println("Game Launched!");
-        display.setView(world.getDefaultMap(), world.getDefaultMap().width, world.getDefaultMap().height);
+        display.setView(world.getDefaultMap(), world.getDefaultMap().width / 2, world.getDefaultMap().height / 2);
     }
 }
