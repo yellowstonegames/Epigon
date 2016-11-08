@@ -47,7 +47,8 @@ public class DisplayMaster implements Screen {
             multiViewSelectionTable,
             leftTable,
             rightTable;
-    private Container mainView;
+    private Stack mainView;
+    private ScrollPane viewScrollPane;
     private Stage stage;
     private Skin skin;
     private TextureAtlas atlas;
@@ -76,7 +77,6 @@ public class DisplayMaster implements Screen {
         int w = map.width;
         int h = map.height;
         viewPanel = new SquidPanel(w, h, tcf.width(25).height(25).initBySize());
-
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 EpiTile tile = map.contents[x][y];
@@ -84,8 +84,13 @@ public class DisplayMaster implements Screen {
             }
         }
 
-        mainView.setActor(viewPanel);
-        mainView.size(viewPanel.getWidth(), viewPanel.getHeight());
+        viewPanel.setSize(25 * w, 25 * h);
+        mainView.add(viewPanel);
+        mainView.setSize(viewPanel.getWidth(), viewPanel.getHeight());
+        viewPanel.setSize(viewPanel.getWidth(), viewPanel.getHeight());
+        viewScrollPane.setWidget(viewPanel);
+        viewScrollPane.layout();
+        primaryTable.invalidateHierarchy();
         //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
     }
 
@@ -306,7 +311,7 @@ public class DisplayMaster implements Screen {
      */
     @Override
     public void resize(int width, int height) {
-        //TODO -- implement resize 
+        stage.getViewport().update(width, height, true);
     }
 
     /**
@@ -316,7 +321,6 @@ public class DisplayMaster implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0f, 0.0f, 0.0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         stage.act(delta);
         stage.draw();
     }
@@ -344,12 +348,11 @@ public class DisplayMaster implements Screen {
         leftTable = new Table(skin);
         primaryTable.add(leftTable).width(width * 0.6f).height(height);
 
-        mainView = new Container();
-
-        ScrollPane viewScrollPane = new ScrollPane(mainView, skin);
+        mainView = new Stack();
+        viewScrollPane = new ScrollPane(mainView, skin);
         viewScrollPane.setScrollbarsOnTop(false);
         viewScrollPane.setFadeScrollBars(false);
-        leftTable.add(viewScrollPane).width(width * 0.6f).height(height * 0.9f).colspan(2);
+        leftTable.add(viewScrollPane).expand().fill().width(width * 0.6f).height(height * 0.9f).colspan(2);
 
         leftTable.row().height(height * 0.1f);
 
@@ -364,10 +367,10 @@ public class DisplayMaster implements Screen {
         image.setHeight(height * 0.08f);
         image.setScaling(Scaling.fillY);
         actionBarTable.add(image);
-        viewScrollPane = new ScrollPane(actionBarTable, skin);
-        viewScrollPane.setScrollbarsOnTop(false);
-        viewScrollPane.setFadeScrollBars(false);
-        leftTable.add(viewScrollPane).width(width * 0.55f);
+        ScrollPane viewScrollPane2 = new ScrollPane(actionBarTable, skin);
+        viewScrollPane2.setScrollbarsOnTop(false);
+        viewScrollPane2.setFadeScrollBars(false);
+        leftTable.add(viewScrollPane2).width(width * 0.55f);
 //        leftTable.add(actionBarTable).width(width * 0.55f);
 
         rightTable = new Table(skin);
@@ -408,6 +411,8 @@ public class DisplayMaster implements Screen {
             primaryTable.debug();
             leftTable.debug();
             rightTable.debug();
+            viewScrollPane.debug();
+            viewScrollPane2.debug();
             mainView.debug();
             defaultActionTable.debug();
             actionBarTable.debug();
@@ -416,7 +421,8 @@ public class DisplayMaster implements Screen {
             multiViewSelectionTable.debug();
             multiAreaTable.debug();
         }
-
+        primaryTable.pack();
+        primaryTable.invalidateHierarchy();
         Planner.INSTANCE.launch(this);//indicate that the display is set up and ready for action
     }
 
@@ -440,4 +446,5 @@ public class DisplayMaster implements Screen {
         atlas.dispose();
         sound.dispose();
     }
+
 }
