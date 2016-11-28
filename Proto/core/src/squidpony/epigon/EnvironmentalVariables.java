@@ -4,16 +4,14 @@ import java.util.prefs.Preferences;
 
 /**
  * A static class that holds environment wide variables.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class EnvironmentalVariables {
 
     static private Preferences prefs = Preferences.userRoot().node("/squidpony");
-    static private int screenWidth = 1024;
-    static private int screenHeight = 768;
+    static private int screenWidth = 1800;
+    static private int screenHeight = 1020;
     static private int pixelsPerMeter = 60;
-    static private float defaultZoom = 2.0f;
+    static private float defaultZoom = 1.0f;
     static private String title = "Epigon - The Expected Beginning";
     static private boolean debug = true;
 
