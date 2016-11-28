@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import javax.swing.GroupLayout;
 import squidpony.epigon.AOE;
 import squidpony.epigon.EnvironmentalVariables;
 import squidpony.epigon.data.ConditionChangeType;
@@ -49,7 +50,7 @@ public class DisplayMaster implements Screen {
             leftTable,
             rightTable;
     private Stack mainView;
-    private ScrollPane viewScrollPane;
+    //private ScrollPane viewScrollPane;
     private Stage stage;
     private Skin skin;
     private TextureAtlas atlas;
@@ -77,7 +78,7 @@ public class DisplayMaster implements Screen {
 
         int w = map.width;
         int h = map.height;
-        viewPanel = new SquidPanel(w, h, tcf.width(25).height(25).initBySize());
+        viewPanel = new SquidPanel(w, h, tcf.width(12).height(18).initBySize());
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 EpiTile tile = map.contents[x][y];
@@ -87,12 +88,12 @@ public class DisplayMaster implements Screen {
         
         viewPanel.put(startx, starty, '@', SColor.BLACK_DYE);
 
-        viewPanel.setSize(25 * w, 25 * h);
+        viewPanel.setSize(12 * w, 18 * h);
         mainView.add(viewPanel);
         mainView.setSize(viewPanel.getWidth(), viewPanel.getHeight());
         viewPanel.setSize(viewPanel.getWidth(), viewPanel.getHeight());
-        viewScrollPane.setWidget(viewPanel);
-        viewScrollPane.layout();
+        //viewScrollPane.setWidget(viewPanel);
+        //viewScrollPane.layout();
         primaryTable.invalidateHierarchy();
         //mainView.setPosition(startx * viewPanel.getTextCellFactory().width(), starty * viewPanel.getTextCellFactory().height());
     }
@@ -352,10 +353,11 @@ public class DisplayMaster implements Screen {
         primaryTable.add(leftTable).width(width * 0.6f).height(height);
 
         mainView = new Stack();
-        viewScrollPane = new ScrollPane(mainView, skin);
-        viewScrollPane.setScrollbarsOnTop(false);
-        viewScrollPane.setFadeScrollBars(false);
-        leftTable.add(viewScrollPane).expand().fill().width(width * 0.6f).height(height * 0.9f).colspan(2);
+//        viewScrollPane = new ScrollPane(mainView, skin);
+//        viewScrollPane.setScrollbarsOnTop(false);
+//        viewScrollPane.setFadeScrollBars(false);
+//        leftTable.add(viewScrollPane).expand().fill().width(width * 0.6f).height(height * 0.9f).colspan(2);
+        leftTable.add(mainView).expand().fill().width(width * 0.6f).height(height * 0.9f).colspan(2);
 
         leftTable.row().height(height * 0.1f);
 
@@ -414,7 +416,7 @@ public class DisplayMaster implements Screen {
             primaryTable.debug();
             leftTable.debug();
             rightTable.debug();
-            viewScrollPane.debug();
+            //viewScrollPane.debug();
             viewScrollPane2.debug();
             mainView.debug();
             defaultActionTable.debug();
