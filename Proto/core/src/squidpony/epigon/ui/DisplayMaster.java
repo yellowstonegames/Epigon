@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import javax.swing.GroupLayout;
 import squidpony.epigon.AOE;
-import squidpony.epigon.EnvironmentalVariables;
+import squidpony.epigon.Prefs;
 import squidpony.epigon.data.ConditionChangeType;
 import squidpony.epigon.data.InventoryChangeType;
 import squidpony.epigon.data.Stat;
@@ -334,8 +334,8 @@ public class DisplayMaster implements Screen {
 
         atlas = new TextureAtlas("images/textures.txt");
 
-        int width = EnvironmentalVariables.getScreenWidth(),
-                height = EnvironmentalVariables.getScreenHeight();
+        int width = Prefs.getScreenWidth(),
+                height = Prefs.getScreenHeight();
 
         tcf = new TextCellFactory().font("Inconsolata-LGC-Square-25x25.fnt").width(25).height(25).initBySize();
 
@@ -412,7 +412,7 @@ public class DisplayMaster implements Screen {
         rightTable.add(multiAreaTable).size(width * 0.4f, height * 0.56f);
 
         //set all tables to debug draw if needed
-        if (EnvironmentalVariables.isDebugMode()) {
+        if (Prefs.isDebugMode()) {
             primaryTable.debug();
             leftTable.debug();
             rightTable.debug();

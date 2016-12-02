@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import squidpony.epigon.EnvironmentalVariables;
+import squidpony.epigon.Prefs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +25,10 @@ public class SoundManager {
     private List<String> readableFileTypes = Arrays.asList(new String[]{"wav", "mp3", "ogg"});
 
     private SoundManager() {
-        if (EnvironmentalVariables.isSoundfxOn()) {
+        if (Prefs.isSoundfxOn()) {
             loadSoundFXResources();
         }
-        if (EnvironmentalVariables.isMusicOn()) {
+        if (Prefs.isMusicOn()) {
             loadMusicResources();
         }
     }
@@ -66,7 +66,7 @@ public class SoundManager {
      * @param key
      */
     public void playSoundFX(String key) {
-        if (!EnvironmentalVariables.isSoundfxOn()) {
+        if (!Prefs.isSoundfxOn()) {
             return;//don't do anything if the sound effects are off
         }
 
@@ -79,7 +79,7 @@ public class SoundManager {
             return;//track not found, continue current music selection
         }
 
-        temp.play(EnvironmentalVariables.getSoundfxVolume());
+        temp.play(Prefs.getSoundfxVolume());
     }
 
     private void loadMusicResources() {
@@ -119,7 +119,7 @@ public class SoundManager {
      * @param key
      */
     public void playMusic(String key) {
-        if (!EnvironmentalVariables.isMusicOn()) {
+        if (!Prefs.isMusicOn()) {
             stopMusic();
             return;//don't do anything if the music is off
         }
@@ -140,7 +140,7 @@ public class SoundManager {
             nowPlaying = temp;
         }
 
-        nowPlaying.setVolume(EnvironmentalVariables.getMusicVolume());
+        nowPlaying.setVolume(Prefs.getMusicVolume());
         nowPlaying.setLooping(true);
         if (!nowPlaying.isPlaying()) {
             nowPlaying.play();
@@ -169,13 +169,13 @@ public class SoundManager {
         if (musicLoaded) {
             if (volume < 0.001) {
                 unloadMusicResources();//unload if volume set to effectively zero
-                EnvironmentalVariables.setMusicOn(false);
+                Prefs.setMusicOn(false);
             } else if (nowPlaying != null) {
                 nowPlaying.setVolume(volume);
             }
         }
 
-        EnvironmentalVariables.setMusicVolume(volume);
+        Prefs.setMusicVolume(volume);
     }
 
     public void dispose() {
