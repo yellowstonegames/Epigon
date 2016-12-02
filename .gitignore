@@ -12,3 +12,7 @@
 hs_err_pid*
 
 **/.nb-gradle/
+/NetBeans Project/build
+/NetBeans Project/nbproject
+/Proto/.nb-gradle
+/Proto/*.nb-gradle-properties
