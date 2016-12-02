@@ -3,22 +3,20 @@ package squidpony.epigon;
 import java.util.prefs.Preferences;
 
 /**
- * A static class that holds environment wide variables.
+ * A static class that holds player adjustable environment wide variables.
  */
-public class EnvironmentalVariables {
+public class Prefs {
 
     static private Preferences prefs = Preferences.userRoot().node("/squidpony");
     static private int screenWidth = 1800;
     static private int screenHeight = 1020;
-    static private int pixelsPerMeter = 60;
-    static private float defaultZoom = 1.0f;
     static private String title = "Epigon - The Expected Beginning";
     static private boolean debug = true;
 
     /**
      * No instances of this class should be made.
      */
-    private EnvironmentalVariables() {
+    private Prefs() {
     }
 
     public static String getGameTitle() {
@@ -27,22 +25,6 @@ public class EnvironmentalVariables {
 
     public static boolean isDebugMode() {
         return debug;
-    }
-
-    public static int getPixelsPerMeter() {
-        return pixelsPerMeter;
-    }
-
-    public static double getMetersPerPixel() {
-        return 1.0 / pixelsPerMeter;
-    }
-
-    public static float getZoom() {
-        return prefs.getFloat("zoom", defaultZoom);
-    }
-
-    public static void setZoom(float zoom) {
-        prefs.putFloat("zoom", zoom);
     }
 
     public static int getScreenWidth() {

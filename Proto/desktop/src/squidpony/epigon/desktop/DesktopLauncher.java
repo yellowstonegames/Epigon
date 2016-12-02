@@ -3,7 +3,7 @@ package squidpony.epigon.desktop;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import squidpony.epigon.EnvironmentalVariables;
+import squidpony.epigon.Prefs;
 import squidpony.epigon.Epigon;
 
 public class DesktopLauncher {
@@ -29,9 +29,9 @@ public class DesktopLauncher {
 
         //hand control over to the display
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.width = EnvironmentalVariables.getScreenWidth();
-        config.height = EnvironmentalVariables.getScreenHeight();
-        config.title = EnvironmentalVariables.getGameTitle();
+        config.width = Prefs.getScreenWidth();
+        config.height = Prefs.getScreenHeight();
+        config.title = Prefs.getGameTitle();
         
         config.addIcon("images/icons/logo128.png", Files.FileType.Internal);
         config.addIcon("images/icons/logo32.png", Files.FileType.Internal);
