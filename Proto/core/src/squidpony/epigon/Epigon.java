@@ -9,21 +9,22 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import java.awt.Point;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidMouse;
-import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
 
 import java.util.ArrayList;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.World;
 import squidpony.squidgrid.gui.gdx.DefaultResources;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.mapping.DungeonUtility;
-import squidpony.squidmath.CoordPacker;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes. Doesn't use any
@@ -58,9 +59,11 @@ public class Epigon extends Game {
 
     private RNG rng;
     private SquidLayers display;
-    private DungeonGenerator dungeonGen;
-    private char[][] decoDungeon, bareDungeon, lineDungeon;
-    private int[][] colorIndices, bgColorIndices;
+//    private DungeonGenerator dungeonGen;
+//    private char[][] decoDungeon, bareDungeon, lineDungeon;
+//    private int[][] colorIndices, bgColorIndices;
+    private char[][] simpleChars;
+    private EpiMap map;
     private SquidInput input;
     private Color bgColor;
     private Stage stage;
@@ -112,13 +115,13 @@ public class Epigon extends Game {
 
         //This uses the seeded RNG we made earlier to build a procedural dungeon using a method that takes rectangular
         //sections of pre-drawn dungeon and drops them into place in a tiling pattern. It makes good "ruined" dungeons.
-        dungeonGen = new DungeonGenerator(MAP_WIDTH, MAP_HEIGHT, rng);
+//        dungeonGen = new DungeonGenerator(MAP_WIDTH, MAP_HEIGHT, rng);
 
         //uncomment this next line to randomly add water to the dungeon in pools.
         //dungeonGen.addWater(15);
         //decoDungeon is given the dungeon with any decorations we specified. (Here, we didn't, unless you chose to add
         //water to the dungeon. In that case, decoDungeon will have different contents than bareDungeon, next.)
-        decoDungeon = dungeonGen.generate();
+//        decoDungeon = dungeonGen.generate();
 
         //There are lots of options for dungeon generation in SquidLib; you can pass a TilesetType enum to generate()
         //as shown on the following lines to change the style of dungeon generated from ruined areas, which are made
@@ -126,32 +129,36 @@ public class Epigon extends Game {
         //decoDungeon = dungeonGen.generate(TilesetType.REFERENCE_CAVES); // generate caves
         //decoDungeon = dungeonGen.generate(TilesetType.ROUND_ROOMS_DIAGONAL_CORRIDORS); // generate large round rooms
         //getBareDungeon provides the simplest representation of the generated dungeon -- '#' for walls, '.' for floors.
-        bareDungeon = dungeonGen.getBareDungeon();
+//        bareDungeon = dungeonGen.getBareDungeon();
 
         //When we draw, we may want to use a nicer representation of walls. DungeonUtility has lots of useful methods
         //for modifying char[][] dungeon grids, and this one takes each '#' and replaces it with a box-drawing character.
-        lineDungeon = DungeonUtility.hashesToLines(decoDungeon);
+//        lineDungeon = DungeonUtility.hashesToLines(decoDungeon);
 
         //Coord is the type we use as a general 2D point, usually in a dungeon.
         //Because we know dungeons won't be huge, Coord is optimized for x and y values between -3 and 255, inclusive.
         cursor = Coord.get(-1, -1);
 
+        map = World.getDefaultMap();
+        
         //player is, here, just a Coord that stores his position. In a real game, you would probably have a class for
         //creatures, and possibly a subclass for the player.
-        player = dungeonGen.utility.randomCell(CoordPacker.pack(bareDungeon, '.'));
+//        player = dungeonGen.utility.randomCell(CoordPacker.pack(bareDungeon, '.'));
+        player = Coord.get(20, 20);
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
-        playerToCursor = new DijkstraMap(decoDungeon, DijkstraMap.Measurement.MANHATTAN);
+        simpleChars = map.simpleChars();
+        playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
 
         bgColor = SColor.DARK_SLATE_GRAY;
 
         // DungeonUtility provides various ways to get default colors or other information from a dungeon char 2D array.
-        colorIndices = DungeonUtility.generatePaletteIndices(decoDungeon);
-        bgColorIndices = DungeonUtility.generateBGPaletteIndices(decoDungeon);
+//        colorIndices = DungeonUtility.generatePaletteIndices(decoDungeon);
+//        bgColorIndices = DungeonUtility.generateBGPaletteIndices(decoDungeon);
 
         input = new SquidInput(keys, mapMouse);
 
@@ -170,7 +177,7 @@ public class Epigon extends Game {
     private void move(Direction dir) {
         int newX = player.x + dir.deltaX;
         int newY = player.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && bareDungeon[newX][newY] != '#') {
+        if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && map.contents[newX][newY].getSymbol() == '#') {
             player = player.translate(dir.deltaX, dir.deltaY);
         }
     }
@@ -181,7 +188,13 @@ public class Epigon extends Game {
     public void putMap() {
         for (int x = 0; x < MAP_WIDTH; x++) {
             for (int y = 0; y < MAP_HEIGHT; y++) {
-                display.put(x, y, lineDungeon[x][y], colorIndices[x][y], bgColorIndices[x][y], 40);
+                if (map.inBounds(new Point(x, y))) {
+                EpiTile tile = map.contents[x][y];
+                //display.put(x, y, lineDungeon[x][y], colorIndices[x][y], bgColorIndices[x][y], 40);
+                display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
+                } else {
+                    display.put(x, y, '`', SColor.SLATE, SColor.BLACK);
+                }
             }
         }
 

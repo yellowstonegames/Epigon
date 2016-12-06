@@ -17,7 +17,7 @@ public class World {
     public EpiMap overworld;
     public Item player;
     private EpiMap currentMap;
-    private static final String[] DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
+    private static final String[] MINI_DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
         "#################################################################",
         "#,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#..m.mmmmmmmmmmmmmm..m...#",
         "#,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#.mmTmmmmmmmmmmmmmm......#",
@@ -57,7 +57,7 @@ public class World {
         "#.....#..........................#.....#AAAAuuuu≈≈≈≈≈≈≈≈≈AAuuuAA#",
         "#################################################################"
     };
-    private static final String[] NOSTIE_DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
+    private static final String[] DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
         "øøøøøøøøøøøøøøøøøøøøøøøøøøøøøøøøøøø########################################øøøøøøøøøøøøøøøøøøøøøøøøø",
         "øøøøøøøøøøøøøøøøøø#########øøøøøøøø#,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#..m.mmmmmmmmmmmmmm..m...ø",
         "øøøøøøøøøøø########.......##øøøøøøø#,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#.mmTmmmmmmmmmmmmmm......ø",
@@ -117,7 +117,7 @@ public class World {
         }
     }
 
-    public EpiMap getDefaultMap() {
+    static public EpiMap getDefaultMap() {
         int width = DEFAULT_MAP[0].length();
         int height = DEFAULT_MAP.length;
         EpiTile[][] tiles = new EpiTile[width][height];
@@ -194,7 +194,8 @@ public class World {
             }
         }
 
-        currentMap = new EpiMap(tiles);
-        return currentMap;
+//        currentMap = new EpiMap(tiles);
+//        return currentMap;
+        return new EpiMap(tiles);
     }
 }
