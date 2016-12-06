@@ -79,4 +79,14 @@ public class EpiMap {
     public boolean inBounds(Point p){
         return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
     }
+    
+    public char[][] simpleChars(){
+        char[][] ret = new char[width][height];
+        for (int x = 0; x < width; x++){
+            for (int y = 0; y < height; y++){
+                ret[x][y] = contents[x][y].getSymbol();
+            }
+        }
+        return ret;
+    }
 }
