@@ -16,7 +16,7 @@ import squidpony.epigon.universe.Rating;
  *
  * @author Eben Howard - http://squidpony.com
  */
-public class Creature extends Physical implements Cloneable {
+public class Creature extends Physical{
 
     public CreatureBlueprint parent;
     public String knownName, trueName;
@@ -98,12 +98,5 @@ public class Creature extends Physical implements Cloneable {
             }
         }
         return false;//checked everything and didn't find it
-    }
-
-   
-
-    @Override
-    public Creature clone() {
-        return (Creature) super.clone();
     }
 }
