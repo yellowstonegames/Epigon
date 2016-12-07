@@ -7,7 +7,7 @@ import squidpony.epigon.data.blueprints.RoomBlueprint;
 /**
  * A specific in-game room.
  *
- * This consists of a thematically created room controlled by it's parent
+ * This consists of a thematically created room controlled by its parent
  * dungeon. The Room is responsible only for initial layout in the dungeon and
  * may be used multiple times to create copies during dungeon creation.
  *

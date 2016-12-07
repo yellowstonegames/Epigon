@@ -13,7 +13,7 @@ import java.util.HashMap;
  *
  * @author Eben Howard - http://squidpony.com
  */
-public class Physical extends EpiData implements Cloneable {
+public class Physical extends EpiData {
 
     public ArrayList<ModificationBlueprint> appliedModifications;
     public HashMap<String, Float> resistances;
@@ -82,10 +82,5 @@ public class Physical extends EpiData implements Cloneable {
         }
 
         return false;//can't be applied
-    }
-
-    @Override
-    public Physical clone() {
-        return (Physical) super.clone();
     }
 }
