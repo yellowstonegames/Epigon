@@ -19,7 +19,7 @@ public class Item extends Physical {
     //
     //possible interfaces
     public Ammunition ammunitionData = null;
-    public Object containerData = null;
+    public Container containerData = null;
     public Interactable interactableData = null;
     public Liquid liquidData = null;
     public Readable readableData = null;
