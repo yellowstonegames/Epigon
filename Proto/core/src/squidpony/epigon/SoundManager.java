@@ -1,4 +1,4 @@
-package squidpony.epigon.ui;
+package squidpony.epigon;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
