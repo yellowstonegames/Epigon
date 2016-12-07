@@ -1,10 +1,11 @@
 package squidpony.epigon.actions;
 
-import java.awt.Point;
-import java.util.LinkedList;
-import java.util.Queue;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.Direction;
+import squidpony.squidmath.Coord;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Represents an action attempting to move the target.
@@ -13,11 +14,11 @@ import squidpony.squidgrid.Direction;
  */
 public class MovementAction implements Action {
 
-    public Point start;
+    public Coord start;
     public Physical mover;
     public String key;
     public boolean forced;
-    public Queue<Point> moveList;//movements in order of execution
+    public Queue<Coord> moveList;//movements in order of execution
 
     /**
      * Constructor which sets the movement type to default and forced to false.
@@ -26,7 +27,7 @@ public class MovementAction implements Action {
      * @param mover
      * @param end
      */
-    public MovementAction(Point start, Physical mover, Point end) {
+    public MovementAction(Coord start, Physical mover, Coord end) {
         moveList = new LinkedList<>();
         moveList.add(end);
         initialize(start, mover, "", false, moveList);
@@ -41,7 +42,7 @@ public class MovementAction implements Action {
      * @param forced
      * @param end
      */
-    public MovementAction(Point start, Physical mover, String key, boolean forced, Point end) {
+    public MovementAction(Coord start, Physical mover, String key, boolean forced, Coord end) {
         moveList = new LinkedList<>();
         moveList.add(end);
         initialize(start, mover, key, forced, moveList);
@@ -56,9 +57,9 @@ public class MovementAction implements Action {
      * @param forced
      * @param dir
      */
-    public MovementAction(Point start, Physical mover, String key, boolean forced, Direction dir) {
+    public MovementAction(Coord start, Physical mover, String key, boolean forced, Direction dir) {
         moveList = new LinkedList<>();
-        moveList.add(new Point(start.x + dir.deltaX, start.y + dir.deltaY));
+        moveList.add(Coord.get(start.x + dir.deltaX, start.y + dir.deltaY));
         initialize(start, mover, key, forced, moveList);
     }
 
@@ -73,11 +74,11 @@ public class MovementAction implements Action {
      * @param forced
      * @param moveList
      */
-    public MovementAction(Point start, Physical mover, String key, boolean forced, Queue<Point> moveList) {
+    public MovementAction(Coord start, Physical mover, String key, boolean forced, Queue<Coord> moveList) {
         initialize(start, mover, key, forced, moveList);
     }
 
-    private void initialize(Point start, Physical mover, String key, boolean forced, Queue<Point> moveList) {
+    private void initialize(Coord start, Physical mover, String key, boolean forced, Queue<Coord> moveList) {
         this.start = start;
         this.mover = mover;
         this.key = key;

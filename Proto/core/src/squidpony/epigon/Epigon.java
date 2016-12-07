@@ -9,22 +9,17 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import java.awt.Point;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.World;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidgrid.gui.gdx.SquidLayers;
-import squidpony.squidgrid.gui.gdx.SquidMouse;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
 
 import java.util.ArrayList;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.World;
-import squidpony.squidgrid.gui.gdx.DefaultResources;
-import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes. Doesn't use any
@@ -177,7 +172,7 @@ public class Epigon extends Game {
     private void move(Direction dir) {
         int newX = player.x + dir.deltaX;
         int newY = player.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && map.contents[newX][newY].getSymbol() == '#') {
+        if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
             player = player.translate(dir.deltaX, dir.deltaY);
         }
     }
@@ -188,7 +183,7 @@ public class Epigon extends Game {
     public void putMap() {
         for (int x = 0; x < MAP_WIDTH; x++) {
             for (int y = 0; y < MAP_HEIGHT; y++) {
-                if (map.inBounds(new Point(x, y))) {
+                if (map.inBounds(Coord.get(x, y))) {
                 EpiTile tile = map.contents[x][y];
                 //display.put(x, y, lineDungeon[x][y], colorIndices[x][y], bgColorIndices[x][y], 40);
                 display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);

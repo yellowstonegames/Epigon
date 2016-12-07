@@ -1,15 +1,10 @@
 package squidpony.epigon.data.specific;
 
-import java.awt.Container;
-import java.util.ArrayList;
 import squidpony.epigon.data.blueprints.ItemBlueprint;
-import squidpony.epigon.data.interfaces.Ammunition;
-import squidpony.epigon.data.interfaces.Interactable;
-import squidpony.epigon.data.interfaces.Liquid;
+import squidpony.epigon.data.interfaces.*;
 import squidpony.epigon.data.interfaces.Readable;
-import squidpony.epigon.data.interfaces.Wearable;
-import squidpony.epigon.data.interfaces.Wieldable;
-import squidpony.epigon.data.interfaces.Zappable;
+
+import java.util.ArrayList;
 
 /**
  * Represents a specific object in the game world.
@@ -24,7 +19,7 @@ public class Item extends Physical {
     //
     //possible interfaces
     public Ammunition ammunitionData = null;
-    public Container containerData = null;
+    public Object containerData = null;
     public Interactable interactableData = null;
     public Liquid liquidData = null;
     public Readable readableData = null;

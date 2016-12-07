@@ -1,10 +1,11 @@
 package squidpony.epigon.mapping;
 
-import java.awt.Point;
-import java.util.Queue;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.data.specific.Creature;
+import squidpony.squidmath.Coord;
+
+import java.util.Queue;
 
 /**
  * This represents a single explorable map level.
@@ -46,8 +47,8 @@ public class EpiMap {
         if (action instanceof MovementAction) {
             MovementAction move = (MovementAction) action;
             String key = move.key;
-            Queue<Point> points = move.moveList;
-            for (Point p : points) {
+            Queue<Coord> points = move.moveList;
+            for (Coord p : points) {
                 if (!inBounds(p) || !contents[p.x][p.y].isPassable(key) || (move.mover instanceof Creature && contents[p.x][p.y].creature != null)) {
                     return false;//found a blocking area
                 }
@@ -62,7 +63,7 @@ public class EpiMap {
         if (actionValid(action)) {
             if (action instanceof MovementAction) {
                 MovementAction move = (MovementAction) action;
-                Point p;
+                Coord p;
                 do {
                     p = move.moveList.poll();
                 } while (!move.moveList.isEmpty());
@@ -76,7 +77,7 @@ public class EpiMap {
         return "Invalid action.";
     }
     
-    public boolean inBounds(Point p){
+    public boolean inBounds(Coord p){
         return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
     }
     
