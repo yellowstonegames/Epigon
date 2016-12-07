@@ -1,11 +1,12 @@
 package squidpony.epigon.data.specific;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.HashMap;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.ModificationBlueprint;
+import squidpony.squidmath.Coord;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -17,7 +18,7 @@ public class Physical extends EpiData implements Cloneable {
     public ArrayList<ModificationBlueprint> appliedModifications;
     public HashMap<String, Float> resistances;
     public ArrayList<Condition> conditions = new ArrayList<>();
-    public Point location;//world location
+    public Coord location;//world location
 
     /**
      * Returns true if this Creature has the condition or a parent of the
