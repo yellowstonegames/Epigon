@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.ui.DisplayMaster;
 
 /**
  * Controls the overall flow of the game world.
@@ -15,7 +14,6 @@ public class DungeonMaster {
 
     private TimeLine timeline = new TimeLine();
     private double gameTime;
-    private DisplayMaster display = new DisplayMaster();
 
     private void runTurn() {
         Action action = timeline.next();

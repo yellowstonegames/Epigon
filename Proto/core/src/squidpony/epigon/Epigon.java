@@ -54,9 +54,6 @@ public class Epigon extends Game {
 
     private RNG rng;
     private SquidLayers display;
-//    private DungeonGenerator dungeonGen;
-//    private char[][] decoDungeon, bareDungeon, lineDungeon;
-//    private int[][] colorIndices, bgColorIndices;
     private char[][] simpleChars;
     private EpiMap map;
     private SquidInput input;
@@ -73,72 +70,27 @@ public class Epigon extends Game {
         System.out.println("Creating new game.");
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
 
-        //super.setScreen(new DisplayMaster());
-        //getScreen().show();
-
-        // gotta have a random number generator. We can seed an RNG with any long we want, or even a String.
         rng = new RNG("SquidLib!");
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
+        
         //Here we make sure our Stage, which holds any text-based grids we make, uses our Batch.
         stage = new Stage(new StretchViewport(TOTAL_PIXEL_WIDTH, TOTAL_PIXEL_HEIGHT), batch);
 
-        // display is a SquidLayers object, and that class has a very large number of similar methods for placing text
-        // on a grid, with an optional background color and lightness modifier per cell. It also handles animations and
-        // other effects, but you don't need to use them at all. SquidLayers also automatically handles the stretchable
-        // distance field fonts, which are a big improvement over fixed-size bitmap fonts and should probably be
-        // preferred for new games. SquidLayers needs to know what the size of the grid is in columns and rows, how big
-        // an individual cell is in pixel width and height, and lastly how to handle text, which can be a BitmapFont or
-        // a TextCellFactory. Either way, it will use what is given to make its TextCellFactory, and that handles the
-        // layout of text in a cell, among other things. DefaultResources stores pre-configured BitmapFont objects but
-        // also some TextCellFactory objects for distance field fonts; either one can be passed to this constructor.
-        // the font will try to load Inconsolata-LGC-Custom as a bitmap font with a distance field effect.
         display = new SquidLayers(TOTAL_WIDTH, TOTAL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSquareFont());
 
-        // a bit of a hack to increase the text height slightly without changing the size of the cells they're in.
-        // this causes a tiny bit of overlap between cells, which gets rid of an annoying gap between vertical lines.
-        // if you use '#' for walls instead of box drawing chars, you don't need this.
         display.setTextSize(CELL_WIDTH, CELL_HEIGHT);
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.03f);
 
-        //These need to have their positions set before adding any entities if there is an offset involved.
-        //There is no offset used here, but it's still a good practice here to set positions early on.
         display.setPosition(0, 0);
 
-        //This uses the seeded RNG we made earlier to build a procedural dungeon using a method that takes rectangular
-        //sections of pre-drawn dungeon and drops them into place in a tiling pattern. It makes good "ruined" dungeons.
-//        dungeonGen = new DungeonGenerator(MAP_WIDTH, MAP_HEIGHT, rng);
-
-        //uncomment this next line to randomly add water to the dungeon in pools.
-        //dungeonGen.addWater(15);
-        //decoDungeon is given the dungeon with any decorations we specified. (Here, we didn't, unless you chose to add
-        //water to the dungeon. In that case, decoDungeon will have different contents than bareDungeon, next.)
-//        decoDungeon = dungeonGen.generate();
-
-        //There are lots of options for dungeon generation in SquidLib; you can pass a TilesetType enum to generate()
-        //as shown on the following lines to change the style of dungeon generated from ruined areas, which are made
-        //when no argument is passed to generate or when TilesetType.DEFAULT_DUNGEON is, to caves or other styles.
-        //decoDungeon = dungeonGen.generate(TilesetType.REFERENCE_CAVES); // generate caves
-        //decoDungeon = dungeonGen.generate(TilesetType.ROUND_ROOMS_DIAGONAL_CORRIDORS); // generate large round rooms
-        //getBareDungeon provides the simplest representation of the generated dungeon -- '#' for walls, '.' for floors.
-//        bareDungeon = dungeonGen.getBareDungeon();
-
-        //When we draw, we may want to use a nicer representation of walls. DungeonUtility has lots of useful methods
-        //for modifying char[][] dungeon grids, and this one takes each '#' and replaces it with a box-drawing character.
-//        lineDungeon = DungeonUtility.hashesToLines(decoDungeon);
-
-        //Coord is the type we use as a general 2D point, usually in a dungeon.
-        //Because we know dungeons won't be huge, Coord is optimized for x and y values between -3 and 255, inclusive.
         cursor = Coord.get(-1, -1);
 
         map = World.getDefaultMap();
-        
-        //player is, here, just a Coord that stores his position. In a real game, you would probably have a class for
-        //creatures, and possibly a subclass for the player.
-//        player = dungeonGen.utility.randomCell(CoordPacker.pack(bareDungeon, '.'));
+
         player = Coord.get(20, 20);
 
         //This is used to allow clicks or taps to take the player to the desired area.
@@ -150,10 +102,6 @@ public class Epigon extends Game {
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
 
         bgColor = SColor.DARK_SLATE_GRAY;
-
-        // DungeonUtility provides various ways to get default colors or other information from a dungeon char 2D array.
-//        colorIndices = DungeonUtility.generatePaletteIndices(decoDungeon);
-//        bgColorIndices = DungeonUtility.generateBGPaletteIndices(decoDungeon);
 
         input = new SquidInput(keys, mapMouse);
 
