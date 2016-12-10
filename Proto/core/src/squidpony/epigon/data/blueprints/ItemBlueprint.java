@@ -32,7 +32,7 @@ public class ItemBlueprint extends PhysicalBlueprint {
     public ZappableBlueprint zappableData = null;
 
     public boolean hasParent(ItemBlueprint blueprint) {
-        if (this == blueprint) {
+        if (this.equals(blueprint)) {
             return true;
         } else if (this.parent == null) {
             return false;
