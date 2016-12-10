@@ -2,7 +2,6 @@ package squidpony.epigon.data.blueprints;
 
 import squidpony.epigon.data.EpiData;
 
-
 /**
  * This is used to create specific recipes in a game world.
  *

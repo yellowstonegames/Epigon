@@ -5,7 +5,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 /**
  * Data class for information shared by all data objects.
  */
-public abstract class EpiData implements Comparable<EpiData> {
+public abstract class EpiData {
 
     public String internalName;
     public char symbol;
@@ -30,12 +30,6 @@ public abstract class EpiData implements Comparable<EpiData> {
 
     @Override
     public String toString() {
-        return "Internal Name: " + internalName + "\nParent: "
-                + "\nName: " + name + "\nPlural: " + plural + "\nDescriptions: " + description + "\nNotes: " + notes;
-    }
-
-    @Override
-    public int compareTo(EpiData other) {
-        return internalName.compareTo(other.internalName);
+        return "Internal Name: " + internalName + "\nName: " + name + "\nPlural: " + plural + "\nDescriptions: " + description + "\nNotes: " + notes;
     }
 }

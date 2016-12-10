@@ -50,16 +50,10 @@ public class Creature extends Physical{
      * Returns true if the listed item types are in the inventory of this Item.
      *
      * @param items
-     * @param exclusive
      * @return
      */
     public boolean hasItems(TreeMap<ItemBlueprint, Integer> items) {
-        for (ItemBlueprint blueprint : items.keySet()) {
-            if (!hasItems(blueprint, items.get(blueprint).intValue())) {
-                return false;//something missing
-            }
-        }
-        return true;//made it through finding everthing
+        return items.keySet().stream().noneMatch((blueprint) -> (!hasItems(blueprint, items.get(blueprint))));
     }
 
     /**
@@ -76,11 +70,7 @@ public class Creature extends Physical{
                 found++;
             }
         }
-        if (found < count) {
-            return false;//didn't find enough of them
-        } else {
-            return true;//found enough
-        }
+        return found >= count;
     }
 
     /**
