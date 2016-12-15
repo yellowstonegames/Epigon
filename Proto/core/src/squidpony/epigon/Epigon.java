@@ -9,6 +9,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map.Entry;
+
+import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.specific.Creature;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.World;
@@ -18,12 +25,6 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map.Entry;
-import squidpony.epigon.data.Stat;
-import squidpony.epigon.data.specific.Creature;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -35,7 +36,7 @@ public class Epigon extends Game {
     public static final int MAP_WIDTH = 80;
     public static final int MAP_HEIGHT = 60;
 
-    public static final int INFO_WIDTH = 28;
+    public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
 
     public static final int MESSAGE_HEIGHT = 7;
@@ -47,7 +48,7 @@ public class Epigon extends Game {
 
     // Cell sizing
     public static final int CELL_WIDTH = 12;
-    public static final int CELL_HEIGHT = 18;
+    public static final int CELL_HEIGHT = 12;
 
     // Pixels
     public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
@@ -85,6 +86,9 @@ public class Epigon extends Game {
 
         display = new SquidLayers(TOTAL_WIDTH, TOTAL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSquareFont());
 
+        map = World.getDefaultMap();
+        
+        display.getTextFactory().fit(Arrays.deepToString(map.simpleChars()));
         display.setTextSize(CELL_WIDTH, CELL_HEIGHT);
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
@@ -94,15 +98,13 @@ public class Epigon extends Game {
 
         cursor = Coord.get(-1, -1);
 
-        map = World.getDefaultMap();
-
         // Create an actual player
         player = new Creature();
         player.abilities = new ArrayList<>();
         player.knownName = "Great Hero";
         player.trueName = "Player 1";
         Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
-        player.currentStats.putAll(player.baseStats);
+        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
         player.location = Coord.get(20, 20);
 
         //This is used to allow clicks or taps to take the player to the desired area.
@@ -166,8 +168,17 @@ public class Epigon extends Game {
         display.putString(MAP_WIDTH + 4, 1, "STATS", front, back);
         int y = 3;
         int x = MAP_WIDTH + 1;
+        int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
         for (Entry<Stat, Integer> e : player.baseStats.entrySet()) {
-            display.putString(x, y, e.getKey().toString() + ": " + player.currentStats.get(e.getKey()) + "/" + e.getValue(), front, back);
+            int diff = player.currentStats.get(e.getKey()) - e.getValue();
+            String diffString = "";
+            if (diff < 0) {
+                diffString = " " + diff;
+            } else {
+                diffString = " +" + diff;
+            }
+            display.putString(x, y, e.getKey().toString() + ":", front, back);
+            display.putString(x + spacing, y, e.getValue() + diffString, front, back);
             y++;
         }
 
