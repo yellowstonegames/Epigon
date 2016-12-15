@@ -20,10 +20,14 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map.Entry;
+import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.specific.Creature;
 
 /**
- * The main class of the game, constructed once in each of the platform-specific Launcher classes. Doesn't use any
- * platform-specific code.
+ * The main class of the game, constructed once in each of the platform-specific Launcher classes.
+ * Doesn't use any platform-specific code.
  */
 public class Epigon extends Game {
 
@@ -31,7 +35,7 @@ public class Epigon extends Game {
     public static final int MAP_WIDTH = 80;
     public static final int MAP_HEIGHT = 60;
 
-    public static final int INFO_WIDTH = 20;
+    public static final int INFO_WIDTH = 28;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
 
     public static final int MESSAGE_HEIGHT = 7;
@@ -60,7 +64,8 @@ public class Epigon extends Game {
     private Color bgColor;
     private Stage stage;
     private DijkstraMap playerToCursor;
-    private Coord cursor, player;
+    private Coord cursor;
+    private Creature player;
     private ArrayList<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
     private float secondsWithoutMoves;
@@ -74,7 +79,7 @@ public class Epigon extends Game {
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
-        
+
         //Here we make sure our Stage, which holds any text-based grids we make, uses our Batch.
         stage = new Stage(new StretchViewport(TOTAL_PIXEL_WIDTH, TOTAL_PIXEL_HEIGHT), batch);
 
@@ -91,7 +96,14 @@ public class Epigon extends Game {
 
         map = World.getDefaultMap();
 
-        player = Coord.get(20, 20);
+        // Create an actual player
+        player = new Creature();
+        player.abilities = new ArrayList<>();
+        player.knownName = "Great Hero";
+        player.trueName = "Player 1";
+        Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
+        player.currentStats.putAll(player.baseStats);
+        player.location = Coord.get(20, 20);
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
@@ -113,32 +125,50 @@ public class Epigon extends Game {
     }
 
     /**
-     * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
-     * In a fully-fledged game, this would not be organized like this, but this is a one-file demo.
+     * Move the player if he isn't bumping into a wall or trying to go off the map somehow. In a
+     * fully-fledged game, this would not be organized like this, but this is a one-file demo.
+     *
      * @param dir
      */
     private void move(Direction dir) {
-        int newX = player.x + dir.deltaX;
-        int newY = player.y + dir.deltaY;
+        int newX = player.location.x + dir.deltaX;
+        int newY = player.location.y + dir.deltaY;
         if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
-            player = player.translate(dir.deltaX, dir.deltaY);
+            player.location = player.location.translate(dir.deltaX, dir.deltaY);
         }
     }
 
     /**
-     * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
+     * Draws the map, applies any highlighting for the path to the cursor, and then draws the
+     * player.
      */
     public void putMap() {
         for (int x = 0; x < MAP_WIDTH; x++) {
             for (int y = 0; y < MAP_HEIGHT; y++) {
                 if (map.inBounds(Coord.get(x, y))) {
-                EpiTile tile = map.contents[x][y];
-                //display.put(x, y, lineDungeon[x][y], colorIndices[x][y], bgColorIndices[x][y], 40);
-                display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
+                    EpiTile tile = map.contents[x][y];
+                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
                 } else {
                     display.put(x, y, '`', SColor.SLATE, SColor.BLACK);
                 }
             }
+        }
+
+        SColor front = SColor.TRANSPARENT;
+        SColor back = SColor.OLD_LACE;
+        for (int x = MAP_WIDTH; x < TOTAL_WIDTH; x++) {
+            for (int y = 0; y < TOTAL_HEIGHT; y++) {
+                display.put(x, y, ' ', front, back);
+            }
+        }
+
+        front = SColor.JAPANESE_IRIS;
+        display.putString(MAP_WIDTH + 4, 1, "STATS", front, back);
+        int y = 3;
+        int x = MAP_WIDTH + 1;
+        for (Entry<Stat, Integer> e : player.baseStats.entrySet()) {
+            display.putString(x, y, e.getKey().toString() + ": " + player.currentStats.get(e.getKey()) + "/" + e.getValue(), front, back);
+            y++;
         }
 
         for (Coord pt : toCursor) {
@@ -147,7 +177,7 @@ public class Epigon extends Game {
         }
 
         //places the player as an '@' at his position in orange (6 is an index into SColor.LIMITED_PALETTE).
-        display.put(player.x, player.y, '@', 6);
+        display.put(player.location.x, player.location.y, '@', 6);
 
         for (int i = 0; i < MESSAGE_HEIGHT; i++) {
             // Output messages
@@ -157,7 +187,7 @@ public class Epigon extends Game {
     @Override
     public void render() {
         super.render();
-        
+
         // standard clear the background routine for libGDX
         Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -174,7 +204,7 @@ public class Epigon extends Game {
                 secondsWithoutMoves = 0;
                 Coord m = awaitedMoves.remove(0);
                 toCursor.remove(0);
-                move(Direction.toGoTo(player, m));
+                move(Direction.toGoTo(player.location, m));
             }
         } // if we are waiting for the player's input and get input, process it.
         else if (input.hasNext()) {
@@ -249,7 +279,7 @@ public class Epigon extends Game {
             if (awaitedMoves.isEmpty()) {
                 if (toCursor.isEmpty()) {
                     cursor = Coord.get(screenX, screenY);
-                    toCursor = playerToCursor.findPath(100, null, null, player, cursor);
+                    toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
                 }
                 awaitedMoves = new ArrayList<>(toCursor);
             }
@@ -273,7 +303,7 @@ public class Epigon extends Game {
             }
             cursor = Coord.get(screenX, screenY);
             if (cursor.x >= 0 && cursor.x < MAP_WIDTH && cursor.y >= 0 && cursor.y < MAP_HEIGHT) {
-                toCursor = playerToCursor.findPath(100, null, null, player, cursor);
+                toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
             }
             return false;
         }

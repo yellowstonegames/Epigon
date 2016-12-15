@@ -14,7 +14,6 @@ public abstract class EpiData {
     public String description;
     public String notes;
     public SColor color;
-    public int rgb;
 
     public EpiData() {
     }

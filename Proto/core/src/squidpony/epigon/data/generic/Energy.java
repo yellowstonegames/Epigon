@@ -18,9 +18,6 @@ public enum Energy {
      *
      * If roll over damage should destroy the creature who's energy pool is
      * being checked, then null is returned.
-     *
-     * @param health
-     * @return
      */
     public Energy getRollover(Energy energy) {
         switch (energy) {
