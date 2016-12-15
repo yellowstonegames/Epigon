@@ -28,6 +28,8 @@ public class BiomeBlueprint extends EpiData {
     public ArrayList<TerrainBlueprint> possibleTerrains = new ArrayList<>();
     public static final BiomeBlueprint SWAMP = new BiomeBlueprint(null, BiomeSize.MICRO, BiomeSize.MEDIUM, "swamp", "swamp", "swamps", "dark slow moving shallow water", "", SColor.MOUSY_INDIGO);
 
+    public BiomeBlueprint(){}
+    
     public BiomeBlueprint(BiomeBlueprint parent, BiomeSize minimumSize, BiomeSize maximumSize, String internalName, String name, String plural, String description, String notes, SColor color) {
         super(internalName, name, plural, description, notes, color);
         this.parent = parent;

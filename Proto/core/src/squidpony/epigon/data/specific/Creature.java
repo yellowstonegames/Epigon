@@ -1,8 +1,9 @@
 package squidpony.epigon.data.specific;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
-import java.util.Stack;
 import java.util.TreeMap;
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.CreatureBlueprint;
@@ -16,7 +17,7 @@ import squidpony.epigon.universe.Rating;
  *
  * @author Eben Howard - http://squidpony.com
  */
-public class Creature extends Physical{
+public class Creature extends Physical {
 
     public CreatureBlueprint parent;
     public String knownName, trueName;
@@ -25,18 +26,12 @@ public class Creature extends Physical{
     public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Integer> currentStats = new EnumMap<>(Stat.class);
     public Ability defaultAttack;
-    public Stack<Item> inventory;
+    public Deque<Item> inventory = new ArrayDeque<>();
     public boolean aware;//has noticed the player
 
     public Ability getDefaultAttack() {
-        //if there is an attack and no default is yet set, arbitrarily pick the first ability with an attack as the default
-        if (defaultAttack == null && !abilities.isEmpty()) {
-            for (Ability ability : abilities) {
-                if (ability.isAttack()) {
-                    defaultAttack = ability;
-                    break;//found an attack, jump out of the loop
-                }
-            }
+        if (defaultAttack == null) {
+            defaultAttack = abilities.stream().filter(a -> a.isAttack()).findAny().orElse(null);
         }
 
         return defaultAttack;
@@ -64,13 +59,7 @@ public class Creature extends Physical{
      * @return
      */
     public boolean hasItems(ItemBlueprint blueprint, int count) {
-        int found = 0;
-        for (Item item : inventory) {
-            if (item.hasParent(blueprint)) {
-                found++;
-            }
-        }
-        return found >= count;
+        return inventory.stream().filter((item) -> (item.hasParent(blueprint))).count() >= count;
     }
 
     /**
@@ -80,13 +69,8 @@ public class Creature extends Physical{
      * @return if an item created from the blueprint is found to be equipped
      */
     public boolean hasEquipped(ItemBlueprint blueprint) {
-        for (Item item : inventory) {
-            if (((item.wearableData != null && item.wearableData.worn)//check worn
-                    || (item.wieldableData != null && item.wieldableData.wielded))//check wielded
-                    && item.hasParent(blueprint)) {//make sure right item type
-                return true;//found!
-            }
-        }
-        return false;//checked everything and didn't find it
+        return inventory.stream()
+            .anyMatch((item) -> (((item.wearableData != null && item.wearableData.worn) || (item.wieldableData != null && item.wieldableData.wielded))
+            && item.hasParent(blueprint)));
     }
 }
