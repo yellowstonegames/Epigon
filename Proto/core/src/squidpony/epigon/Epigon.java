@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.specific.Creature;
+import squidpony.epigon.data.specific.Item;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.World;
@@ -107,6 +108,12 @@ public class Epigon extends Game {
         Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
         player.location = Coord.get(20, 20);
 
+        Item sword = new Item();
+        sword.color = SColor.SILVER;
+        sword.symbol = '/';
+        sword.internalName = "Test Sword";
+        sword.name = "Sword";
+        
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
