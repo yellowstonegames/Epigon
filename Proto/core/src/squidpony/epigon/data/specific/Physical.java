@@ -1,12 +1,14 @@
 package squidpony.epigon.data.specific;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.ModificationBlueprint;
-import squidpony.squidmath.Coord;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.Coord;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -15,14 +17,16 @@ import java.util.HashMap;
  */
 public class Physical extends EpiData {
 
+    public char symbol;
+    public SColor color;
+    public boolean colorFromMaterial;
     public ArrayList<ModificationBlueprint> appliedModifications;
     public HashMap<String, Float> resistances;
     public ArrayList<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
 
     /**
-     * Returns true if this Creature has the condition or a parent of the
-     * condition.
+     * Returns true if this Creature has the condition or a parent of the condition.
      *
      * @param condition
      * @return

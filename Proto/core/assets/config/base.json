@@ -1,0 +1,14 @@
+{
+  "physicalBlueprints": [
+    {
+      "internalName": "spike_basic",
+      "name": {"name": "spike"},
+      "description": "sharp bits",
+      "notes": "This base spike includes spikes on armor and needles",
+      "colorFromMaterial": true,
+      "possibleAliases": [{"name": "needle"}, {"name": "flange"}],
+      "possibleModifications": ["multi", "injection"],
+      "passthroughFromMaterial": true
+    }
+  ]
+}
