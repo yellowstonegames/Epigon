@@ -17,9 +17,11 @@ import java.util.Map.Entry;
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.specific.Creature;
 import squidpony.epigon.data.specific.Item;
+import squidpony.epigon.data.specific.Name;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.World;
+
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
@@ -55,10 +57,10 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
+    public static final RNG rng = new RNG("SquidLib!");
+
     // 
     SpriteBatch batch;
-
-    private RNG rng;
     private SquidLayers display;
     private char[][] simpleChars;
     private EpiMap map;
@@ -76,8 +78,6 @@ public class Epigon extends Game {
     public void create() {
         System.out.println("Creating new game.");
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
-
-        rng = new RNG("SquidLib!");
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -112,7 +112,7 @@ public class Epigon extends Game {
         sword.color = SColor.SILVER;
         sword.symbol = '/';
         sword.internalName = "Test Sword";
-        sword.name = "Sword";
+        sword.name = new Name("Sword");
         
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
