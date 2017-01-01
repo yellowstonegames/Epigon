@@ -1,20 +1,19 @@
 package squidpony.epigon.mapping;
 
+import java.util.Queue;
+
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.actions.MovementAction;
-import squidpony.epigon.data.specific.Creature;
-import squidpony.squidmath.Coord;
 
-import java.util.Queue;
+import squidpony.squidmath.Coord;
 
 /**
  * This represents a single explorable map level.
  *
  * Each cell is considered to be 1 meter by 1 meter square.
  *
- * A null tile represents open space with no special properties or resistances
- * to things passing through. They should not be considered a vacuum, but rather
- * normal air.
+ * A null tile represents open space with no special properties or resistances to things passing
+ * through. They should not be considered a vacuum, but rather normal air.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -30,8 +29,8 @@ public class EpiMap {
         contents = new EpiTile[width][height];
         hasBeenSeen = new boolean[width][height];
     }
-    
-    public EpiMap(EpiTile[][] contents){
+
+    public EpiMap(EpiTile[][] contents) {
         this.contents = contents;
         this.width = contents.length;
         this.height = contents[0].length;
@@ -49,7 +48,7 @@ public class EpiMap {
             String key = move.key;
             Queue<Coord> points = move.moveList;
             for (Coord p : points) {
-                if (!inBounds(p) || !contents[p.x][p.y].isPassable(key) || (move.mover instanceof Creature && contents[p.x][p.y].creature != null)) {
+                if (!inBounds(p) || !contents[p.x][p.y].isPassable(key) || (move.mover.creatureData != null && contents[p.x][p.y].creature != null)) {
                     return false;//found a blocking area
                 }
             }
@@ -76,15 +75,15 @@ public class EpiMap {
 
         return "Invalid action.";
     }
-    
-    public boolean inBounds(Coord p){
+
+    public boolean inBounds(Coord p) {
         return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
     }
-    
-    public char[][] simpleChars(){
+
+    public char[][] simpleChars() {
         char[][] ret = new char[width][height];
-        for (int x = 0; x < width; x++){
-            for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 ret[x][y] = contents[x][y].getSymbol();
             }
         }

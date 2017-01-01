@@ -3,122 +3,34 @@ package squidpony.epigon.data.generic;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
-import squidpony.epigon.data.blueprints.ItemBlueprint;
+import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.blueprints.RecipeBlueprint;
 import squidpony.epigon.universe.Rating;
 
 /**
- * A grouping of starting skills and stats plus an aptitude towards increasing
- * them, starting equipment, recipes known, starting perks, starting conditions,
- * and starting abilities.
+ * A grouping of starting skills and stats plus an aptitude towards increasing them, starting
+ * equipment, recipes known, starting perks, starting conditions, and starting abilities.
  *
- * Creatures should have a list of what kinds of professions they can have.
- * Modifications may change their list.
+ * Creatures should have a list of what kinds of professions they can have. Modifications may change
+ * their list.
  *
  * @author Eben Howard - http://squidpony.com
  */
 public class Profession extends EpiData {
 
-    private HashMap<Skill, Rating> initialSkillRatings = new HashMap<>();
-    private HashMap<Skill, Rating> skillProgress = new HashMap<>();
-    private EnumMap<Stat, Integer> initialStatLevels = new EnumMap<>(Stat.class);
-    private EnumMap<Stat, Rating> statProgress = new EnumMap<>(Stat.class);
-    private EnumMap<Energy, Integer> initialEnergyLevels = new EnumMap<>(Energy.class);
-    private EnumMap<Energy, Rating> energyLevelProgress = new EnumMap<>(Energy.class);
-    private ArrayList<ItemBlueprint> items = new ArrayList<>();
-    private ArrayList<RecipeBlueprint> recipes = new ArrayList<>();
-    private ArrayList<ConditionBlueprint> perks = new ArrayList<>();
-    private ArrayList<ConditionBlueprint> condistions = new ArrayList<>();
-    private ArrayList<Ability> abilities = new ArrayList<>();
-
-    public HashMap<Skill, Rating> getInitialSkillRatings() {
-        return initialSkillRatings;
-    }
-
-    public void setInitialSkillRatings(HashMap<Skill, Rating> initialSkillRatings) {
-        this.initialSkillRatings = initialSkillRatings;
-    }
-
-    public HashMap<Skill, Rating> getSkillProgress() {
-        return skillProgress;
-    }
-
-    public void setSkillProgress(HashMap<Skill, Rating> skillProgress) {
-        this.skillProgress = skillProgress;
-    }
-
-    public EnumMap<Stat, Rating> getStatProgress() {
-        return statProgress;
-    }
-
-    public void setStatProgress(EnumMap<Stat, Rating> statProgress) {
-        this.statProgress = statProgress;
-    }
-
-    public ArrayList<ItemBlueprint> getItems() {
-        return items;
-    }
-
-    public void setItems(ArrayList<ItemBlueprint> items) {
-        this.items = items;
-    }
-
-    public ArrayList<RecipeBlueprint> getRecipes() {
-        return recipes;
-    }
-
-    public void setRecipes(ArrayList<RecipeBlueprint> recipes) {
-        this.recipes = recipes;
-    }
-
-    public ArrayList<ConditionBlueprint> getPerks() {
-        return perks;
-    }
-
-    public void setPerks(ArrayList<ConditionBlueprint> perks) {
-        this.perks = perks;
-    }
-
-    public ArrayList<ConditionBlueprint> getCondistions() {
-        return condistions;
-    }
-
-    public void setCondistions(ArrayList<ConditionBlueprint> condistions) {
-        this.condistions = condistions;
-    }
-
-    public ArrayList<Ability> getAbilities() {
-        return abilities;
-    }
-
-    public void setAbilities(ArrayList<Ability> abilities) {
-        this.abilities = abilities;
-    }
-
-    public EnumMap<Stat, Integer> getInitialStatLevels() {
-        return initialStatLevels;
-    }
-
-    public void setInitialStatLevels(EnumMap<Stat, Integer> initialStatLevels) {
-        this.initialStatLevels = initialStatLevels;
-    }
-
-    public EnumMap<Energy, Integer> getInitialEnergyLevels() {
-        return initialEnergyLevels;
-    }
-
-    public void setInitialEnergyLevels(EnumMap<Energy, Integer> initialEnergyLevels) {
-        this.initialEnergyLevels = initialEnergyLevels;
-    }
-
-    public EnumMap<Energy, Rating> getEnergyLevelProgress() {
-        return energyLevelProgress;
-    }
-
-    public void setEnergyLevelProgress(EnumMap<Energy, Rating> energyLevelProgress) {
-        this.energyLevelProgress = energyLevelProgress;
-    }
+    public HashMap<Skill, Rating> initialSkillRatings = new HashMap<>();
+    public HashMap<Skill, Rating> skillProgress = new HashMap<>();
+    public EnumMap<Stat, Integer> initialStatLevels = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Rating> statProgress = new EnumMap<>(Stat.class);
+    public EnumMap<Energy, Integer> initialEnergyLevels = new EnumMap<>(Energy.class);
+    public EnumMap<Energy, Rating> energyLevelProgress = new EnumMap<>(Energy.class);
+    public ArrayList<PhysicalBlueprint> items = new ArrayList<>();
+    public ArrayList<RecipeBlueprint> recipes = new ArrayList<>();
+    public ArrayList<ConditionBlueprint> perks = new ArrayList<>();
+    public ArrayList<ConditionBlueprint> conditions = new ArrayList<>();
+    public ArrayList<Ability> abilities = new ArrayList<>();
 }

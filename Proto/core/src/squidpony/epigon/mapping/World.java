@@ -1,7 +1,8 @@
 package squidpony.epigon.mapping;
 
-import squidpony.epigon.data.specific.Item;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
+
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 
@@ -14,7 +15,6 @@ public class World {
 
     //
     public EpiMap overworld;
-    public Item player;
     private EpiMap currentMap;
     private static final String[] MINI_DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
         "#################################################################",

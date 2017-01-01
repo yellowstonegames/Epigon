@@ -2,10 +2,20 @@ package squidpony.epigon.data.specific;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.ModificationBlueprint;
+import squidpony.epigon.data.blueprints.PhysicalBlueprint;
+import squidpony.epigon.data.interfaces.Ammunition;
+import squidpony.epigon.data.interfaces.Container;
+import squidpony.epigon.data.interfaces.Creature;
+import squidpony.epigon.data.interfaces.Interactable;
+import squidpony.epigon.data.interfaces.Liquid;
+import squidpony.epigon.data.interfaces.Wearable;
+import squidpony.epigon.data.interfaces.Wieldable;
+import squidpony.epigon.data.interfaces.Zappable;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
@@ -24,6 +34,24 @@ public class Physical extends EpiData {
     public HashMap<String, Float> resistances;
     public ArrayList<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
+
+    public PhysicalBlueprint parent;
+    public ArrayList<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
+    public int fragility;
+    public int maxCondition;
+    public int currentCondition;
+    public boolean large;
+    //
+    //possible interfaces
+    public Ammunition ammunitionData;
+    public Container containerData;
+    public Creature creatureData;
+    public Interactable interactableData;
+    public Liquid liquidData;
+    public squidpony.epigon.data.interfaces.Readable readableData;
+    public Wearable wearableData;
+    public Wieldable wieldableData;
+    public Zappable zappableData;
 
     /**
      * Returns true if this Creature has the condition or a parent of the condition.
@@ -86,5 +114,9 @@ public class Physical extends EpiData {
         }
 
         return false;//can't be applied
+    }
+
+    public boolean hasParent(PhysicalBlueprint blueprint) {
+        return false; // TODO - fill out parent check
     }
 }
