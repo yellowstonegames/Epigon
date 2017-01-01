@@ -9,7 +9,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
  *
  * @author Eben Howard - http://squidpony.com
  */
-public class TerrainBlueprint extends ItemBlueprint {
+public class TerrainBlueprint extends PhysicalBlueprint {
 
     public Stone stone;
 

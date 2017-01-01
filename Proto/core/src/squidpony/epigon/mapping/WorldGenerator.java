@@ -1,9 +1,11 @@
 package squidpony.epigon.mapping;
 
 import java.util.ArrayList;
+
 import squidpony.epigon.data.blueprints.Inclusion;
 import squidpony.epigon.data.blueprints.Stone;
 import squidpony.epigon.data.specific.Terrain;
+
 import squidpony.squidmath.RNG;
 import squidpony.squidmath.ThunderRNG;
 
@@ -15,16 +17,16 @@ import squidpony.squidmath.ThunderRNG;
 public class WorldGenerator {
 
     private static ArrayList<Stone> wallList = new ArrayList<>(),
-            sedimentaryList = new ArrayList<>(),
-            intrusiveList = new ArrayList<>(),
-            extrusiveList = new ArrayList<>(),
-            metamorphicList = new ArrayList<>();
+        sedimentaryList = new ArrayList<>(),
+        intrusiveList = new ArrayList<>(),
+        extrusiveList = new ArrayList<>(),
+        metamorphicList = new ArrayList<>();
 
     private static ArrayList<Inclusion> gemList = new ArrayList<>(),
-            sedimentaryGemList = new ArrayList<>(),
-            intrusiveGemList = new ArrayList<>(),
-            extrusiveGemList = new ArrayList<>(),
-            metamorphicGemList = new ArrayList<>();
+        sedimentaryGemList = new ArrayList<>(),
+        intrusiveGemList = new ArrayList<>(),
+        extrusiveGemList = new ArrayList<>(),
+        metamorphicGemList = new ArrayList<>();
 
     private static boolean initialized = false;
     private static int maxRecurse = 10;
@@ -103,7 +105,7 @@ public class WorldGenerator {
                         world[z].contents[x][y] = tile;
                     }
 
-                    tile.floor = new Terrain((Stone.values()[rng.nextInt(Stone.values().length)]));
+                    tile.floor = new Terrain();//(Stone.values()[rng.nextInt(Stone.values().length)]));
                 }
             }
         }
@@ -114,7 +116,7 @@ public class WorldGenerator {
         int centerY = 0;
         int centerZ = 0;
         int counter = 0;
-        Terrain terrain = new Terrain(Stone.ARKOSE);
+        Terrain terrain = new Terrain();
         for (int growStep = 0; growStep < 15; growStep++) { //number of times to grow the bubble
             if (counter <= 0) {
                 counter = rng.nextInt(3);
@@ -227,7 +229,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = new Terrain(intruder);
+                        world[z].contents[x][y].floor = new Terrain();//intruder);
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -271,7 +273,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = new Terrain(extruder);
+                                world[z].contents[x][y].floor = new Terrain();//extruder);
                             }
                         }
                     }
@@ -325,7 +327,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floor = new Terrain(changer);
+                                world[j].contents[i][k].floor = new Terrain();//changer);
                             }
                         }
                     }
@@ -372,7 +374,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floor = new Terrain(changer);
+                                world[j].contents[i][k].floor = new Terrain();//changer);
                             }
                         }
                     }

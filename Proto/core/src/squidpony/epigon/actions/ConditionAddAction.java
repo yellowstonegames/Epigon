@@ -1,7 +1,7 @@
 package squidpony.epigon.actions;
 
 import squidpony.epigon.data.specific.Condition;
-import squidpony.epigon.data.specific.Creature;
+import squidpony.epigon.data.interfaces.Creature;
 
 /**
  * Attempts to add a condition to the target source.

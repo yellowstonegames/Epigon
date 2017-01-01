@@ -15,9 +15,9 @@ import java.util.Arrays;
 import java.util.Map.Entry;
 
 import squidpony.epigon.data.Stat;
-import squidpony.epigon.data.specific.Creature;
-import squidpony.epigon.data.specific.Item;
+import squidpony.epigon.data.interfaces.Creature;
 import squidpony.epigon.data.specific.Name;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.World;
@@ -69,7 +69,7 @@ public class Epigon extends Game {
     private Stage stage;
     private DijkstraMap playerToCursor;
     private Coord cursor;
-    private Creature player;
+    private Physical player;
     private ArrayList<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
     private float secondsWithoutMoves;
@@ -100,15 +100,16 @@ public class Epigon extends Game {
         cursor = Coord.get(-1, -1);
 
         // Create an actual player
-        player = new Creature();
-        player.abilities = new ArrayList<>();
-        player.knownName = "Great Hero";
-        player.trueName = "Player 1";
-        Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
-        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
+        player = new Physical();
+        player.creatureData = new Creature();
+        player.creatureData.abilities = new ArrayList<>();
+        player.creatureData.knownName = "Great Hero";
+        player.creatureData.trueName = "Player 1";
+        Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
+        Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
         player.location = Coord.get(20, 20);
 
-        Item sword = new Item();
+        Physical sword = new Physical();
         sword.color = SColor.SILVER;
         sword.symbol = '/';
         sword.internalName = "Test Sword";
@@ -176,8 +177,8 @@ public class Epigon extends Game {
         int y = 3;
         int x = MAP_WIDTH + 1;
         int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
-        for (Entry<Stat, Integer> e : player.baseStats.entrySet()) {
-            int diff = player.currentStats.get(e.getKey()) - e.getValue();
+        for (Entry<Stat, Integer> e : player.creatureData.baseStats.entrySet()) {
+            int diff = player.creatureData.currentStats.get(e.getKey()) - e.getValue();
             String diffString = "";
             if (diff < 0) {
                 diffString = " " + diff;

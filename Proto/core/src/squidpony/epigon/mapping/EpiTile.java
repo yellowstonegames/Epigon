@@ -1,27 +1,26 @@
 package squidpony.epigon.mapping;
 
 import java.util.Stack;
-import squidpony.epigon.data.specific.Creature;
-import squidpony.epigon.data.specific.Item;
+
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
+
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * This class holds the objects in a single grid square.
  *
- * Through this class, one can get how the tile should be displayed, a compiled
- * description of what's in it, and the resistance factor to light, movement,
- * etc.
+ * Through this class, one can get how the tile should be displayed, a compiled description of
+ * what's in it, and the resistance factor to light, movement, etc.
  *
  * @author Eben Howard - http://squidpony.com
  */
 public class EpiTile {
 
     public Terrain floor;
-    public Item largeObject;
-    public Stack<Item> smallObjects = new Stack<>();
-    public Creature creature;
+    public Physical largeObject;
+    public Stack<Physical> smallObjects = new Stack<>();
+    public Physical creature;
 
     /**
      * Returns the resistance this tile has to the provided key.
@@ -75,8 +74,8 @@ public class EpiTile {
     }
 
     /**
-     * Returns the background color this tile should use. If there is no
-     * specific background color for this tile, then null is returned.
+     * Returns the background color this tile should use. If there is no specific background color
+     * for this tile, then null is returned.
      *
      * @return
      */
@@ -106,34 +105,28 @@ public class EpiTile {
     }
 
     public void remove(Physical phys) {
-        if (phys instanceof Creature && (Creature) phys == creature) {
+        if (phys == creature) {
             creature = null;
-        } else if (phys instanceof Item) {
-            Item item = (Item) phys;
-            if (item.large && largeObject == item) {
-                largeObject = null;
-            } else {
-                smallObjects.remove(item);
-            }
+        } else if (largeObject == phys) {
+            largeObject = null;
+        } else {
+            smallObjects.remove(phys);
         }
     }
 
     /**
-     * Adds the provided creature or item as appropriate. Overwrites the current
-     * one if the item is large or a creature.
+     * Adds the provided creature or item as appropriate. Overwrites the current one if the item is
+     * large or a creature.
      *
      * @param phys
      */
     public void add(Physical phys) {
-        if (phys instanceof Creature) {
-            creature = (Creature) phys;
-        } else if (phys instanceof Item) {
-            Item item = (Item) phys;
-            if (item.large) {
-                largeObject = item;
-            } else {
-                smallObjects.add(item);
-            }
+        if (phys.creatureData != null) {
+            creature = phys;
+        } else if (phys.large) {
+            largeObject = phys;
+        } else {
+            smallObjects.add(phys);
         }
     }
 }
