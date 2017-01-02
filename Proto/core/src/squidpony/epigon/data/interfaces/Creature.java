@@ -7,10 +7,12 @@ import java.util.EnumMap;
 import java.util.TreeMap;
 
 import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
+import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
 
@@ -74,5 +76,17 @@ public class Creature {
         return inventory.stream()
             .anyMatch((item) -> (((item.wearableData != null && item.wearableData.worn) || (item.wieldableData != null && item.wieldableData.wielded))
             && item.hasParent(blueprint)));
+    }
+
+    public boolean hasCondition(ConditionBlueprint parent) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean immune(ConditionBlueprint parent) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void applyCondition(Condition condition) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

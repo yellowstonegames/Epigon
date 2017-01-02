@@ -28,6 +28,6 @@ public class RecipeMixer {
     }
 
     public PhysicalBlueprint mix(RecipeBlueprint recipe) {
-        return recipe.result.roll(rng);
+        return recipe.result.roll();
     }
 }
