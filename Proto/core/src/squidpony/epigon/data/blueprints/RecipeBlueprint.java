@@ -3,7 +3,8 @@ package squidpony.epigon.data.blueprints;
 import java.util.List;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.loot.LootTable;
+
+import squidpony.squidmath.ProbabilityTable;
 
 /**
  * This is used to create specific recipes in a game world.
@@ -20,7 +21,7 @@ public class RecipeBlueprint extends EpiData {
     public List<PhysicalBlueprint> requiredCatalyst; // ie: a Forge (not consumed)
     public List<PhysicalBlueprint> optionalConsumed; // can add various properties
     public List<PhysicalBlueprint> optionalCatalyst;
-    public LootTable result;
+    public ProbabilityTable<EpiData> result;
 
     public boolean uses(PhysicalBlueprint ingredient) {
         return requiredConsumed.contains(ingredient)
