@@ -24,10 +24,10 @@ public class RecipeMixer {
     }
 
     public Stream<RecipeBlueprint> creates(PhysicalBlueprint creation) {
-        return recipes.stream().filter(r -> r.result.contains(creation));
+        return recipes.stream().filter(r -> r.result.items().contains(creation));
     }
 
     public PhysicalBlueprint mix(RecipeBlueprint recipe) {
-        return recipe.result.roll();
+        return recipe.result.random();
     }
 }

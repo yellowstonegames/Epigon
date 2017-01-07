@@ -2,13 +2,72 @@
   "physicalBlueprints": [
     {
       "internalName": "spike_basic",
-      "name": {"name": "spike"},
+      "name":
+        {
+          "name": "spike"
+        },
       "description": "sharp bits",
       "notes": "This base spike includes spikes on armor and needles",
       "colorFromMaterial": true,
-      "possibleAliases": [{"name": "needle"}, {"name": "flange"}],
+      "possibleAliases": [
+        {
+          "name": "needle"
+        }, {
+          "name": "flange"
+        }
+      ],
       "possibleModifications": ["multi", "injection"],
-      "passthroughFromMaterial": true
+      "passthroughFromMaterial": true,
+      "physicalDropTable": [
+        [
+          {
+            "item": "metal_chip",
+            "minQuantity": 10,
+            "maxQuantity": 15
+          }
+        ],
+        [
+          {
+            "item": "metal_shard",
+            "weight": 1,
+            "quantity": 1
+          },
+          {
+            "item": "none",
+            "weight": 3
+          }
+        ]
+      ],
+      "becomes": [
+        {
+          "element": "fire",
+          "table": [
+            [
+              {
+                "item": "metal_slag"
+              }
+            ]
+          ]
+        }
+      ],
+      "identification": [
+        {
+          "skill": "metalworking",
+          "result": [
+            {
+              "rating": 2,
+              "description": "A sharp bit that can be attached to anything and modified in a variety of dangerous ways."
+            },
+            {
+              "rating": 10,
+              "description": "Injection modifications would be especially lethal."
+            }
+          ]
+        }
+      ],
+      "fragility": 10,
+      "maxCondition": 15,
+      "value": 2
     }
   ]
 }
