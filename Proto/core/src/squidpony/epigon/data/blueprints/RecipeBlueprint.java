@@ -21,7 +21,7 @@ public class RecipeBlueprint extends EpiData {
     public List<PhysicalBlueprint> requiredCatalyst; // ie: a Forge (not consumed)
     public List<PhysicalBlueprint> optionalConsumed; // can add various properties
     public List<PhysicalBlueprint> optionalCatalyst;
-    public ProbabilityTable<EpiData> result;
+    public ProbabilityTable<PhysicalBlueprint> result;
 
     public boolean uses(PhysicalBlueprint ingredient) {
         return requiredConsumed.contains(ingredient)

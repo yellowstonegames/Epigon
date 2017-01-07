@@ -1,7 +1,5 @@
 package squidpony.epigon.data.blueprints;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,41 +35,42 @@ public class PhysicalBlueprint extends EpiData {
     public List<ModificationBlueprint> possibleModifications;
     public List<ModificationBlueprint> modifications;
     public boolean passthroughFromMaterial;
-    public Map<String, Float> passthroughResistances = new HashMap<>();
+    public Map<String, Float> passthroughResistances;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
 
     /**
-     * The list of physical objects it drops on destruction no matter what the source
+     * The list of physical objects it drops on destruction no matter what the source.
      */
-    public ProbabilityTable<PhysicalBlueprint> physicalDrops = new ProbabilityTable<>();
+    public List<ProbabilityTable<PhysicalBlueprint>> physicalDrops; // TODO - build custom deserializer for probability tabless
 
     /**
      * A list of what the item might become when a given element is used on it.
      */
-    public HashMap<Element, ProbabilityTable<ArrayList<PhysicalBlueprint>>> becomes = new HashMap<>();
+    public Map<Element, List<ProbabilityTable<PhysicalBlueprint>>> becomes;
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
      * The description will be used if no matching skill is available.
      */
-    public HashMap<Skill, HashMap<Rating, String>> identification;
+    public Map<Skill, Map<Rating, String>> identification;
 
     /**
      * When marked generic the item won't be created in the world.
      */
-    public boolean generic = false;
+    public boolean generic;
 
     /**
      * When marked as unique the item will only be created once at most per world.
      */
     public boolean unique;
-    public int rarity;
 
-    public String destructionSound, idleSound, movementSound;
-    public int destructionVolume, idleVolume, movementVolume;
+    public int rarity; // TODO - define scale
+
+    public PhysicalSoundBlueprint sound;
 
     public PhysicalBlueprint parent;
+
     public int fragility; // TODO - how does this work with a creature mixin?
     public int maxCondition; // TODO - how does this work with a creature mixin?
     public int value; // TODO - calculated by mixins?

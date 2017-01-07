@@ -28,6 +28,7 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
+import squidpony.squidmath.StatefulRNG;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -57,7 +58,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final RNG rng = new RNG("SquidLib!");
+    public static final RNG rng = new StatefulRNG();
 
     // 
     SpriteBatch batch;

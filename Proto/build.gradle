@@ -13,7 +13,8 @@ allprojects {
     version = '1.0'
     ext {
         appName = "EpigonProto"
-        squidlibVersion = '6e315145d1'
+        squidlibVersion = '86a4b4d8f5'
+        jacksonVersion = '2.8.5'
         gdxVersion = '1.9.3'
         roboVMVersion = '1.12.0'
         box2DLightsVersion = '1.4'
@@ -44,5 +45,8 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
         compile "com.github.tommyettinger:regexodus:$regexodusVersion"
+        compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+        compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+        compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     }
 }
