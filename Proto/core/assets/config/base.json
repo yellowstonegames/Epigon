@@ -1,41 +1,24 @@
 {
   "physicalBlueprints": [
     {
-      "internalName": "spike_basic",
-      "name":
-        {
-          "name": "spike"
-        },
+      "internalName": "spike_metal",
+      "name": { "name": "spike" },
       "description": "sharp bits",
       "notes": "This base spike includes spikes on armor and needles",
-      "colorFromMaterial": true,
+      "symbol": "^",
+      "color": "grey",
       "possibleAliases": [
-        {
-          "name": "needle"
-        }, {
-          "name": "flange"
-        }
+        { "name": "needle" },
+        { "name": "flange" }
       ],
-      "possibleModifications": ["multi", "injection"],
-      "passthroughFromMaterial": true,
+      "possibleModifications": [ "multi", "injection" ],
       "physicalDropTable": [
         [
-          {
-            "item": "metal_chip",
-            "minQuantity": 10,
-            "maxQuantity": 15
-          }
+          { "item": "metal_chip", "minQuantity": 10, "maxQuantity": 15 }
         ],
         [
-          {
-            "item": "metal_shard",
-            "weight": 1,
-            "quantity": 1
-          },
-          {
-            "item": "none",
-            "weight": 3
-          }
+          { "item": "metal_shard", "weight": 1, "quantity": 1 },
+          { "item": "none", "weight": 3 }
         ]
       ],
       "becomes": [
@@ -43,9 +26,7 @@
           "element": "fire",
           "table": [
             [
-              {
-                "item": "metal_slag"
-              }
+              { "item": "metal_slag" }
             ]
           ]
         }
@@ -68,6 +49,18 @@
       "fragility": 10,
       "maxCondition": 15,
       "value": 2
+    },
+    {
+      "internalName": "sword",
+      "name": { "name": "sword" },
+      "description": "A sword to be swung into things or poked at things.",
+      "symbol": "(",
+      "color": "grey",
+      "wieldableData": {
+        "hitChance": 90,
+        "damage": 30,
+        "distance": 3
+      }
     }
   ]
 }

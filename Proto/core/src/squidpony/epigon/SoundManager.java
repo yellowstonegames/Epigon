@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import squidpony.epigon.Prefs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,18 +16,20 @@ import java.util.TreeMap;
  */
 public class SoundManager {
 
-    static private SoundManager instance = new SoundManager();
     private boolean musicLoaded = false, soundfxLoaded = false;
-    private TreeMap<String, Sound> soundMap = new TreeMap<>();
-    private TreeMap<String, Music> musicMap = new TreeMap<>();
+    private final TreeMap<String, Sound> soundMap = new TreeMap<>();
+    private final TreeMap<String, Music> musicMap = new TreeMap<>();
     private Music nowPlaying;
-    private List<String> readableFileTypes = Arrays.asList(new String[]{"wav", "mp3", "ogg"});
+    private final List<String> readableFileTypes = Arrays.asList(new String[]{"wav", "mp3", "ogg"});
 
-    private SoundManager() {
+    public SoundManager() {
         if (Prefs.isSoundfxOn()) {
+            System.out.println("Loading Sound FX");
             loadSoundFXResources();
         }
+
         if (Prefs.isMusicOn()) {
+            System.out.println("Loading Music");
             loadMusicResources();
         }
     }
@@ -38,6 +39,7 @@ public class SoundManager {
         for (FileHandle f : Gdx.files.internal("sound fx").list()) {
             String name = f.name();
             if (readableFileTypes.contains(name.substring(name.lastIndexOf('.') + 1))) {
+                System.out.println("Loading sound fx: " + name);
                 Sound sound = Gdx.audio.newSound(Gdx.files.internal("sound fx/" + name));
                 soundMap.put(f.nameWithoutExtension(), sound);
             }
@@ -60,8 +62,8 @@ public class SoundManager {
     }
 
     /**
-     * Plays the sound fx associated with the provided key. The key is the
-     * filename of the sound without its extension.
+     * Plays the sound fx associated with the provided key. The key is the filename of the sound
+     * without its extension.
      *
      * @param key
      */
@@ -113,8 +115,8 @@ public class SoundManager {
     }
 
     /**
-     * Plays the music associated with the key. Keys for music are the filenames
-     * of the tracks without their extension.
+     * Plays the music associated with the key. Keys for music are the filenames of the tracks
+     * without their extension.
      *
      * @param key
      */
@@ -157,8 +159,7 @@ public class SoundManager {
     }
 
     /**
-     * Sets the music to play at the provided volume, with 0 being off and 1
-     * being full volume.
+     * Sets the music to play at the provided volume, with 0 being off and 1 being full volume.
      *
      * @param volume
      */
@@ -181,9 +182,5 @@ public class SoundManager {
     public void dispose() {
         unloadMusicResources();
         unloadSoundFXResources();
-    }
-
-    static public SoundManager getInstance() {
-        return instance;
     }
 }

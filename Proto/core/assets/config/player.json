@@ -1,0 +1,68 @@
+{
+  "internalName": "player",
+  "name": { "name": "player" },
+  "description": "Your handsome (for some values of handsome) self.",
+  "notes": "The player character.",
+  "symbol": "@",
+  "color": "blue",
+  "unique": true,
+  "creatureData": {
+    "body": {
+      "primaryPart": {
+        "internalName": "brain_human",
+        "name": { "name": "brain" },
+        "description": "Precious precious brains. Must not be exposed to air.",
+        "notes": "This is the critical part for many beings.",
+        "critical": true,
+        "conditionMultiplier": 0.1
+      },
+      "otherParts": [
+        {
+          "internalName": "head_human",
+          "name": { "name": "head" },
+          "description": "Holds many important bits, such as the brain and sensory organs.",
+          "contains": [
+            { "internalName": "brain_human" }
+          ],
+          "conditionMultiplier": 1.1,
+          "clothingSlots": 2,
+          "jewelrySlots": 4
+        },
+        {
+          "internalName": "rest_of_body_human",
+          "name": { "name": "body" },
+          "descritpion": "The human body, except for the head.",
+          "notes": "This is a placeholder until the rest of the parts are made.",
+          "attachedTo": [
+            { "internalName": "head_human" }
+          ],
+          "clothingSlots": 12,
+          "jewelrySlots": 12,
+          "equipmentSlots": 2
+        }
+      ]
+    },
+    "opacity": 1.0,
+    "skills": [
+      { "skill": { "internalName": "kendo", "name": { "name": "kendo" } }, "rating": "typical" }
+    ],
+    "maxStats": {
+      "aim": 100,
+      "attack_power": 100,
+      "precision": 100,
+      "agility": 100,
+      "deflection": 100,
+      "toughness": 100,
+      "spirit_power": 100,
+      "spirit_connectivity": 100,
+      "spirit_control": 100,
+      "iq": 100,
+      "creativity": 100,
+      "knowledge": 100,
+      "appearance": 100,
+      "conviction": 100
+    },
+    "visionRange": 12,
+    "hearingRange": 32
+  }
+}
