@@ -28,6 +28,7 @@ public class RecipeMixer {
     }
 
     public PhysicalBlueprint mix(RecipeBlueprint recipe) {
+        // TODO - set up stats on result based on the things used to create it
         return recipe.result.random();
     }
 }

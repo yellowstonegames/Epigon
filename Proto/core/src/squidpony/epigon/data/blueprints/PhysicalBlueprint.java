@@ -11,6 +11,7 @@ import squidpony.epigon.data.interfaceBlueprints.ContainerBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.InteractableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.LiquidBlueprint;
+import squidpony.epigon.data.interfaceBlueprints.MaterialBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.ReadableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.WearableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.WieldableBlueprint;
@@ -30,11 +31,9 @@ public class PhysicalBlueprint extends EpiData {
 
     public char symbol;
     public SColor color;
-    public boolean colorFromMaterial;
     public List<Name> possibleAliases;
     public List<ModificationBlueprint> possibleModifications;
     public List<ModificationBlueprint> modifications;
-    public boolean passthroughFromMaterial;
     public Map<String, Float> passthroughResistances;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
@@ -65,7 +64,7 @@ public class PhysicalBlueprint extends EpiData {
      */
     public boolean unique;
 
-    public int rarity; // TODO - define scale
+    public int rarity;
 
     public PhysicalSoundBlueprint sound;
 
@@ -82,6 +81,7 @@ public class PhysicalBlueprint extends EpiData {
     public CreatureBlueprint creatureData;
     public InteractableBlueprint interactableData;
     public LiquidBlueprint liquidData;
+    public MaterialBlueprint materialData;
     public ReadableBlueprint readableData;
     public WearableBlueprint wearableData;
     public WieldableBlueprint wieldableData;

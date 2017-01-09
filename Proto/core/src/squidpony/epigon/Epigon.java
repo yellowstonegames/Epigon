@@ -9,12 +9,20 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import squidpony.epigon.data.EpiJsonParser;
 
 import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.interfaces.Creature;
 import squidpony.epigon.data.specific.Name;
 import squidpony.epigon.data.specific.Physical;
@@ -79,6 +87,9 @@ public class Epigon extends Game {
     public void create() {
         System.out.println("Creating new game.");
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
+        System.out.println("Loading sound manager...");
+        SoundManager sound = new SoundManager();
+        //sound.playSoundFX("footsteps-1");
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -89,7 +100,7 @@ public class Epigon extends Game {
         display = new SquidLayers(TOTAL_WIDTH, TOTAL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSquareFont());
 
         map = World.getDefaultMap();
-        
+
         display.getTextFactory().fit(Arrays.deepToString(map.simpleChars()));
         display.setTextSize(CELL_WIDTH, CELL_HEIGHT);
 
@@ -108,20 +119,40 @@ public class Epigon extends Game {
         player.creatureData.trueName = "Player 1";
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
-        player.location = Coord.get(20, 20);
+
+        ObjectMapper mapper = new EpiJsonParser().mapper();
+//        try {
+//            System.out.println(mapper.writeValueAsString(player));
+//        } catch (JsonProcessingException ex) {
+//            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
+//        }
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
         sword.symbol = '/';
         sword.internalName = "Test Sword";
         sword.name = new Name("Sword");
-        
+//        try {
+//            System.out.println(mapper.writeValueAsString(sword));
+//        } catch (JsonProcessingException ex) {
+//            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+
+        try {
+            String playerFile = Gdx.files.internal("config/player.json").readString();
+            PhysicalBlueprint playerJson = mapper.readValue(playerFile, PhysicalBlueprint.class);
+            System.out.println(mapper.writeValueAsString(playerJson)); // Write back out for testing with
+        } catch (IOException ex) {
+            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
         simpleChars = map.simpleChars();
+        player.location = Coord.get(20, 20);
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
 
         bgColor = SColor.DARK_SLATE_GRAY;

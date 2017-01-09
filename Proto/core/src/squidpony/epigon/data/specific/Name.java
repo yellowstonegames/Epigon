@@ -12,10 +12,13 @@ public class Name {
     public Name() {
     }
 
+    /**
+     * Uses default pluralization of adding an 's' to the end of the word and uses plural for zero.
+     * @param name
+     */
     public Name(String name) {
         this.name = name;
         plural = name + 's';
         zero = plural;
     }
-
 }

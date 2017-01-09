@@ -30,7 +30,8 @@ public class CreatureBlueprint {
     public Stack<PhysicalBlueprint> inventory = new Stack<>();
     public EnumMap<Stat, Integer> maxStats = new EnumMap<>(Stat.class);
     public ArrayList<ConditionBlueprint> preexistingAuras = new ArrayList<>();
-    public float visionRange, hearingRange;
+    public float visionRange;
+    public float hearingRange;
 
     /* Properties Creatures Need to model real life 
      * 
