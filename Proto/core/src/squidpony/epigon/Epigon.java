@@ -8,18 +8,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import squidpony.epigon.data.EpiJsonParser;
 
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
@@ -120,31 +114,20 @@ public class Epigon extends Game {
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
 
-        ObjectMapper mapper = new EpiJsonParser().mapper();
-//        try {
-//            System.out.println(mapper.writeValueAsString(player));
-//        } catch (JsonProcessingException ex) {
-//            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        Json json = new Json();
+        json.setIgnoreUnknownFields(true);
+        json.setUsePrototypes(false);
+        System.out.println(json.prettyPrint(player));
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
         sword.symbol = '/';
         sword.internalName = "Test Sword";
         sword.name = new Name("Sword");
-//        try {
-//            System.out.println(mapper.writeValueAsString(sword));
-//        } catch (JsonProcessingException ex) {
-//            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+//        System.out.println(json.prettyPrint(sword));
 
-        try {
-            String playerFile = Gdx.files.internal("config/player.json").readString();
-            PhysicalBlueprint playerJson = mapper.readValue(playerFile, PhysicalBlueprint.class);
-            System.out.println(mapper.writeValueAsString(playerJson)); // Write back out for testing with
-        } catch (IOException ex) {
-            Logger.getLogger(Epigon.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        String playerFile = Gdx.files.internal("config/player.json").readString();
+//        PhysicalBlueprint playerJson = json.fromJson(PhysicalBlueprint.class, playerFile);
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);

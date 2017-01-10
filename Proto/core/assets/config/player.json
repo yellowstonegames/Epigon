@@ -4,7 +4,12 @@
   "description": "Your handsome (for some values of handsome) self.",
   "notes": "The player character.",
   "symbol": "@",
-  "color": "blue",
+  "color": {
+    "r": 0.7529412,
+    "g": 0.7529412,
+    "b": 0.7529412,
+    "name": "Silver"
+  },
   "unique": true,
   "creatureData": {
     "body": {

@@ -44,9 +44,10 @@ project(":core") {
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
+        compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
         compile "com.github.tommyettinger:regexodus:$regexodusVersion"
-        compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
-        compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-        compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     }
+
+    apply plugin: 'idea'
+    idea.module.downloadJavadoc = true
 }
