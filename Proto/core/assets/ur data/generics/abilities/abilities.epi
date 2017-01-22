@@ -1,0 +1,36 @@
+[
+{	"name": "swing sword",
+	"representation": "→",
+	"actionDescription": "$[source name] swings.",
+	"mustHaveEquipped": [{"item": "sword", "quantity": 1}],
+	must have skill:swordplay:low;//doesn't take too much to do this
+	skill contribution:swordplay:great;//very relevant
+	skill contribution:fighting:low;//a bit relevant
+	effect:basic weapon slashing attack;
+}
+
+ability:double sword slice{
+	name:Double Sword Slice;
+	parent:swing sword;
+	representation:↔;
+	action description:$[source name] swings twice quickly.;
+	must have skill:swordplay:good;//takes a bit more to do
+	effect:basic weapon slashing attack:2 times;
+}
+
+ability:break armor{
+	name:Break Armor;
+	representation:₡;
+	action description:$[source name] smashes into the armor of $[target name].;
+	source must have equipped:hammer;
+	consumes target equipped:armor;
+	must have skill:hammer fighting:great;//an advanced move
+	effect:armor breaking attack;
+}
+
+ability:walk{
+	name:Walk;
+	representation:w;
+	action description:$[source name] walks.;
+	effect:move:1 square;
+}

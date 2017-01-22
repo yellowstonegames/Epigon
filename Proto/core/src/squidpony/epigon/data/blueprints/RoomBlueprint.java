@@ -1,21 +1,22 @@
 package squidpony.epigon.data.blueprints;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.Map;
 import squidpony.epigon.data.EpiData;
 
 /**
- * Contains the information related to a prebuilt map. The map is intended to
- * represent a small area rather than an entire region.
+ * Contains the information related to a prebuilt map. The map is intended to represent a small area
+ * rather than an entire region.
  *
  * @author SquidPony
  */
 public class RoomBlueprint extends EpiData {
 
-    public ArrayList<RoomConnection> connections = new ArrayList<>();//can mark where stairs should lead
+    public List<RoomConnection> connections = new ArrayList<>();//can mark where stairs should lead
     public boolean repeatLeft, repeatRight, repeatTop, repeatBottom,
-            mirrorLeft, mirrorRight, mirrorTop, mirrorBottom;
-    public TreeMap<Character, PhysicalBlueprint> replacements = null;//maps characters to the physical objects that should replace them
+        mirrorLeft, mirrorRight, mirrorTop, mirrorBottom;
+    public Map<Character, PhysicalBlueprint> replacements;//maps characters to the physical objects that should replace them
     public boolean outside = false;
     public boolean landscape = false;//landscape is the middle layer between overworld and encounter level maps
     public boolean generic = false;
@@ -26,9 +27,9 @@ public class RoomBlueprint extends EpiData {
     }
 
     /**
-     * Reads an array of strings and turns it into a 2D char array, ensuring
-     * that the resulting blueprint is in the same coordinate system as it would
-     * appear when the string array was printed out.
+     * Reads an array of strings and turns it into a 2D char array, ensuring that the resulting
+     * blueprint is in the same coordinate system as it would appear when the string array was
+     * printed out.
      *
      * @param layout
      */
@@ -44,8 +45,7 @@ public class RoomBlueprint extends EpiData {
     }
 
     /**
-     * Adds the given pair to the list of things that will be replaced upon
-     * constructions.
+     * Adds the given pair to the list of things that will be replaced upon constructions.
      *
      * @param key
      * @param contents
@@ -80,8 +80,6 @@ public class RoomBlueprint extends EpiData {
 
     /**
      * Data class to hold tuple for marking connections between levels/rooms
-     *
-     * @author Eben Howard - http://squidpony.com
      */
     public class RoomConnection {
 

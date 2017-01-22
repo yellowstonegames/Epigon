@@ -1,10 +1,8 @@
 package squidpony.epigon.data.interfaceBlueprints;
 
-import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.Set;
 
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.BodyBlueprint;
@@ -13,6 +11,7 @@ import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Rating;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * Represents an object which can act and has stats, abilities, skills, and so on just like the
@@ -25,11 +24,11 @@ public class CreatureBlueprint {
     public CreatureBlueprint parent;
     public BodyBlueprint body;
     public double opacity;//0.0 is transparent, 1.0 is opaque
-    public Map<Skill, Rating> skills = new HashMap<>();
-    public ArrayList<Ability> abilities = new ArrayList<>();
-    public Stack<PhysicalBlueprint> inventory = new Stack<>();
+    public OrderedMap<Skill, Rating> skills;
+    public Set<Ability> abilities;
+    public Deque<PhysicalBlueprint> inventory;
     public EnumMap<Stat, Integer> maxStats = new EnumMap<>(Stat.class);
-    public ArrayList<ConditionBlueprint> preexistingAuras = new ArrayList<>();
+    public Set<ConditionBlueprint> preexistingConditions;
     public float visionRange;
     public float hearingRange;
 

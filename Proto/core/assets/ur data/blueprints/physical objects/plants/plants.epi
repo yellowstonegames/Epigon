@@ -1,0 +1,47 @@
+﻿[
+{	"name": "plant",
+	"generic": true,
+	"representation": ["♣","p"],
+	"foregroundColor": "green"
+},
+{	"name": "shrub",
+	"plural": "shrubberies",
+	"parent": "plant"
+},
+{	"name": "sage brush",
+	"plural": "sage brushes",
+	"parent": "shrub"
+},
+{	"name": "rose bush",
+	"plural": "rose bushes",
+	"parent": "shrub",
+	"representation": "r",
+	"foregroundColor": "rose"
+},
+{	"name": "tree",
+	"parent": "plant",
+	"generic": true,
+	"representation": "T",
+	"foregroundColor": "forest green"
+},
+{	"name": "cactus",
+	"plural": "cacti",
+	"parent": "plant",
+	"generic": true,
+	"representation": "c",
+	"foregroundColor": "greyish dark green"
+},
+{	"name": "saguaro",
+	"plural": "saguaro",
+	"parent": "cactus",
+	"representation": "Ψ",
+	"foregroundColor": "green",
+	"countsAs": "tree"
+},
+{	"name": "barrel cactus",
+	"plural": "barrel cacti",
+	"parent": "cactus",
+	"representation": "ѻ",
+	"foregroundColor": "camo green"
+}
+]

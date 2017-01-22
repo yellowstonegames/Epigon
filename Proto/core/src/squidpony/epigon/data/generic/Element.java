@@ -1,7 +1,6 @@
 package squidpony.epigon.data.generic;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.specific.Name;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -20,7 +19,7 @@ public class Element extends EpiData {
 
     private Element(Element parent, String name, String description, SColor color) {
         this.parent = parent;
-        this.name = new Name(name);
+        this.name = name;
         this.description = description;
         this.color = color;
     }
