@@ -8,7 +8,7 @@ import java.util.Set;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.ModificationBlueprint;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.data.mixin.Ammunition;
@@ -33,7 +33,7 @@ public class Physical extends EpiData {
 
     public char symbol;
     public SColor color;
-    public List<ModificationBlueprint> modifications;
+    public List<Modification> modifications;
     public Map<String, Float> resistances;
     public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Integer> currentStats = new EnumMap<>(Stat.class);
