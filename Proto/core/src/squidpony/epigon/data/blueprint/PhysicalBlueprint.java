@@ -31,7 +31,7 @@ public class PhysicalBlueprint extends EpiData {
 
     public PhysicalBlueprint parent;
 
-    public char symbol = ' '; // defautl to an empty character sine NUL is not fun in data
+    public char symbol = ' '; // default to an empty character sine NUL is not fun in data
     public SColor color;
 
     public List<String> possibleAliases;
