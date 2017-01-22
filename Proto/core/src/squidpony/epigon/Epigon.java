@@ -155,7 +155,7 @@ public class Epigon extends Game {
 //        System.out.println(convert.toJson(pj));
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
-        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
+//        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
 //        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
 //        System.out.println(convert.toJson(pj));
         //This is used to allow clicks or taps to take the player to the desired area.
