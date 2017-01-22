@@ -22,8 +22,8 @@ import squidpony.DataConverter;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.imixinBlueprint.CreatureBlueprint;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Humanoid;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
@@ -143,7 +143,7 @@ public class Epigon extends Game {
         pj.color = SColor.FOX;
         pj.possibleAliases = Stream.of("Mario", "Link", "Sam").collect(Collectors.toList());
         pj.baseStats.put(Stat.OPACITY, 100);
-        CreatureBlueprint cb = new CreatureBlueprint();
+        Humanoid cb = new Humanoid();
         pj.creatureData = cb;
         cb.skills = new OrderedMap<>();
         Skill skill = new Skill();
@@ -155,9 +155,9 @@ public class Epigon extends Game {
 //        System.out.println(convert.toJson(pj));
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
-//        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
+        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
 //        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
-        System.out.println(convert.toJson(pj));
+//        System.out.println(convert.toJson(pj));
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);

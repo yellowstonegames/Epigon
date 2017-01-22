@@ -2,6 +2,8 @@
     "name": "Player",
     "description": "The main player's character.",
     "notes": "Voted most likely to die.",
+    "parent": null,
+    "sound": null,
     "symbol": "@",
     "color": {
         "r": 0.59607846,
@@ -13,6 +15,7 @@
     "possibleAliases": ["Mario", "Link", "Sam"],
     "possibleModifications": null,
     "modifications": null,
+    "whenUsedAsMaterial": null,
     "passthroughResistances": null,
     "possibleConditions": null,
     "conditions": null,
@@ -24,21 +27,21 @@
         "v": 100,
         "r": []
     },
+    "commonInventory": null,
     "physicalDrops": null,
     "becomes": null,
     "identification": null,
     "generic": false,
     "unique": false,
     "rarity": null,
-    "sound": null,
-    "parent": null,
     "baseValue": 0,
     "large": false,
     "ammunitionData": null,
     "containerData": null,
     "creatureData": {
+        "class": "squidpony.epigon.data.mixin.Humanoid",
         "parent": null,
-        "isHumanoid": false,
+        "profession": null,
         "skills": {
             "f": 0.75,
             "k": {
@@ -58,12 +61,15 @@
             }]
         },
         "abilities": null,
-        "commonInventory": null,
-        "preexistingConditions": null
+        "aware": false,
+        "jewelry": {},
+        "clothing": {},
+        "armor": {},
+        "overArmor": {},
+        "equipment": {}
     },
     "interactableData": null,
     "liquidData": null,
-    "materialData": null,
     "readableData": null,
     "wearableData": null,
     "wieldableData": null,

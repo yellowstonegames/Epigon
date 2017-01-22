@@ -1,5 +1,6 @@
 package squidpony.epigon.data.blueprint;
 
+import squidpony.epigon.data.generic.Modification;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -7,16 +8,14 @@ import squidpony.epigon.data.EpiData;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Stat;
-import squidpony.epigon.data.imixinBlueprint.AmmunitionBlueprint;
-import squidpony.epigon.data.imixinBlueprint.ContainerBlueprint;
-import squidpony.epigon.data.imixinBlueprint.CreatureBlueprint;
-import squidpony.epigon.data.imixinBlueprint.InteractableBlueprint;
-import squidpony.epigon.data.imixinBlueprint.LiquidBlueprint;
-import squidpony.epigon.data.imixinBlueprint.MaterialBlueprint;
-import squidpony.epigon.data.imixinBlueprint.ReadableBlueprint;
-import squidpony.epigon.data.imixinBlueprint.WearableBlueprint;
-import squidpony.epigon.data.imixinBlueprint.WieldableBlueprint;
-import squidpony.epigon.data.imixinBlueprint.ZappableBlueprint;
+import squidpony.epigon.data.mixin.Ammunition;
+import squidpony.epigon.data.mixin.Container;
+import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Interactable;
+import squidpony.epigon.data.mixin.Liquid;
+import squidpony.epigon.data.mixin.Wearable;
+import squidpony.epigon.data.mixin.Wieldable;
+import squidpony.epigon.data.mixin.Zappable;
 import squidpony.epigon.universe.Rating;
 
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -30,15 +29,22 @@ import squidpony.squidmath.ProbabilityTable;
  */
 public class PhysicalBlueprint extends EpiData {
 
+    public PhysicalBlueprint parent;
+    public PhysicalSoundBlueprint sound;
+
     public char symbol = ' '; // defautl to an empty character sine NUL is not fun in data
     public SColor color;
+
     public List<String> possibleAliases;
-    public List<ModificationBlueprint> possibleModifications;
-    public List<ModificationBlueprint> modifications;
+    public List<Modification> possibleModifications;
+    public List<Modification> modifications;
+    public List<Modification> whenUsedAsMaterial;
     public OrderedMap<Element, Float> passthroughResistances;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
+
     public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
+    public List<PhysicalBlueprint> commonInventory;
 
     /**
      * The list of physical objects it drops on destruction no matter what the source.
@@ -68,23 +74,18 @@ public class PhysicalBlueprint extends EpiData {
 
     public Rating rarity;
 
-    public PhysicalSoundBlueprint sound;
-
-    public PhysicalBlueprint parent;
-
     public int baseValue;
     public boolean large;
 
-    public AmmunitionBlueprint ammunitionData;
-    public ContainerBlueprint containerData;
-    public CreatureBlueprint creatureData;
-    public InteractableBlueprint interactableData;
-    public LiquidBlueprint liquidData;
-    public MaterialBlueprint materialData;
-    public ReadableBlueprint readableData;
-    public WearableBlueprint wearableData;
-    public WieldableBlueprint wieldableData;
-    public ZappableBlueprint zappableData;
+    public Ammunition ammunitionData;
+    public Container containerData;
+    public Creature creatureData;
+    public Interactable interactableData;
+    public Liquid liquidData;
+    public Readable readableData;
+    public Wearable wearableData;
+    public Wieldable wieldableData;
+    public Zappable zappableData;
 
     public boolean hasParent(PhysicalBlueprint blueprint) {
         if (this.equals(blueprint)) {

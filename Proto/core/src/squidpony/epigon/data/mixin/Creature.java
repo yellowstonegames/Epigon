@@ -2,8 +2,8 @@ package squidpony.epigon.data.mixin;
 
 import java.util.Set;
 import squidpony.epigon.data.generic.Ability;
+import squidpony.epigon.data.generic.Profession;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.imixinBlueprint.CreatureBlueprint;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 
@@ -14,22 +14,26 @@ import squidpony.squidmath.OrderedMap;
  */
 public class Creature {
 
-    public CreatureBlueprint parent;
+    public Creature parent;
+    public Profession profession;
     public OrderedMap<Skill, Rating> skills;
     public Set<Ability> abilities;
-    public Ability defaultAttack;
+
     public boolean aware;//has noticed the player
 
-    public Ability getDefaultAttack() {
-        if (defaultAttack == null) {
-            defaultAttack = abilities.stream().filter(a -> a.isAttack()).findAny().orElse(null);
-        }
-
-        return defaultAttack;
-    }
-
-    public void setDefaultAttack(Ability defaultAttack) {
-        this.defaultAttack = defaultAttack;
-    }
-
+    /*
+     * Properties Creatures Need to model real life
+     * 
+     * taxonomy
+     * habitation areas (with frequency / likelyhood)
+     * behavior
+     * size of territory
+     * breeding method
+     * gestation time
+     * number of children
+     * years to maturity
+     * lifespan
+     * food type (and specific animals / plants preferred)
+     * needed food intake per day
+     */
 }
