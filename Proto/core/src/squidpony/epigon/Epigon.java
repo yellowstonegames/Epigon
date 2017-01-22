@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import squidpony.DataConverter;
+import squidpony.Maker;
 
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
@@ -141,7 +140,7 @@ public class Epigon extends Game {
         pj.notes = "Voted most likely to die.";
         pj.symbol = '@';
         pj.color = SColor.FOX;
-        pj.possibleAliases = Stream.of("Mario", "Link", "Sam").collect(Collectors.toList());
+        pj.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
         pj.baseStats.put(Stat.OPACITY, 100);
         Humanoid cb = new Humanoid();
         pj.creatureData = cb;
@@ -157,7 +156,7 @@ public class Epigon extends Game {
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
 //        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
-//        System.out.println(convert.toJson(pj));
+        System.out.println(convert.toJson(pj));
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);

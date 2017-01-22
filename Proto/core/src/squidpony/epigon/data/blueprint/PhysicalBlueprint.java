@@ -30,7 +30,6 @@ import squidpony.squidmath.ProbabilityTable;
 public class PhysicalBlueprint extends EpiData {
 
     public PhysicalBlueprint parent;
-    public PhysicalSoundBlueprint sound;
 
     public char symbol = ' '; // defautl to an empty character sine NUL is not fun in data
     public SColor color;
