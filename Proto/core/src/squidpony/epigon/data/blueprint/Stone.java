@@ -1150,7 +1150,7 @@ public enum Stone {
         this.hardness = hardness;
     }
 
-    private String getName() {
+    public String getName() {
         return toString().toLowerCase().replace('_', ' ');
     }
 }
