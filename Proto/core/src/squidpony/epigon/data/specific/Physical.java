@@ -1,6 +1,7 @@
 package squidpony.epigon.data.specific;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,7 @@ import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.ModificationBlueprint;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
+import squidpony.epigon.data.generic.Stat;
 import squidpony.epigon.data.interfaces.Ammunition;
 import squidpony.epigon.data.interfaces.Container;
 import squidpony.epigon.data.interfaces.Creature;
@@ -31,20 +33,16 @@ public class Physical extends EpiData {
 
     public char symbol;
     public SColor color;
-    public boolean colorFromMaterial;
-    public List<ModificationBlueprint> appliedModifications;
+    public List<ModificationBlueprint> modifications;
     public Map<String, Float> resistances;
-    public ArrayList<Condition> conditions = new ArrayList<>();
+    public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Integer> currentStats = new EnumMap<>(Stat.class);
+    public List<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
 
     public PhysicalBlueprint parent;
     public Set<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
-    public int fragility;
-    public int maxCondition;
-    public int currentCondition;
-    public boolean large;
-    //
-    //possible interfaces
+
     public Ammunition ammunitionData;
     public Container containerData;
     public Creature creatureData;
@@ -119,6 +117,6 @@ public class Physical extends EpiData {
     }
 
     public boolean hasParent(PhysicalBlueprint blueprint) {
-        return false; // TODO - fill out parent check
+        return blueprint.hasParent(blueprint);
     }
 }

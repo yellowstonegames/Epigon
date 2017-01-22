@@ -1,10 +1,12 @@
 package squidpony.epigon.data.blueprints;
 
+import java.util.EnumMap;
 import java.util.List;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.Element;
 import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.generic.Stat;
 import squidpony.epigon.data.interfaceBlueprints.AmmunitionBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.ContainerBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
@@ -36,11 +38,12 @@ public class PhysicalBlueprint extends EpiData {
     public OrderedMap<Element, Float> passthroughResistances;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
+    public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
 
     /**
      * The list of physical objects it drops on destruction no matter what the source.
      */
-    public List<ProbabilityTable<PhysicalBlueprint>> physicalDrops; // TODO - build custom deserializer for probability tabless
+    public List<ProbabilityTable<PhysicalBlueprint>> physicalDrops;
 
     /**
      * A list of what the item might become when a given element is used on it.
@@ -63,18 +66,15 @@ public class PhysicalBlueprint extends EpiData {
      */
     public boolean unique;
 
-    public int rarity;
+    public Rating rarity;
 
     public PhysicalSoundBlueprint sound;
 
     public PhysicalBlueprint parent;
 
-    public int fragility; // TODO - how does this work with a creature mixin?
-    public int maxCondition; // TODO - how does this work with a creature mixin?
-    public int value; // TODO - calculated by mixins?
+    public int baseValue;
     public boolean large;
-    //
-    //possible interfaces
+
     public AmmunitionBlueprint ammunitionData;
     public ContainerBlueprint containerData;
     public CreatureBlueprint creatureData;

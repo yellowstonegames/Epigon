@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.generic.Stat;
 import squidpony.epigon.data.generic.Element;
 import squidpony.epigon.data.generic.Energy;
 import squidpony.epigon.data.generic.Skill;

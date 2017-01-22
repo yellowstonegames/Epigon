@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.blueprints.RecipeBlueprint;

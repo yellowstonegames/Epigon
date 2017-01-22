@@ -2,10 +2,7 @@ package squidpony.epigon.universe;
 
 /**
  * The areas where things can be worn.
- *
- * @author SquidPony
  */
-@Deprecated
 public enum ClothingSlot {
 
     HEAD, FACE, NECK, LEFT_UPPER_ARM, RIGHT_UPPER_ARM,

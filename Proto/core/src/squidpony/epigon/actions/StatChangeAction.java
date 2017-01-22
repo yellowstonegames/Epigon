@@ -1,6 +1,6 @@
 package squidpony.epigon.actions;
 
-import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.generic.Stat;
 
 /**
  *

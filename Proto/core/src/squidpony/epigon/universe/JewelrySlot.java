@@ -2,9 +2,7 @@ package squidpony.epigon.universe;
 
 /**
  *
- * @author SquidPony
  */
-@Deprecated
 public enum JewelrySlot {
 
     BROW, LEFT_EAR, RIGHT_EAR, FACE, NECK, LEFT_UPPER_ARM, RIGHT_UPPER_ARM,

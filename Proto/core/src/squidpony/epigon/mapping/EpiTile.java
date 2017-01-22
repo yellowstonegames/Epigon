@@ -28,7 +28,7 @@ public class EpiTile {
      * @param key
      * @return
      */
-    public float geResistance(String key) {//TODO -- determine if resistance should be additive or just max value
+    public float geResistance(String key) {//TODO -- determine if resistance should be additive or just max baseValue
         float resistance = 0f;
         Float check;
         if (floor != null) {
