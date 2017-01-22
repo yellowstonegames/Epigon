@@ -29,8 +29,8 @@ public class Kickball {
     }
 
     private void go() {
-//        testJSON();
-        printStones();
+        testJSON();
+//        printStones();
     }
 
     private void printStones() {
@@ -69,17 +69,13 @@ public class Kickball {
         Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
         Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
 
-//        Json json = new Json();
-//        json.setIgnoreUnknownFields(true);
-//        json.setUsePrototypes(false);
-//        System.out.println(json.prettyPrint(player));
-        System.out.println(convert.prettyPrint(player));
+//        System.out.println(convert.prettyPrint(player));
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
         sword.symbol = '/';
         sword.name = "Sword";
-        System.out.println(convert.prettyPrint(sword));
+//        System.out.println(convert.prettyPrint(sword));
 
         PhysicalBlueprint pj = new PhysicalBlueprint();
         pj.name = "Player";
@@ -98,11 +94,13 @@ public class Kickball {
         skill = new Skill();
         skill.name = "akido";
         cb.skills.put(skill, Rating.SLIGHT);
-        System.out.println(convert.prettyPrint(pj));
+//        System.out.println(convert.prettyPrint(pj));
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
-//        pj = convert.fromJson(PhysicalBlueprint.class, convert.prettyPrint(pj));
-//        System.out.println(convert.prettyPrint(pj));
+        String json = convert.prettyPrint(pj);
+        System.out.println(json);
+        pj = convert.fromJson(PhysicalBlueprint.class, json);
+        System.out.println(convert.prettyPrint(pj));
     }
 }
