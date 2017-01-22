@@ -1,6 +1,6 @@
 package squidpony.epigon.data.specific;
 
-import java.util.ArrayList;
+import java.util.List;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 
@@ -13,7 +13,7 @@ public class Condition extends EpiData {
 
     public ConditionBlueprint parent;
     public int currentTick;
-    public ArrayList<Condition> suppresedBys = new ArrayList<>();//lists the specific conditions that are currently suppressing this one
+    public List<Condition> suppresedBys;//lists the specific conditions that are currently suppressing this one
     public Physical attachedTo;
 
     /**

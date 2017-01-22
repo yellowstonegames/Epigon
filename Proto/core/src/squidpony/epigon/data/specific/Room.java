@@ -1,9 +1,8 @@
 package squidpony.epigon.data.specific;
 
-import java.util.TreeMap;
-
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.RoomBlueprint;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * A specific in-game room.
@@ -17,5 +16,5 @@ import squidpony.epigon.data.blueprints.RoomBlueprint;
 public class Room extends EpiData {
 
     public RoomBlueprint parent;
-    public TreeMap<Character, Physical> features;
+    public OrderedMap<Character, Physical> features;
 }

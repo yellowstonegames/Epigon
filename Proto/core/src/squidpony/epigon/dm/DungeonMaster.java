@@ -1,6 +1,6 @@
 package squidpony.epigon.dm;
 
-import java.util.ArrayList;
+import java.util.List;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
@@ -24,12 +24,10 @@ public class DungeonMaster {
     }
 
     /**
-     * Removes the provided condition. This may cause other conditions to become
-     * unsuppressed.
+     * Removes the provided condition. This may cause other conditions to become unsuppressed.
      *
      * @param condition
-     * @param canceled true if it's being removed due to cancellation rather
-     * than expiration
+     * @param canceled true if it's being removed due to cancellation rather than expiration
      */
     private void detachCondition(Physical thing, Condition condition, boolean cancelled) {
         thing.conditions.remove(condition);
@@ -43,7 +41,7 @@ public class DungeonMaster {
         }
     }
 
-    private void applyActions(ArrayList<Action> actions) {
-        
+    private void applyActions(List<Action> actions) {
+
     }
 }
