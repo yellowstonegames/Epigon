@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import squidpony.DataConverter;
 
@@ -112,9 +113,8 @@ public class Epigon extends Game {
         // Create an actual player
         player = new Physical();
         player.creatureData = new Creature();
-        player.creatureData.abilities = new ArrayList<>();
-        player.creatureData.knownName = "Great Hero";
-        player.creatureData.trueName = "Player 1";
+        player.creatureData.abilities = new HashSet<>();
+        player.name = "Great Hero";
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
 

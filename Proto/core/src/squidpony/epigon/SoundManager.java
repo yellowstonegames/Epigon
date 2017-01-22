@@ -7,6 +7,7 @@ import com.badlogic.gdx.files.FileHandle;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -17,8 +18,8 @@ import java.util.TreeMap;
 public class SoundManager {
 
     private boolean musicLoaded = false, soundfxLoaded = false;
-    private final TreeMap<String, Sound> soundMap = new TreeMap<>();
-    private final TreeMap<String, Music> musicMap = new TreeMap<>();
+    private final Map<String, Sound> soundMap = new TreeMap<>();
+    private final Map<String, Music> musicMap = new TreeMap<>();
     private Music nowPlaying;
     private final List<String> readableFileTypes = Arrays.asList(new String[]{"wav", "mp3", "ogg"});
 

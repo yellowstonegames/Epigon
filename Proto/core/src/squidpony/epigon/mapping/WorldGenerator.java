@@ -1,6 +1,7 @@
 package squidpony.epigon.mapping;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import squidpony.epigon.data.blueprints.Inclusion;
 import squidpony.epigon.data.blueprints.Stone;
@@ -16,13 +17,13 @@ import squidpony.squidmath.ThunderRNG;
  */
 public class WorldGenerator {
 
-    private static ArrayList<Stone> wallList = new ArrayList<>(),
+    private static List<Stone> wallList = new ArrayList<>(),
         sedimentaryList = new ArrayList<>(),
         intrusiveList = new ArrayList<>(),
         extrusiveList = new ArrayList<>(),
         metamorphicList = new ArrayList<>();
 
-    private static ArrayList<Inclusion> gemList = new ArrayList<>(),
+    private static List<Inclusion> gemList = new ArrayList<>(),
         sedimentaryGemList = new ArrayList<>(),
         intrusiveGemList = new ArrayList<>(),
         extrusiveGemList = new ArrayList<>(),

@@ -1,8 +1,9 @@
 package squidpony.epigon.data.specific;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
@@ -13,6 +14,7 @@ import squidpony.epigon.data.interfaces.Container;
 import squidpony.epigon.data.interfaces.Creature;
 import squidpony.epigon.data.interfaces.Interactable;
 import squidpony.epigon.data.interfaces.Liquid;
+import squidpony.epigon.data.interfaces.Readable;
 import squidpony.epigon.data.interfaces.Wearable;
 import squidpony.epigon.data.interfaces.Wieldable;
 import squidpony.epigon.data.interfaces.Zappable;
@@ -30,13 +32,13 @@ public class Physical extends EpiData {
     public char symbol;
     public SColor color;
     public boolean colorFromMaterial;
-    public ArrayList<ModificationBlueprint> appliedModifications;
-    public HashMap<String, Float> resistances;
+    public List<ModificationBlueprint> appliedModifications;
+    public Map<String, Float> resistances;
     public ArrayList<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
 
     public PhysicalBlueprint parent;
-    public ArrayList<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
+    public Set<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
     public int fragility;
     public int maxCondition;
     public int currentCondition;
@@ -48,7 +50,7 @@ public class Physical extends EpiData {
     public Creature creatureData;
     public Interactable interactableData;
     public Liquid liquidData;
-    public squidpony.epigon.data.interfaces.Readable readableData;
+    public Readable readableData;
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;
