@@ -1,7 +1,7 @@
-package squidpony.epigon.data;
+package squidpony.epigon.data.generic;
 
 /**
- * Represents all of the possible base stats and health bars.
+ * Represents all of the possible base stats.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -20,18 +20,22 @@ public enum Stat {
     CREATIVITY("Controls the rate at which som skills can be learned."),
     KNOWLEDGE("Controls chance to get critical success when using skills."),
     APPEARANCE("Controls reactions from some NPCs"),
-    CONVICTION("Controls reactions from some NPCs.");
-    
+    CONVICTION("Controls reactions from some NPCs."),
+    VISION("Controls how far optical awareness extends."),
+    HEARING("Controls how far auditory awareness extends."),
+    VOLUME("Generalized accounting of approximate size."),
+    MASS("Approximate mass.");
+
     private final String description;
-    
-    private Stat(String description){
+
+    private Stat(String description) {
         this.description = description;
     }
-    
+
     public String description() {
         return description;
     }
-    
+
     @Override
     public String toString() {
         return (name().substring(0, 1).toUpperCase() + name().substring(1)).replace('_', ' ');

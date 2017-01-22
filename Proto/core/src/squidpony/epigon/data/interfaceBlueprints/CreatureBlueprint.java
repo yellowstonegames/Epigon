@@ -1,10 +1,10 @@
 package squidpony.epigon.data.interfaceBlueprints;
 
-import java.util.Deque;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Set;
 
-import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.generic.Stat;
 import squidpony.epigon.data.blueprints.BodyBlueprint;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
@@ -26,13 +26,11 @@ public class CreatureBlueprint {
     public double opacity;//0.0 is transparent, 1.0 is opaque
     public OrderedMap<Skill, Rating> skills;
     public Set<Ability> abilities;
-    public Deque<PhysicalBlueprint> inventory;
-    public EnumMap<Stat, Integer> maxStats = new EnumMap<>(Stat.class);
+    public List<PhysicalBlueprint> commonInventory;
     public Set<ConditionBlueprint> preexistingConditions;
-    public float visionRange;
-    public float hearingRange;
 
-    /* Properties Creatures Need to model real life 
+    /*
+     * Properties Creatures Need to model real life
      * 
      * taxonomy
      * habitation areas (with frequency / likelyhood)
@@ -43,10 +41,7 @@ public class CreatureBlueprint {
      * number of children
      * years to maturity
      * lifespan
-     * size
-     * weight
      * food type (and specific animals / plants preferred)
      * needed food intake per day
-     * 
      */
 }

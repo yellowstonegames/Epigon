@@ -3,7 +3,7 @@ package squidpony.epigon.data.specific;
 import java.util.List;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.BodyPartBlueprint;
+import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.squidmath.OrderedMap;
 
 /**
@@ -15,8 +15,29 @@ import squidpony.squidmath.OrderedMap;
  */
 public class Body extends EpiData {
 
-    public OrderedMap<BodyPartBlueprint, List<Physical>> clothingSlots;
-    public OrderedMap<BodyPartBlueprint, List<Physical>> jewelrySlots;
-    public OrderedMap<BodyPartBlueprint, List<Physical>> equipSlots;
-    public OrderedMap<BodyPartBlueprint, Integer> condition; // current health for each part
+    public OrderedMap<BodyPart, List<Physical>> clothingSlots;
+    public OrderedMap<BodyPart, List<Physical>> jewelrySlots;
+    public OrderedMap<BodyPart, List<Physical>> equipSlots;
+    public OrderedMap<BodyPart, Integer> condition; // current health for each part
+
+    public int quantityOf(PhysicalBlueprint blueprint) {
+        return (int) (clothingSlots.values().stream().flatMap(m -> m.parallelStream())
+            .filter(p -> p.hasParent(blueprint))
+            .count()
+            + jewelrySlots.values().stream().flatMap(m -> m.parallelStream())
+                .filter(p -> p.hasParent(blueprint))
+                .count()
+            + equipSlots.values().stream().flatMap(m -> m.parallelStream())
+                .filter(p -> p.hasParent(blueprint))
+                .count());
+    }
+
+    public boolean has(PhysicalBlueprint blueprint) {
+        return clothingSlots.values().stream().flatMap(m -> m.parallelStream())
+            .anyMatch(p -> p.hasParent(blueprint))
+            || jewelrySlots.values().stream().flatMap(m -> m.parallelStream())
+                .anyMatch(p -> p.hasParent(blueprint))
+            || equipSlots.values().stream().flatMap(m -> m.parallelStream())
+                .anyMatch(p -> p.hasParent(blueprint));
+    }
 }

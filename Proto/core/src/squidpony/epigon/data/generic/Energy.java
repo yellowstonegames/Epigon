@@ -3,8 +3,8 @@ package squidpony.epigon.data.generic;
 /**
  * Represents the types of energy pools in the game.
  *
- * Includes methods to determine what pool damage is rolled over to if a
- * specific type of energy pool has been depleted.
+ * Includes methods to determine what pool damage is rolled over to if a specific type of energy
+ * pool has been depleted.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -13,11 +13,11 @@ public enum Energy {
     LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM;
 
     /**
-     * Returns the type of energy pool that damage to the passed in pool should
-     * be rolled over to when the passed in energy pool is depleted.
+     * Returns the type of energy pool that damage to the passed in pool should be rolled over to
+     * when the passed in energy pool is depleted.
      *
-     * If roll over damage should destroy the creature who's energy pool is
-     * being checked, then null is returned.
+     * If roll over damage should destroy the creature who's energy pool is being checked, then null
+     * is returned.
      */
     public Energy getRollover(Energy energy) {
         switch (energy) {

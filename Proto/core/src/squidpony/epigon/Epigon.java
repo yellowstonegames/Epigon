@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import squidpony.DataConverter;
 
-import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.generic.Stat;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
