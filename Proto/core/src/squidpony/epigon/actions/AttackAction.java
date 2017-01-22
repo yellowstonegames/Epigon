@@ -1,7 +1,7 @@
 package squidpony.epigon.actions;
 
 import java.util.TreeMap;
-import squidpony.epigon.data.generic.Element;
+import squidpony.epigon.universe.Element;
 
 /**
  * Represents an attempted attack.

@@ -3,8 +3,8 @@ package squidpony.epigon.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
-import squidpony.epigon.data.blueprints.Inclusion;
-import squidpony.epigon.data.blueprints.Stone;
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.specific.Terrain;
 
 import squidpony.squidmath.RNG;

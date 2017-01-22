@@ -1,7 +1,7 @@
 package squidpony.epigon.actions;
 
 import squidpony.epigon.data.specific.Condition;
-import squidpony.epigon.data.interfaces.Creature;
+import squidpony.epigon.data.mixin.Creature;
 
 /**
  * Attempts to add a condition to the target source.
@@ -20,7 +20,8 @@ public class ConditionAddAction implements Action {
     }
 
     public boolean wouldSucceed() {
-        return !target.hasCondition(condition.parent) && !target.immune(condition.parent);
+//        return !target.hasCondition(condition.parent) && !target.immune(condition.parent);
+        return true;
     }
 
     public boolean isValid() {
@@ -29,7 +30,7 @@ public class ConditionAddAction implements Action {
 
     public void apply() {
         if (wouldSucceed()) {
-            target.applyCondition(condition);
+//            target.applyCondition(condition);
             succeeded = true;
         }
     }

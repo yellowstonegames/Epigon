@@ -2,10 +2,8 @@ package squidpony.epigon.data.generic;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import squidpony.epigon.ActionParticipantType;
 import squidpony.epigon.actions.AttackAction;
@@ -18,9 +16,9 @@ import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.actions.RemoveFromAction;
 import squidpony.epigon.actions.StatChangeAction;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.ConditionBlueprint;
-import squidpony.epigon.data.blueprints.PhysicalBlueprint;
-import squidpony.epigon.data.interfaces.Creature;
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
+import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 

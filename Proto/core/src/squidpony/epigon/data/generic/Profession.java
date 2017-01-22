@@ -1,13 +1,15 @@
 package squidpony.epigon.data.generic;
 
+import squidpony.epigon.universe.Energy;
+import squidpony.epigon.universe.Stat;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.ConditionBlueprint;
-import squidpony.epigon.data.blueprints.PhysicalBlueprint;
-import squidpony.epigon.data.blueprints.RecipeBlueprint;
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
+import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 

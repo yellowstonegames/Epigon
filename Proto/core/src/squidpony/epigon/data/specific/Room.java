@@ -1,7 +1,7 @@
 package squidpony.epigon.data.specific;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.RoomBlueprint;
+import squidpony.epigon.data.blueprint.RoomBlueprint;
 import squidpony.squidmath.OrderedMap;
 
 /**

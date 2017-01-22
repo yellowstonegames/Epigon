@@ -123,7 +123,7 @@ public class EpiTile {
     public void add(Physical phys) {
         if (phys.creatureData != null) {
             creature = phys;
-        } else if (phys.large) {
+        } else if (phys.parent.large) {
             largeObject = phys;
         } else {
             smallObjects.add(phys);
