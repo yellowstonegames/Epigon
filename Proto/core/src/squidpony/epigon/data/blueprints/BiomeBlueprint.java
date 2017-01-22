@@ -1,10 +1,12 @@
 package squidpony.epigon.data.blueprints;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import squidpony.epigon.data.BiomeSize;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.specific.Name;
 
 /**
  * Base information for world level biomes. The lists of lists of biomes that can border a specific
@@ -24,9 +26,9 @@ public class BiomeBlueprint extends EpiData {
     public BiomeBlueprint parent;
     public BiomeSize minimumSize;
     public BiomeSize maximumSize;
-    public ArrayList<ArrayList<BiomeBlueprint>> borders = new ArrayList<>();
-    public ArrayList<DungeonBlueprint> possibleDungeons = new ArrayList<>();
-    public ArrayList<TerrainBlueprint> possibleTerrains = new ArrayList<>();
+    public List<Set<BiomeBlueprint>> borderRequirements = new LinkedList<>();
+    public Set<DungeonBlueprint> possibleDungeons = new HashSet<>();
+    public Set<TerrainBlueprint> possibleTerrains = new HashSet<>();
 
     // TEMP - sample biome to be replaced
     public static final BiomeBlueprint SWAMP;
@@ -35,7 +37,7 @@ public class BiomeBlueprint extends EpiData {
         SWAMP = new BiomeBlueprint();
         SWAMP.minimumSize = BiomeSize.MICRO;
         SWAMP.maximumSize = BiomeSize.MEDIUM;
-        SWAMP.name = new Name("swamp");
+        SWAMP.name = "swamp";
         SWAMP.description = "dark slow moving shallow water";
     }
 }

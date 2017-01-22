@@ -1,0 +1,78 @@
+﻿recipe:liquid puddle terrain recipe{
+	ingredient list{
+		liquid:50000;//about 50 gallons
+	}
+	skill:dungeon master:ultimate chance;
+	result list{
+		terrain:$ingredient_name puddle terrain{
+			name:puddle of $ingredient_name:puddles of $ingredient_name;
+			subclasses:liquid terrain;
+			color:$ingredient_color;
+			description{
+				A puddle of $ingredient_name lies stagnant.;
+			}
+		}
+	}
+}
+
+terrain:liquid terrain{
+	name:puddle of liquid:puddles of liquid;
+	//physical object part
+	representation:~;
+	color:aqua;
+	description{
+		A generic liquid.;
+	}
+	notes{
+		This is the generic base class for all liquid terrain.;
+	}
+	generic:true;
+	
+	//terrain part
+	movement cost:high;
+	transparency:1.0;//clear
+	base type:default liquid;
+	flat:true;//just a puddle
+}
+
+terrain:honey terrain{
+	parent:liquid terrain;
+	base type:honey;
+	color:golden yellow;
+	movement cost:amazing;
+	transparency:0.2;//pretty opaque
+	generic:false;
+}
+
+terrain:water terrain{
+	parent:liquid terrain;
+	base type:water;
+	movement cost:medium;
+	transparency:0.9;//pretty clear
+	generic:false;
+}
+
+terrain:oil terrain{
+	parent:liquid terrain;
+	base type:oil;
+	color:brown;
+	movement cost:good;
+	transparency:0.01;//very opaque
+	generic:false;
+}
+
+//-------Stone Terrains
+terrain:ground{
+	representation:.;
+	background color:black;
+	foreground color:grey;
+	description{
+		Normal ground.;
+	}
+	generic:true;
+	
+	movement cost:1.0;//normal cost
+	transparency:1.0;
+	base type:stone;
+	flat:true;
+}

@@ -3,6 +3,8 @@ package squidpony.epigon.data.generic;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import squidpony.epigon.ActionParticipantType;
@@ -19,6 +21,8 @@ import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprints.ConditionBlueprint;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
 import squidpony.epigon.data.interfaces.Creature;
+import squidpony.epigon.universe.Rating;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * An ability is an action choice a creature, item, or condition can make.
@@ -29,23 +33,23 @@ import squidpony.epigon.data.interfaces.Creature;
  */
 public class Ability extends EpiData {
 
-    public HashMap<String, Integer> contribution = new HashMap<>();
+    public Map<String, Integer> contribution;
     //AOE
     //range
     //vs creatures / items / open space
     //
     //preconditions that must be satisfied
-    public ArrayList<String> effectsString = new ArrayList<>();
-    public HashMap<String, String> mustHaveSkillRatingsString = new HashMap<>();
+    public List<String> effectsString = new ArrayList<>();
+    public OrderedMap<Skill, Rating> mustHaveSkillRatings;
     EnumMap<ActionParticipantType, Effect> effects = new EnumMap<>(ActionParticipantType.class);
     //
     //preconditions that must be satisfied
-    public EnumMap<ActionParticipantType, ArrayList<TreeMap<PhysicalBlueprint, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, ArrayList<PhysicalBlueprint>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, ArrayList<TreeMap<PhysicalBlueprint, Integer>>> consumes = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, ArrayList<TreeMap<PhysicalBlueprint, Integer>>> consumesEquipped = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, ArrayList<ConditionBlueprint>> mustHaveCondition = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, ArrayList<ConditionBlueprint>> mustNotHaveCondition = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<PhysicalBlueprint>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> consumes = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> consumesEquipped = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustHaveCondition = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustNotHaveCondition = new EnumMap<>(ActionParticipantType.class);
 
     /**
      * Determines that all needed prerequisites are taken care of.

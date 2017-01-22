@@ -8,27 +8,31 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
+import squidpony.DataConverter;
 
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.blueprints.PhysicalBlueprint;
+import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
 import squidpony.epigon.data.interfaces.Creature;
-import squidpony.epigon.data.specific.Name;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.World;
+import squidpony.epigon.universe.Rating;
 
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.RNG;
 import squidpony.squidmath.StatefulRNG;
 
@@ -114,21 +118,44 @@ public class Epigon extends Game {
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
         Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
 
-        Json json = new Json();
-        json.setIgnoreUnknownFields(true);
-        json.setUsePrototypes(false);
-        System.out.println(json.prettyPrint(player));
+//        Json json = new Json();
+//        json.setIgnoreUnknownFields(true);
+//        json.setUsePrototypes(false);
+//        System.out.println(json.prettyPrint(player));
+        DataConverter convert = new DataConverter(JsonWriter.OutputType.json);
+        convert.setIgnoreUnknownFields(true);
+        convert.setUsePrototypes(false);
+//        System.out.println(convert.toJson(player));
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
         sword.symbol = '/';
-        sword.internalName = "Test Sword";
-        sword.name = new Name("Sword");
+        sword.name = "Sword";
 //        System.out.println(json.prettyPrint(sword));
 
-//        String playerFile = Gdx.files.internal("config/player.json").readString();
-//        PhysicalBlueprint playerJson = json.fromJson(PhysicalBlueprint.class, playerFile);
+        PhysicalBlueprint pj = new PhysicalBlueprint();
+        pj.name = "Player";
+        pj.description = "The main player's character.";
+        pj.notes = "Voted most likely to die.";
+        pj.symbol = '@';
+        pj.color = SColor.FOX;
+        pj.possibleAliases = Arrays.asList("Mario", "Link", "Sam");
+        CreatureBlueprint cb = new CreatureBlueprint();
+        pj.creatureData = cb;
+        cb.opacity = 1.0;
+        cb.skills = new OrderedMap<>();
+        Skill skill = new Skill();
+        skill.name = "kendo";
+        cb.skills.put(skill, Rating.HIGH);
+        skill = new Skill();
+        skill.name = "akido";
+        cb.skills.put(skill, Rating.SLIGHT);
+//        System.out.println(convert.toJson(pj));
 
+//        String playerFile = Gdx.files.internal("config/player.json").readString();
+//        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
+        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
+        System.out.println(convert.toJson(pj));
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);

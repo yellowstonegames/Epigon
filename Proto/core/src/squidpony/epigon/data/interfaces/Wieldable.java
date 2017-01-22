@@ -11,6 +11,5 @@ import squidpony.epigon.data.interfaceBlueprints.WieldableBlueprint;
 public class Wieldable {
 
     public WieldableBlueprint parent;
-    public int hitChance, damage, distance;
     public boolean wielded;
 }

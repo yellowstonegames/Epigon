@@ -1,6 +1,8 @@
 {
   "internalName": "player",
-  "name": { "name": "player" },
+  "name": {
+    "name": "player"
+  },
   "description": "Your handsome (for some values of handsome) self.",
   "notes": "The player character.",
   "symbol": "@",
@@ -15,32 +17,37 @@
     "body": {
       "primaryPart": {
         "internalName": "brain_human",
-        "name": { "name": "brain" },
+        "name": {
+          "name": "brain"
+        },
         "description": "Precious precious brains. Must not be exposed to air.",
         "notes": "This is the critical part for many beings.",
         "critical": true,
         "conditionMultiplier": 0.1
       },
-      "otherParts": [
-        {
+      "otherParts": [ {
           "internalName": "head_human",
-          "name": { "name": "head" },
+          "name": {
+            "name": "head"
+          },
           "description": "Holds many important bits, such as the brain and sensory organs.",
-          "contains": [
-            { "internalName": "brain_human" }
-          ],
+          "contains": [ {
+              "internalName": "brain_human"
+            } ],
           "conditionMultiplier": 1.1,
           "clothingSlots": 2,
           "jewelrySlots": 4
         },
         {
           "internalName": "rest_of_body_human",
-          "name": { "name": "body" },
+          "name": {
+            "name": "body"
+          },
           "descritpion": "The human body, except for the head.",
           "notes": "This is a placeholder until the rest of the parts are made.",
-          "attachedTo": [
-            { "internalName": "head_human" }
-          ],
+          "attachedTo": [ {
+              "internalName": "head_human"
+            } ],
           "clothingSlots": 12,
           "jewelrySlots": 12,
           "equipmentSlots": 2
@@ -49,7 +56,15 @@
     },
     "opacity": 1.0,
     "skills": [
-      { "skill": { "internalName": "kendo", "name": { "name": "kendo" } }, "rating": "typical" }
+      {
+        "skill": {
+          "internalName": "kendo",
+          "name": {
+            "name": "kendo"
+          }
+        },
+        "rating": "typical"
+      }
     ],
     "maxStats": {
       "aim": 100,

@@ -1,0 +1,83 @@
+﻿//mundane elements
+element:mundane{}
+element:pierce{
+	parent:mundane;
+}
+element:lacerate{
+	parent:mundane;
+}
+element:blunt{
+	parent:mundane;
+}
+
+//magical elements
+element:magic{}//natural elements should not subclass magic!
+element:geomancy{
+	parent:magic;
+}
+element:chromamancy{//color magic :)
+	parent:magic;
+}
+
+//natural elements
+element:nature{}
+element:stone{
+	parent nature;
+}
+element:fire{
+	parent:nature;
+}
+element:air{
+	parent:nature;
+}
+element:sonic{
+	parent:nature;
+}
+element:acid{
+	parent:nature;
+}
+element:alkalai{
+	parent:nature;
+}
+element:ice{
+	parent:nature;
+}
+element:water{
+	parent:nature;
+}
+
+//space elements
+element:astronomical{}
+element:solar{
+	parent:astronomical;
+}
+element:lunar{
+	parent:astronomical;
+}
+element:stellar{
+	parent:astronomical;
+}
+
+//miscelanous elements
+element:death{}
+element:life{}
+element:language{}
+element:color{}
+//natural elements
+element:crystal{
+	parent stone;
+}
+element:magma{
+	parent fire;
+}
+
+//astronomical
+element:cometary{
+	parent:astronomical;
+}
+element:planetary{
+	parent:astronomical;
+}
+element:meteoric{
+	parent:cometary{
+}

@@ -1,7 +1,6 @@
 package squidpony.epigon.data.blueprints;
 
 import java.util.List;
-import java.util.Map;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.Element;
@@ -16,10 +15,10 @@ import squidpony.epigon.data.interfaceBlueprints.ReadableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.WearableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.WieldableBlueprint;
 import squidpony.epigon.data.interfaceBlueprints.ZappableBlueprint;
-import squidpony.epigon.data.specific.Name;
 import squidpony.epigon.universe.Rating;
 
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
 
 /**
@@ -29,12 +28,12 @@ import squidpony.squidmath.ProbabilityTable;
  */
 public class PhysicalBlueprint extends EpiData {
 
-    public char symbol;
+    public char symbol = ' '; // defautl to an empty character sine NUL is not fun in data
     public SColor color;
-    public List<Name> possibleAliases;
+    public List<String> possibleAliases;
     public List<ModificationBlueprint> possibleModifications;
     public List<ModificationBlueprint> modifications;
-    public Map<String, Float> passthroughResistances;
+    public OrderedMap<Element, Float> passthroughResistances;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
 
@@ -46,13 +45,13 @@ public class PhysicalBlueprint extends EpiData {
     /**
      * A list of what the item might become when a given element is used on it.
      */
-    public Map<Element, List<ProbabilityTable<PhysicalBlueprint>>> becomes;
+    public OrderedMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> becomes;
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
      * The description will be used if no matching skill is available.
      */
-    public Map<Skill, Map<Rating, String>> identification;
+    public OrderedMap<Skill, OrderedMap<Rating, String>> identification;
 
     /**
      * When marked generic the item won't be created in the world.

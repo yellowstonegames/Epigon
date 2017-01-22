@@ -24,6 +24,7 @@ public class RecipeBlueprint extends EpiData {
     public ProbabilityTable<PhysicalBlueprint> result;
 
     public boolean uses(PhysicalBlueprint ingredient) {
+        // TODO - rework to include things that are children
         return requiredConsumed.contains(ingredient)
             || requiredCatalyst.contains(ingredient)
             || optionalConsumed.contains(ingredient)

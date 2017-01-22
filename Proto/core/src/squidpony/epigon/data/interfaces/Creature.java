@@ -1,9 +1,9 @@
 package squidpony.epigon.data.interfaces;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.EnumMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 import squidpony.epigon.data.Stat;
@@ -15,6 +15,7 @@ import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * A specific creature in the world.
@@ -24,9 +25,8 @@ import squidpony.epigon.universe.Rating;
 public class Creature {
 
     public CreatureBlueprint parent;
-    public String knownName, trueName;
-    public TreeMap<Skill, Rating> skills = new TreeMap<>();
-    public ArrayList<Ability> abilities = new ArrayList<>();
+    public OrderedMap<Skill, Rating> skills;
+    public Set<Ability> abilities;
     public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Integer> currentStats = new EnumMap<>(Stat.class);
     public Ability defaultAttack;

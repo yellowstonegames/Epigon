@@ -1,20 +1,39 @@
 package squidpony.epigon.data;
 
-import squidpony.epigon.data.specific.Name;
+import java.util.Objects;
 
 /**
  * Data class for information shared by all data objects.
- *
- * Objects of this type that contain only an internalName are meant to be placeholders for later
- * run-time attachment to the full definitions. This allows for JSON-compatible string lookup for
- * connecting data and run-time direct connections for efficiency without requiring a serialized
- * data only class.
  */
 public abstract class EpiData {
 
-    public String internalName;
-    public Name name;
+    public String name;
     public String description;
     public String notes;
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final EpiData other = (EpiData) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return true;
+    }
 
 }
