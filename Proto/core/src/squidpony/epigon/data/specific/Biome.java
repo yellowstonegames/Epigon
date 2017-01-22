@@ -2,7 +2,7 @@ package squidpony.epigon.data.specific;
 
 import squidpony.epigon.data.BiomeSize;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.BiomeBlueprint;
+import squidpony.epigon.data.blueprint.BiomeBlueprint;
 
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.OrderedMap;

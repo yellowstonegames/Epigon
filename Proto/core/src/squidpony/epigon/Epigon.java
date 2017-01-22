@@ -15,13 +15,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import squidpony.DataConverter;
 
-import squidpony.epigon.data.generic.Stat;
-import squidpony.epigon.data.blueprints.PhysicalBlueprint;
+import squidpony.epigon.universe.Stat;
+import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.interfaceBlueprints.CreatureBlueprint;
-import squidpony.epigon.data.interfaces.Creature;
+import squidpony.epigon.data.imixinBlueprint.CreatureBlueprint;
+import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
@@ -115,8 +117,8 @@ public class Epigon extends Game {
         player.creatureData = new Creature();
         player.creatureData.abilities = new HashSet<>();
         player.name = "Great Hero";
-        Arrays.stream(Stat.values()).forEach(s -> player.creatureData.baseStats.put(s, rng.between(20, 100)));
-        Arrays.stream(Stat.values()).forEach(s -> player.creatureData.currentStats.put(s, player.creatureData.baseStats.get(s) + rng.between(-10, 30)));
+        Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
+        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
 
 //        Json json = new Json();
 //        json.setIgnoreUnknownFields(true);
@@ -139,10 +141,10 @@ public class Epigon extends Game {
         pj.notes = "Voted most likely to die.";
         pj.symbol = '@';
         pj.color = SColor.FOX;
-        pj.possibleAliases = Arrays.asList("Mario", "Link", "Sam");
+        pj.possibleAliases = Stream.of("Mario", "Link", "Sam").collect(Collectors.toList());
+        pj.baseStats.put(Stat.OPACITY, 100);
         CreatureBlueprint cb = new CreatureBlueprint();
         pj.creatureData = cb;
-        cb.opacity = 1.0;
         cb.skills = new OrderedMap<>();
         Skill skill = new Skill();
         skill.name = "kendo";
@@ -154,7 +156,7 @@ public class Epigon extends Game {
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
-        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
+//        pj = convert.fromJson(PhysicalBlueprint.class, convert.toJson(pj));
         System.out.println(convert.toJson(pj));
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
@@ -219,8 +221,8 @@ public class Epigon extends Game {
         int y = 3;
         int x = MAP_WIDTH + 1;
         int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
-        for (Entry<Stat, Integer> e : player.creatureData.baseStats.entrySet()) {
-            int diff = player.creatureData.currentStats.get(e.getKey()) - e.getValue();
+        for (Entry<Stat, Integer> e : player.baseStats.entrySet()) {
+            int diff = player.currentStats.get(e.getKey()) - e.getValue();
             String diffString = "";
             if (diff < 0) {
                 diffString = " " + diff;

@@ -2,7 +2,7 @@ package squidpony.epigon.data.specific;
 
 import java.util.List;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprints.ConditionBlueprint;
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
 
 /**
  * Represents a specific Condition attached to a single physical object.

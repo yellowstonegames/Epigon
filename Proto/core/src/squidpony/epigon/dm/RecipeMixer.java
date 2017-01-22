@@ -3,8 +3,8 @@ package squidpony.epigon.dm;
 import java.util.List;
 import java.util.stream.Stream;
 
-import squidpony.epigon.data.blueprints.PhysicalBlueprint;
-import squidpony.epigon.data.blueprints.RecipeBlueprint;
+import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
