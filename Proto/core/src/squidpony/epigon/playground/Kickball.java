@@ -1,13 +1,8 @@
 package squidpony.epigon.playground;
 
 import com.badlogic.gdx.utils.JsonWriter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 import squidpony.DataConverter;
 import squidpony.Maker;
-import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Skill;
@@ -18,6 +13,13 @@ import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * A class for doing various tests and utility work.
