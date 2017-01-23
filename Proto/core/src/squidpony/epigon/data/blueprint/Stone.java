@@ -28,29 +28,10 @@ public enum Stone {
     CHARNOCKITE(SColor.LIGHT_GRAY, SColor.GRAY, true, false, true, true),
     CHERT(SColor.LIGHT_GRAY, SColor.DARK_GRAY, false, true, false, false, 1000, 1000),
     CLAYSTONE(SColor.BROWN, SColor.BROWNER, false, true, false, false),
-    COAL(SColor.BLACK, SColor.DARK_GRAY, false, true, false, false, 300, 1000);
-    /* TODO -- finish adding these    
-     * case CONGLOMERATE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BROWNER;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case COQUINA:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.TAN;
-     backColor = SColor.KHAKI;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 300;
-     hardness = 1000;
+    COAL(SColor.BLACK, SColor.DARK_GRAY, false, true, false, false, 300, 1000),
+    CONGLOMERATE(SColor.BROWNER, SColor.GRAY, false,true, false, false, 100, 1000),
+    COQUINA(SColor.TAN, SColor.KHAKI, false,true, false, false, 300, 1000);
+    /*
      break;
      case DACITE:
      myName = type.toString().toLowerCase().replace('_', ' ');
