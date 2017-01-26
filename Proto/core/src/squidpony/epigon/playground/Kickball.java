@@ -101,7 +101,7 @@ public class Kickball {
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
         String json = convert.prettyPrint(pj);
-        System.out.println(json);
+//        System.out.println(json);
         pj = convert.fromJson(PhysicalBlueprint.class, json);
         System.out.println(convert.prettyPrint(pj));
     }
