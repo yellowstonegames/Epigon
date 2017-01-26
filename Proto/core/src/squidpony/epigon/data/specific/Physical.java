@@ -14,6 +14,7 @@ import squidpony.epigon.universe.Stat;
 import squidpony.epigon.data.mixin.Ammunition;
 import squidpony.epigon.data.mixin.Container;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Liquid;
 import squidpony.epigon.data.mixin.Readable;
@@ -46,6 +47,7 @@ public class Physical extends EpiData {
     public Ammunition ammunitionData;
     public Container containerData;
     public Creature creatureData;
+    public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
     public Readable readableData;
