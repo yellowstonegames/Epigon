@@ -1,8 +1,6 @@
 package squidpony.epigon.mapping;
 
-import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
-
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 
