@@ -4,31 +4,33 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map.Entry;
-
-import squidpony.epigon.universe.Stat;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.World;
-
+import squidpony.epigon.universe.Stat;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.mapping.DungeonGenerator;
+import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.Coord;
-import squidpony.squidmath.RNG;
+import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -37,28 +39,28 @@ import squidpony.squidmath.StatefulRNG;
 public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final int MAP_WIDTH = 80;
-    public static final int MAP_HEIGHT = 60;
+    public static final int MAP_WIDTH = 100, BIG_MAP_WIDTH  = MAP_WIDTH  * 3;
+    public static final int MAP_HEIGHT = 30, BIG_MAP_HEIGHT = MAP_HEIGHT * 3;
 
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
 
     public static final int MESSAGE_HEIGHT = 7;
 
-    public static final int TOTAL_WIDTH = MAP_WIDTH + INFO_WIDTH;
-    public static final int TOTAL_HEIGHT = MAP_HEIGHT + MESSAGE_HEIGHT;
+    public static final int TOTAL_WIDTH = MAP_WIDTH;// + INFO_WIDTH;
+    public static final int TOTAL_HEIGHT = MAP_HEIGHT;// + MESSAGE_HEIGHT;
 
     public static final int MESSAGE_WIDTH = TOTAL_WIDTH;
 
     // Cell sizing
-    public static final int CELL_WIDTH = 12;
-    public static final int CELL_HEIGHT = 12;
+    public static final int CELL_WIDTH = 11;
+    public static final int CELL_HEIGHT = 21;
 
     // Pixels
     public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final RNG rng = new StatefulRNG();
+    public static final StatefulRNG rng = new StatefulRNG();
 
     // 
     SpriteBatch batch;
@@ -73,7 +75,13 @@ public class Epigon extends Game {
     private Physical player;
     private ArrayList<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
-    private float secondsWithoutMoves;
+    private int framesWithoutAnimation;
+
+    // WIP stuff, needs large sample map
+    private Viewport viewport;
+    private Camera camera;
+    private AnimatedEntity playerEntity;
+
 
     @Override
     public void create() {
@@ -86,18 +94,28 @@ public class Epigon extends Game {
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
 
+        viewport = new StretchViewport(TOTAL_PIXEL_WIDTH, TOTAL_PIXEL_HEIGHT);
+        camera = viewport.getCamera();
         //Here we make sure our Stage, which holds any text-based grids we make, uses our Batch.
-        stage = new Stage(new StretchViewport(TOTAL_PIXEL_WIDTH, TOTAL_PIXEL_HEIGHT), batch);
+        stage = new Stage(viewport, batch);
 
-        display = new SquidLayers(TOTAL_WIDTH, TOTAL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSquareFont());
+        //map = World.getDefaultMap();
 
-        map = World.getDefaultMap();
+        Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
+        DungeonGenerator sdg = new DungeonGenerator(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, rng);
+        sdg.addGrass(15);
+        sdg.addWater(15);
+        sdg.addDoors(20, true);
+        simpleChars = DungeonUtility.closeDoors(sdg.generate());
+        map = new EpiMap(simpleChars);
+        display = new SquidLayers(MAP_WIDTH, MAP_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSlabFont(),
+                DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
 
-        display.getTextFactory().fit(Arrays.deepToString(map.simpleChars()));
-        display.setTextSize(CELL_WIDTH, CELL_HEIGHT);
+        //display.getTextFactory().fit(Arrays.deepToString(simpleMap)); // not currently needed
+        //display.setTextSize(CELL_WIDTH, CELL_HEIGHT); // probably not needed
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        display.setAnimationDuration(0.03f);
+        display.setAnimationDuration(0.1f);
 
         display.setPosition(0, 0);
 
@@ -121,8 +139,13 @@ public class Epigon extends Game {
         awaitedMoves = new ArrayList<>(100);
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
-        simpleChars = map.simpleChars();
-        player.location = Coord.get(20, 20);
+        GreasedRegion floors = new GreasedRegion(simpleChars, '.');
+        player.location = floors.singleRandom(rng);
+        playerEntity = display.animateActor(player.location.x, player.location.y, '@', 6);
+        // this is new, related to camera movement
+        display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
+        display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
+
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
 
         bgColor = SColor.DARK_SLATE_GRAY;
@@ -145,8 +168,35 @@ public class Epigon extends Game {
     private void move(Direction dir) {
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
-            player.location = player.location.translate(dir.deltaX, dir.deltaY);
+        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
+            final float midX = player.location.x + dir.deltaX * 0.5f,
+                        midY = player.location.y + dir.deltaY * 0.5f;
+            final Vector3 pos = camera.position.cpy(), original = camera.position.cpy(),
+                    nextPos = camera.position.cpy().add(
+                            midX > BIG_MAP_WIDTH - (MAP_WIDTH + 1) * 0.5f || midX < (MAP_WIDTH + 1) * 0.5f ? 0 : (dir.deltaX * CELL_WIDTH),
+                            midY > BIG_MAP_HEIGHT - (MAP_HEIGHT + 1) * 0.5f || midY < (MAP_HEIGHT + 1) * 0.5f ? 0 : (-dir.deltaY * CELL_HEIGHT),
+                            0);
+            display.slide(playerEntity, newX, newY);
+            display.addAction(
+                    new TemporalAction(display.getAnimationDuration()) {
+                        @Override
+                        protected void update(float percent) {
+                            pos.lerp(nextPos, percent);
+                            camera.position.set(pos);
+                            pos.set(original);
+                            camera.update();
+                        }
+                        @Override
+                        protected void end() {
+                            super.end();
+                            player.location = Coord.get(newX, newY);
+                            display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
+                            display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
+                            camera.position.set(original);
+                            camera.update();
+
+                        }
+                    });
         }
     }
 
@@ -155,8 +205,9 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            for (int y = 0; y < MAP_HEIGHT; y++) {
+        int offsetX = display.getGridOffsetX(), offsetY = display.getGridOffsetY();
+        for (int i = -1, x = Math.max(0, offsetX-1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
+            for (int j = -1, y = Math.max(0, offsetY-1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
                     display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
@@ -166,11 +217,13 @@ public class Epigon extends Game {
             }
         }
 
-        SColor front = SColor.TRANSPARENT;
-        SColor back = SColor.OLD_LACE;
+        SColor front;
+        SColor back;
+        /*
+        back = SColor.OLD_LACE;
         for (int x = MAP_WIDTH; x < TOTAL_WIDTH; x++) {
             for (int y = 0; y < TOTAL_HEIGHT; y++) {
-                display.put(x, y, ' ', front, back);
+                display.getBackgroundLayer().put(x, y, back);
             }
         }
 
@@ -191,6 +244,7 @@ public class Epigon extends Game {
             display.putString(x + spacing, y, e.getValue() + diffString, front, back);
             y++;
         }
+        */
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
@@ -198,7 +252,7 @@ public class Epigon extends Game {
         }
 
         //places the player as an '@' at his position in orange (6 is an index into SColor.LIMITED_PALETTE).
-        display.put(player.location.x, player.location.y, '@', 6);
+        //display.put(player.location.x, player.location.y, '@', 6);
 
         for (int i = 0; i < MESSAGE_HEIGHT; i++) {
             // Output messages
@@ -220,20 +274,25 @@ public class Epigon extends Game {
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
-            secondsWithoutMoves += Gdx.graphics.getDeltaTime();
-            if (secondsWithoutMoves >= 0.1) {
-                secondsWithoutMoves = 0;
-                Coord m = awaitedMoves.remove(0);
-                toCursor.remove(0);
-                move(Direction.toGoTo(player.location, m));
+            if (!display.hasActiveAnimations()) {
+                ++framesWithoutAnimation;
+                if (framesWithoutAnimation >= 3) {
+                    framesWithoutAnimation = 0;
+                    Coord m = awaitedMoves.remove(0);
+                    toCursor.remove(0);
+                    move(Direction.toGoTo(player.location, m));
+                }
             }
         } // if we are waiting for the player's input and get input, process it.
         else if (input.hasNext()) {
             input.next();
         }
-
-        //stage has its own batch and must be explicitly told to draw(). this also causes it to act().
+        stage.act();
+        viewport.apply(false);
         stage.draw();
+        batch.begin();
+        display.drawActor(batch, 1.0f, playerEntity);
+        batch.end();
     }
 
     @Override
@@ -241,6 +300,9 @@ public class Epigon extends Game {
         super.resize(width, height);
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
         input.getMouse().reinitialize((float) width / TOTAL_WIDTH, (float) height / TOTAL_HEIGHT, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
+        viewport.update(width, height, false);
+        viewport.setScreenBounds(0, 0, width, height);
+
     }
 
     @Override
@@ -297,10 +359,15 @@ public class Epigon extends Game {
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (awaitedMoves.isEmpty()) {
+            screenX += display.getGridOffsetX();
+            screenY += display.getGridOffsetY();
+
+            if (screenX >= 0 && screenX < BIG_MAP_WIDTH && screenY >= 0 && screenY < BIG_MAP_HEIGHT) {
+                if (awaitedMoves.isEmpty()) {
                 if (toCursor.isEmpty()) {
-                    cursor = Coord.get(screenX, screenY);
-                    toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
+                        cursor = Coord.get(screenX, screenY);
+                        toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
+                    }
                 }
                 awaitedMoves = new ArrayList<>(toCursor);
             }
@@ -319,11 +386,13 @@ public class Epigon extends Game {
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
+            screenX += display.getGridOffsetX();
+            screenY += display.getGridOffsetY();
             if (cursor.x == screenX && cursor.y == screenY) {
                 return false;
             }
-            cursor = Coord.get(screenX, screenY);
-            if (cursor.x >= 0 && cursor.x < MAP_WIDTH && cursor.y >= 0 && cursor.y < MAP_HEIGHT) {
+            if (screenX >= 0 && screenX < BIG_MAP_WIDTH && screenY >= 0 && screenY < BIG_MAP_HEIGHT) {
+                cursor = Coord.get(screenX, screenY);
                 toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
             }
             return false;

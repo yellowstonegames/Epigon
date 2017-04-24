@@ -1,15 +1,15 @@
 package squidpony.epigon.dm;
 
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 import squidpony.epigon.Epigon;
-
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.RNG;
+import squidpony.squidmath.StatefulRNG;
+
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -22,7 +22,7 @@ import squidpony.squidmath.RNG;
  */
 public class RecipeMixer {
 
-    private RNG rng = Epigon.rng;
+    private StatefulRNG rng = Epigon.rng;
 
     public List<RecipeBlueprint> recipes;
 
