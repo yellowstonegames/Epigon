@@ -39,8 +39,10 @@ import java.util.HashSet;
 public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final int MAP_WIDTH = 100, BIG_MAP_WIDTH  = MAP_WIDTH  * 3;
-    public static final int MAP_HEIGHT = 30, BIG_MAP_HEIGHT = MAP_HEIGHT * 3;
+    public static final int MAP_WIDTH = 100;
+    public static final int BIG_MAP_WIDTH = MAP_WIDTH * 3;
+    public static final int MAP_HEIGHT = 30;
+    public static final int BIG_MAP_HEIGHT = MAP_HEIGHT * 3;
 
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
@@ -49,6 +51,9 @@ public class Epigon extends Game {
 
     public static final int TOTAL_WIDTH = MAP_WIDTH;// + INFO_WIDTH;
     public static final int TOTAL_HEIGHT = MAP_HEIGHT;// + MESSAGE_HEIGHT;
+
+    private static final float HALF_MAP_HEIGHT = (MAP_HEIGHT + 1) * 0.5f;
+    private static final float HALF_MAP_WIDTH = (MAP_WIDTH + 1) * 0.5f;
 
     public static final int MESSAGE_WIDTH = TOTAL_WIDTH;
 
@@ -82,7 +87,6 @@ public class Epigon extends Game {
     private Camera camera;
     private AnimatedEntity playerEntity;
 
-
     @Override
     public void create() {
         System.out.println("Creating new game.");
@@ -100,7 +104,6 @@ public class Epigon extends Game {
         stage = new Stage(viewport, batch);
 
         //map = World.getDefaultMap();
-
         Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
         DungeonGenerator sdg = new DungeonGenerator(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, rng);
         sdg.addGrass(15);
@@ -109,11 +112,10 @@ public class Epigon extends Game {
         simpleChars = DungeonUtility.closeDoors(sdg.generate());
         map = new EpiMap(simpleChars);
         display = new SquidLayers(MAP_WIDTH, MAP_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSlabFont(),
-                DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
+            DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
 
         //display.getTextFactory().fit(Arrays.deepToString(simpleMap)); // not currently needed
         //display.setTextSize(CELL_WIDTH, CELL_HEIGHT); // probably not needed
-
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.1f);
 
@@ -141,7 +143,8 @@ public class Epigon extends Game {
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
         GreasedRegion floors = new GreasedRegion(simpleChars, '.');
         player.location = floors.singleRandom(rng);
-        playerEntity = display.animateActor(player.location.x, player.location.y, '@', 6);
+        playerEntity = display.animateActor(player.location.x, player.location.y, '@', SColor.ALICE_BLUE);
+
         // this is new, related to camera movement
         display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
@@ -169,34 +172,37 @@ public class Epigon extends Game {
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
         if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
-            final float midX = player.location.x + dir.deltaX * 0.5f,
-                        midY = player.location.y + dir.deltaY * 0.5f;
-            final Vector3 pos = camera.position.cpy(), original = camera.position.cpy(),
-                    nextPos = camera.position.cpy().add(
-                            midX > BIG_MAP_WIDTH - (MAP_WIDTH + 1) * 0.5f || midX < (MAP_WIDTH + 1) * 0.5f ? 0 : (dir.deltaX * CELL_WIDTH),
-                            midY > BIG_MAP_HEIGHT - (MAP_HEIGHT + 1) * 0.5f || midY < (MAP_HEIGHT + 1) * 0.5f ? 0 : (-dir.deltaY * CELL_HEIGHT),
-                            0);
-            display.slide(playerEntity, newX, newY);
-            display.addAction(
-                    new TemporalAction(display.getAnimationDuration()) {
-                        @Override
-                        protected void update(float percent) {
-                            pos.lerp(nextPos, percent);
-                            camera.position.set(pos);
-                            pos.set(original);
-                            camera.update();
-                        }
-                        @Override
-                        protected void end() {
-                            super.end();
-                            player.location = Coord.get(newX, newY);
-                            display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
-                            display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
-                            camera.position.set(original);
-                            camera.update();
+            final float midX = player.location.x + dir.deltaX * 0.5f;
+            final float midY = player.location.y + dir.deltaY * 0.5f;
+            final Vector3 pos = camera.position.cpy();
+            final Vector3 original = camera.position.cpy();
+            float cameraDeltaX = midX > BIG_MAP_WIDTH - HALF_MAP_WIDTH || midX < HALF_MAP_WIDTH ? 0 : (dir.deltaX * CELL_WIDTH);
+            float cameraDeltaY = midY > BIG_MAP_HEIGHT - HALF_MAP_HEIGHT || midY < HALF_MAP_HEIGHT ? 0 : (dir.opposite().deltaY * CELL_HEIGHT);
+            final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
-                        }
-                    });
+            display.slide(playerEntity, newX, newY);
+
+            display.addAction(
+                new TemporalAction(display.getAnimationDuration()) {
+                @Override
+                protected void update(float percent) {
+//                    pos.lerp(nextPos, percent);
+//                    camera.position.set(pos);
+//                    pos.set(original);
+//                    camera.update();
+                }
+
+                @Override
+                protected void end() {
+                    super.end();
+                    player.location = Coord.get(newX, newY);
+                    display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
+                    display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
+                    camera.position.set(original);
+                    camera.update();
+
+                }
+            });
         }
     }
 
@@ -206,8 +212,8 @@ public class Epigon extends Game {
      */
     public void putMap() {
         int offsetX = display.getGridOffsetX(), offsetY = display.getGridOffsetY();
-        for (int i = -1, x = Math.max(0, offsetX-1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
-            for (int j = -1, y = Math.max(0, offsetY-1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
+        for (int i = -1, x = Math.max(0, offsetX - 1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
+            for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
                     display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
@@ -244,7 +250,7 @@ public class Epigon extends Game {
             display.putString(x + spacing, y, e.getValue() + diffString, front, back);
             y++;
         }
-        */
+         */
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
@@ -253,7 +259,6 @@ public class Epigon extends Game {
 
         //places the player as an '@' at his position in orange (6 is an index into SColor.LIMITED_PALETTE).
         //display.put(player.location.x, player.location.y, '@', 6);
-
         for (int i = 0; i < MESSAGE_HEIGHT; i++) {
             // Output messages
         }
@@ -364,7 +369,7 @@ public class Epigon extends Game {
 
             if (screenX >= 0 && screenX < BIG_MAP_WIDTH && screenY >= 0 && screenY < BIG_MAP_HEIGHT) {
                 if (awaitedMoves.isEmpty()) {
-                if (toCursor.isEmpty()) {
+                    if (toCursor.isEmpty()) {
                         cursor = Coord.get(screenX, screenY);
                         toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
                     }
