@@ -33,6 +33,10 @@ public class DataMaster {
         // TODO - check data for type and then attempt to link everything relevant
     }
 
+    public Set<EpiData> getKnown(){
+        return known;
+    }
+
     public Set<EpiData> children(EpiData parent) {
         Set<EpiData> found;
         Set<EpiData> returning = new HashSet<>();

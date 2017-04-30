@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.DataMaster;
 
 /**
  * A class for doing various tests and utility work.
@@ -103,6 +104,12 @@ public class Kickball {
         String json = convert.prettyPrint(pj);
 //        System.out.println(json);
         pj = convert.fromJson(PhysicalBlueprint.class, json);
-        System.out.println(convert.prettyPrint(pj));
+       // System.out.println(convert.prettyPrint(pj));
+
+        DataMaster dm = new DataMaster();
+        dm.add(player);
+        dm.add(sword);
+        dm.add(pj);
+        System.out.println(convert.prettyPrint(dm.getKnown()));
     }
 }
