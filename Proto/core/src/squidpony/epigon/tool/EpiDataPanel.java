@@ -9,13 +9,6 @@ public class EpiDataPanel extends javax.swing.JPanel {
 
     public EpiDataPanel() {
         initComponents();
-        update();
-    }
-
-    private void update(){
-        tabToggle.setText((tabToggle.isSelected() ? "-" : "+"));
-        tabPane.setVisible(tabToggle.isSelected());
-        setPreferredSize(getPreferredSize());
     }
 
     /**
@@ -25,11 +18,9 @@ public class EpiDataPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel1 = new javax.swing.JPanel();
         nameField = new javax.swing.JTextField();
-        tabToggle = new javax.swing.JToggleButton();
         textEntryPanel = new javax.swing.JPanel();
         tabPane = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
@@ -40,78 +31,58 @@ public class EpiDataPanel extends javax.swing.JPanel {
         notes = new javax.swing.JTextArea();
 
         setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel1.setAlignmentY(0.0F);
-        jPanel1.setNextFocusableComponent(tabToggle);
 
         nameField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         nameField.setText("Data Object Name");
         nameField.setOpaque(false);
 
-        tabToggle.setSelected(true);
-        tabToggle.setText("-");
-        tabToggle.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                tabToggleItemStateChanged(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(nameField)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tabToggle))
+            .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(tabToggle))
+            .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 2);
-        add(jPanel1, gridBagConstraints);
+        add(jPanel1, java.awt.BorderLayout.NORTH);
 
         description.setColumns(20);
-        description.setRows(5);
+        description.setRows(2);
         jScrollPane1.setViewportView(description);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
         );
 
         tabPane.addTab("Description", jPanel2);
 
         notes.setColumns(20);
-        notes.setRows(5);
+        notes.setRows(2);
         jScrollPane2.setViewportView(notes);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
         );
 
         tabPane.addTab("Notes", jPanel3);
@@ -120,26 +91,15 @@ public class EpiDataPanel extends javax.swing.JPanel {
         textEntryPanel.setLayout(textEntryPanelLayout);
         textEntryPanelLayout.setHorizontalGroup(
             textEntryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabPane)
+            .addComponent(tabPane, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
         );
         textEntryPanelLayout.setVerticalGroup(
             textEntryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(tabPane)
         );
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 217;
-        gridBagConstraints.ipady = 200;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 4, 2, 2);
-        add(textEntryPanel, gridBagConstraints);
+        add(textEntryPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void tabToggleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_tabToggleItemStateChanged
-      update();
-    }//GEN-LAST:event_tabToggleItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -152,7 +112,6 @@ public class EpiDataPanel extends javax.swing.JPanel {
     private javax.swing.JTextField nameField;
     private javax.swing.JTextArea notes;
     private javax.swing.JTabbedPane tabPane;
-    private javax.swing.JToggleButton tabToggle;
     private javax.swing.JPanel textEntryPanel;
     // End of variables declaration//GEN-END:variables
 }

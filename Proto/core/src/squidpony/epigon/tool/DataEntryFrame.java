@@ -26,45 +26,23 @@ public class DataEntryFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jMenuItem1 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         mainViewScrollPane = new javax.swing.JScrollPane();
-        mainViewPane = new javax.swing.JLayeredPane();
+        mainViewPane = new javax.swing.JPanel();
         componentSelectorScrollPane = new javax.swing.JScrollPane();
         componentSelectorPane = new javax.swing.JLayeredPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
-
-        jMenuItem1.setText("jMenuItem1");
+        jMenu2 = new javax.swing.JMenu();
+        jMenu3 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        javax.swing.GroupLayout mainViewPaneLayout = new javax.swing.GroupLayout(mainViewPane);
-        mainViewPane.setLayout(mainViewPaneLayout);
-        mainViewPaneLayout.setHorizontalGroup(
-            mainViewPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 877, Short.MAX_VALUE)
-        );
-        mainViewPaneLayout.setVerticalGroup(
-            mainViewPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 795, Short.MAX_VALUE)
-        );
-
         mainViewScrollPane.setViewportView(mainViewPane);
 
-        javax.swing.GroupLayout componentSelectorPaneLayout = new javax.swing.GroupLayout(componentSelectorPane);
-        componentSelectorPane.setLayout(componentSelectorPaneLayout);
-        componentSelectorPaneLayout.setHorizontalGroup(
-            componentSelectorPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 306, Short.MAX_VALUE)
-        );
-        componentSelectorPaneLayout.setVerticalGroup(
-            componentSelectorPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 795, Short.MAX_VALUE)
-        );
-
+        componentSelectorPane.setLayout(new javax.swing.BoxLayout(componentSelectorPane, javax.swing.BoxLayout.LINE_AXIS));
         componentSelectorScrollPane.setViewportView(componentSelectorPane);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -72,14 +50,14 @@ public class DataEntryFrame extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(mainViewScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 879, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(mainViewScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(componentSelectorScrollPane))
+                .addComponent(componentSelectorScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(mainViewScrollPane)
             .addComponent(componentSelectorScrollPane)
+            .addComponent(mainViewScrollPane)
         );
 
         jMenu1.setText("File");
@@ -91,6 +69,13 @@ public class DataEntryFrame extends javax.swing.JFrame {
         jMenu1.add(jMenuItem3);
 
         jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Objects");
+
+        jMenu3.setText("Create New Object");
+        jMenu2.add(jMenu3);
+
+        jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
 
@@ -147,12 +132,13 @@ public class DataEntryFrame extends javax.swing.JFrame {
     private javax.swing.JLayeredPane componentSelectorPane;
     private javax.swing.JScrollPane componentSelectorScrollPane;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JLayeredPane mainViewPane;
+    private javax.swing.JPanel mainViewPane;
     private javax.swing.JScrollPane mainViewScrollPane;
     // End of variables declaration//GEN-END:variables
 }
