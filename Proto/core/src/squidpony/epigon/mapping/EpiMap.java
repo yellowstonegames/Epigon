@@ -112,7 +112,7 @@ public class EpiMap {
                         break;
                     case 'ø':
                         c = ' ';
-                        color = SColor.BLACK;
+                        color = SColor.DB_INK;
                         break;
                     default://opaque items
                         color = SColor.DEEP_PINK;
