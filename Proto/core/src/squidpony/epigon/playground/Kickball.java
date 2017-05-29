@@ -89,7 +89,7 @@ public class Kickball {
         pj.symbol = '@';
         pj.color = SColor.FOX;
         pj.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
-        pj.baseStats.put(Stat.OPACITY, 100);
+        pj.stats.put(Stat.OPACITY, new LiveValue(100));
         Humanoid cb = new Humanoid();
         pj.creatureData = cb;
         cb.skills = new OrderedMap<>();

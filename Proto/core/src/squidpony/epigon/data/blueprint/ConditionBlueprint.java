@@ -1,15 +1,12 @@
 package squidpony.epigon.data.blueprint;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
-import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.universe.Stat;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.Element;
 
 /**
@@ -35,11 +32,7 @@ public class ConditionBlueprint extends EpiData {
     public int duration;//how many turns until it wears off
     public int period;//how often effects trigger -- 0 means it's constant
     public Element element;
-    public EnumMap<Stat, Integer> statChanges = new EnumMap<>(Stat.class);
-    public OrderedMap<Skill, Integer> skillChanges = new OrderedMap<>();
-    public OrderedMap<Element, Integer> elementResistanceChanges = new OrderedMap<>();
-    public OrderedMap<TerrainBlueprint, Integer> movementChanges = new OrderedMap<>();
-    public OrderedMap<String, Integer> lightEmitted = new OrderedMap<>();
+    public Modification modification;
     public List<Action> tickActions = new ArrayList<>();
     public List<Action> wearsOffActions = new ArrayList<>();//what happens when it wears off
     public List<Action> cancelledActions = new ArrayList<>();//what happens when it's cancelled

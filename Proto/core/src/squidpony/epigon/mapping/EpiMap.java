@@ -7,6 +7,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 
 import java.util.Queue;
+import squidpony.epigon.universe.Element;
 
 /**
  * This represents a single explorable map level.
@@ -137,7 +138,7 @@ public class EpiMap {
     public boolean actionValid(Action action) {
         if (action instanceof MovementAction) {
             MovementAction move = (MovementAction) action;
-            String key = move.key;
+            Element key = move.element;
             Queue<Coord> points = move.moveList;
             for (Coord p : points) {
                 if (!inBounds(p) || !contents[p.x][p.y].isPassable(key) || (move.mover.creatureData != null && contents[p.x][p.y].creature != null)) {
