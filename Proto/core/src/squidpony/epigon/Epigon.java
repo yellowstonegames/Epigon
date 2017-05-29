@@ -17,7 +17,6 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.universe.Stat;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
@@ -29,8 +28,8 @@ import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -65,7 +64,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final StatefulRNG rng = new StatefulRNG();
+    public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL);
 
     // 
     SpriteBatch batch;
@@ -78,7 +77,7 @@ public class Epigon extends Game {
     private DijkstraMap playerToCursor;
     private Coord cursor;
     private Physical player;
-    private ArrayList<Coord> toCursor;
+    private List<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
     private int framesWithoutAnimation;
 
@@ -115,9 +114,9 @@ public class Epigon extends Game {
             DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
 
         //display.getTextFactory().fit(Arrays.deepToString(simpleMap)); // not currently needed
-        //display.setTextSize(CELL_WIDTH, CELL_HEIGHT); // probably not needed
+        display.setTextSize(CELL_WIDTH+2, CELL_HEIGHT+2); // weirdly, this seems to help with flicker
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        display.setAnimationDuration(0.1f);
+        display.setAnimationDuration(0.13f);
 
         display.setPosition(0, 0);
 
@@ -150,6 +149,8 @@ public class Epigon extends Game {
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
 
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
+        playerToCursor.setGoal(player.location);
+        playerToCursor.scan(null);
 
         bgColor = SColor.DARK_SLATE_GRAY;
 
@@ -186,10 +187,10 @@ public class Epigon extends Game {
                 new TemporalAction(display.getAnimationDuration()) {
                 @Override
                 protected void update(float percent) {
-//                    pos.lerp(nextPos, percent);
-//                    camera.position.set(pos);
-//                    pos.set(original);
-//                    camera.update();
+                    pos.lerp(nextPos, percent);
+                    camera.position.set(pos); //Math.round(pos.x), Math.round(pos.y), pos.z
+                    pos.set(original);
+                    camera.update();
                 }
 
                 @Override
@@ -216,9 +217,9 @@ public class Epigon extends Game {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
-                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.BLACK);
+                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.DB_INK);
                 } else {
-                    display.put(x, y, '`', SColor.SLATE, SColor.BLACK);
+                    display.put(x, y, '`', SColor.SLATE, SColor.DB_INK);
                 }
             }
         }
@@ -280,12 +281,25 @@ public class Epigon extends Game {
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!display.hasActiveAnimations()) {
-                ++framesWithoutAnimation;
-                if (framesWithoutAnimation >= 3) {
+                if (++framesWithoutAnimation >= 2) {
                     framesWithoutAnimation = 0;
                     Coord m = awaitedMoves.remove(0);
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
+                    if(awaitedMoves.isEmpty())
+                    {
+                        // the next two lines remove any lingering data needed for earlier paths
+                        playerToCursor.clearGoals();
+                        playerToCursor.resetMap();
+                        // the next line marks the player as a "goal" cell, which seems counter-intuitive, but it works because all
+                        // cells will try to find the distance between themselves and the nearest goal, and once this is found, the
+                        // distances don't change as long as the goals don't change. Since the mouse will move and new paths will be
+                        // found, but the player doesn't move until a cell is clicked, the "goal" is the non-changing cell, so the
+                        // player's position, and the "target" of a pathfinding method like DijkstraMap.findPathPreScanned() is the
+                        // currently-moused-over cell, which we only need to set where the mouse is being handled.
+                        playerToCursor.setGoal(m);
+                        playerToCursor.scan(null);
+                    }
                 }
             }
         } // if we are waiting for the player's input and get input, process it.
@@ -359,7 +373,70 @@ public class Epigon extends Game {
     };
 
     private final SquidMouse mapMouse = new SquidMouse(CELL_WIDTH, CELL_HEIGHT, MAP_WIDTH, MAP_HEIGHT, 0, 0, new InputAdapter() {
+        // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
+        // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
+            if (awaitedMoves.isEmpty()) {
+                if (toCursor.isEmpty()) {
+                    cursor = Coord.get(sx, sy);
+                    //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+                    // player position to the position the user clicked on. The "PreScanned" part is an optimization
+                    // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
+                    // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
+                    // moves, we only need to do a fraction of the work to find the best path with that info.
+                    toCursor = playerToCursor.findPathPreScanned(cursor);
+                    //findPathPreScanned includes the current cell (goal) by default, which is helpful when
+                    // you're finding a path to a monster or loot, and want to bump into it, but here can be
+                    // confusing because you would "move into yourself" as your first move without this.
+                    // Getting a sublist avoids potential performance issues with removing from the start of an
+                    // ArrayList, since it keeps the original list around and only gets a "view" of it.
+                    if(!toCursor.isEmpty())
+                        toCursor = toCursor.subList(1, toCursor.size());
 
+                }
+                awaitedMoves.addAll(toCursor);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            return mouseMoved(screenX, screenY);
+        }
+
+        // causes the path to the mouse position to become highlighted (toCursor contains a list of points that
+        // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
+        @Override
+        public boolean mouseMoved(int screenX, int screenY) {
+            if(!awaitedMoves.isEmpty())
+                return false;
+            int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
+            if((sx < 0 || sx >= BIG_MAP_WIDTH || sy < 0 || sy >= BIG_MAP_HEIGHT)
+                    || (cursor.x == sx && cursor.y == sy))
+            {
+                return false;
+            }
+            cursor = Coord.get(sx, sy);
+                //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+                // player position to the position the user clicked on. The "PreScanned" part is an optimization
+                // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
+                // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
+                // moves, we only need to do a fraction of the work to find the best path with that info.
+                toCursor = playerToCursor.findPathPreScanned(cursor);
+                //findPathPreScanned includes the current cell (goal) by default, which is helpful when
+                // you're finding a path to a monster or loot, and want to bump into it, but here can be
+                // confusing because you would "move into yourself" as your first move without this.
+                // Getting a sublist avoids potential performance issues with removing from the start of an
+                // ArrayList, since it keeps the original list around and only gets a "view" of it.
+                if(!toCursor.isEmpty())
+                    toCursor = toCursor.subList(1, toCursor.size());
+
+            return false;
+        }
+
+        /*
         // if the user clicks and there are no awaitedMoves queued up, generate toCursor if it
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
@@ -401,6 +478,6 @@ public class Epigon extends Game {
                 toCursor = playerToCursor.findPath(100, null, null, player.location, cursor);
             }
             return false;
-        }
+        }*/
     });
 }

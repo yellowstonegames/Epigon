@@ -32,6 +32,7 @@ public class DesktopLauncher {
         config.width = Prefs.getScreenWidth();
         config.height = Prefs.getScreenHeight();
         config.title = Prefs.getGameTitle();
+        //config.vSyncEnabled = true; // maybe?
         
         config.addIcon("images/icons/logo128.png", Files.FileType.Internal);
         config.addIcon("images/icons/logo32.png", Files.FileType.Internal);
