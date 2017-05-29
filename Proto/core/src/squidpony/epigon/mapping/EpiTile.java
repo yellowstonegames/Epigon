@@ -2,10 +2,12 @@ package squidpony.epigon.mapping;
 
 import java.util.Stack;
 
+import squidpony.squidgrid.gui.gdx.SColor;
+
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.universe.Element;
 
-import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * This class holds the objects in a single grid square.
@@ -28,29 +30,29 @@ public class EpiTile {
      * @param key
      * @return
      */
-    public float geResistance(String key) {//TODO -- determine if resistance should be additive or just max baseValue
-        float resistance = 0f;
-        Float check;
+    public double geResistance(Element key) {//TODO -- determine if resistance should be additive or just max baseValue
+        double resistance = 0f;
+        Double check;
         if (floor != null) {
-            resistance = floor.resistances.get(key);
+            resistance = floor.passthroughResistances.get(key);
         }
         if (largeObject != null) {
-            check = largeObject.resistances.get(key);
+            check = largeObject.passthroughResistances.get(key);
             if (check != null) {
                 resistance = Math.max(resistance, check);
             }
         }
         if (creature != null) {
-            check = creature.resistances.get(key);
+            check = creature.passthroughResistances.get(key);
             if (check != null) {
-                resistance = Math.max(resistance, creature.resistances.get(key));
+                resistance = Math.max(resistance, creature.passthroughResistances.get(key));
             }
         }
         return resistance;
     }
 
-    public boolean isPassable(String key) {
-        return geResistance(key) < 1f;
+    public boolean isPassable(Element key) {
+        return key == null || geResistance(key) < 1;
     }
 
     /**

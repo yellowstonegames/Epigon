@@ -58,6 +58,58 @@ public enum Rating {
         }
     }
 
+    /**
+     * Returns the next lowest Rating or itself if it is the lowest already.
+     */
+    public Rating decrease(){
+        switch (this) {
+            case NONE:
+                return NONE;
+            case SLIGHT:
+                return NONE;
+            case TYPICAL:
+                return SLIGHT;
+            case GOOD:
+                return TYPICAL;
+            case HIGH:
+                return GOOD;
+            case SUPERB:
+                return HIGH;
+            case AMAZING:
+                return SUPERB;
+            case ULTIMATE:
+                return AMAZING;
+            default:
+                return NONE;
+        }
+    }
+
+    /**
+     * Returns the next highest Rating or itself if it is the highest already.
+     */
+    public Rating increase(){
+        switch (this) {
+            case NONE:
+                return SLIGHT;
+            case SLIGHT:
+                return TYPICAL;
+            case TYPICAL:
+                return GOOD;
+            case GOOD:
+                return HIGH;
+            case HIGH:
+                return SUPERB;
+            case SUPERB:
+                return AMAZING;
+            case AMAZING:
+                return ULTIMATE;
+            case ULTIMATE:
+                return ULTIMATE;
+            default:
+                return NONE;
+        }
+    }
+
     @Override
     public String toString() {
         return this.name().toLowerCase();

@@ -2,7 +2,6 @@ package squidpony.epigon.data.mixin;
 
 import java.util.Set;
 import squidpony.epigon.data.generic.Ability;
-import squidpony.epigon.data.generic.Profession;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
@@ -15,7 +14,6 @@ import squidpony.squidmath.OrderedMap;
 public class Creature {
 
     public Creature parent;
-    public Profession profession;
     public OrderedMap<Skill, Rating> skills;
     public Set<Ability> abilities;
 

@@ -3,15 +3,14 @@ package squidpony.epigon.data.specific;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.mixin.Ammunition;
 import squidpony.epigon.data.mixin.Container;
@@ -19,10 +18,12 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Liquid;
+import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Readable;
 import squidpony.epigon.data.mixin.Wearable;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 
@@ -35,8 +36,8 @@ public class Physical extends EpiData {
 
     public char symbol;
     public SColor color;
-    public List<Modification> modifications;
-    public Map<String, Float> resistances;
+    public OrderedMap<Element, Double> passthroughResistances;
+    public OrderedMap<Element, Double> elementalDamageMultiplyer;
     public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
     public List<String> appliedModifications = new ArrayList<>();
     public List<Condition> conditions = new ArrayList<>();
@@ -45,9 +46,11 @@ public class Physical extends EpiData {
     public PhysicalBlueprint parent;
     public Set<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
 
+    public Creature creatureData;
+    public Set<Profession> professions;
+
     public Ammunition ammunitionData;
     public Container containerData;
-    public Creature creatureData;
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;

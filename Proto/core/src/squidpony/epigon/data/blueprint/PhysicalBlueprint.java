@@ -3,6 +3,11 @@ package squidpony.epigon.data.blueprint;
 import squidpony.epigon.data.generic.Modification;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
+
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.ProbabilityTable;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.universe.Element;
@@ -14,14 +19,12 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Liquid;
+import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Wearable;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
-
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Base class for all classes that have physical properties in the world.
@@ -39,11 +42,12 @@ public class PhysicalBlueprint extends EpiData {
     public List<Modification> possibleModifications;
     public List<Modification> modifications;
     public List<Modification> whenUsedAsMaterial;
-    public OrderedMap<Element, Float> passthroughResistances;
+    public OrderedMap<Element, Double> passthroughResistances;
+    public OrderedMap<Element, Double> elementalDamageMultiplyer;
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
 
-    public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
     public List<PhysicalBlueprint> commonInventory;
 
     /**
@@ -72,14 +76,25 @@ public class PhysicalBlueprint extends EpiData {
      */
     public boolean unique;
 
-    public Rating rarity;
+    /**
+     * The changes to this object (if any) that happen as its rarity is increased. As rarity increases
+     * each lower level modification is also included, so a given level's result will be the compounded
+     * application of all rarity levels up to and including that level's modification.
+     */
+    public EnumMap<Rating, List<Modification>> rarityModifications = new EnumMap<>(Rating.class);
 
-    public int baseValue;
+    public double baseValue;
+
+    /**
+     * Only one large thing can be in a tile at once
+     */
     public boolean large;
+
+    public Creature creatureData;
+    public List<Set<Profession>> possibleProfessions;
 
     public Ammunition ammunitionData;
     public Container containerData;
-    public Creature creatureData;
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
