@@ -12,14 +12,17 @@ public enum Stat {
     PRECISION("Controls chance of critical damage with physical attacks"),
 
     // Physical Defense
-    AGILITY("Controls chance to completely avoid enemy physical attacks."),
+    AGILITY("Controls chance to completely avoid enemy physical attacks."), // TODO- change to DODGE ?
     DEFLECTION("Controls chance to reduce the base damage dealt by enemy physical attacks."),
     TOUGHNESS("Controls chance to reduce the critical damage dealt by enemy physical attacks."),
 
     // Magical
-    SPIRIT_POWER("Controls how much damage or how big the effect is for spiritual abilities."),
-    SPIRIT_CONNECTIVITY("Controls damage resistance to spiritual attacks."),
-    SPIRIT_CONTROL("Controls chance to cause critical damage or effects with spiritual attacks."),
+//    POTENCY("Controls how much damage or how big the effect is for spiritual abilities."),
+//    ATTUNEMENT("Controls damage resistance to spiritual attacks."),
+//    DOMINION("Controls chance to cause critical damage or effects with spiritual attacks."),
+    POTENCY("Controls how much damage or how big the effect is for spiritual abilities."),
+    ATTUNEMENT("Controls damage resistance to spiritual attacks."),
+    DOMINION("Controls chance to cause critical damage or effects with spiritual attacks."),
 
     // Intellect
     IQ("Controls rate at which some skills can be learned."),
@@ -29,6 +32,7 @@ public enum Stat {
     // Social
     APPEARANCE("Controls reactions from some NPCs"),
     CONVICTION("Controls reactions from some NPCs."),
+    AUTHORITY("Controls reactions from some NPCs."),
 
     // Health
     LIFE_FORCE("Ammount of physical endurance."),
