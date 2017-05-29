@@ -3,6 +3,7 @@ package squidpony.epigon.data.generic;
 import java.util.EnumMap;
 
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Stat;
 
 /**
@@ -18,5 +19,6 @@ import squidpony.epigon.universe.Stat;
  * to be maintained in reference to the object.
  */
 public class Modification extends EpiData {
-    public EnumMap<Stat, Integer> statChanges = new EnumMap<>(Stat.class);
+
+    public EnumMap<Stat, LiveValueModification> statChanges = new EnumMap<>(Stat.class);
 }

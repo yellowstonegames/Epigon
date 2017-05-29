@@ -1,6 +1,12 @@
 package squidpony.epigon.playground;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.badlogic.gdx.utils.JsonWriter;
+
 import squidpony.DataConverter;
 import squidpony.Maker;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
@@ -14,13 +20,10 @@ import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import squidpony.epigon.data.DataMaster;
+import squidpony.epigon.universe.LiveValue;
 
 import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.data.DataMaster;
 
 /**
  * A class for doing various tests and utility work.
@@ -69,8 +72,7 @@ public class Kickball {
         player.creatureData = new Creature();
         player.creatureData.abilities = new HashSet<>();
         player.name = "Great Hero";
- //       Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, rng.between(20, 100)));
-//        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.stats.get(s) + rng.between(-10, 30)));
+        Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, new LiveValue(rng.between(20, 100))));
 
 //        System.out.println(convert.prettyPrint(player));
 
