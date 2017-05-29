@@ -10,6 +10,7 @@ import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.Rating;
 
@@ -26,7 +27,7 @@ public class Profession extends EpiData {
 
     public OrderedMap<Skill, Rating> initialSkillRatings;
     public OrderedMap<Skill, Rating> skillProgress;
-    public EnumMap<Stat, Integer> initialStatLevels = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValue> initialStatLevels = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Rating> statProgress = new EnumMap<>(Stat.class);
     public List<PhysicalBlueprint> items;
     public Set<RecipeBlueprint> recipes;

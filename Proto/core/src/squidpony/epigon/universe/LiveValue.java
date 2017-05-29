@@ -44,4 +44,28 @@ public class LiveValue {
             actual = Double.min(actual, max);
         }
     }
+
+    /**
+     * Modifies this value in place by the values in the provided object.
+     */
+    public void modify(LiveValueModification mod) {
+        base = mod.baseOverwrite == null ? base : mod.baseOverwrite;
+        max = mod.maxOverwrite == null ? max : mod.maxOverwrite;
+        min = mod.minOverwrite == null ? min : mod.minOverwrite;
+        delta = mod.deltaOverwrite == null ? delta : mod.deltaOverwrite;
+        inertia = mod.inertiaOverwrite == null ? inertia : mod.inertiaOverwrite;
+        stable = mod.stableOverwrite == null ? stable : mod.stableOverwrite;
+
+        base = mod.baseAdditive == null ? base : mod.baseAdditive;
+        max = mod.maxAdditive == null ? max : mod.maxAdditive;
+        min = mod.minAdditive == null ? min : mod.minAdditive;
+        delta = mod.deltaAdditive == null ? delta : mod.deltaAdditive;
+        inertia = mod.inertiaAdditive == null ? inertia : mod.inertiaAdditive;
+
+        base = mod.baseMultiply == null ? base : mod.baseMultiply;
+        max = mod.maxMultiply == null ? max : mod.maxMultiply;
+        min = mod.minMultiply == null ? min : mod.minMultiply;
+        delta = mod.deltaMultiply == null ? delta : mod.deltaMultiply;
+        inertia = mod.inertiaMultiply == null ? inertia : mod.inertiaMultiply;
+    }
 }

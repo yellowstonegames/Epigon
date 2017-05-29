@@ -17,9 +17,6 @@ public enum Stat {
     TOUGHNESS("Controls chance to reduce the critical damage dealt by enemy physical attacks."),
 
     // Magical
-//    POTENCY("Controls how much damage or how big the effect is for spiritual abilities."),
-//    ATTUNEMENT("Controls damage resistance to spiritual attacks."),
-//    DOMINION("Controls chance to cause critical damage or effects with spiritual attacks."),
     POTENCY("Controls how much damage or how big the effect is for spiritual abilities."),
     ATTUNEMENT("Controls damage resistance to spiritual attacks."),
     DOMINION("Controls chance to cause critical damage or effects with spiritual attacks."),

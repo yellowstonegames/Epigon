@@ -1,5 +1,10 @@
 package squidpony.epigon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -13,10 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
+import java.util.Map.Entry;
+
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
@@ -27,9 +30,12 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -127,8 +133,11 @@ public class Epigon extends Game {
         player.creatureData = new Creature();
         player.creatureData.abilities = new HashSet<>();
         player.name = "Great Hero";
-//        Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, rng.between(20, 100)));
-//        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.stats.get(s) + rng.between(-10, 30)));
+        Arrays.stream(Stat.values()).forEach(s -> {
+            LiveValue lv = new LiveValue(rng.between(20, 100));
+            lv.actual = lv.base * rng.nextDouble();
+            player.stats.put(s, lv);
+        });
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
@@ -226,7 +235,7 @@ public class Epigon extends Game {
 
         SColor front;
         SColor back;
-        /*
+
         back = SColor.OLD_LACE;
         for (int x = MAP_WIDTH; x < TOTAL_WIDTH; x++) {
             for (int y = 0; y < TOTAL_HEIGHT; y++) {
@@ -239,8 +248,8 @@ public class Epigon extends Game {
         int y = 3;
         int x = MAP_WIDTH + 1;
         int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
-        for (Entry<Stat, Integer> e : player.stats.entrySet()) {
-            int diff = player.currentStats.get(e.getKey()) - e.getValue();
+        for (Entry<Stat, LiveValue> e : player.stats.entrySet()) {
+            int diff = (int) Math.round(e.getValue().actual - e.getValue().base);
             String diffString = "";
             if (diff < 0) {
                 diffString = " " + diff;
@@ -248,10 +257,9 @@ public class Epigon extends Game {
                 diffString = " +" + diff;
             }
             display.putString(x, y, e.getKey().toString() + ":", front, back);
-            display.putString(x + spacing, y, e.getValue() + diffString, front, back);
+            display.putString(x + spacing, y, (int)Math.round(e.getValue().base) + diffString, front, back);
             y++;
         }
-         */
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
