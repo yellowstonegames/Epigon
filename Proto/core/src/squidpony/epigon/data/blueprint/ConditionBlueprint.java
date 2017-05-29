@@ -3,13 +3,14 @@ package squidpony.epigon.data.blueprint;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+
+import squidpony.squidmath.OrderedMap;
+
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.Energy;
-import squidpony.epigon.data.generic.Skill;
-import squidpony.squidmath.OrderedMap;
 
 /**
  * Blueprint for a Condition.
@@ -38,8 +39,6 @@ public class ConditionBlueprint extends EpiData {
     public OrderedMap<Skill, Integer> skillChanges = new OrderedMap<>();
     public OrderedMap<Element, Integer> elementResistanceChanges = new OrderedMap<>();
     public OrderedMap<TerrainBlueprint, Integer> movementChanges = new OrderedMap<>();
-    public OrderedMap<Energy, Integer> maxEnergyChanges = new OrderedMap<>();
-    public OrderedMap<Energy, Integer> periodicEnergyChanges = new OrderedMap<>();
     public OrderedMap<String, Integer> lightEmitted = new OrderedMap<>();
     public List<Action> tickActions = new ArrayList<>();
     public List<Action> wearsOffActions = new ArrayList<>();//what happens when it wears off

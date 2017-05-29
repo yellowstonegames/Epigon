@@ -1,8 +1,8 @@
 package squidpony.epigon.data.generic;
 
 import java.util.EnumMap;
+
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.universe.Energy;
 import squidpony.epigon.universe.Stat;
 
 /**
@@ -13,11 +13,10 @@ import squidpony.epigon.universe.Stat;
  *
  * For example, a modification of "Ice" might add certain resistances to a creature and modify the
  * liquidity of liquids.
+ *
+ * Once a Modification has been applied to the object, the Modification object itself does not need
+ * to be maintained in reference to the object.
  */
 public class Modification extends EpiData {
-
-    public boolean perk = false;// defaults to being permanent
-
     public EnumMap<Stat, Integer> statChanges = new EnumMap<>(Stat.class);
-    public EnumMap<Energy, Integer> energyChanges = new EnumMap<>(Energy.class);
 }
