@@ -69,8 +69,8 @@ public class Kickball {
         player.creatureData = new Creature();
         player.creatureData.abilities = new HashSet<>();
         player.name = "Great Hero";
-        Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
-        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
+ //       Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, rng.between(20, 100)));
+//        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.stats.get(s) + rng.between(-10, 30)));
 
 //        System.out.println(convert.prettyPrint(player));
 

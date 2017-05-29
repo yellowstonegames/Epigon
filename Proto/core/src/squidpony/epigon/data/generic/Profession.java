@@ -1,17 +1,17 @@
 package squidpony.epigon.data.generic;
 
-import squidpony.epigon.universe.Energy;
-import squidpony.epigon.universe.Stat;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
+
+import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.Rating;
-import squidpony.squidmath.OrderedMap;
 
 /**
  * A grouping of starting skills and stats plus an aptitude towards increasing them, starting
@@ -28,8 +28,6 @@ public class Profession extends EpiData {
     public OrderedMap<Skill, Rating> skillProgress;
     public EnumMap<Stat, Integer> initialStatLevels = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Rating> statProgress = new EnumMap<>(Stat.class);
-    public EnumMap<Energy, Integer> initialEnergyLevels = new EnumMap<>(Energy.class);
-    public EnumMap<Energy, Rating> energyLevelProgress = new EnumMap<>(Energy.class);
     public List<PhysicalBlueprint> items;
     public Set<RecipeBlueprint> recipes;
     public Set<ConditionBlueprint> perks;

@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.Coord;
+
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
-import squidpony.epigon.universe.Stat;
 import squidpony.epigon.data.mixin.Ammunition;
 import squidpony.epigon.data.mixin.Container;
 import squidpony.epigon.data.mixin.Creature;
@@ -21,9 +23,8 @@ import squidpony.epigon.data.mixin.Readable;
 import squidpony.epigon.data.mixin.Wearable;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
-
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Coord;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -36,8 +37,8 @@ public class Physical extends EpiData {
     public SColor color;
     public List<Modification> modifications;
     public Map<String, Float> resistances;
-    public EnumMap<Stat, Integer> baseStats = new EnumMap<>(Stat.class);
-    public EnumMap<Stat, Integer> currentStats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
+    public List<String> appliedModifications = new ArrayList<>();
     public List<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
 

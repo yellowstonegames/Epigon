@@ -128,8 +128,8 @@ public class Epigon extends Game {
         player.creatureData = new Creature();
         player.creatureData.abilities = new HashSet<>();
         player.name = "Great Hero";
-        Arrays.stream(Stat.values()).forEach(s -> player.baseStats.put(s, rng.between(20, 100)));
-        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.baseStats.get(s) + rng.between(-10, 30)));
+//        Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, rng.between(20, 100)));
+//        Arrays.stream(Stat.values()).forEach(s -> player.currentStats.put(s, player.stats.get(s) + rng.between(-10, 30)));
 
         Physical sword = new Physical();
         sword.color = SColor.SILVER;
@@ -238,7 +238,7 @@ public class Epigon extends Game {
         int y = 3;
         int x = MAP_WIDTH + 1;
         int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
-        for (Entry<Stat, Integer> e : player.baseStats.entrySet()) {
+        for (Entry<Stat, Integer> e : player.stats.entrySet()) {
             int diff = player.currentStats.get(e.getKey()) - e.getValue();
             String diffString = "";
             if (diff < 0) {
