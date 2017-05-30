@@ -1,7 +1,16 @@
 package squidpony.epigon.universe;
 
 /**
- * The bundle that represents a stat at a point in time.
+ * The bundle that represents a stat at a point in time. For all stats a higher number is better.
+ *
+ * Base value is the "all things being equal" value actual should be at. When all needs are fully
+ * met and no external effects are in place actual should be at base.
+ *
+ * Max and min are the limits a value can go to no matter what. They limit the effects that external
+ * changes can make on the value so the closer to base the min is the better and the higher max is
+ * the better.
+ *
+ * Note that a stable value just cancels out a delta, it does not move actual towards base.
  *
  * @author Eben Howard
  */

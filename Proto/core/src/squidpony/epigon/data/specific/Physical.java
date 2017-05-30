@@ -25,6 +25,7 @@ import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 
 /**
@@ -36,9 +37,12 @@ public class Physical extends EpiData {
 
     public char symbol;
     public SColor color;
+
     public OrderedMap<Element, Double> passthroughResistances;
     public OrderedMap<Element, Double> elementalDamageMultiplyer;
     public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
+
     public List<String> appliedModifications = new ArrayList<>();
     public List<Condition> conditions = new ArrayList<>();
     public Coord location;//world location
