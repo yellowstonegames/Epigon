@@ -10,4 +10,6 @@ public class RatingValueModification {
     public Rating overwriteDecrease;
     public Rating overwriteIncrease;
     public Integer deltaLevel;
+    public Rating deltaMax; // The highest to go if the delta is positive
+    public Rating deltaMin; // The highest to go if the delta is negative
 }

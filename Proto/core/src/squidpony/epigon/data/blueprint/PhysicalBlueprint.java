@@ -42,12 +42,16 @@ public class PhysicalBlueprint extends EpiData {
     public List<Modification> possibleModifications;
     public List<Modification> modifications;
     public List<Modification> whenUsedAsMaterial;
-    public OrderedMap<Element, Double> passthroughResistances;
-    public OrderedMap<Element, Double> elementalDamageMultiplyer;
+
+    public OrderedMap<Element, LiveValue> passthroughResistances;
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer;
+    public SColor lightEmitted;
+    public LiveValue lightEmittedStrength;
+
     public List<ConditionBlueprint> possibleConditions;
     public List<ConditionBlueprint> conditions;
 
-    public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValue> initialStats = new EnumMap<>(Stat.class);
     public List<PhysicalBlueprint> commonInventory;
 
     /**

@@ -1,16 +1,10 @@
 package squidpony.epigon.data.mixin;
 
 import java.util.EnumMap;
-import java.util.List;
-import java.util.Set;
 
 import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
-import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.LiveValue;
@@ -28,21 +22,16 @@ import squidpony.epigon.universe.Rating;
  */
 public class Profession extends EpiData {
 
-    public OrderedMap<Skill, Rating> initialSkillRatings;
-    public OrderedMap<Skill, Rating> skillProgress;
-    public EnumMap<Stat, LiveValue> initialStatLevels = new EnumMap<>(Stat.class);
-    public EnumMap<Stat, Rating> statProgress = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValue> initialStatRequirements = new EnumMap<>(Stat.class);
+    public OrderedMap<Skill, Rating> initialSkillRequirements;
 
     /**
-     * Each rating level may or may not have some special modifications that come with it, often
-     * in the form of new or improved abilities.
+     * Each rating level may or may not have some special modifications that come with it, often in
+     * the form of new or improved abilities. Additionally increasing profession rating may increase
+     * the stat progression ratings, although not retroactively.
      */
     public EnumMap<Rating, Modification> improvements = new EnumMap<>(Rating.class);
 
     // Starting parts only for when generating a creature with this profession
-    public List<PhysicalBlueprint> items;
-    public Set<RecipeBlueprint> recipes;
-    public Set<ConditionBlueprint> perks;
-    public List<ConditionBlueprint> conditions;
-    public Set<Ability> abilities;
+    public Modification startingModification;
 }
