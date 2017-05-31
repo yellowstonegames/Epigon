@@ -40,9 +40,9 @@ public class RecipeBlueprint extends EpiData {
     public OrderedMap<PhysicalBlueprint, Modification> modifications; // mapping of what adding optionals does to the results
 
     public boolean uses(PhysicalBlueprint ingredient) {
-        return requiredConsumed.keySet().stream().anyMatch(p -> p.hasParent(ingredient))
-            || requiredCatalyst.keySet().stream().anyMatch(p -> p.hasParent(ingredient))
-            || optionalConsumed.keySet().stream().anyMatch(p -> p.hasParent(ingredient))
-            || optionalCatalyst.keySet().stream().anyMatch(p -> p.hasParent(ingredient));
+        return requiredConsumed.keySet().stream().anyMatch(p -> p.countsAs(ingredient))
+            || requiredCatalyst.keySet().stream().anyMatch(p -> p.countsAs(ingredient))
+            || optionalConsumed.keySet().stream().anyMatch(p -> p.countsAs(ingredient))
+            || optionalCatalyst.keySet().stream().anyMatch(p -> p.countsAs(ingredient));
     }
 }

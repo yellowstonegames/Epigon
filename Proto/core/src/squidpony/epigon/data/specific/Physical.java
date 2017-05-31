@@ -19,7 +19,7 @@ import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Liquid;
 import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.data.mixin.Readable;
+import squidpony.epigon.data.mixin.Legible;
 import squidpony.epigon.data.mixin.Wearable;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
@@ -58,7 +58,7 @@ public class Physical extends EpiData {
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
-    public Readable readableData;
+    public Legible readableData;
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;
@@ -127,6 +127,6 @@ public class Physical extends EpiData {
     }
 
     public boolean hasParent(PhysicalBlueprint blueprint) {
-        return blueprint.hasParent(blueprint);
+        return blueprint.countsAs(blueprint);
     }
 }

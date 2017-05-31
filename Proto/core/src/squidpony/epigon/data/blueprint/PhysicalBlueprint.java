@@ -1,7 +1,7 @@
 package squidpony.epigon.data.blueprint;
 
-import squidpony.epigon.data.generic.Modification;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,19 +10,11 @@ import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
 
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Stat;
-import squidpony.epigon.data.mixin.Ammunition;
-import squidpony.epigon.data.mixin.Container;
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.mixin.Grouping;
-import squidpony.epigon.data.mixin.Interactable;
-import squidpony.epigon.data.mixin.Liquid;
-import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.data.mixin.Wearable;
-import squidpony.epigon.data.mixin.Wieldable;
-import squidpony.epigon.data.mixin.Zappable;
+import squidpony.epigon.data.mixin.*;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 
@@ -34,6 +26,7 @@ import squidpony.epigon.universe.Rating;
 public class PhysicalBlueprint extends EpiData {
 
     public PhysicalBlueprint parent;
+    public Set<PhysicalBlueprint> countsAs = new HashSet<>();
 
     public char symbol = ' '; // default to an empty character sine NUL is not fun in data
     public SColor color;
@@ -60,9 +53,10 @@ public class PhysicalBlueprint extends EpiData {
     public List<ProbabilityTable<PhysicalBlueprint>> physicalDrops;
 
     /**
-     * A list of what the item might become when a given element is used on it.
+     * A list of what the item might drop when a given element is used on it. This is in addition
+     * to the regular drop table.
      */
-    public OrderedMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> becomes;
+    public OrderedMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> elementDrops;
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
@@ -97,23 +91,25 @@ public class PhysicalBlueprint extends EpiData {
     public Creature creatureData;
     public List<Set<Profession>> possibleProfessions;
 
+    // NOTE - Ammunition and Wieldable need to be sets of how to treat them based on Abilities or CountsAs (not sure which yet)
     public Ammunition ammunitionData;
     public Container containerData;
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
-    public Readable readableData;
+    public Legible readableData;
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;
 
-    public boolean hasParent(PhysicalBlueprint blueprint) {
-        if (this.equals(blueprint)) {
+    public boolean countsAs(PhysicalBlueprint blueprint) {
+        if (this.equals(blueprint) || countsAs.contains(blueprint)) {
             return true;
-        } else if (this.parent == null) {
+        } else if (parent == null) {
             return false;
         }
 
-        return parent.hasParent(blueprint);
+        // Any parent either direct or through something it counts as will work
+        return parent.countsAs(blueprint) || countsAs.stream().parallel().anyMatch(bp -> bp.countsAs(blueprint));
     }
 }
