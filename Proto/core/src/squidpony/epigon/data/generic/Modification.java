@@ -13,11 +13,13 @@ import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.RatingValueModification;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Represents a modification to another object.
@@ -32,6 +34,13 @@ import squidpony.epigon.universe.Stat;
  * to be maintained in reference to the object.
  */
 public class Modification extends EpiData {
+    
+    // Modification might change the effective heirarchy
+    public PhysicalBlueprint parentOverwrite;
+    public boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
+    public List<PhysicalBlueprint> countsAsOverwrite;
+    public List<PhysicalBlueprint> countsAsGained;
+    public List<PhysicalBlueprint> countsAsLost;
 
     // Only one string out of the set of prefixes and postfixes should be used
     public List<String> possiblePrefix;
@@ -50,11 +59,9 @@ public class Modification extends EpiData {
     public List<Modification> whenUsedAsMaterialOverwrite; // TODO - this might not make sense when more than one material is used
     public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
 
-    // When destroyed
-    public List<PhysicalBlueprint> physicalDropsOverwrite; // TODO - this needs to work with the base ProbabilityTable
-    public List<PhysicalBlueprint> physicalDropsAdditive; // TODO - same regarding ProbabilityTable
-    public EnumMap<Element, List<PhysicalBlueprint>> elementDropsOverwrit = new EnumMap<>(Element.class); // TODO - same
-    public EnumMap<Element, List<PhysicalBlueprint>> elementDropsAdditive = new EnumMap<>(Element.class); // TODO - same
+    // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
+    public List<ProbabilityTable<PhysicalBlueprint>> physicalDropsOverwrite;
+    public EnumMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> elementDropsOverwrite = new EnumMap<>(Element.class);
 
     public EnumMap<Stat, LiveValueModification> statChanges = new EnumMap<>(Stat.class);
     public EnumMap<Stat, RatingValueModification> statProgressionChanges = new EnumMap<>(Stat.class);
@@ -87,4 +94,46 @@ public class Modification extends EpiData {
 
     public Set<Ability> gainedAbilities;
     public Set<Ability> lostAbilities;
+
+    public Set<Profession> gainedProfessions; // Can only gain professions, never lose them
+
+    // Ammunition changes
+    public List<ConditionBlueprint> ammunitionCausesOverwrite;
+    public Set<ConditionBlueprint> ammunitionCausesRemoved;
+    public List<ConditionBlueprint> ammunitionCausesAdded;
+    public Set<PhysicalBlueprint> ammunitionLaunchersOverwrite;
+    public Set<PhysicalBlueprint> ammunitionLaunchersRemoved;
+    public Set<PhysicalBlueprint> ammunitionLaunchersAdded;
+    public Boolean ammunitionThrowableOverwrite;
+    public Double ammunitionHitChanceOverwrite;
+    public Double ammunitionHitChanceDelta;
+    public Double ammunitionDamageOverwrite;
+    public Double ammunitionDamageDelta;
+    public Double ammunitionDistanceOverwrite;
+    public Double ammunitionDistanceDelta;
+
+    // Container changes
+    public Double capacityOverwrite;
+    public Double capacityDelta;
+    public List<PhysicalBlueprint> contentsOverwrite;
+    public List<PhysicalBlueprint> contentsRemoved;
+    public List<PhysicalBlueprint> contentsAdded;
+
+    // Grouping changes
+    public Integer quantityOverwrite;
+    public Integer quantityDelta;
+
+    // Wearable changes
+    public Boolean wornOverwrite;
+
+    // Wieldable changes
+    public List<ConditionBlueprint> wieldableCausesOverwrite;
+    public Set<ConditionBlueprint> wieldableCausesRemoved;
+    public List<ConditionBlueprint> wieldableCausesAdded;
+    public Double wieldableHitChanceOverwrite;
+    public Double wieldableHitChanceDelta;
+    public Double wieldableDamageOverwrite;
+    public Double wieldableDamageDelta;
+    public Double wieldableDistanceOverwrite;
+    public Double wieldableDistanceDelta;
 }
