@@ -50,7 +50,7 @@ public enum Stat {
     HEARING("HE", "Controls how far auditory awareness extends."),
 
     // Utility (Both animate and inanimate objects have these)
-    VOLUME("VO", "Generalized accounting of approximate size."),
+    VOLUME("VO", "Generalized accounting of approximate size. A human has a Volume of 100."),
     MASS("MA", "Approximate mass."),
     OPACITY("OP", "How much light is blocked."),
     STRUCTURE("ST", "How much of itself there is. When this is zero the object no longer exists.");
