@@ -5,5 +5,6 @@ package squidpony.epigon.universe;
  */
 public enum WieldSlot {
 
-    LEFT_HAND, RIGHT_HAND;
+    LEFT_HAND,
+    RIGHT_HAND;
 }

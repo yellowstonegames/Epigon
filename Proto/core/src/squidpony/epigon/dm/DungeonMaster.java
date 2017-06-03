@@ -35,7 +35,7 @@ public class DungeonMaster {
             c.suppresedBys.remove(condition);//remove it from the list of suppressing conditions if it's there
         }
         if (cancelled) {
-            applyActions(condition.parent.cancelledActions);
+            applyActions(condition.parent.canceledActions);
         } else {
             applyActions(condition.parent.wearsOffActions);
         }

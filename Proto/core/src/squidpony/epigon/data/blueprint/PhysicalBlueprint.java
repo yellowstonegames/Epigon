@@ -98,7 +98,7 @@ public class PhysicalBlueprint extends EpiData {
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
-    public Legible readableData;
+    public Legible legibileData;
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;

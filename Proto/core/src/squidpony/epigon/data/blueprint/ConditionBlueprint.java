@@ -35,7 +35,7 @@ public class ConditionBlueprint extends EpiData {
     public Modification modification;
     public List<Action> tickActions = new ArrayList<>();
     public List<Action> wearsOffActions = new ArrayList<>();//what happens when it wears off
-    public List<Action> cancelledActions = new ArrayList<>();//what happens when it's cancelled
+    public List<Action> canceledActions = new ArrayList<>();//what happens when it's cancelled
     public List<ConditionBlueprint> conflicts = new ArrayList<>();//can't exist at the same time, new one cancels the old one
     public List<ConditionBlueprint> immunizes = new ArrayList<>();//can't exist at the same time, old one prevents the new one from being applies
     public List<ConditionBlueprint> suppresses = new ArrayList<>();//can both exist, but only newest one has effect

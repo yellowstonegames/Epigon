@@ -5,12 +5,12 @@ import squidpony.squidgrid.gui.gdx.SColor;
 /**
  * Elements are keys to know when certain resistances and such apply.
  */
-public enum Element {
+public enum Element { // TODO - make this a full EpiData class with external data source
     // Mundane
-    MUNDSNE(),
-    PIERCE(MUNDSNE),
-    LACERATE(MUNDSNE),
-    BLUNT(MUNDSNE),
+    MUNDANE(),
+    PIERCE(MUNDANE),
+    LACERATE(MUNDANE),
+    BLUNT(MUNDANE),
     // Natural
     NATURE(),
     STONE(NATURE),
@@ -26,7 +26,7 @@ public enum Element {
     // Magical
     MAGIC(),
     GEOMANCY(MAGIC),
-    CHROMOMANCY(MAGIC),
+    CHRONOMANCY(MAGIC),
     // Astronomical
     ASTRONOMICAL(),
     SOLAR(ASTRONOMICAL),
