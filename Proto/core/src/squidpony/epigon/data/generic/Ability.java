@@ -5,16 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import squidpony.epigon.ActionParticipantType;
-import squidpony.epigon.actions.AttackAction;
-import squidpony.epigon.actions.ConditionAddAction;
-import squidpony.epigon.actions.ConditionRemoveAction;
-import squidpony.epigon.actions.CreateObjectAction;
-import squidpony.epigon.actions.DestroyObjectAction;
-import squidpony.epigon.actions.InsertIntoAction;
-import squidpony.epigon.actions.MovementAction;
-import squidpony.epigon.actions.RemoveFromAction;
-import squidpony.epigon.actions.StatChangeAction;
+import squidpony.epigon.actions.ActionParticipantType;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
@@ -36,11 +27,11 @@ public class Ability extends EpiData {
     //range
     //vs creatures / items / open space
     //
-    //preconditions that must be satisfied
+
     public List<String> effectsString = new ArrayList<>();
     public OrderedMap<Skill, Rating> mustHaveSkillRatings;
     EnumMap<ActionParticipantType, Effect> effects = new EnumMap<>(ActionParticipantType.class);
-    //
+
     //preconditions that must be satisfied
     public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
     public EnumMap<ActionParticipantType, List<PhysicalBlueprint>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
@@ -115,73 +106,5 @@ public class Ability extends EpiData {
 //        }
 
         return true;//if it made it here then everything needed was found and nothing counter was found
-    }
-
-    /**
-     * Returns true if this ability maps attempted damage to another object.
-     *
-     * @return
-     */
-    public boolean isAttack() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof AttackAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean isMovement() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof MovementAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean changesInventory() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof InsertIntoAction || effect.action instanceof RemoveFromAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean changesAura() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof ConditionAddAction || effect.action instanceof ConditionRemoveAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean createsObject() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof CreateObjectAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean destroysObject() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof DestroyObjectAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
-    }
-
-    public boolean changesStats() {
-        for (Effect effect : effects.values()) {
-            if (effect.action instanceof StatChangeAction) {
-                return true;
-            }
-        }
-        return false;//no actions found
     }
 }

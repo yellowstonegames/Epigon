@@ -3,11 +3,9 @@ package squidpony.epigon.data;
 /**
  * Used to populate a ProbabilityTable from data with optional elements.
  */
-public class ProbabilityTableEntry {
+public class ProbabilityTableEntry<T extends EpiData> {
 
-    public EpiData item;
-    public int weight;
-    public int quantity;
+    public T item;
     public int minQuantity;
     public int maxQuantity;
 }

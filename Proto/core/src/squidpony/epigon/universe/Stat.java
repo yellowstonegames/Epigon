@@ -37,6 +37,7 @@ public enum Stat {
     SPIRIT("SP", "Amount of spirit energy."),
     INTELLECT("IN", "Amount of mental energy"),
     CHARM("CH", "Amount of social energy"),
+    SANITY("SA", "How sane one is. When this is reduced too far, actions are no longer under direct control."),
     
     // Needs
     HUNGER("HU", "How full of nutrition."),
@@ -60,7 +61,7 @@ public enum Stat {
 
     public static final Stat[] socials = {APPEARANCE, CONVICTION, AUTHORITY};
 
-    public static final Stat[] healths = {LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM};
+    public static final Stat[] healths = {LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM, SANITY};
 
     public static final Stat[] needs = {HUNGER, THIRST, REST, SLEEP};
 

@@ -10,6 +10,7 @@ import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
 
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.data.generic.Skill;
@@ -50,13 +51,13 @@ public class PhysicalBlueprint extends EpiData {
     /**
      * The list of physical objects it drops on destruction no matter what the source.
      */
-    public List<ProbabilityTable<PhysicalBlueprint>> physicalDrops;
+    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDrops;
 
     /**
      * A list of what the item might drop when a given element is used on it. This is in addition
      * to the regular drop table.
      */
-    public OrderedMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> elementDrops;
+    public OrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDrops;
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.

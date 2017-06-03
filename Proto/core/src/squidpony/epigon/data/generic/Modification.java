@@ -8,6 +8,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
@@ -37,7 +38,7 @@ public class Modification extends EpiData {
     
     // Modification might change the effective heirarchy
     public PhysicalBlueprint parentOverwrite;
-    public boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
+    public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
     public List<PhysicalBlueprint> countsAsOverwrite;
     public List<PhysicalBlueprint> countsAsGained;
     public List<PhysicalBlueprint> countsAsLost;
@@ -60,8 +61,8 @@ public class Modification extends EpiData {
     public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
-    public List<ProbabilityTable<PhysicalBlueprint>> physicalDropsOverwrite;
-    public EnumMap<Element, List<ProbabilityTable<PhysicalBlueprint>>> elementDropsOverwrite = new EnumMap<>(Element.class);
+    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDropsOverwrite;
+    public EnumMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDropsOverwrite = new EnumMap<>(Element.class);
 
     public EnumMap<Stat, LiveValueModification> statChanges = new EnumMap<>(Stat.class);
     public EnumMap<Stat, RatingValueModification> statProgressionChanges = new EnumMap<>(Stat.class);
