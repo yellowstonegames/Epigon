@@ -1,10 +1,5 @@
 package squidpony.epigon;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -18,8 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import java.util.Map.Entry;
-
+import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
+import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
@@ -30,12 +30,11 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Stat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -52,22 +51,32 @@ public class Epigon extends Game {
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
 
-    public static final int MESSAGE_HEIGHT = 7;
+    public static final int MESSAGE_WIDTH = MAP_WIDTH;
+    public static final int MESSAGE_HEIGHT = 6;
 
-    public static final int TOTAL_WIDTH = MAP_WIDTH;// + INFO_WIDTH;
-    public static final int TOTAL_HEIGHT = MAP_HEIGHT;// + MESSAGE_HEIGHT;
+    public static final int CONTEXT_WIDTH = INFO_WIDTH;
+    public static final int CONTEXT_HEIGHT = MESSAGE_HEIGHT;
+
+    public static final int TOTAL_WIDTH = MAP_WIDTH + INFO_WIDTH;
+    public static final int TOTAL_HEIGHT = MAP_HEIGHT + MESSAGE_HEIGHT;
 
     private static final float HALF_MAP_HEIGHT = (MAP_HEIGHT + 1) * 0.5f;
     private static final float HALF_MAP_WIDTH = (MAP_WIDTH + 1) * 0.5f;
 
-    public static final int MESSAGE_WIDTH = TOTAL_WIDTH;
-
     // Cell sizing
-    public static final int CELL_WIDTH = 11;
-    public static final int CELL_HEIGHT = 21;
+    public static final int CELL_WIDTH = 12;
+    public static final int CELL_HEIGHT = 23;
 
     // Pixels
-    public static final int TOTAL_PIXEL_WIDTH = TOTAL_WIDTH * CELL_WIDTH;
+    public static final int MAP_PIXEL_WIDTH  = MAP_WIDTH * CELL_WIDTH;
+    public static final int MAP_PIXEL_HEIGHT = MAP_HEIGHT * CELL_HEIGHT;
+    public static final int MESSAGE_PIXEL_WIDTH  = MESSAGE_WIDTH * CELL_WIDTH;
+    public static final int MESSAGE_PIXEL_HEIGHT = MESSAGE_HEIGHT * CELL_HEIGHT;
+    public static final int INFO_PIXEL_WIDTH  = INFO_WIDTH * CELL_WIDTH;
+    public static final int INFO_PIXEL_HEIGHT = INFO_HEIGHT * CELL_HEIGHT;
+    public static final int CONTEXT_PIXEL_WIDTH  = CONTEXT_WIDTH * CELL_WIDTH;
+    public static final int CONTEXT_PIXEL_HEIGHT = CONTEXT_HEIGHT * CELL_HEIGHT;
+    public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
     public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL);
@@ -75,20 +84,22 @@ public class Epigon extends Game {
     // 
     SpriteBatch batch;
     private SquidLayers display;
+    private LinesPanel<Color> messages;
     private char[][] simpleChars;
     private EpiMap map;
     private SquidInput input;
     private Color bgColor;
-    private Stage stage;
     private DijkstraMap playerToCursor;
     private Coord cursor;
     private Physical player;
     private List<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
     private int framesWithoutAnimation;
+    private TextCellFactory printText;
 
     // WIP stuff, needs large sample map
-    private Viewport viewport;
+    private Stage stage, messageStage, infoStage, contextStage;
+    private Viewport viewport, messageViewport, infoViewport, contextViewport;
     private Camera camera;
     private AnimatedEntity playerEntity;
 
@@ -103,10 +114,20 @@ public class Epigon extends Game {
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
 
-        viewport = new StretchViewport(TOTAL_PIXEL_WIDTH, TOTAL_PIXEL_HEIGHT);
+        viewport = new StretchViewport(MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT);
+        messageViewport = new StretchViewport(MESSAGE_PIXEL_WIDTH, MESSAGE_PIXEL_HEIGHT);
+        infoViewport = new StretchViewport(INFO_PIXEL_WIDTH, INFO_PIXEL_HEIGHT);
+        contextViewport = new StretchViewport(CONTEXT_PIXEL_WIDTH, CONTEXT_PIXEL_HEIGHT);
         camera = viewport.getCamera();
         //Here we make sure our Stage, which holds any text-based grids we make, uses our Batch.
         stage = new Stage(viewport, batch);
+        messageStage = new Stage(messageViewport, batch);
+        infoStage = new Stage(infoViewport, batch);
+        contextStage = new Stage(contextViewport, batch);
+        printText = DefaultResources.getStretchablePrintFont()
+                .width(5f).height(CELL_HEIGHT * 1.18f).initBySize();
+        messages = new LinesPanel<Color>(new GDXMarkup(), printText, 5);
+        messages.clearingColor = null;
 
         //map = World.getDefaultMap();
         Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
@@ -124,7 +145,15 @@ public class Epigon extends Game {
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.13f);
 
+        messages.setBounds(0, 0, MESSAGE_PIXEL_WIDTH, MESSAGE_PIXEL_HEIGHT);
         display.setPosition(0, 0);
+        viewport.setScreenY(MESSAGE_PIXEL_HEIGHT);
+
+        messages.addLast(new IColoredString.Impl<>("Use mouse, numpad, or vi-keys (hjklyubn) to move.", Color.WHITE));
+        messages.addLast(new IColoredString.Impl<>("Use ? for help, or q to quit.", Color.WHITE));
+        messages.addLast(new IColoredString.Impl<>("Bump into walls and stuff.", Color.WHITE));
+        messages.addLast(new IColoredString.Impl<>("The fate of the worlds is in your hands...", Color.WHITE));
+        messages.addLast(new IColoredString.Impl<>("Have fun!", Color.WHITE));
 
         cursor = Coord.get(-1, -1);
 
@@ -161,15 +190,16 @@ public class Epigon extends Game {
         playerToCursor.setGoal(player.location);
         playerToCursor.scan(null);
 
-        bgColor = SColor.DARK_SLATE_GRAY;
+        bgColor = SColor.DB_INK;
 
         input = new SquidInput(keys, mapMouse);
 
         //Setting the InputProcessor is ABSOLUTELY NEEDED TO HANDLE INPUT
-        Gdx.input.setInputProcessor(new InputMultiplexer(stage, input));
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, messageStage, input));
 
         // and then add display, our one visual component, to the list of things that act in Stage.
         stage.addActor(display);
+        messageStage.addActor(messages);
     }
 
     /**
@@ -314,8 +344,22 @@ public class Epigon extends Game {
         else if (input.hasNext()) {
             input.next();
         }
-        stage.act();
+        // the order here matters. We apply two viewports at different times to clip different areas.
+        messageViewport.apply(false);
+        // you do need to tell each Stage to act().
+        messageStage.act();
+        // ... just like you need to tell each stage to draw().
+        batch.begin();
+        batch.setProjectionMatrix(messageViewport.getCamera().combined);
+        batch.setColor(SColor.INDIGO_DYE);
+        batch.draw(printText.getSolid(), 0, 0, MESSAGE_PIXEL_WIDTH, MESSAGE_PIXEL_HEIGHT);
+        messageStage.getRoot().draw(batch, 1f);
+        batch.end();
+
+        //here we apply the other viewport, which clips a different area while leaving the message area intact.
         viewport.apply(false);
+        stage.act();
+        // each stage has its own batch that it starts an ends, so certain batch-wide effects only change one stage.
         stage.draw();
         batch.begin();
         display.drawActor(batch, 1.0f, playerEntity);
@@ -326,9 +370,29 @@ public class Epigon extends Game {
     public void resize(int width, int height) {
         super.resize(width, height);
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
+        /*
         input.getMouse().reinitialize((float) width / TOTAL_WIDTH, (float) height / TOTAL_HEIGHT, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
         viewport.update(width, height, false);
         viewport.setScreenBounds(0, 0, width, height);
+        */
+        // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
+        float currentZoomX = (float) width / MAP_WIDTH,
+                // total new screen height in pixels divided by total number of rows on the screen
+                currentZoomY = (float)height / TOTAL_HEIGHT;
+        // message box should be given updated bounds since I don't think it will do this automatically
+        messages.setBounds(0, 0, currentZoomX * MESSAGE_WIDTH, currentZoomY * MESSAGE_HEIGHT);
+        // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
+        input.getMouse().reinitialize(currentZoomX, currentZoomY, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
+        currentZoomX = CELL_WIDTH / currentZoomX;
+        currentZoomY = CELL_HEIGHT / currentZoomY;
+        //printText.bmpFont.getData().lineHeight /= currentZoomY;
+        //printText.bmpFont.getData().descent /= currentZoomY;
+        messageViewport.update(width, height, false);
+        messageViewport.setScreenBounds(0, 0, (int)messages.getWidth(), (int)messages.getHeight());
+        viewport.update(width, height, false);
+        viewport.setScreenBounds(0, (int)messages.getHeight(),
+                width, height - (int)messages.getHeight());
+
 
     }
 
