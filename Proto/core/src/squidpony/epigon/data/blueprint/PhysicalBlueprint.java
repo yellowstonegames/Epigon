@@ -34,9 +34,9 @@ public class PhysicalBlueprint extends EpiData {
     public SColor color;
 
     public List<String> possibleAliases = new ArrayList<>();
+    public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<Modification> modifications = new ArrayList<>();
     public List<Modification> possibleModifications = new ArrayList<>();
-    public List<Modification> whenUsedAsMaterial = new ArrayList<>();
 
     public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
     public OrderedMap<Element, LiveValue> elementalDamageMultiplyer = new OrderedMap<>();
@@ -48,6 +48,8 @@ public class PhysicalBlueprint extends EpiData {
     public List<ConditionBlueprint> possibleConditions = new ArrayList<>();
 
     public EnumMap<Stat, LiveValue> initialStats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
+
     public List<PhysicalBlueprint> commonInventory = new ArrayList<>();
 
     /**

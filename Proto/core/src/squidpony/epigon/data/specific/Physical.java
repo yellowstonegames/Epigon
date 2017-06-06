@@ -2,6 +2,7 @@ package squidpony.epigon.data.specific;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import squidpony.squidmath.OrderedMap;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Ammunition;
 import squidpony.epigon.data.mixin.Container;
 import squidpony.epigon.data.mixin.Creature;
@@ -35,23 +37,31 @@ import squidpony.epigon.universe.Stat;
  */
 public class Physical extends EpiData {
 
+    public PhysicalBlueprint parent;
+    public Set<Physical> createdFrom = new HashSet<>();//only important items should track this since it will cause object lifetimes to extend
+
     public char symbol;
     public SColor color;
 
+    public List<Modification> whenUsedAsMaterial = new ArrayList<>();
+    public List<String> appliedModifications = new ArrayList<>();
+
     public OrderedMap<Element, LiveValue> passthroughResistances;
     public OrderedMap<Element, LiveValue> elementalDamageMultiplyer;
+
+    public SColor lightEmitted;
+    public LiveValue lightEmittedStrength;
+
+    public List<Condition> conditions = new ArrayList<>();
+
     public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
 
-    public List<String> appliedModifications = new ArrayList<>();
-    public List<Condition> conditions = new ArrayList<>();
+    public List<Physical> inventory = new ArrayList<>();
     public Coord location;//world location
 
-    public PhysicalBlueprint parent;
-    public Set<Physical> createdFrom;//only important items should track this since it will cause object lifetimes to extend
-
     public Creature creatureData;
-    public Set<Profession> professions;
+    public Set<Profession> professions = new HashSet<>();
 
     public Ammunition ammunitionData;
     public Container containerData;
