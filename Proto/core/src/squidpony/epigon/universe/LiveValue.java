@@ -34,6 +34,16 @@ public class LiveValue {
         stable = true;
     }
 
+    public LiveValue(LiveValue other){
+        base = other.base;
+        max = other.max;
+        min = other.min;
+        actual = other.actual;
+        delta = other.delta;
+        inertia = other.inertia;
+        stable = other.stable;
+    }
+
     /**
      * Changes the stat by one turn's delta and inertia
      */
