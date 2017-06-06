@@ -1,7 +1,6 @@
 package squidpony.epigon.playground;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,7 +11,6 @@ import squidpony.Maker;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Humanoid;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
@@ -23,7 +21,6 @@ import squidpony.squidmath.OrderedMap;
 import squidpony.epigon.data.DataMaster;
 import squidpony.epigon.universe.LiveValue;
 
-import static squidpony.epigon.Epigon.rng;
 
 /**
  * A class for doing various tests and utility work.
@@ -67,46 +64,27 @@ public class Kickball {
         convert.setIgnoreUnknownFields(true);
         convert.setUsePrototypes(false);
 
+        Starter starter = new Starter();
+
         // Create an actual player
-        Physical player = new Physical();
-        player.creatureData = new Creature();
-        player.creatureData.abilities = new HashSet<>();
-        player.name = "Great Hero";
-        Arrays.stream(Stat.values()).forEach(s -> player.stats.put(s, new LiveValue(rng.between(20, 100))));
+        Physical player = starter.player;
 
 //        System.out.println(convert.prettyPrint(player));
 
-        Physical sword = new Physical();
-        sword.color = SColor.SILVER;
-        sword.symbol = '/';
-        sword.name = "Sword";
+        Physical sword = starter.sword;
 //        System.out.println(convert.prettyPrint(sword));
 
-        PhysicalBlueprint pj = new PhysicalBlueprint();
-        pj.name = "Player";
-        pj.description = "The main player's character.";
-        pj.notes = "Voted most likely to die.";
-        pj.symbol = '@';
-        pj.color = SColor.FOX;
-        pj.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
-        pj.initialStats.put(Stat.OPACITY, new LiveValue(100));
-        Humanoid cb = new Humanoid();
-        pj.creatureData = cb;
-        cb.skills = new OrderedMap<>();
-        Skill skill = new Skill();
-        skill.name = "kendo";
-        cb.skills.put(skill, Rating.HIGH);
-        skill = new Skill();
-        skill.name = "akido";
-        cb.skills.put(skill, Rating.SLIGHT);
-//        System.out.println(convert.prettyPrint(pj));
+        PhysicalBlueprint pj = starter.playerBlueprint;
+
+
+//        System.out.println(convert.prettyPrint(playerBlueprint));
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
-//        pj = convert.fromJson(PhysicalBlueprint.class, playerFile);
+//        playerBlueprint = convert.fromJson(PhysicalBlueprint.class, playerFile);
         String json = convert.prettyPrint(pj);
 //        System.out.println(json);
         pj = convert.fromJson(PhysicalBlueprint.class, json);
-       // System.out.println(convert.prettyPrint(pj));
+       // System.out.println(convert.prettyPrint(playerBlueprint));
 
         DataMaster dm = new DataMaster();
         dm.add(player);

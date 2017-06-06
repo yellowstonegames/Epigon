@@ -29,7 +29,7 @@ import squidpony.epigon.universe.Element;
 public class ConditionBlueprint extends EpiData {
 
     public ConditionBlueprint parent;
-    public int duration;//how many turns until it wears off
+    public int duration;//how many turns until it wears off -- 0 means it lasts until removed some other way
     public int period;//how often effects trigger -- 0 means it's constant
     public Element element;
     public Modification modification;
