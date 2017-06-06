@@ -38,8 +38,8 @@ public class Physical extends EpiData {
     public char symbol;
     public SColor color;
 
-    public OrderedMap<Element, Double> passthroughResistances;
-    public OrderedMap<Element, Double> elementalDamageMultiplyer;
+    public OrderedMap<Element, LiveValue> passthroughResistances;
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer;
     public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
     public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
 
@@ -58,7 +58,7 @@ public class Physical extends EpiData {
     public Grouping groupingData;
     public Interactable interactableData;
     public Liquid liquidData;
-    public Legible readableData;
+    public Legible legibleData;
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;

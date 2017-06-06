@@ -1,5 +1,7 @@
 package squidpony.epigon.dm;
 
+import java.util.ArrayList;
+import java.util.List;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
@@ -7,9 +9,11 @@ import squidpony.epigon.data.specific.Recipe;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+import squidpony.epigon.data.generic.Modification;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -54,5 +58,45 @@ public class RecipeMixer {
         recipe.result.putAll(blueprint.result);
 
         return recipe;
+    }
+
+    /**
+     * Creates a specific instance of the provided blueprint.
+     */
+    public Physical createFrom(PhysicalBlueprint blueprint) {
+        Physical physical = new Physical();
+        physical.parent = blueprint;
+        physical.symbol = blueprint.symbol;
+        physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
+
+        List<String> possibleNames = new ArrayList<>();
+        possibleNames.addAll(blueprint.possibleAliases);
+        possibleNames.add(blueprint.name);
+        physical.name = rng.getRandomElement(possibleNames);
+
+        physical.description = blueprint.description;
+        physical.notes = blueprint.notes; // TODO - probably don't need these transfered
+
+        for (Modification m : blueprint.modifications) {
+            applyModification(physical, m);
+        }
+
+        if (!blueprint.possibleModifications.isEmpty()) {
+            applyModification(physical, rng.getRandomElement(blueprint.possibleModifications));
+        }
+
+        physical.passthroughResistances = new OrderedMap<>(blueprint.passthroughResistances);
+        physical.elementalDamageMultiplyer = new OrderedMap<>(blueprint.elementalDamageMultiplyer);
+
+        
+
+        return physical;
+    }
+
+    /**
+     * Applies the provided modification to the provided physical in place.
+     */
+    public void applyModification(Physical physical, Modification modification) {
+        // TODO - apply modification
     }
 }

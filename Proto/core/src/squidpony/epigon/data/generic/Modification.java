@@ -35,6 +35,7 @@ import squidpony.squidmath.ProbabilityTable;
  * to be maintained in reference to the object.
  */
 public class Modification extends EpiData {
+    public Modification parent;
     
     // Modification might change the effective heirarchy
     public PhysicalBlueprint parentOverwrite;

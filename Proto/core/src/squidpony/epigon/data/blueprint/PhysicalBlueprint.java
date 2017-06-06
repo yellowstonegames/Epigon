@@ -1,5 +1,6 @@
 package squidpony.epigon.data.blueprint;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,41 +30,42 @@ public class PhysicalBlueprint extends EpiData {
     public PhysicalBlueprint parent;
     public Set<PhysicalBlueprint> countsAs = new HashSet<>();
 
-    public char symbol = ' '; // default to an empty character sine NUL is not fun in data
+    public char symbol = ' '; // default to an empty character since NUL is not fun in data
     public SColor color;
 
-    public List<String> possibleAliases;
-    public List<Modification> possibleModifications;
-    public List<Modification> modifications;
-    public List<Modification> whenUsedAsMaterial;
+    public List<String> possibleAliases = new ArrayList<>();
+    public List<Modification> modifications = new ArrayList<>();
+    public List<Modification> possibleModifications = new ArrayList<>();
+    public List<Modification> whenUsedAsMaterial = new ArrayList<>();
 
-    public OrderedMap<Element, LiveValue> passthroughResistances;
-    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer;
+    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer = new OrderedMap<>();
+
     public SColor lightEmitted;
     public LiveValue lightEmittedStrength;
 
-    public List<ConditionBlueprint> possibleConditions;
-    public List<ConditionBlueprint> conditions;
+    public List<ConditionBlueprint> conditions = new ArrayList<>();
+    public List<ConditionBlueprint> possibleConditions = new ArrayList<>();
 
     public EnumMap<Stat, LiveValue> initialStats = new EnumMap<>(Stat.class);
-    public List<PhysicalBlueprint> commonInventory;
+    public List<PhysicalBlueprint> commonInventory = new ArrayList<>();
 
     /**
      * The list of physical objects it drops on destruction no matter what the source.
      */
-    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDrops;
+    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDrops = new ArrayList<>();
 
     /**
-     * A list of what the item might drop when a given element is used on it. This is in addition
-     * to the regular drop table.
+     * A list of what the item might drop when a given element is used on it. This is in addition to
+     * the regular drop table.
      */
-    public OrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDrops;
+    public OrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDrops = new OrderedMap<>();
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
      * The description will be used if no matching skill is available.
      */
-    public OrderedMap<Skill, OrderedMap<Rating, String>> identification;
+    public OrderedMap<Skill, OrderedMap<Rating, String>> identification = new OrderedMap<>();
 
     /**
      * When marked generic the item won't be created in the world.
@@ -76,9 +78,10 @@ public class PhysicalBlueprint extends EpiData {
     public boolean unique;
 
     /**
-     * The changes to this object (if any) that happen as its rarity is increased. As rarity increases
-     * each lower level modification is also included, so a given level's result will be the compounded
-     * application of all rarity levels up to and including that level's modification.
+     * The changes to this object (if any) that happen as its rarity is increased. As rarity
+     * increases each lower level modification is also included, so a given level's result will be
+     * the compounded application of all rarity levels up to and including that level's
+     * modification.
      */
     public EnumMap<Rating, List<Modification>> rarityModifications = new EnumMap<>(Rating.class);
 
@@ -90,7 +93,7 @@ public class PhysicalBlueprint extends EpiData {
     public boolean large;
 
     public Creature creatureData;
-    public List<Set<Profession>> possibleProfessions;
+    public List<Set<Profession>> possibleProfessions = new ArrayList<>();
 
     // NOTE - Ammunition and Wieldable need to be sets of how to treat them based on Abilities or CountsAs (not sure which yet)
     public Ammunition ammunitionData;
