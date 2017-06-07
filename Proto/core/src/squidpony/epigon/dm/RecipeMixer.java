@@ -172,6 +172,7 @@ public class RecipeMixer {
         creature.parent = other.parent;
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
+        creature.equippedData = other.equippedData; // TODO - copy into new equippedData
 
         return creature;
     }

@@ -7,19 +7,11 @@ import java.util.stream.Collectors;
 import com.badlogic.gdx.utils.JsonWriter;
 
 import squidpony.DataConverter;
-import squidpony.Maker;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.mixin.Humanoid;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.DataMaster;
-import squidpony.epigon.universe.LiveValue;
 
 
 /**
@@ -38,8 +30,8 @@ public class Kickball {
 
     private void printStones() {
         DataConverter convert = new DataConverter(JsonWriter.OutputType.json);
-        convert.setIgnoreUnknownFields(true);
-        convert.setUsePrototypes(true);
+        //convert.setIgnoreUnknownFields(true);
+        //convert.setUsePrototypes(true);
 
         List<PhysicalBlueprint> stones = Arrays.stream(Stone.values())
             .map(s -> makePhysicalFromStone(s))
@@ -74,22 +66,22 @@ public class Kickball {
         Physical sword = starter.sword;
 //        System.out.println(convert.prettyPrint(sword));
 
-        PhysicalBlueprint pj = starter.playerBlueprint;
+        //PhysicalBlueprint pj = starter.playerBlueprint;
 
 
 //        System.out.println(convert.prettyPrint(playerBlueprint));
 
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        playerBlueprint = convert.fromJson(PhysicalBlueprint.class, playerFile);
-        String json = convert.prettyPrint(pj);
+        //String json = convert.prettyPrint(pj);
 //        System.out.println(json);
-        pj = convert.fromJson(PhysicalBlueprint.class, json);
+        //pj = convert.fromJson(PhysicalBlueprint.class, json);
        // System.out.println(convert.prettyPrint(playerBlueprint));
 
         DataMaster dm = new DataMaster();
         dm.add(player);
         dm.add(sword);
-        dm.add(pj);
+        //dm.add(pj);
         System.out.println(convert.prettyPrint(dm.getKnown()));
     }
 }
