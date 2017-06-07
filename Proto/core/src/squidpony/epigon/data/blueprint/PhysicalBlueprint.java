@@ -33,6 +33,23 @@ public class PhysicalBlueprint extends EpiData {
     public char symbol = ' '; // default to an empty character since NUL is not fun in data
     public SColor color;
 
+    public double baseValue;
+
+    /**
+     * When marked generic the item won't be created in the world.
+     */
+    public boolean generic;
+
+    /**
+     * When marked as unique the item will only be created once at most per world.
+     */
+    public boolean unique;
+
+    /**
+     * Only one large thing can be in a tile at once
+     */
+    public boolean large;
+
     public List<String> possibleAliases = new ArrayList<>();
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<Modification> modifications = new ArrayList<>();
@@ -70,29 +87,12 @@ public class PhysicalBlueprint extends EpiData {
     public OrderedMap<Skill, OrderedMap<Rating, String>> identification = new OrderedMap<>();
 
     /**
-     * When marked generic the item won't be created in the world.
-     */
-    public boolean generic;
-
-    /**
-     * When marked as unique the item will only be created once at most per world.
-     */
-    public boolean unique;
-
-    /**
      * The changes to this object (if any) that happen as its rarity is increased. As rarity
      * increases each lower level modification is also included, so a given level's result will be
      * the compounded application of all rarity levels up to and including that level's
      * modification.
      */
     public EnumMap<Rating, List<Modification>> rarityModifications = new EnumMap<>(Rating.class);
-
-    public double baseValue;
-
-    /**
-     * Only one large thing can be in a tile at once
-     */
-    public boolean large;
 
     public Creature creatureData;
     public List<Set<Profession>> possibleProfessions = new ArrayList<>();

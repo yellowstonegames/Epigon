@@ -13,9 +13,11 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
+import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -63,14 +65,28 @@ public class RecipeMixer {
         return recipe;
     }
 
+    public Physical createFrom(PhysicalBlueprint blueprint){
+        return createFrom(blueprint, Rating.NONE);
+    }
+
     /**
      * Creates a specific instance of the provided blueprint.
      */
-    public Physical createFrom(PhysicalBlueprint blueprint) {
+    public Physical createFrom(PhysicalBlueprint blueprint, Rating rarity) {
+        if (blueprint.generic){
+            throw new IllegalArgumentException("Physical blueprint " + blueprint.name + " marked generic, cannot create.");
+        }
+
+        if (blueprint.unique){
+            // TODO - check for whether one has been created
+        }
+
         Physical physical = new Physical();
         physical.parent = blueprint;
         physical.symbol = blueprint.symbol;
+        physical.baseValue = blueprint.baseValue;
         physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
+        physical.large = blueprint.large;
 
         List<String> possibleNames = new ArrayList<>();
         possibleNames.addAll(blueprint.possibleAliases);
@@ -82,14 +98,6 @@ public class RecipeMixer {
 
         physical.whenUsedAsMaterial.addAll(blueprint.whenUsedAsMaterial);
 
-        for (Modification m : blueprint.modifications) {
-            applyModification(physical, m);
-        }
-
-        if (!blueprint.possibleModifications.isEmpty()) {
-            applyModification(physical, rng.getRandomElement(blueprint.possibleModifications));
-        }
-
         physical.passthroughResistances = new OrderedMap<>(blueprint.passthroughResistances);
         physical.elementalDamageMultiplyer = new OrderedMap<>(blueprint.elementalDamageMultiplyer);
 
@@ -97,11 +105,11 @@ public class RecipeMixer {
         physical.lightEmittedStrength = blueprint.lightEmittedStrength;
 
         for (ConditionBlueprint c : blueprint.conditions) {
-            physical.conditions.add(createFrom(c));
+            physical.applyCondition(createFrom(c));
         }
 
         if (!blueprint.possibleConditions.isEmpty()) {
-            physical.conditions.add(createFrom(rng.getRandomElement(blueprint.possibleConditions)));
+            physical.applyCondition(createFrom(rng.getRandomElement(blueprint.possibleConditions)));
         }
 
         blueprint.initialStats.entrySet().stream().forEach(kvp -> {
@@ -114,6 +122,36 @@ public class RecipeMixer {
             physical.inventory.add(createFrom(i));
         });
 
+        physical.physicalDrops = blueprint.physicalDrops;
+        physical.elementDrops = blueprint.elementDrops;
+
+        physical.identification.putAll(blueprint.identification);
+
+        physical.creatureData = createFrom(blueprint.creatureData);
+
+        // TODO - add rest of mixins
+
+        // finally work any modifications
+        for (Modification m : blueprint.modifications) {
+            applyModification(physical, m);
+        }
+
+        if (!blueprint.possibleModifications.isEmpty()) {
+            applyModification(physical, rng.getRandomElement(blueprint.possibleModifications));
+        }
+
+        for (Rating rating : Rating.values()){
+            List<Modification> mods = blueprint.rarityModifications.get(rating);
+            if (mods != null){
+                for (Modification m : mods) {
+                    applyModification(physical, m);
+                }
+            }
+            if (rarity == rating){ // Only process up to expected rarity level
+                break;
+            }
+        }
+
         return physical;
     }
 
@@ -122,6 +160,20 @@ public class RecipeMixer {
      */
     public Condition createFrom(ConditionBlueprint blueprint) {
         // TODO - create condition
+        return new Condition();
+    }
+
+    public Creature createFrom(Creature other){
+        if (other == null){
+            return null;
+        }
+
+        Creature creature = new Creature();
+        creature.parent = other.parent;
+        creature.skills.putAll(other.skills);
+        creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
+
+        return creature;
     }
 
     /**

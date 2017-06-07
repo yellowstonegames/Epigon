@@ -71,8 +71,8 @@ public class Modification extends EpiData {
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsOverwrite;
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsAdditive;
 
-    public EnumMap<Rating, List<Modification>> rarityModificationsOverwrite = new EnumMap<>(Rating.class);
-    public EnumMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumMap<>(Rating.class);
+    public EnumMap<Rating, List<Modification>> rarityModificationsOverwrite = new EnumMap<>(Rating.class); // Only for blueprints
+    public EnumMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumMap<>(Rating.class); // Only for blueprints
 
     public Boolean largeOverwrite;
 
