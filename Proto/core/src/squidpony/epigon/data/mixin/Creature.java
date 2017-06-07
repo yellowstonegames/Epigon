@@ -1,5 +1,6 @@
 package squidpony.epigon.data.mixin;
 
+import java.util.HashSet;
 import java.util.Set;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Skill;
@@ -14,8 +15,8 @@ import squidpony.squidmath.OrderedMap;
 public class Creature {
 
     public Creature parent;
-    public OrderedMap<Skill, Rating> skills;
-    public Set<Ability> abilities;
+    public OrderedMap<Skill, Rating> skills = new OrderedMap<>();
+    public Set<Ability> abilities = new HashSet<>();
 
     public boolean aware;//has noticed the player
 

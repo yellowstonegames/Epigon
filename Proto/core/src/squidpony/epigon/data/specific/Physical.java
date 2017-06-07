@@ -11,9 +11,11 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.generic.Modification;
+import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Ammunition;
 import squidpony.epigon.data.mixin.Container;
 import squidpony.epigon.data.mixin.Creature;
@@ -29,6 +31,7 @@ import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -42,6 +45,8 @@ public class Physical extends EpiData {
 
     public char symbol;
     public SColor color;
+    public double baseValue;
+    public boolean large;
 
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<String> appliedModifications = new ArrayList<>();
@@ -59,6 +64,10 @@ public class Physical extends EpiData {
 
     public List<Physical> inventory = new ArrayList<>();
     public Coord location;//world location
+
+    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDrops = new ArrayList<>();
+    public OrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDrops = new OrderedMap<>();
+    public OrderedMap<Skill, OrderedMap<Rating, String>> identification = new OrderedMap<>();
 
     public Creature creatureData;
     public Set<Profession> professions = new HashSet<>();

@@ -7,6 +7,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
 import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.LiveValue;
 
 
 /**
@@ -33,19 +34,20 @@ public class EpiTile {
     public double geResistance(Element key) {//TODO -- determine if resistance should be additive or just max baseValue
         double resistance = 0f;
         Double check;
+        LiveValue lv = new LiveValue();
         if (floor != null) {
-            resistance = floor.passthroughResistances.get(key);
+            resistance = floor.passthroughResistances.getOrDefault(key, lv).actual;
         }
         if (largeObject != null) {
-            check = largeObject.passthroughResistances.get(key);
+            check = largeObject.passthroughResistances.getOrDefault(key, lv).actual;
             if (check != null) {
                 resistance = Math.max(resistance, check);
             }
         }
         if (creature != null) {
-            check = creature.passthroughResistances.get(key);
+            check = creature.passthroughResistances.getOrDefault(key, lv).actual;
             if (check != null) {
-                resistance = Math.max(resistance, creature.passthroughResistances.get(key));
+                resistance = Math.max(resistance, creature.passthroughResistances.getOrDefault(key, lv).actual);
             }
         }
         return resistance;

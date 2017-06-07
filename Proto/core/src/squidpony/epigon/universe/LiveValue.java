@@ -24,6 +24,10 @@ public class LiveValue {
     public double inertia; // change in delta per turn
     public boolean stable; // when true inertia will not reverse the delta's sign whne it crosses zero
 
+    public LiveValue(){
+        this(1.0);
+    }
+
     public LiveValue(double base) {
         this.base = base;
         max = base;
