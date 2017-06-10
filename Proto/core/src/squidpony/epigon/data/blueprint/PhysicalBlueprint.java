@@ -108,6 +108,10 @@ public class PhysicalBlueprint extends EpiData {
     public Wieldable wieldableData;
     public Zappable zappableData;
 
+    public PhysicalBlueprint(){
+        initialStats.put(Stat.OPACITY, new LiveValue(100)); // default to opaque
+    }
+
     public boolean countsAs(PhysicalBlueprint blueprint) {
         if (this.equals(blueprint) || countsAs.contains(blueprint)) {
             return true;
