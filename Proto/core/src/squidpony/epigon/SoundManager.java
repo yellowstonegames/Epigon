@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * Singleton class which controls sound output.
@@ -16,6 +17,10 @@ import java.util.TreeMap;
  * @author Eben Howard - http://squidpony.com
  */
 public class SoundManager {
+
+    private static final String footstep = "footstep0";
+    private static final int totalFoosteps = 9;
+    private int lastFootstep = 0;
 
     private boolean musicLoaded = false, soundfxLoaded = false;
     private final Map<String, Sound> soundMap = new TreeMap<>();
@@ -77,9 +82,9 @@ public class SoundManager {
             loadSoundFXResources();
         }
 
-        Sound temp = (soundMap.get(key));
+        Sound temp = soundMap.get(key);
         if (temp == null) {
-            return;//track not found, continue current music selection
+            return;
         }
 
         temp.play(Prefs.getSoundfxVolume());
@@ -183,5 +188,17 @@ public class SoundManager {
     public void dispose() {
         unloadMusicResources();
         unloadSoundFXResources();
+    }
+
+    /**
+     * Plays a random footstep sound.
+     */
+    public void playFootstep(){
+        int step;
+        do {
+            step = rng.nextInt(totalFoosteps);
+        } while (step == lastFootstep);
+
+        playSoundFX(footstep + step);
     }
 }

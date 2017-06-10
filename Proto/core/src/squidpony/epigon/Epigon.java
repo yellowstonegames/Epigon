@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
@@ -32,9 +31,9 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import squidpony.epigon.playground.HandBuilt;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -103,13 +102,20 @@ public class Epigon extends Game {
     private Camera camera;
     private AnimatedEntity playerEntity;
 
+    // Audio
+    SoundManager sound;
+
+    // TEMP - hand build stuff for testing
+    HandBuilt handBuilt = new HandBuilt();
+
     @Override
     public void create() {
         System.out.println("Creating new game.");
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
         System.out.println("Loading sound manager...");
-        SoundManager sound = new SoundManager();
-        //sound.playSoundFX("footsteps-1");
+
+        sound = new SoundManager();
+        //sound.playSoundFX(SoundManager.FOOTSTEPS);
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -126,7 +132,7 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
         printText = DefaultResources.getStretchablePrintFont()
                 .width(5f).height(CELL_HEIGHT * 1.18f).initBySize();
-        messages = new LinesPanel<Color>(new GDXMarkup(), printText, 5);
+        messages = new LinesPanel<>(new GDXMarkup(), printText, 5);
         messages.clearingColor = null;
 
         //map = World.getDefaultMap();
@@ -158,20 +164,8 @@ public class Epigon extends Game {
         cursor = Coord.get(-1, -1);
 
         // Create an actual player
-        player = new Physical();
-        player.creatureData = new Creature();
-        player.creatureData.abilities = new HashSet<>();
-        player.name = "Great Hero";
-        Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValue lv = new LiveValue(rng.between(20, 100));
-            lv.actual = lv.base * rng.nextDouble();
-            player.stats.put(s, lv);
-        });
-
-        Physical sword = new Physical();
-        sword.color = SColor.SILVER;
-        sword.symbol = '/';
-        sword.name = "Sword";
+        player = handBuilt.player;
+        Physical sword = handBuilt.sword;
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
@@ -180,7 +174,7 @@ public class Epigon extends Game {
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
         GreasedRegion floors = new GreasedRegion(simpleChars, '.');
         player.location = floors.singleRandom(rng);
-        playerEntity = display.animateActor(player.location.x, player.location.y, '@', SColor.ALICE_BLUE);
+        playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
         // this is new, related to camera movement
         display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
@@ -203,10 +197,7 @@ public class Epigon extends Game {
     }
 
     /**
-     * Move the player if he isn't bumping into a wall or trying to go off the map somehow. In a
-     * fully-fledged game, this would not be organized like this, but this is a one-file demo.
-     *
-     * @param dir
+     * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
     private void move(Direction dir) {
         int newX = player.location.x + dir.deltaX;
@@ -221,6 +212,7 @@ public class Epigon extends Game {
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
             display.slide(playerEntity, newX, newY);
+            sound.playFootstep();
 
             display.addAction(
                 new TemporalAction(display.getAnimationDuration()) {

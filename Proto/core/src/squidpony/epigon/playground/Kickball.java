@@ -56,7 +56,7 @@ public class Kickball {
         convert.setIgnoreUnknownFields(true);
         convert.setUsePrototypes(false);
 
-        Starter starter = new Starter();
+        HandBuilt starter = new HandBuilt();
 
         // Create an actual player
         Physical player = starter.player;

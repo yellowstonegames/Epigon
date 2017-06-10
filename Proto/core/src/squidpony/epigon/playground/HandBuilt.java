@@ -1,6 +1,8 @@
 package squidpony.epigon.playground;
 
+import java.util.Arrays;
 import squidpony.Maker;
+import static squidpony.epigon.Epigon.rng;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
@@ -16,23 +18,29 @@ import squidpony.epigon.universe.Stat;
 /**
  * Contains objects to use to test out connections.
  */
-public class Starter {
+public class HandBuilt {
 
     public RecipeMixer mixer = new RecipeMixer();
     public PhysicalBlueprint playerBlueprint;
     public Physical player;
+    public PhysicalBlueprint swordBlueprint;
     public Physical sword;
 
-    public Starter() {
+    public HandBuilt() {
         playerBlueprint = new PhysicalBlueprint();
-        playerBlueprint.name = "Player";
+        playerBlueprint.name = "Plae Haa";
         playerBlueprint.description = "The main player's character.";
-        playerBlueprint.notes = "Voted most likely to die.";
+        playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
         playerBlueprint.color = SColor.FOX;
         playerBlueprint.large = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
-        playerBlueprint.initialStats.put(Stat.OPACITY, new LiveValue(100));
+        Arrays.stream(Stat.values()).forEach(s -> {
+            LiveValue lv = new LiveValue(rng.between(20, 100));
+            lv.actual = lv.base * (rng.nextDouble() + 0.1);
+            playerBlueprint.initialStats.put(s, lv);
+        });
+        playerBlueprint.initialStats.put(Stat.OPACITY, new LiveValue(100)); // Make sure player's opaque after randomizing stats
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
@@ -45,9 +53,13 @@ public class Starter {
         cb.skills.put(skill, Rating.SLIGHT);
 
         player = mixer.createFrom(playerBlueprint);
-        sword = new Physical();
-        sword.color = SColor.SILVER;
-        sword.symbol = '/';
-        sword.name = "Sword";
+
+
+        swordBlueprint = new PhysicalBlueprint();
+        swordBlueprint.name = "sword";
+        swordBlueprint.color =  SColor.SILVER;
+        swordBlueprint.symbol = '/';
+
+        sword = mixer.createFrom(swordBlueprint);
     }
 }
