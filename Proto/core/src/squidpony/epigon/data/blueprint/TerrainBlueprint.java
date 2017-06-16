@@ -17,6 +17,8 @@ public class TerrainBlueprint extends PhysicalBlueprint {
 
     public SColor background;
 
+    public Stone stone;
+    public Inclusion inclusion;
     public boolean extrusive;
     public boolean intrusive;
     public boolean metamorphic;

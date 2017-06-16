@@ -51,7 +51,7 @@ public class EpiTile {
         }
         if (creature != null) {
             check = creature.passthroughResistances.getOrDefault(key, lv).actual;
-            resistance = Math.max(resistance, creature.passthroughResistances.getOrDefault(key, lv).actual);
+            resistance = Math.max(resistance,check);
         }
         return resistance;
     }
@@ -70,9 +70,9 @@ public class EpiTile {
 
         //check in order of preference
         if (creature != null) {
-            rep = creature.parent.symbol;
+            rep = creature.symbol;
         } else if (largeObject != null) {
-            rep = largeObject.parent.symbol;
+            rep = largeObject.symbol;
         } else if (wallBlueprint != null) {
             rep = wallBlueprint.symbol;
         } else if (floor != null) {
