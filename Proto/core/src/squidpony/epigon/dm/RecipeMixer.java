@@ -73,6 +73,7 @@ public class RecipeMixer {
         TerrainBlueprint blueprint = new TerrainBlueprint();
         blueprint.color = stone.front;
         blueprint.background = stone.back;
+        blueprint.stone = stone;
         blueprint.extrusive = stone.extrusive;
         blueprint.intrusive = stone.intrusive;
         blueprint.metamorphic = stone.metamorphic;
@@ -88,7 +89,7 @@ public class RecipeMixer {
         terrain.background = blueprint.background;
         terrain.extrusive = blueprint.extrusive;
         terrain.metamorphic = blueprint.metamorphic;
-        terrain.sedimentary = terrain.sedimentary;
+        terrain.sedimentary = blueprint.sedimentary;
         return terrain;
     }
 

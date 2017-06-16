@@ -2,16 +2,19 @@ package squidpony.epigon.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import static squidpony.epigon.Epigon.BIG_MAP_HEIGHT;
+import static squidpony.epigon.Epigon.BIG_MAP_WIDTH;
 
 import static squidpony.epigon.Epigon.mixer;
+import static squidpony.epigon.Epigon.rng;
 
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.blueprint.TerrainBlueprint;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
-
-import squidpony.squidmath.RNG;
-import squidpony.squidmath.ThunderRNG;
+import squidpony.squidgrid.mapping.DungeonGenerator;
+import squidpony.squidgrid.mapping.DungeonUtility;
 
 /**
  * Creates and populates a world.
@@ -20,13 +23,13 @@ import squidpony.squidmath.ThunderRNG;
  */
 public class WorldGenerator {
 
-    private static List<Stone> wallList = new ArrayList<>(),
+    private static final List<Stone> wallList = new ArrayList<>(),
         sedimentaryList = new ArrayList<>(),
         intrusiveList = new ArrayList<>(),
         extrusiveList = new ArrayList<>(),
         metamorphicList = new ArrayList<>();
 
-    private static List<Inclusion> gemList = new ArrayList<>(),
+    private static final List<Inclusion> gemList = new ArrayList<>(),
         sedimentaryGemList = new ArrayList<>(),
         intrusiveGemList = new ArrayList<>(),
         extrusiveGemList = new ArrayList<>(),
@@ -34,8 +37,6 @@ public class WorldGenerator {
 
     private static boolean initialized = false;
     private static int maxRecurse = 10;
-
-    private RNG rng = new RNG(new ThunderRNG());
 
     private EpiMap[] world;
     private int width, height, depth;
@@ -58,6 +59,41 @@ public class WorldGenerator {
         }
 
         mineralPlacement();
+        bubbleMap(false);
+        //intrudeMap();
+
+        makeSolid();
+
+        DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
+        sdg.addGrass(15);
+        sdg.addWater(15);
+        sdg.addDoors(20, true);
+        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
+
+        EpiTile tile;
+        for (int x = 0; x < width; x++){
+            for (int y = 0; y < height; y++){
+                char c = simpleChars[x][y];
+                switch(c){
+                    case '.':
+                        tile = world[0].contents[x][y];
+                        tile.wallBlueprint = null;
+                        break;
+                    case '#':
+                        tile = world[0].contents[x][y];
+                        tile.wallBlueprint = mixer.createFrom(tile.floorBlueprint.stone); // TODO - cache
+                        tile.wallBlueprint.symbol = '#';
+                    break;
+                    default:
+                        tile = world[0].contents[x][y];
+                        tile.largeObject = new Physical();
+                        tile.largeObject.symbol = EpiMap.altSymbolOf(c);
+                        tile.largeObject.color = EpiMap.colorOf(c);
+                        tile.largeObject.large = true;
+                        break;
+                }
+            }
+        }
 
         return world;
     }
@@ -100,6 +136,7 @@ public class WorldGenerator {
      * Randomly places minerals in the provided map.
      */
     private void mineralPlacement() {
+        TerrainBlueprint floor = mixer.createFrom(rng.getRandomElement(wallList));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -109,32 +146,56 @@ public class WorldGenerator {
                         world[z].contents[x][y] = tile;
                     }
 
-                    tile.floorBlueprint = mixer.createFrom(rng.getRandomElement(wallList));
+                    tile.floorBlueprint = floor;
                 }
             }
         }
     }
 
-    private void bubbleMap() {
+    /**
+     * Makes every block contain a full wall. Should be called after floor manipulations are done to
+     * have walls match the floor under them.
+     */
+    private void makeSolid(){
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                for (int z = 0; z < depth; z++) {
+                    EpiTile tile = world[z].contents[x][y];
+                    tile.wallBlueprint = mixer.createFrom(tile.floorBlueprint.stone); // TODO - cache
+                    tile.wallBlueprint.symbol = '#';
+                }
+            }
+        }
+    }
+
+    private void bubbleMap(boolean useExistingFloor) {
+        int quantity = (width * height) / 10;
+        int sizeX = 16;
+        int sizeY = 15;
+        int sizeZ = 2;
         int centerX = 0;
         int centerY = 0;
         int centerZ = 0;
         int counter = 0;
         TerrainBlueprint blueprint = null;
-        for (int growStep = 0; growStep < 15; growStep++) { //number of times to grow the bubble
+        for (int growStep = 0; growStep < quantity; growStep++) {
             if (counter <= 0) {
                 counter = rng.nextInt(3);
-                centerX = rng.between(1, width);// rng.nextInt(width - 2) + 1;
-                centerY = rng.between(1, height);// rng.nextInt(height - 2) + 1;
+                centerX = rng.between(1, width);
+                centerY = rng.between(1, height);
                 centerZ = rng.nextInt(depth);
 
-                blueprint = world[centerZ].contents[centerX][centerY].floorBlueprint;
+                if (useExistingFloor) {
+                    blueprint = world[centerZ].contents[centerX][centerY].floorBlueprint;
+                } else {
+                    blueprint = mixer.createFrom(rng.getRandomElement(wallList));
+                }
             }
 
             counter--;
-            int bubbleSizeX = rng.nextInt(6) + 1;//this will be the approximate size of the bubbles
-            int bubbleSizeY = rng.nextInt(4) + 1;//this will be the approximate size of the bubbles
-            int bubbleSizeZ = rng.nextInt(2) + 1;//this will be the approximate size of the bubbles
+            int bubbleSizeX = rng.nextInt(sizeX) + 1;//this will be the approximate size of the bubbles
+            int bubbleSizeY = rng.nextInt(sizeY) + 1;//this will be the approximate size of the bubbles
+            int bubbleSizeZ = rng.nextInt(sizeZ) + 2;//this will be the approximate size of the bubbles
             int bubbleGrowXStart = centerX - bubbleSizeX - rng.nextInt(2);
             int bubbleGrowXEnd = centerX + bubbleSizeX + rng.nextInt(2);
             for (int bubbleGrowZ = centerZ - bubbleSizeZ - rng.nextInt(1); bubbleGrowZ < (centerZ + bubbleSizeZ + rng.nextInt(1)); bubbleGrowZ++) {

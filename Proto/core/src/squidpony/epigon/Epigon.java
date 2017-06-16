@@ -27,6 +27,7 @@ import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.ThunderRNG;
 
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.dm.RecipeMixer;
@@ -45,9 +46,9 @@ public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
     public static final int MAP_WIDTH = 100;
-    public static final int BIG_MAP_WIDTH = (int) (MAP_WIDTH * 1.2);
+    public static final int BIG_MAP_WIDTH = (int) (MAP_WIDTH * 1);
     public static final int MAP_HEIGHT = 30;
-    public static final int BIG_MAP_HEIGHT = MAP_HEIGHT * 4;
+    public static final int BIG_MAP_HEIGHT = MAP_HEIGHT * 1;
 
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
@@ -80,8 +81,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL);
-
+    public static final StatefulRNG rng = new StatefulRNG(new ThunderRNG()); // new StatefulRNG(0xBEEFD00DBABAB00EL);
     public static final RecipeMixer mixer = new RecipeMixer();
 
     // 
@@ -143,14 +143,6 @@ public class Epigon extends Game {
 
         //map = World.getDefaultMap();
         Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
-//        DungeonGenerator sdg = new DungeonGenerator(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, rng);
-//        sdg.addGrass(15);
-//        sdg.addWater(15);
-//        sdg.addDoors(20, true);
-//        simpleChars = DungeonUtility.closeDoors(sdg.generate());
-//        map = new EpiMap(simpleChars);
-//        display = new SquidLayers(MAP_WIDTH, MAP_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSlabFont(),
-//            DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
 
         Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
 

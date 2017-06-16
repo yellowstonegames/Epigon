@@ -45,7 +45,7 @@ public class SoundManager {
         for (FileHandle f : Gdx.files.internal("sound fx").list()) {
             String name = f.name();
             if (readableFileTypes.contains(name.substring(name.lastIndexOf('.') + 1))) {
-                System.out.println("Loading sound fx: " + name);
+                //System.out.println("Loading sound fx: " + name);
                 Sound sound = Gdx.audio.newSound(Gdx.files.internal("sound fx/" + name));
                 soundMap.put(f.nameWithoutExtension(), sound);
             }
