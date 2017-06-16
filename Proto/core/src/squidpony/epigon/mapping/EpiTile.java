@@ -1,6 +1,7 @@
 package squidpony.epigon.mapping;
 
 import java.util.Stack;
+import squidpony.epigon.data.blueprint.TerrainBlueprint;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -8,7 +9,6 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
-
 
 /**
  * This class holds the objects in a single grid square.
@@ -20,7 +20,9 @@ import squidpony.epigon.universe.LiveValue;
  */
 public class EpiTile {
 
+    public TerrainBlueprint floorBlueprint; // Goes away if the actual floor is uniqued in some way
     public Terrain floor;
+    public TerrainBlueprint wallBlueprint; // Counts as the large object here, instantiate when needed
     public Physical largeObject;
     public Stack<Physical> smallObjects = new Stack<>();
     public Physical creature;
@@ -37,18 +39,19 @@ public class EpiTile {
         LiveValue lv = new LiveValue();
         if (floor != null) {
             resistance = floor.passthroughResistances.getOrDefault(key, lv).actual;
+        } else if (floorBlueprint != null) {
+            resistance = floorBlueprint.passthroughResistances.getOrDefault(key, lv).actual;
         }
         if (largeObject != null) {
             check = largeObject.passthroughResistances.getOrDefault(key, lv).actual;
-            if (check != null) {
-                resistance = Math.max(resistance, check);
-            }
+            resistance = Math.max(resistance, check);
+        } else if (largeObject != null) {
+            check = wallBlueprint.passthroughResistances.getOrDefault(key, lv).actual;
+            resistance = Math.max(resistance, check);
         }
         if (creature != null) {
             check = creature.passthroughResistances.getOrDefault(key, lv).actual;
-            if (check != null) {
-                resistance = Math.max(resistance, creature.passthroughResistances.getOrDefault(key, lv).actual);
-            }
+            resistance = Math.max(resistance, creature.passthroughResistances.getOrDefault(key, lv).actual);
         }
         return resistance;
     }
@@ -70,8 +73,12 @@ public class EpiTile {
             rep = creature.parent.symbol;
         } else if (largeObject != null) {
             rep = largeObject.parent.symbol;
+        } else if (wallBlueprint != null) {
+            rep = wallBlueprint.symbol;
         } else if (floor != null) {
             rep = floor.symbol;
+        } else if (floorBlueprint != null) {
+            rep = floorBlueprint.symbol;
         }
 
         return rep;
@@ -87,7 +94,9 @@ public class EpiTile {
         SColor back = null;//indicates that no particular color is used
 
         if (floor != null) {
-            back = floor.color;
+            back = floor.background;
+        } else if (floorBlueprint != null) {
+            back = floorBlueprint.background;
         }
 
         return back;
@@ -101,8 +110,12 @@ public class EpiTile {
             fore = creature.color;
         } else if (largeObject != null) {
             fore = largeObject.color;
+        } else if (wallBlueprint != null) {
+            fore = wallBlueprint.color;
         } else if (floor != null) {
             fore = floor.color;
+        } else if (floorBlueprint != null) {
+            fore = floorBlueprint.color;
         }
 
         return fore;

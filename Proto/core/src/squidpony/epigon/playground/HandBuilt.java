@@ -32,7 +32,7 @@ public class HandBuilt {
         playerBlueprint.description = "The main player's character.";
         playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
-        playerBlueprint.color = SColor.FOX;
+        playerBlueprint.color = SColor.BRIGHT_PINK;
         playerBlueprint.large = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
         Arrays.stream(Stat.values()).forEach(s -> {

@@ -1,5 +1,7 @@
 package squidpony.epigon.data.specific;
 
+import squidpony.squidgrid.gui.gdx.SColor;
+
 /**
  * A specific instance of a terrain unit.
  *
@@ -10,7 +12,10 @@ package squidpony.epigon.data.specific;
  */
 public class Terrain extends Physical {
 
-    public boolean intrusive;
+    public SColor background;
+
     public boolean extrusive;
+    public boolean intrusive;
+    public boolean metamorphic;
     public boolean sedimentary;
 }

@@ -9,11 +9,11 @@ public enum Stat {
     // Physical Offense
     AIM("AI", "Controls chance of hitting targets with physical attacks."),
     IMPACT("IM", "Controls how much damage is dealt with physical attacks."),
-    PRECISION("PR", "Controls chance of critical damage with physical attacks"),
+    //PRECISION("PR", "Controls chance of critical damage with physical attacks"), // turned into skill
 
     // Physical Defense
     AGILITY("AG", "Controls chance to completely avoid enemy physical attacks."), // TODO- change to DODGE ?
-    DEFLECTION("DE", "Controls chance to reduce the base damage dealt by enemy physical attacks."),
+    //DEFLECTION("DE", "Controls chance to reduce the base damage dealt by enemy physical attacks."), // turned into skill
     TOUGHNESS("TO", "Controls chance to reduce the critical damage dealt by enemy physical attacks."),
 
     // Magical
@@ -55,7 +55,7 @@ public enum Stat {
     OPACITY("OP", "How much light is blocked."),
     STRUCTURE("ST", "How much of itself there is. When this is zero the object no longer exists.");
 
-    public static final Stat[] physicals = {AIM, IMPACT, PRECISION, AGILITY, DEFLECTION, TOUGHNESS};
+    public static final Stat[] physicals = {AIM, IMPACT, AGILITY, TOUGHNESS};
 
     public static final Stat[] magicals = {POTENCY, ATTUNEMENT, DOMINION};
 
