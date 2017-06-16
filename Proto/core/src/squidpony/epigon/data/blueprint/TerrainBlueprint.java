@@ -15,13 +15,10 @@ import squidpony.squidgrid.gui.gdx.SColor;
  */
 public class TerrainBlueprint extends PhysicalBlueprint {
 
-    public Stone stone;
+    public SColor background;
 
-    public SColor getBackground() {
-        return stone == null ? SColor.BLACK : stone.back;
-    }
-
-    public SColor getColor() {
-        return stone == null ? SColor.GRAY : stone.front;
-    }
+    public boolean extrusive;
+    public boolean intrusive;
+    public boolean metamorphic;
+    public boolean sedimentary;
 }

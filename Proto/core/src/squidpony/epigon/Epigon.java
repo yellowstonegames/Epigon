@@ -1,5 +1,10 @@
 package squidpony.epigon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -13,27 +18,24 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Stat;
+
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidgrid.mapping.DungeonGenerator;
-import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.dm.RecipeMixer;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -43,9 +45,9 @@ public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
     public static final int MAP_WIDTH = 100;
-    public static final int BIG_MAP_WIDTH = MAP_WIDTH * 3;
+    public static final int BIG_MAP_WIDTH = (int) (MAP_WIDTH * 1.2);
     public static final int MAP_HEIGHT = 30;
-    public static final int BIG_MAP_HEIGHT = MAP_HEIGHT * 3;
+    public static final int BIG_MAP_HEIGHT = MAP_HEIGHT * 4;
 
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_HEIGHT;
@@ -80,6 +82,8 @@ public class Epigon extends Game {
 
     public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL);
 
+    public static final RecipeMixer mixer = new RecipeMixer();
+
     // 
     SpriteBatch batch;
     private SquidLayers display;
@@ -95,6 +99,7 @@ public class Epigon extends Game {
     private ArrayList<Coord> awaitedMoves;
     private int framesWithoutAnimation;
     private TextCellFactory printText;
+    private WorldGenerator worldGenerator;
 
     // WIP stuff, needs large sample map
     private Stage stage, messageStage, infoStage, contextStage;
@@ -103,10 +108,10 @@ public class Epigon extends Game {
     private AnimatedEntity playerEntity;
 
     // Audio
-    SoundManager sound;
+    private SoundManager sound;
 
     // TEMP - hand build stuff for testing
-    HandBuilt handBuilt = new HandBuilt();
+    private HandBuilt handBuilt = new HandBuilt();
 
     @Override
     public void create() {
@@ -115,7 +120,8 @@ public class Epigon extends Game {
         System.out.println("Loading sound manager...");
 
         sound = new SoundManager();
-        //sound.playSoundFX(SoundManager.FOOTSTEPS);
+
+        worldGenerator = new WorldGenerator();
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -131,23 +137,30 @@ public class Epigon extends Game {
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
         printText = DefaultResources.getStretchablePrintFont()
-                .width(5f).height(CELL_HEIGHT * 1.18f).initBySize();
+            .width(5f).height(CELL_HEIGHT * 1.18f).initBySize();
         messages = new LinesPanel<>(new GDXMarkup(), printText, 5);
         messages.clearingColor = null;
 
         //map = World.getDefaultMap();
         Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
-        DungeonGenerator sdg = new DungeonGenerator(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, rng);
-        sdg.addGrass(15);
-        sdg.addWater(15);
-        sdg.addDoors(20, true);
-        simpleChars = DungeonUtility.closeDoors(sdg.generate());
-        map = new EpiMap(simpleChars);
+//        DungeonGenerator sdg = new DungeonGenerator(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, rng);
+//        sdg.addGrass(15);
+//        sdg.addWater(15);
+//        sdg.addDoors(20, true);
+//        simpleChars = DungeonUtility.closeDoors(sdg.generate());
+//        map = new EpiMap(simpleChars);
+//        display = new SquidLayers(MAP_WIDTH, MAP_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSlabFont(),
+//            DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
+
+        Coord.expandPoolTo(BIG_MAP_WIDTH, BIG_MAP_HEIGHT);
+
+        map = worldGenerator.buildWorld(BIG_MAP_WIDTH, BIG_MAP_HEIGHT, 1)[0];
+        simpleChars = map.simpleChars();
         display = new SquidLayers(MAP_WIDTH, MAP_HEIGHT, CELL_WIDTH, CELL_HEIGHT, DefaultResources.getStretchableSlabFont(),
             DefaultResources.getSCC(), DefaultResources.getSCC(), simpleChars);
 
         //display.getTextFactory().fit(Arrays.deepToString(simpleMap)); // not currently needed
-        display.setTextSize(CELL_WIDTH+2, CELL_HEIGHT+2); // weirdly, this seems to help with flicker
+        display.setTextSize(CELL_WIDTH + 2, CELL_HEIGHT + 2); // weirdly, this seems to help with flicker
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.13f);
 
@@ -248,7 +261,7 @@ public class Epigon extends Game {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
-                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), SColor.DB_INK);
+                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor());
                 } else {
                     display.put(x, y, '`', SColor.SLATE, SColor.DB_INK);
                 }

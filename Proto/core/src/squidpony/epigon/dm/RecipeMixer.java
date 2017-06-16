@@ -1,24 +1,28 @@
 package squidpony.epigon.dm;
 
+import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.List;
-import squidpony.epigon.Epigon;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
-import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.specific.Recipe;
+import java.util.stream.Stream;
+
+import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
+import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Recipe;
+import squidpony.epigon.Epigon;
+import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.blueprint.TerrainBlueprint;
+import squidpony.epigon.data.specific.Terrain;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
-import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -59,13 +63,36 @@ public class RecipeMixer {
 
         recipe.result = new OrderedMap<>();
 
-        // TODO - modify resulsts based on chosen optionals
+        // TODO - modify results based on chosen optionals
         recipe.result.putAll(blueprint.result);
 
         return recipe;
     }
 
-    public Physical createFrom(PhysicalBlueprint blueprint){
+    public TerrainBlueprint createFrom(Stone stone){
+        TerrainBlueprint blueprint = new TerrainBlueprint();
+        blueprint.color = stone.front;
+        blueprint.background = stone.back;
+        blueprint.extrusive = stone.extrusive;
+        blueprint.intrusive = stone.intrusive;
+        blueprint.metamorphic = stone.metamorphic;
+        blueprint.sedimentary = stone.sedimentary;
+        blueprint.name = stone.toString();
+        blueprint.baseValue = stone.value;
+        blueprint.symbol = '.';
+        return blueprint;
+    }
+
+    public Terrain createFrom(TerrainBlueprint blueprint){
+        Terrain terrain = (Terrain)createFrom((PhysicalBlueprint)blueprint);
+        terrain.background = blueprint.background;
+        terrain.extrusive = blueprint.extrusive;
+        terrain.metamorphic = blueprint.metamorphic;
+        terrain.sedimentary = terrain.sedimentary;
+        return terrain;
+    }
+
+    public Physical createFrom(PhysicalBlueprint blueprint) {
         return createFrom(blueprint, Rating.NONE);
     }
 
@@ -73,11 +100,11 @@ public class RecipeMixer {
      * Creates a specific instance of the provided blueprint.
      */
     public Physical createFrom(PhysicalBlueprint blueprint, Rating rarity) {
-        if (blueprint.generic){
+        if (blueprint.generic) {
             throw new IllegalArgumentException("Physical blueprint " + blueprint.name + " marked generic, cannot create.");
         }
 
-        if (blueprint.unique){
+        if (blueprint.unique) {
             // TODO - check for whether one has been created
         }
 
@@ -130,7 +157,6 @@ public class RecipeMixer {
         physical.creatureData = createFrom(blueprint.creatureData);
 
         // TODO - add rest of mixins
-
         // finally work any modifications
         for (Modification m : blueprint.modifications) {
             applyModification(physical, m);
@@ -140,14 +166,14 @@ public class RecipeMixer {
             applyModification(physical, rng.getRandomElement(blueprint.possibleModifications));
         }
 
-        for (Rating rating : Rating.values()){
+        for (Rating rating : Rating.values()) {
             List<Modification> mods = blueprint.rarityModifications.get(rating);
-            if (mods != null){
+            if (mods != null) {
                 for (Modification m : mods) {
                     applyModification(physical, m);
                 }
             }
-            if (rarity == rating){ // Only process up to expected rarity level
+            if (rarity == rating) { // Only process up to expected rarity level
                 break;
             }
         }
@@ -163,8 +189,8 @@ public class RecipeMixer {
         return new Condition();
     }
 
-    public Creature createFrom(Creature other){
-        if (other == null){
+    public Creature createFrom(Creature other) {
+        if (other == null) {
             return null;
         }
 

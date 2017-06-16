@@ -3,8 +3,11 @@ package squidpony.epigon.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
+import static squidpony.epigon.Epigon.mixer;
+
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.specific.Terrain;
 
 import squidpony.squidmath.RNG;
@@ -106,7 +109,7 @@ public class WorldGenerator {
                         world[z].contents[x][y] = tile;
                     }
 
-                    tile.floor = new Terrain();//(Stone.values()[rng.nextInt(Stone.values().length)]));
+                    tile.floorBlueprint = mixer.createFrom(rng.getRandomElement(wallList));
                 }
             }
         }
@@ -117,7 +120,7 @@ public class WorldGenerator {
         int centerY = 0;
         int centerZ = 0;
         int counter = 0;
-        Terrain terrain = new Terrain();
+        TerrainBlueprint blueprint = null;
         for (int growStep = 0; growStep < 15; growStep++) { //number of times to grow the bubble
             if (counter <= 0) {
                 counter = rng.nextInt(3);
@@ -125,7 +128,7 @@ public class WorldGenerator {
                 centerY = rng.between(1, height);// rng.nextInt(height - 2) + 1;
                 centerZ = rng.nextInt(depth);
 
-                terrain = world[centerZ].contents[centerX][centerY].floor;
+                blueprint = world[centerZ].contents[centerX][centerY].floorBlueprint;
             }
 
             counter--;
@@ -138,7 +141,7 @@ public class WorldGenerator {
                 for (int bubbleGrowX = bubbleGrowXStart; bubbleGrowX < bubbleGrowXEnd; bubbleGrowX++) {
                     for (int bubbleGrowY = centerY - bubbleSizeY - rng.nextInt(2); bubbleGrowY < (centerY + bubbleSizeY + rng.nextInt(2)); bubbleGrowY++) {
                         if (pointInBounds(bubbleGrowX, bubbleGrowY, bubbleGrowZ)) {
-                            world[bubbleGrowZ].contents[bubbleGrowX][bubbleGrowY].floor = terrain;
+                            world[bubbleGrowZ].contents[bubbleGrowX][bubbleGrowY].floorBlueprint = blueprint;
                         }
                         /* mini-stagger walk here */
                         for (int m = 0; m < rng.nextInt(3); m++) {
@@ -146,7 +149,7 @@ public class WorldGenerator {
                             int newY = bubbleGrowY - rng.between(-1, 2);//rng.nextInt(2) - 1);
                             int newZ = bubbleGrowZ - rng.between(-1, 2);//rng.nextInt(2) - 1);
                             if (pointInBounds(newX, newY, newZ)) {
-                                world[newZ].contents[newX][newY].floor = terrain;
+                                world[newZ].contents[newX][newY].floorBlueprint = blueprint;
                             }
                         }
                     }
@@ -178,7 +181,7 @@ public class WorldGenerator {
             for (x = 1; x < (width - 1); x++) {
                 for (y = 1; y < (height - 1); y++) {
                     if (y < (m * x + b)) {
-                        world[z].contents[x][y].floor = world[z + 1].contents[x][y].floor;
+                        world[z].contents[x][y].floorBlueprint = world[z + 1].contents[x][y].floorBlueprint;
                     }
                 }
             }
@@ -230,7 +233,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = new Terrain();//intruder);
+                        world[z].contents[x][y].floorBlueprint = mixer.createFrom(intruder); // TODO - get from cache
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -242,7 +245,7 @@ public class WorldGenerator {
     }
 
     private void extrudeMap() {
-        Terrain terrain;
+        TerrainBlueprint blueprint;
         Stone tempWall = Stone.ANDESITE;
         Stone extruder = extrusiveList.get(rng.nextInt(extrusiveList.size()));
         int extrudeX = -1;
@@ -254,9 +257,9 @@ public class WorldGenerator {
             for (int n = 0; n < maxRecurse; n++) {
                 extrudeX = rng.nextInt(width - 2) + 1;
                 extrudeY = rng.nextInt(height - 2) + 1;
-                terrain = world[testZ].contents[extrudeX][extrudeY].floor;
+                blueprint = world[testZ].contents[extrudeX][extrudeY].floorBlueprint;
 
-                if ((terrain.extrusive) || (terrain.intrusive)) {
+                if ((blueprint.extrusive) || (blueprint.intrusive)) {
                     extrudeZ = testZ;
                     break test_for_igneous;
                 }
@@ -274,7 +277,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = new Terrain();//extruder);
+                                world[z].contents[x][y].floorBlueprint = mixer.createFrom(extruder); // TODO - cache
                             }
                         }
                     }
@@ -284,7 +287,7 @@ public class WorldGenerator {
     }
 
     private void metamorphoseMap() {
-        Terrain[][][] near = new Terrain[3][3][3];
+        TerrainBlueprint[][][] near = new TerrainBlueprint[3][3][3];
         Stone changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
@@ -302,15 +305,15 @@ public class WorldGenerator {
                     for (int a = 0; a < 3; a++) {//build array of near objects
                         for (int b = 0; b < 3; b++) {
                             for (int c = 0; c < 3; c++) {
-                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floor : null;
+                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floorBlueprint : null;
                             }
                         }
                     }
 
                     test_for_change:
-                    for (Terrain testing1[][] : near) {
-                        for (Terrain testing2[] : testing1) {
-                            for (Terrain test : testing2) {
+                    for (TerrainBlueprint testing1[][] : near) {
+                        for (TerrainBlueprint testing2[] : testing1) {
+                            for (TerrainBlueprint test : testing2) {
                                 if (test.sedimentary) {
                                     sedimentary = true;
                                 }
@@ -328,7 +331,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floor = new Terrain();//changer);
+                                world[j].contents[i][k].floorBlueprint = mixer.createFrom(changer); // TODO - cache
                             }
                         }
                     }
@@ -349,15 +352,15 @@ public class WorldGenerator {
                     for (int a = 0; a < 3; a++) {//build array of near objects
                         for (int b = 0; b < 3; b++) {
                             for (int c = 0; c < 3; c++) {
-                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floor : null;
+                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floorBlueprint : null;
                             }
                         }
                     }
 
                     test_for_change:
-                    for (Terrain testing1[][] : near) {
-                        for (Terrain testing2[] : testing1) {
-                            for (Terrain test : testing2) {
+                    for (TerrainBlueprint testing1[][] : near) {
+                        for (TerrainBlueprint testing2[] : testing1) {
+                            for (TerrainBlueprint test : testing2) {
                                 if (test.sedimentary) {
                                     sedimentary = true;
                                 }
@@ -375,7 +378,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floor = new Terrain();//changer);
+                                world[j].contents[i][k].floorBlueprint = mixer.createFrom(changer); // TODO - cache
                             }
                         }
                     }

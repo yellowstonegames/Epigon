@@ -45,7 +45,7 @@ public class Kickball {
 
     private PhysicalBlueprint makePhysicalFromStone(Stone stone) {
         PhysicalBlueprint pb = new PhysicalBlueprint();
-        pb.name = stone.getName();
+        pb.name = stone.toString();
         pb.color = stone.front;
 
         return pb;
