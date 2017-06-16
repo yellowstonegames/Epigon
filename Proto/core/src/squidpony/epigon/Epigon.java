@@ -112,6 +112,7 @@ public class Epigon extends Game {
 
     // TEMP - hand build stuff for testing
     private HandBuilt handBuilt = new HandBuilt();
+    private SquidColorCenter colorCenter;
 
     @Override
     public void create() {
@@ -120,6 +121,7 @@ public class Epigon extends Game {
         System.out.println("Loading sound manager...");
 
         sound = new SoundManager();
+        colorCenter = new SquidColorCenter();
 
         worldGenerator = new WorldGenerator();
 
@@ -253,7 +255,7 @@ public class Epigon extends Game {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
-                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor());
+                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), colorCenter.dimmest(tile.getBackgroundColor()));
                 } else {
                     display.put(x, y, '`', SColor.SLATE, SColor.DB_INK);
                 }
