@@ -21,6 +21,7 @@ import squidpony.epigon.Epigon;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 

@@ -51,8 +51,8 @@ public class Physical extends EpiData {
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<String> appliedModifications = new ArrayList<>();
 
-    public OrderedMap<Element, LiveValue> passthroughResistances;
-    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer;
+    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer = new OrderedMap<>();
 
     public SColor lightEmitted;
     public LiveValue lightEmittedStrength;

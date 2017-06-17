@@ -18,6 +18,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
@@ -35,8 +39,11 @@ import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.FOV;
+import squidpony.squidgrid.Radius;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -81,7 +88,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final StatefulRNG rng = new StatefulRNG(new ThunderRNG()); // new StatefulRNG(0xBEEFD00DBABAB00EL);
+    public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL); //new StatefulRNG(new ThunderRNG()); //
     public static final RecipeMixer mixer = new RecipeMixer();
 
     // 
@@ -113,6 +120,8 @@ public class Epigon extends Game {
     // TEMP - hand build stuff for testing
     private HandBuilt handBuilt = new HandBuilt();
     private SquidColorCenter colorCenter;
+    private FOV fov = new FOV(FOV.SHADOW);
+    private double[][] fovResult = new double[BIG_MAP_WIDTH][BIG_MAP_HEIGHT];
 
     @Override
     public void create() {
@@ -187,9 +196,23 @@ public class Epigon extends Game {
         display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
 
-        playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.MANHATTAN);
+        playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.CHEBYSHEV);
+        double[][] resists = map.resistances(Element.LIGHT);
+        for(int x =0;x<BIG_MAP_WIDTH;x++){
+            for(int y = 0; y< BIG_MAP_HEIGHT; y++){
+                if (resists[x][y] >= 1){
+                    resists[x][y] = DijkstraMap.WALL;
+                } else {
+                    resists[x][y] = DijkstraMap.FLOOR;
+                }
+            }
+        }
+        //playerToCursor.initializeCost(resists);
+
+        fovResult = fov.calculateFOV(map.resistances(Element.AIR), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
+
         playerToCursor.setGoal(player.location);
-        playerToCursor.scan(null);
+        playerToCursor.scan(calculateBlocked());
 
         bgColor = SColor.DB_INK;
 
@@ -245,22 +268,50 @@ public class Epigon extends Game {
         }
     }
 
+    private Collection<Coord> calculateBlocked() {
+        Set<Coord> blocked = new HashSet<>();
+        for (int x = 0; x < BIG_MAP_WIDTH; x++) {
+            for (int y = 0; y < BIG_MAP_HEIGHT; y++) {
+                if (fovResult[x][y] <= 0) {
+                    blocked.add(Coord.get(x, y));
+                }
+            }
+        }
+        return blocked;
+    }
+
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the
      * player.
      */
     public void putMap() {
+        fovResult = fov.calculateFOV(map.resistances(Element.AIR), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
+        
+        playerToCursor.setGoal(player.location);
+        playerToCursor.scan(calculateBlocked());
+        
         int offsetX = display.getGridOffsetX(), offsetY = display.getGridOffsetY();
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     EpiTile tile = map.contents[x][y];
-                    display.put(x, y, tile.getSymbol(), tile.getForegroundColor(), colorCenter.dimmest(tile.getBackgroundColor()));
+                    float f = (float)fovResult[x][y];
+                    Color fore;
+                    if (f > 0){
+                        fore = colorCenter.lerp(tile.getForegroundColor(), SColor.DB_INK, 1f - f);
+                    } else {
+                        fore = SColor.MAUVE;
+                    }
+                    Color back = colorCenter.lerp(colorCenter.dimmest(tile.getBackgroundColor()), SColor.DB_INK, 1f - f);
+                    display.put(x, y, tile.getSymbol(), fore, back);
                 } else {
-                    display.put(x, y, '`', SColor.SLATE, SColor.DB_INK);
+                    display.put(x, y, ' ', SColor.SLATE, SColor.DB_INK);
                 }
             }
         }
+
+        // Clear the tile the player is on
+        display.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
 
         SColor front;
         SColor back;
@@ -323,11 +374,11 @@ public class Epigon extends Game {
                     Coord m = awaitedMoves.remove(0);
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
-                    if(awaitedMoves.isEmpty())
-                    {
+                    if (awaitedMoves.isEmpty()) {
                         // the next two lines remove any lingering data needed for earlier paths
                         playerToCursor.clearGoals();
                         playerToCursor.resetMap();
+
                         // the next line marks the player as a "goal" cell, which seems counter-intuitive, but it works because all
                         // cells will try to find the distance between themselves and the nearest goal, and once this is found, the
                         // distances don't change as long as the goals don't change. Since the mouse will move and new paths will be
@@ -335,7 +386,7 @@ public class Epigon extends Game {
                         // player's position, and the "target" of a pathfinding method like DijkstraMap.findPathPreScanned() is the
                         // currently-moused-over cell, which we only need to set where the mouse is being handled.
                         playerToCursor.setGoal(m);
-                        playerToCursor.scan(null);
+                        playerToCursor.scan(calculateBlocked());
                     }
                 }
             }
@@ -457,14 +508,17 @@ public class Epigon extends Game {
                     // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                     // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
                     // moves, we only need to do a fraction of the work to find the best path with that info.
+                    playerToCursor.scan(calculateBlocked());
                     toCursor = playerToCursor.findPathPreScanned(cursor);
+
                     //findPathPreScanned includes the current cell (goal) by default, which is helpful when
                     // you're finding a path to a monster or loot, and want to bump into it, but here can be
                     // confusing because you would "move into yourself" as your first move without this.
                     // Getting a sublist avoids potential performance issues with removing from the start of an
                     // ArrayList, since it keeps the original list around and only gets a "view" of it.
-                    if(!toCursor.isEmpty())
+                    if (!toCursor.isEmpty()) {
                         toCursor = toCursor.subList(1, toCursor.size());
+                    }
 
                 }
                 awaitedMoves.addAll(toCursor);
@@ -481,28 +535,31 @@ public class Epigon extends Game {
         // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
-            if(!awaitedMoves.isEmpty())
+            if (!awaitedMoves.isEmpty()) {
                 return false;
+            }
             int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
-            if((sx < 0 || sx >= BIG_MAP_WIDTH || sy < 0 || sy >= BIG_MAP_HEIGHT)
-                    || (cursor.x == sx && cursor.y == sy))
-            {
+            if ((sx < 0 || sx >= BIG_MAP_WIDTH || sy < 0 || sy >= BIG_MAP_HEIGHT) || (cursor.x == sx && cursor.y == sy)) {
                 return false;
             }
             cursor = Coord.get(sx, sy);
-                //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
-                // player position to the position the user clicked on. The "PreScanned" part is an optimization
-                // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
-                // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
-                // moves, we only need to do a fraction of the work to find the best path with that info.
-                toCursor = playerToCursor.findPathPreScanned(cursor);
-                //findPathPreScanned includes the current cell (goal) by default, which is helpful when
-                // you're finding a path to a monster or loot, and want to bump into it, but here can be
-                // confusing because you would "move into yourself" as your first move without this.
-                // Getting a sublist avoids potential performance issues with removing from the start of an
-                // ArrayList, since it keeps the original list around and only gets a "view" of it.
-                if(!toCursor.isEmpty())
-                    toCursor = toCursor.subList(1, toCursor.size());
+
+            //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+            // player position to the position the user clicked on. The "PreScanned" part is an optimization
+            // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
+            // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
+            // moves, we only need to do a fraction of the work to find the best path with that info.
+            playerToCursor.scan(calculateBlocked());
+            toCursor = playerToCursor.findPathPreScanned(cursor);
+
+            //findPathPreScanned includes the current cell (goal) by default, which is helpful when
+            // you're finding a path to a monster or loot, and want to bump into it, but here can be
+            // confusing because you would "move into yourself" as your first move without this.
+            // Getting a sublist avoids potential performance issues with removing from the start of an
+            // ArrayList, since it keeps the original list around and only gets a "view" of it.
+            if (!toCursor.isEmpty()) {
+                toCursor = toCursor.subList(1, toCursor.size());
+            }
 
             return false;
         }

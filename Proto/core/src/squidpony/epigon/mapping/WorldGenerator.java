@@ -13,6 +13,8 @@ import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.DungeonUtility;
 
@@ -83,6 +85,9 @@ public class WorldGenerator {
                         tile = world[0].contents[x][y];
                         tile.wallBlueprint = mixer.createFrom(tile.floorBlueprint.stone); // TODO - cache
                         tile.wallBlueprint.symbol = '#';
+                        for (Element e : Element.values()){
+                            tile.wallBlueprint.passthroughResistances.put(e, new LiveValue(1.0)); // walls block everything
+                        }
                     break;
                     default:
                         tile = world[0].contents[x][y];
