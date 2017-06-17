@@ -1,6 +1,9 @@
 package squidpony.epigon.mapping;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
@@ -109,6 +112,16 @@ public class EpiMap {
 
     public boolean inBounds(int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    public double[][] resistances(Element element){
+        double[][] resistances = new double[width][height];
+        for (int x = 0; x < width; x++){
+            for(int y = 0; y < height; y++){
+                resistances[x][y] = contents[x][y].resistance(element);
+            }
+        }
+        return resistances;
     }
 
     public char[][] simpleChars() {

@@ -33,10 +33,10 @@ public class EpiTile {
      * @param key
      * @return
      */
-    public double geResistance(Element key) {//TODO -- determine if resistance should be additive or just max baseValue
+    public double resistance(Element key) {//TODO -- determine if resistance should be additive or just max baseValue
         double resistance = 0f;
         Double check;
-        LiveValue lv = new LiveValue();
+        LiveValue lv = new LiveValue(resistance);
         if (floor != null) {
             resistance = floor.passthroughResistances.getOrDefault(key, lv).actual;
         } else if (floorBlueprint != null) {
@@ -45,7 +45,7 @@ public class EpiTile {
         if (largeObject != null) {
             check = largeObject.passthroughResistances.getOrDefault(key, lv).actual;
             resistance = Math.max(resistance, check);
-        } else if (largeObject != null) {
+        } else if (wallBlueprint != null) {
             check = wallBlueprint.passthroughResistances.getOrDefault(key, lv).actual;
             resistance = Math.max(resistance, check);
         }
@@ -57,7 +57,7 @@ public class EpiTile {
     }
 
     public boolean isPassable(Element key) {
-        return key == null || geResistance(key) < 1;
+        return key == null || resistance(key) < 1;
     }
 
     /**

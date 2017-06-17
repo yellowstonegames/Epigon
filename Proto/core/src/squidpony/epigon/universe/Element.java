@@ -36,6 +36,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     PLANETARY(ASTRONOMICAL),
     METEORIC(ASTRONOMICAL),
     // Misc
+    LIGHT(null, "light", "Basic lighting, not related to magical or other effects.", SColor.ALICE_BLUE),
     DEATH(),
     LIFE(),
     LANGUAGE(),
@@ -52,7 +53,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
 
     private Element(Element parent) {
         this(parent, "", "", SColor.BLACK);
-        name = name();
+        name = name().toLowerCase();
     }
 
     private Element(Element parent, String name, String description, SColor color) {
