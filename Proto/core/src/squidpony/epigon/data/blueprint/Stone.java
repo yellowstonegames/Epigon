@@ -30,119 +30,18 @@ public enum Stone {
     CLAYSTONE(SColor.BROWN, SColor.BROWNER, false, true, false, false),
     COAL(SColor.BLACK, SColor.DARK_GRAY, false, true, false, false, 300, 1000),
     CONGLOMERATE(SColor.BROWNER, SColor.GRAY, false,true, false, false, 100, 1000),
-    COQUINA(SColor.TAN, SColor.KHAKI, false,true, false, false, 300, 1000);
-    /*
-     break;
-     case DACITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case DIABASE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case DIATOMACEOUS_EARTH:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LIGHT_GRAY;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 250;
-     hardness = 1000;
-     break;
-     case DIAMICTITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_KHAKI;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case DIORITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.WHITE;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 350;
-     hardness = 1000;
-     break;
-     case DOLOMITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LIGHT_PINK;
-     backColor = SColor.WHITE;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 200;
-     hardness = 1000;
-     break;
-     case DUNITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY_ASPARAGUS;
-     backColor = SColor.DARK_GREEN;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case ECLOGITE://may contain diamonds or garnets
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.RED_PIGMENT;
-     backColor = SColor.GRAY;
-     metamorphic = true;//basalt only
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case ENDERBITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case ESSEXITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
+    COQUINA(SColor.TAN, SColor.KHAKI, false,true, false, false, 300, 1000),
+    DACITE(SColor.GRAY, SColor.BLACK,false,false,true,true, 100, 1000),
+     DIABASE(SColor.GRAY, SColor.BLACK,false,false,true,false,100, 1000),
+     DIATOMACEOUS_EARTH( SColor.LIGHT_GRAY,SColor.GRAY, false, true, false, false, 250,1000),
+      DIAMICTITE(SColor.GRAY,SColor.DARK_KHAKI,false, true, false, false,100,1000),
+     DIORITE(SColor.WHITE,SColor.GRAY,false,false,true,false,350,1000),
+     DOLOMITE(SColor.LIGHT_PINK,SColor.WHITE,false,true,false,false,200,1000),
+     DUNITE(SColor.GRAY_ASPARAGUS,SColor.DARK_GREEN,false, false,true,true, 100,1000),
+     ECLOGITE(SColor.RED_PIGMENT,SColor.GRAY, true, false, false, false,100,1000),
+     ENDERBITE(SColor.GRAY, SColor.BLACK, false, false,true,true,100, 1000),
+     ESSEXITE(SColor.DARK_GRAY,SColor.BLACK, false, false,true,true, 100, 1000);
+      /*
      case EVAPORITE:
      myName = type.toString().toLowerCase().replace('_', ' ');
      frontColor = SColor.KHAKI;

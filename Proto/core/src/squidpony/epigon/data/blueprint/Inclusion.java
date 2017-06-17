@@ -21,179 +21,24 @@ public enum Inclusion {
     AERINITE(SColor.GRAY, SColor.BLACK, true, false, false, false, 50),
     AFGHANITE(SColor.BLUE, SColor.BLUE_VIOLET, true, false, false, false, 60),
     AFWILLITE(SColor.LIGHT_KHAKI, SColor.WHITE, true, false, false, false, 20),
-    AGATE(SColor.WHEAT, SColor.FLAX, true, true, false, true, 250);
-
-    /*      
-     case AGRELLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.OLD_LACE;
-     backColor = SColor.WHEAT;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 40;
-     break;
-     case AGRINIERITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.WHEAT;
-     backColor = SColor.GOLD;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AGUILARITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AHEYLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BLUE_GREEN;
-     backColor = SColor.ASPARAGUS;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AIKINITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     ;
-     backColor = SColor.RUSSET;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 30;
-     break;
-     case AJOITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AKAGANEITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AKATOREITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case ALEXANDRITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case ALMANDINE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_SCARLET;
-     backColor = SColor.DARK_RED;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 430;
-     break;
-     case AMAZONITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BRIGHT_GREEN;
-     backColor = SColor.PASTEL_GREEN;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = true;
-     value = 380;
-     break;
-     case AMBER:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 180;
-     break;
-     case AMETHYST:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.PURPLE_TAUPE;
-     backColor = SColor.PURPLE;
-     metamorphic = true;//uncommon
-     sedimentary = true;//very rarely
-     intrusive = true;
-     extrusive = true;
-     value = 835;
-     break;
-     case AMETRINE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.ORANGE_PEEL;
-     backColor = SColor.PURPLE;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 1000;
-     break;
-     case ANDALUSITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 28;
-     break;
-     case ANTIMONY:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     break;
-     case AQUAMARINE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
+    AGATE(SColor.WHEAT, SColor.FLAX, true, true, false, true, 250),
+    AGRELLITE(SColor.OLD_LACE, SColor.WHEAT, false, false,true, true,40),
+     AGRINIERITE(SColor.WHEAT,SColor.GOLD,false, false, false, false, 100),
+     AGUILARITE(SColor.GRAY,SColor.DARK_GRAY,false, false,false, false, 100),
+     AHEYLITE(SColor.BLUE_GREEN,SColor.ASPARAGUS, false, false,false, false,100),
+     AIKINITE(SColor.DARK_GRAY,SColor.RUSSET,false,false,false, false, 30),
+     AJOITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+     AKAGANEITE(SColor.GRAY,SColor.BLACK,false,false,false, false,100),
+     AKATOREITE(SColor.GRAY, SColor.BLACK,false,false,false, false, 100),
+     ALEXANDRITE(SColor.GRAY,SColor.BLACK, false,false,false, false,100),
+     ALMANDINE(SColor.DARK_SCARLET, SColor.DARK_RED, true,false,false, false, 430),
+     AMAZONITE(SColor.BRIGHT_GREEN, SColor.PASTEL_GREEN, true,false,false,true,380),
+     AMBER(SColor.GRAY, SColor.BLACK, false, false,false, false, 180),
+     AMETHYST(SColor.PURPLE_TAUPE,SColor.PURPLE, true, true, true, true, 835),
+     AMETRINE(SColor.ORANGE_PEEL, SColor.PURPLE,false, false, false, false, 1000),
+     ANDALUSITE(SColor.GRAY,SColor.BLACK,true,false, false, false, 28),
+     ANTIMONY(SColor.GRAY,SColor.BLACK,false,false, false,false,100),
+     AQUAMARINE(SColor.GRAY, SColor.BLACK, false,false, false,false,100);/*
      break;
      case AZURITE:
      myName = type.toString().toLowerCase().replace('_', ' ');
