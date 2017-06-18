@@ -298,7 +298,7 @@ public class Epigon extends Game {
                     if (f > 0){
                         fore = colorCenter.lerp(tile.getForegroundColor(), SColor.DB_INK, 1f - f);
                     } else {
-                        fore = SColor.FOX;
+                        fore = SColor.BLACK_CHESTNUT_OAK;
                     }
                     Color back = colorCenter.lerp(colorCenter.dimmest(tile.getBackgroundColor()), SColor.DB_INK, 1f - f);
                     display.put(x, y, tile.getSymbol(), fore, back);
