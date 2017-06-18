@@ -180,8 +180,8 @@ public class Epigon extends Game {
         cursor = Coord.get(-1, -1);
 
         // Create an actual player
-        player = handBuilt.player;
-        Physical sword = handBuilt.sword;
+        player = mixer.createFrom(handBuilt.playerBlueprint);
+        Physical sword = mixer.createFrom(handBuilt.swordBlueprint);
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
