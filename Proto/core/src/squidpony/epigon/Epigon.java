@@ -192,6 +192,7 @@ public class Epigon extends Game {
         // this is new, related to camera movement
         display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
+
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.EUCLIDEAN);
         double[][] resists = map.resistances(Element.LIGHT);
         for(int x =0;x<BIG_MAP_WIDTH;x++){
@@ -206,7 +207,6 @@ public class Epigon extends Game {
         //playerToCursor.initializeCost(resists);
 
         fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
-        
         playerToCursor.setGoal(player.location);
         playerToCursor.scan(calculateBlocked());
 
@@ -238,6 +238,9 @@ public class Epigon extends Game {
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
             display.slide(playerEntity, newX, newY);
+            fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), newX, newY, MAP_WIDTH, Radius.CIRCLE);
+            playerToCursor.setGoal(player.location);
+            playerToCursor.scan(calculateBlocked());
             sound.playFootstep();
 
             display.addAction(
@@ -286,9 +289,6 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        //playerToCursor.setGoal(player.location);
-        //playerToCursor.scan(calculateBlocked());
-        
         int offsetX = display.getGridOffsetX(), offsetY = display.getGridOffsetY();
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_HEIGHT && y < BIG_MAP_HEIGHT; j++, y++) {
@@ -299,7 +299,7 @@ public class Epigon extends Game {
                     if (f > 0){
                         fore = colorCenter.lerp(tile.getForegroundColor(), SColor.DB_INK, 1f - f);
                     } else {
-                        fore = SColor.MAUVE;
+                        fore = SColor.BLACK_CHESTNUT_OAK;
                     }
                     Color back = colorCenter.lerp(SColor.LIGHT_GRAY, colorCenter.dimmest(tile.getBackgroundColor()),(1f - f));
                     display.put(x, y, tile.getSymbol(), fore, back);
