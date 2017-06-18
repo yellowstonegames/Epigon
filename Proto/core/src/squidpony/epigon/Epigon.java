@@ -1,10 +1,5 @@
 package squidpony.epigon;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -18,21 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import squidpony.panel.IColoredString;
-import squidpony.squidai.DijkstraMap;
-import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.StatefulRNG;
-import squidpony.squidmath.ThunderRNG;
-
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.mapping.EpiMap;
@@ -42,8 +22,23 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.panel.IColoredString;
+import squidpony.squidai.DijkstraMap;
+import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.FlapRNG;
+import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.StatefulRNG;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -88,7 +83,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final StatefulRNG rng = new StatefulRNG(0xBEEFD00DBABAB00EL); //new StatefulRNG(new ThunderRNG()); //
+    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(0xBEEFD00D, 0xCAFEFEED)); //new StatefulRNG(new ThunderRNG()); //
     public static final RecipeMixer mixer = new RecipeMixer();
 
     // 
@@ -107,6 +102,7 @@ public class Epigon extends Game {
     private int framesWithoutAnimation;
     private TextCellFactory printText;
     private WorldGenerator worldGenerator;
+    private GreasedRegion blocked;
 
     // WIP stuff, needs large sample map
     private Stage stage, messageStage, infoStage, contextStage;
@@ -189,14 +185,14 @@ public class Epigon extends Game {
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
         GreasedRegion floors = new GreasedRegion(simpleChars, '.');
+        blocked = new GreasedRegion(BIG_MAP_WIDTH,  BIG_MAP_HEIGHT);
         player.location = floors.singleRandom(rng);
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
         // this is new, related to camera movement
         display.setGridOffsetX(player.location.x - (MAP_WIDTH >> 1));
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
-
-        playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.CHEBYSHEV);
+        playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.EUCLIDEAN);
         double[][] resists = map.resistances(Element.LIGHT);
         for(int x =0;x<BIG_MAP_WIDTH;x++){
             for(int y = 0; y< BIG_MAP_HEIGHT; y++){
@@ -209,8 +205,8 @@ public class Epigon extends Game {
         }
         //playerToCursor.initializeCost(resists);
 
-        fovResult = fov.calculateFOV(map.resistances(Element.AIR), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
-
+        fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
+        
         playerToCursor.setGoal(player.location);
         playerToCursor.scan(calculateBlocked());
 
@@ -262,13 +258,17 @@ public class Epigon extends Game {
                     display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
                     camera.position.set(original);
                     camera.update();
-
+                    fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), player.location.x, player.location.y, MAP_WIDTH, Radius.CIRCLE);
+                    calculateBlocked();
+                    playerToCursor.scan(blocked);
                 }
             });
         }
     }
 
     private Collection<Coord> calculateBlocked() {
+        blocked.refill(fovResult, 0.0);
+        /*
         Set<Coord> blocked = new HashSet<>();
         for (int x = 0; x < BIG_MAP_WIDTH; x++) {
             for (int y = 0; y < BIG_MAP_HEIGHT; y++) {
@@ -277,6 +277,7 @@ public class Epigon extends Game {
                 }
             }
         }
+        */
         return blocked;
     }
 
@@ -285,10 +286,8 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        fovResult = fov.calculateFOV(map.resistances(Element.AIR), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
-        
-        playerToCursor.setGoal(player.location);
-        playerToCursor.scan(calculateBlocked());
+        //playerToCursor.setGoal(player.location);
+        //playerToCursor.scan(calculateBlocked());
         
         int offsetX = display.getGridOffsetX(), offsetY = display.getGridOffsetY();
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= MAP_WIDTH && x < BIG_MAP_WIDTH; i++, x++) {
@@ -302,7 +301,7 @@ public class Epigon extends Game {
                     } else {
                         fore = SColor.MAUVE;
                     }
-                    Color back = colorCenter.lerp(colorCenter.dimmest(tile.getBackgroundColor()), SColor.DB_INK, 1f - f);
+                    Color back = colorCenter.lerp(SColor.LIGHT_GRAY, colorCenter.dimmest(tile.getBackgroundColor()),(1f - f));
                     display.put(x, y, tile.getSymbol(), fore, back);
                 } else {
                     display.put(x, y, ' ', SColor.SLATE, SColor.DB_INK);
@@ -386,7 +385,7 @@ public class Epigon extends Game {
                         // player's position, and the "target" of a pathfinding method like DijkstraMap.findPathPreScanned() is the
                         // currently-moused-over cell, which we only need to set where the mouse is being handled.
                         playerToCursor.setGoal(m);
-                        playerToCursor.scan(calculateBlocked());
+                        //playerToCursor.scan(blocked);
                     }
                 }
             }
@@ -508,7 +507,7 @@ public class Epigon extends Game {
                     // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                     // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
                     // moves, we only need to do a fraction of the work to find the best path with that info.
-                    playerToCursor.scan(calculateBlocked());
+                    playerToCursor.scan(blocked);
                     toCursor = playerToCursor.findPathPreScanned(cursor);
 
                     //findPathPreScanned includes the current cell (goal) by default, which is helpful when
@@ -549,7 +548,7 @@ public class Epigon extends Game {
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
             // moves, we only need to do a fraction of the work to find the best path with that info.
-            playerToCursor.scan(calculateBlocked());
+            playerToCursor.scan(blocked);
             toCursor = playerToCursor.findPathPreScanned(cursor);
 
             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
