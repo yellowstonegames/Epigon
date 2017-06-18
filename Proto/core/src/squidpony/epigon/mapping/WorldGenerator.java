@@ -2,8 +2,6 @@ package squidpony.epigon.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import static squidpony.epigon.Epigon.BIG_MAP_HEIGHT;
-import static squidpony.epigon.Epigon.BIG_MAP_WIDTH;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
