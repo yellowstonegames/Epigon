@@ -59,11 +59,11 @@ public class Kickball {
         HandBuilt starter = new HandBuilt();
 
         // Create an actual player
-        Physical player = starter.player;
+        //Physical player = starter.player;
 
 //        System.out.println(convert.prettyPrint(player));
 
-        Physical sword = starter.sword;
+       // Physical sword = starter.sword;
 //        System.out.println(convert.prettyPrint(sword));
 
         //PhysicalBlueprint pj = starter.playerBlueprint;
@@ -79,8 +79,8 @@ public class Kickball {
        // System.out.println(convert.prettyPrint(playerBlueprint));
 
         DataMaster dm = new DataMaster();
-        dm.add(player);
-        dm.add(sword);
+//        dm.add(player);
+//        dm.add(sword);
         //dm.add(pj);
         System.out.println(convert.prettyPrint(dm.getKnown()));
     }
