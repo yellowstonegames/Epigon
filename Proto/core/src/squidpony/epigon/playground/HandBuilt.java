@@ -7,10 +7,11 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.dm.RecipeMixer;
+import squidpony.epigon.data.specific.Condition;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
@@ -20,11 +21,13 @@ import squidpony.epigon.universe.Stat;
  */
 public class HandBuilt {
 
-    public RecipeMixer mixer = new RecipeMixer();
     public PhysicalBlueprint playerBlueprint;
-    public Physical player;
     public PhysicalBlueprint swordBlueprint;
-    public Physical sword;
+    public PhysicalBlueprint doorBlueprint;
+
+    public Modification makeWall;
+    public Modification makeDoor;
+    public Condition openDoor;
 
     public HandBuilt() {
         playerBlueprint = new PhysicalBlueprint();
@@ -34,6 +37,7 @@ public class HandBuilt {
         playerBlueprint.symbol = '@';
         playerBlueprint.color = SColor.BRIGHT_PINK;
         playerBlueprint.large = true;
+        playerBlueprint.unique = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
         Arrays.stream(Stat.values()).forEach(s -> {
             LiveValue lv = new LiveValue(rng.between(20, 100));
@@ -52,14 +56,19 @@ public class HandBuilt {
         skill.name = "akido";
         cb.skills.put(skill, Rating.SLIGHT);
 
-        player = mixer.createFrom(playerBlueprint);
-
-
         swordBlueprint = new PhysicalBlueprint();
         swordBlueprint.name = "sword";
         swordBlueprint.color =  SColor.SILVER;
         swordBlueprint.symbol = '/';
 
-        sword = mixer.createFrom(swordBlueprint);
+        doorBlueprint = new PhysicalBlueprint();
+        doorBlueprint.name = "door";
+        doorBlueprint.symbol = '+';
+        doorBlueprint.color = SColor.WALNUT;
+        doorBlueprint.large = true;
+        Arrays.stream(Element.values()).forEach(e -> doorBlueprint.passthroughResistances.put(e, new LiveValue(1)));
+
+        makeWall = new Modification();
+        makeWall.symbol = '#';
     }
 }
