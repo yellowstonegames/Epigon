@@ -1,18 +1,13 @@
 package squidpony.epigon.mapping;
 
-import java.util.ArrayList;
-import java.util.List;
+import static squidpony.epigon.Epigon.handBuilt;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
 
-import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.data.specific.Terrain;
-import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.data.mixin.Terrain;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.DungeonUtility;
 
@@ -22,31 +17,9 @@ import squidpony.squidgrid.mapping.DungeonUtility;
  * @author Eben Howard - http://squidpony.com
  */
 public class WorldGenerator {
-
-    private static final List<Stone> wallList = new ArrayList<>(),
-        sedimentaryList = new ArrayList<>(),
-        intrusiveList = new ArrayList<>(),
-        extrusiveList = new ArrayList<>(),
-        metamorphicList = new ArrayList<>();
-
-    private static final List<Inclusion> gemList = new ArrayList<>(),
-        sedimentaryGemList = new ArrayList<>(),
-        intrusiveGemList = new ArrayList<>(),
-        extrusiveGemList = new ArrayList<>(),
-        metamorphicGemList = new ArrayList<>();
-
-    private static boolean initialized = false;
-    private static int maxRecurse = 10;
-
+    private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
-
-    public WorldGenerator() {
-        if (!initialized) {
-            initWallLists();
-            initialized = true;
-        }
-    }
 
     public EpiMap[] buildWorld(int width, int height, int depth) {
         this.width = width;
@@ -65,7 +38,7 @@ public class WorldGenerator {
         makeSolid();
 
         DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
-        sdg.addGrass(15);
+        //sdg.addGrass(15);
         sdg.addWater(15);
         sdg.addDoors(20, true);
         char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
@@ -77,15 +50,17 @@ public class WorldGenerator {
                 switch(c){
                     case '.':
                         tile = world[0].contents[x][y];
-                        tile.wallBlueprint = null;
+                        tile.largeObject = null; // empty walkable tile in the dungeon gen
                         break;
                     case '#':
                         tile = world[0].contents[x][y];
-                        tile.wallBlueprint = mixer.createFrom(tile.floorBlueprint.stone); // TODO - cache
-                        tile.wallBlueprint.symbol = '#';
-                        for (Element e : Element.values()){
-                            tile.wallBlueprint.passthroughResistances.put(e, new LiveValue(1.0)); // walls block everything
-                        }
+                        tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                        mixer.applyModification(tile.largeObject, handBuilt.makeWall);
+                    break;
+                    case '+':
+                        tile = world[0].contents[x][y];
+                        tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                        mixer.applyModification(tile.largeObject, handBuilt.makeDoor);
                     break;
                     default:
                         tile = world[0].contents[x][y];
@@ -101,45 +76,11 @@ public class WorldGenerator {
         return world;
     }
 
-    private static void initWallLists() {
-        for (Stone stone : Stone.values()) {
-            wallList.add(stone);
-            if (stone.sedimentary) {
-                sedimentaryList.add(stone);
-            }
-            if (stone.intrusive) {
-                intrusiveList.add(stone);
-            }
-            if (stone.extrusive) {
-                extrusiveList.add(stone);
-            }
-            if (stone.metamorphic) {
-                metamorphicList.add(stone);
-            }
-        }
-
-        for (Inclusion inclusion : Inclusion.values()) {
-            gemList.add(inclusion);
-            if (inclusion.sedimentary) {
-                sedimentaryGemList.add(inclusion);
-            }
-            if (inclusion.intrusive) {
-                intrusiveGemList.add(inclusion);
-            }
-            if (inclusion.extrusive) {
-                extrusiveGemList.add(inclusion);
-            }
-            if (inclusion.metamorphic) {
-                metamorphicGemList.add(inclusion);
-            }
-        }
-    }
-
     /**
      * Randomly places minerals in the provided map.
      */
     private void mineralPlacement() {
-        TerrainBlueprint floor = mixer.createFrom(rng.getRandomElement(wallList));
+        Physical floor = mixer.buildPhysical(mixer.createBlueprint(rng.getRandomElement(handBuilt.wallList)));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -149,7 +90,7 @@ public class WorldGenerator {
                         world[z].contents[x][y] = tile;
                     }
 
-                    tile.floorBlueprint = floor;
+                    tile.floor = floor;
                 }
             }
         }
@@ -164,8 +105,8 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    tile.wallBlueprint = mixer.createFrom(tile.floorBlueprint.stone); // TODO - cache
-                    tile.wallBlueprint.symbol = '#';
+                    tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                    mixer.applyModification(tile.largeObject, handBuilt.makeWall);
                 }
             }
         }
@@ -180,7 +121,7 @@ public class WorldGenerator {
         int centerY = 0;
         int centerZ = 0;
         int counter = 0;
-        TerrainBlueprint blueprint = null;
+        Physical blueprint = null;
         for (int growStep = 0; growStep < quantity; growStep++) {
             if (counter <= 0) {
                 counter = rng.nextInt(3);
@@ -189,9 +130,9 @@ public class WorldGenerator {
                 centerZ = rng.nextInt(depth);
 
                 if (useExistingFloor) {
-                    blueprint = world[centerZ].contents[centerX][centerY].floorBlueprint;
+                    blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = mixer.createFrom(rng.getRandomElement(wallList));
+                    blueprint = mixer.buildPhysical(mixer.createBlueprint(rng.getRandomElement(handBuilt.wallList)));
                 }
             }
 
@@ -205,7 +146,7 @@ public class WorldGenerator {
                 for (int bubbleGrowX = bubbleGrowXStart; bubbleGrowX < bubbleGrowXEnd; bubbleGrowX++) {
                     for (int bubbleGrowY = centerY - bubbleSizeY - rng.nextInt(2); bubbleGrowY < (centerY + bubbleSizeY + rng.nextInt(2)); bubbleGrowY++) {
                         if (pointInBounds(bubbleGrowX, bubbleGrowY, bubbleGrowZ)) {
-                            world[bubbleGrowZ].contents[bubbleGrowX][bubbleGrowY].floorBlueprint = blueprint;
+                            world[bubbleGrowZ].contents[bubbleGrowX][bubbleGrowY].floor = blueprint;
                         }
                         /* mini-stagger walk here */
                         for (int m = 0; m < rng.nextInt(3); m++) {
@@ -213,7 +154,7 @@ public class WorldGenerator {
                             int newY = bubbleGrowY - rng.between(-1, 2);//rng.nextInt(2) - 1);
                             int newZ = bubbleGrowZ - rng.between(-1, 2);//rng.nextInt(2) - 1);
                             if (pointInBounds(newX, newY, newZ)) {
-                                world[newZ].contents[newX][newY].floorBlueprint = blueprint;
+                                world[newZ].contents[newX][newY].floor = blueprint;
                             }
                         }
                     }
@@ -245,7 +186,7 @@ public class WorldGenerator {
             for (x = 1; x < (width - 1); x++) {
                 for (y = 1; y < (height - 1); y++) {
                     if (y < (m * x + b)) {
-                        world[z].contents[x][y].floorBlueprint = world[z + 1].contents[x][y].floorBlueprint;
+                        world[z].contents[x][y].floor = world[z + 1].contents[x][y].floor;
                     }
                 }
             }
@@ -253,7 +194,7 @@ public class WorldGenerator {
     }
 
     private void intrudeMap() {
-        Stone intruder = intrusiveList.get(rng.nextInt(intrusiveList.size()));
+        Stone intruder = rng.getRandomElement(handBuilt.intrusiveList);
         int startX = rng.nextInt(width - 2) + 1;
         int startY = rng.nextInt(height - 2) + 1;
         int startZ = rng.nextInt(depth) + depth / 2;
@@ -297,7 +238,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floorBlueprint = mixer.createFrom(intruder); // TODO - get from cache
+                        world[z].contents[x][y].floor = mixer.buildPhysical(mixer.createBlueprint(intruder)); // TODO - get from cache
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -309,9 +250,8 @@ public class WorldGenerator {
     }
 
     private void extrudeMap() {
-        TerrainBlueprint blueprint;
-        Stone tempWall = Stone.ANDESITE;
-        Stone extruder = extrusiveList.get(rng.nextInt(extrusiveList.size()));
+        Stone extruder = rng.getRandomElement(handBuilt.extrusiveList);
+        Physical blueprint;
         int extrudeX = -1;
         int extrudeY = -1;
         int extrudeZ = -1;
@@ -321,9 +261,9 @@ public class WorldGenerator {
             for (int n = 0; n < maxRecurse; n++) {
                 extrudeX = rng.nextInt(width - 2) + 1;
                 extrudeY = rng.nextInt(height - 2) + 1;
-                blueprint = world[testZ].contents[extrudeX][extrudeY].floorBlueprint;
+                blueprint = world[testZ].contents[extrudeX][extrudeY].floor;
 
-                if ((blueprint.extrusive) || (blueprint.intrusive)) {
+                if ((blueprint.terrainData.extrusive) || (blueprint.terrainData.intrusive)) {
                     extrudeZ = testZ;
                     break test_for_igneous;
                 }
@@ -341,7 +281,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floorBlueprint = mixer.createFrom(extruder); // TODO - cache
+                                world[z].contents[x][y].floor = mixer.buildPhysical(mixer.createBlueprint(extruder)); // TODO - cache
                             }
                         }
                     }
@@ -351,15 +291,15 @@ public class WorldGenerator {
     }
 
     private void metamorphoseMap() {
-        TerrainBlueprint[][][] near = new TerrainBlueprint[3][3][3];
+        Physical[][][] near = new Physical[3][3][3];
         Stone changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = metamorphicList.get(rng.nextInt(metamorphicList.size()));
+        changer = rng.getRandomElement(handBuilt.metamorphicList);
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer = metamorphicList.get(rng.nextInt(metamorphicList.size()));
+                changer =  rng.getRandomElement(handBuilt.metamorphicList);
             }
             for (int i = 1; i < width - 1; i++) {
                 for (int k = 1; k < height - 1; k++) {
@@ -369,19 +309,19 @@ public class WorldGenerator {
                     for (int a = 0; a < 3; a++) {//build array of near objects
                         for (int b = 0; b < 3; b++) {
                             for (int c = 0; c < 3; c++) {
-                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floorBlueprint : null;
+                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floor : null;
                             }
                         }
                     }
 
                     test_for_change:
-                    for (TerrainBlueprint testing1[][] : near) {
-                        for (TerrainBlueprint testing2[] : testing1) {
-                            for (TerrainBlueprint test : testing2) {
-                                if (test.sedimentary) {
+                    for (Physical testing1[][] : near) {
+                        for (Physical testing2[] : testing1) {
+                            for (Physical test : testing2) {
+                                if (test.terrainData.sedimentary) {
                                     sedimentary = true;
                                 }
-                                if (test.extrusive || test.intrusive) {
+                                if (test.terrainData.extrusive || test.terrainData.intrusive) {
                                     igneous = true;
                                 }
                                 if (sedimentary && igneous) {
@@ -395,7 +335,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floorBlueprint = mixer.createFrom(changer); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.createBlueprint(changer)); // TODO - cache
                             }
                         }
                     }
@@ -406,7 +346,7 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = metamorphicList.get(rng.nextInt(metamorphicList.size()));
+                changer = rng.getRandomElement(handBuilt.metamorphicList);
             }
             for (int i = width - 1; i > 1; i--) {
                 for (int k = height - 1; k > 1; k--) {
@@ -416,19 +356,19 @@ public class WorldGenerator {
                     for (int a = 0; a < 3; a++) {//build array of near objects
                         for (int b = 0; b < 3; b++) {
                             for (int c = 0; c < 3; c++) {
-                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floorBlueprint : null;
+                                near[a][b][c] = pointInBounds(i + a - 1, k + b - 1, j + c - 1) ? world[j + c - 1].contents[i + a - 1][k + b - 1].floor : null;
                             }
                         }
                     }
 
                     test_for_change:
-                    for (TerrainBlueprint testing1[][] : near) {
-                        for (TerrainBlueprint testing2[] : testing1) {
-                            for (TerrainBlueprint test : testing2) {
-                                if (test.sedimentary) {
+                    for (Physical testing1[][] : near) {
+                        for (Physical testing2[] : testing1) {
+                            for (Physical test : testing2) {
+                                if (test.terrainData.sedimentary) {
                                     sedimentary = true;
                                 }
-                                if (test.extrusive || test.intrusive) {
+                                if (test.terrainData.extrusive || test.terrainData.intrusive) {
                                     igneous = true;
                                 }
                                 if (sedimentary && igneous) {
@@ -442,7 +382,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floorBlueprint = mixer.createFrom(changer); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.createBlueprint(changer)); // TODO - cache
                             }
                         }
                     }

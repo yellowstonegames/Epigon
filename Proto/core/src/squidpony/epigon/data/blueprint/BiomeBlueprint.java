@@ -7,6 +7,7 @@ import java.util.Set;
 
 import squidpony.epigon.data.BiomeSize;
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.mixin.Terrain;
 
 /**
  * Base information for world level biomes. The lists of lists of biomes that can border a specific
@@ -28,5 +29,5 @@ public class BiomeBlueprint extends EpiData {
     public BiomeSize maximumSize;
     public List<Set<BiomeBlueprint>> borderRequirements = new LinkedList<>();
     public Set<DungeonBlueprint> possibleDungeons = new HashSet<>();
-    public Set<TerrainBlueprint> possibleTerrains = new HashSet<>();
+    public Set<Terrain> possibleTerrains = new HashSet<>();
 }

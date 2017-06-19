@@ -1,5 +1,6 @@
 package squidpony.epigon.data.generic;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
@@ -12,10 +13,10 @@ import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.blueprint.TerrainBlueprint;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.RatingValueModification;
@@ -40,23 +41,23 @@ public class Modification extends EpiData {
     // Modification might change the effective heirarchy
     public PhysicalBlueprint parentOverwrite;
     public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
-    public List<PhysicalBlueprint> countsAsOverwrite;
-    public List<PhysicalBlueprint> countsAsGained;
-    public List<PhysicalBlueprint> countsAsLost;
+    public Set<PhysicalBlueprint> countsAsOverwrite;
+    public Set<PhysicalBlueprint> countsAsGained;
+    public Set<PhysicalBlueprint> countsAsLost;
 
     // Only one string out of the set of prefixes and postfixes should be used
-    public List<String> possiblePrefix;
-    public List<String> possiblePostfix;
+    public List<String> possiblePrefix = new ArrayList<>();
+    public List<String> possiblePostfix = new ArrayList<>();
 
     public Character symbol;
 
-    // Only one color change should be used
     public SColor colorOverwrite;
-    public SColor colorMultiply;
 
-    public OrderedMap<String, LiveValueModification> lightEmittedStrenghtChanges = new OrderedMap<>();
     public SColor lightEmittedOverwrite;
-    public SColor lightEmittedMultiply;
+    public LiveValueModification lightEmittedStrenghtChanges;
+
+    public OrderedMap<Element, LiveValue> passthroughResistancesOverwrite = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplierOverwrite = new OrderedMap<>();
 
     public List<Modification> whenUsedAsMaterialOverwrite; // TODO - this might not make sense when more than one material is used
     public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
@@ -85,7 +86,6 @@ public class Modification extends EpiData {
     public OrderedMap<Skill, RatingValueModification> skillProgressionChagnes = new OrderedMap<>();
 
     public OrderedMap<Element, LiveValueModification> elementDamageMultiplierChanges = new OrderedMap<>();
-    public OrderedMap<TerrainBlueprint, LiveValueModification> movementChanges = new OrderedMap<>();
 
     public List<RecipeBlueprint> gainedRecipes;
 

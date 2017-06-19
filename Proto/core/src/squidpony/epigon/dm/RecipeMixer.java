@@ -2,12 +2,12 @@ package squidpony.epigon.dm;
 
 import java.util.Map.Entry;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.StatefulRNG;
 
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.PhysicalBlueprint;
@@ -17,13 +17,12 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
-import squidpony.epigon.Epigon;
+import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.blueprint.TerrainBlueprint;
-import squidpony.epigon.data.specific.Terrain;
-import squidpony.epigon.universe.Element;
+import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -36,15 +35,13 @@ import squidpony.epigon.universe.Rating;
  */
 public class RecipeMixer {
 
-    private StatefulRNG rng = Epigon.rng;
-
     public List<RecipeBlueprint> recipes;
 
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(PhysicalBlueprint ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
 
-    public Recipe createFrom(RecipeBlueprint blueprint) {
+    public Recipe createRecipe(RecipeBlueprint blueprint) {
         Recipe recipe = new Recipe();
         recipe.consumed = new OrderedMap<>(blueprint.requiredConsumed);
 
@@ -70,38 +67,28 @@ public class RecipeMixer {
         return recipe;
     }
 
-    public TerrainBlueprint createFrom(Stone stone){
-        TerrainBlueprint blueprint = new TerrainBlueprint();
+    public PhysicalBlueprint createBlueprint(Stone stone) {
+        PhysicalBlueprint blueprint = new PhysicalBlueprint();
         blueprint.color = stone.front;
-        blueprint.background = stone.back;
-        blueprint.stone = stone;
-        blueprint.extrusive = stone.extrusive;
-        blueprint.intrusive = stone.intrusive;
-        blueprint.metamorphic = stone.metamorphic;
-        blueprint.sedimentary = stone.sedimentary;
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
         blueprint.symbol = '.';
+        Terrain terrain = new Terrain();
+        blueprint.terrainData = terrain;
+        terrain.background = stone.back;
+        terrain.stone = stone;
+        terrain.extrusive = stone.extrusive;
+        terrain.intrusive = stone.intrusive;
+        terrain.metamorphic = stone.metamorphic;
+        terrain.sedimentary = stone.sedimentary;
         return blueprint;
     }
 
-    public Terrain createFrom(TerrainBlueprint blueprint){
-        Terrain terrain = (Terrain)createFrom((PhysicalBlueprint)blueprint);
-        terrain.background = blueprint.background;
-        terrain.extrusive = blueprint.extrusive;
-        terrain.metamorphic = blueprint.metamorphic;
-        terrain.sedimentary = blueprint.sedimentary;
-        return terrain;
+    public Physical buildPhysical(PhysicalBlueprint blueprint) {
+        return buildPhysical(blueprint, Rating.NONE);
     }
 
-    public Physical createFrom(PhysicalBlueprint blueprint) {
-        return createFrom(blueprint, Rating.NONE);
-    }
-
-    /**
-     * Creates a specific instance of the provided blueprint.
-     */
-    public Physical createFrom(PhysicalBlueprint blueprint, Rating rarity) {
+    public Physical buildPhysical(PhysicalBlueprint blueprint, Rating rarity) {
         if (blueprint.generic) {
             throw new IllegalArgumentException("Physical blueprint " + blueprint.name + " marked generic, cannot create.");
         }
@@ -134,11 +121,11 @@ public class RecipeMixer {
         physical.lightEmittedStrength = blueprint.lightEmittedStrength;
 
         for (ConditionBlueprint c : blueprint.conditions) {
-            physical.applyCondition(createFrom(c));
+            physical.applyCondition(createCondition(c));
         }
 
         if (!blueprint.possibleConditions.isEmpty()) {
-            physical.applyCondition(createFrom(rng.getRandomElement(blueprint.possibleConditions)));
+            physical.applyCondition(createCondition(rng.getRandomElement(blueprint.possibleConditions)));
         }
 
         blueprint.initialStats.entrySet().stream().forEach(kvp -> {
@@ -148,7 +135,7 @@ public class RecipeMixer {
         physical.statProgression.putAll(blueprint.statProgression);
 
         blueprint.commonInventory.stream().forEach(i -> {
-            physical.inventory.add(createFrom(i));
+            physical.inventory.add(buildPhysical(i));
         });
 
         physical.physicalDrops = blueprint.physicalDrops;
@@ -156,9 +143,12 @@ public class RecipeMixer {
 
         physical.identification.putAll(blueprint.identification);
 
-        physical.creatureData = createFrom(blueprint.creatureData);
+        physical.creatureData = createCreature(blueprint.creatureData);
+
+        physical.terrainData = blueprint.terrainData;
 
         // TODO - add rest of mixins
+        
         // finally work any modifications
         for (Modification m : blueprint.modifications) {
             applyModification(physical, m);
@@ -186,12 +176,12 @@ public class RecipeMixer {
     /**
      * Creates a specific Condition from a blueprint.
      */
-    public Condition createFrom(ConditionBlueprint blueprint) {
-        // TODO - create condition
+    public Condition createCondition(ConditionBlueprint blueprint) {
+        // TODO - createRecipe condition
         return new Condition();
     }
 
-    public Creature createFrom(Creature other) {
+    public Creature createCreature(Creature other) {
         if (other == null) {
             return null;
         }
@@ -209,7 +199,58 @@ public class RecipeMixer {
      * Applies the provided modification to the provided physical in place.
      */
     public void applyModification(Physical physical, Modification modification) {
-        // TODO - apply modification
+        SquidColorCenter colorCenter = new SquidColorCenter();
         physical.appliedModifications.add(modification.name);
+
+        if (modification.parentOverwrite != null) {
+            physical.parent = modification.parentOverwrite;
+        } else if (modification.parentBecomesNull != null && modification.parentBecomesNull) {
+            physical.parent = null;
+        }
+
+        if (modification.contentsOverwrite != null) {
+            physical.countsAs = new HashSet<>(modification.countsAsOverwrite);
+        } else {
+            if (modification.countsAsGained != null) {
+                physical.countsAs.addAll(modification.countsAsGained);
+            }
+            if (modification.countsAsLost != null) {
+                physical.countsAs.removeAll(modification.countsAsLost);
+            }
+        }
+
+        int totalSize = modification.possiblePrefix.size() + modification.possiblePostfix.size();
+        if (totalSize > 0) {
+            int i = rng.nextInt(totalSize);
+            if (i < modification.possiblePrefix.size()) {
+                physical.name = modification.possiblePrefix.get(i) + " ";
+            } else {
+                i -= modification.possiblePrefix.size();
+                physical.name += " " + modification.possiblePostfix.get(i);
+            }
+        }
+
+        if (modification.symbol != null) {
+            physical.symbol = modification.symbol;
+        }
+
+        if (modification.colorOverwrite != null) {
+            physical.color = modification.colorOverwrite;
+        }
+
+        if (modification.lightEmittedOverwrite != null) {
+            physical.lightEmitted = modification.lightEmittedOverwrite;
+        }
+
+        if (modification.lightEmittedStrenghtChanges != null) {
+            physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChanges);
+        }
+
+        physical.passthroughResistances.putAll(modification.passthroughResistancesOverwrite);
+        physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplierOverwrite);
+
+        if (modification.whenUsedAsMaterialOverwrite != null) {
+            physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterialOverwrite);
+        }
     }
 }

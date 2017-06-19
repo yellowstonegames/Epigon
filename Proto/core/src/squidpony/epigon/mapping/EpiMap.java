@@ -1,16 +1,13 @@
 package squidpony.epigon.mapping;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Queue;
-import java.util.Set;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.actions.MovementAction;
-import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Element;
 
 /**
@@ -56,7 +53,7 @@ public class EpiMap {
                 char c = altSymbolOf(map[x][y]);
                 SColor color = colorOf(c);
                 EpiTile tile = new EpiTile();
-                Terrain floor = new Terrain();
+                Physical floor = new Physical();
                 floor.color = color;
                 floor.symbol = c;
                 tile.floor = floor;

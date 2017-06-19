@@ -1,5 +1,6 @@
 package squidpony.epigon.data.specific;
 
+import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.BiomeSize;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.BiomeBlueprint;
