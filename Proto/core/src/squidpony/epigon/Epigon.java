@@ -83,7 +83,9 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(0xBEEFD00D, 0xCAFEFEED)); //new StatefulRNG(new ThunderRNG()); //
+    public static int seed1 = 0xBEEFD00D;
+    public static int seed2 = 0xCAFEFEED;
+    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(seed1, seed2)); //new StatefulRNG(new ThunderRNG()); //
     public static final RecipeMixer mixer = new RecipeMixer();
 
     // 
@@ -114,7 +116,7 @@ public class Epigon extends Game {
     private SoundManager sound;
 
     // TEMP - hand build stuff for testing
-    private HandBuilt handBuilt = new HandBuilt();
+    public static final HandBuilt handBuilt = new HandBuilt();
     private SquidColorCenter colorCenter;
     private FOV fov = new FOV(FOV.SHADOW);
     private double[][] fovResult = new double[BIG_MAP_WIDTH][BIG_MAP_HEIGHT];
@@ -176,15 +178,15 @@ public class Epigon extends Game {
         cursor = Coord.get(-1, -1);
 
         // Create an actual player
-        player = mixer.createFrom(handBuilt.playerBlueprint);
-        Physical sword = mixer.createFrom(handBuilt.swordBlueprint);
+        player = mixer.buildPhysical(handBuilt.playerBlueprint);
+        Physical sword = mixer.buildPhysical(handBuilt.swordBlueprint);
 
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
-        GreasedRegion floors = new GreasedRegion(simpleChars, '.');
+        GreasedRegion floors = new GreasedRegion(map.resistances(Element.AIR), 1);
         blocked = new GreasedRegion(BIG_MAP_WIDTH,  BIG_MAP_HEIGHT);
         player.location = floors.singleRandom(rng);
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);

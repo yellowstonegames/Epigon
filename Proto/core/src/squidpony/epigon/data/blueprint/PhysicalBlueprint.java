@@ -108,6 +108,9 @@ public class PhysicalBlueprint extends EpiData {
     public Wieldable wieldableData;
     public Zappable zappableData;
 
+    // Non-action mixins
+    public Terrain terrainData;
+
     public PhysicalBlueprint(){
         initialStats.put(Stat.OPACITY, new LiveValue(100)); // default to opaque
     }

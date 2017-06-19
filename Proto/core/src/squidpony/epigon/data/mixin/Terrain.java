@@ -1,6 +1,9 @@
-package squidpony.epigon.data.specific;
+package squidpony.epigon.data.mixin;
 
 import squidpony.squidgrid.gui.gdx.SColor;
+
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.blueprint.Stone;
 
 /**
  * A specific instance of a terrain unit.
@@ -10,10 +13,12 @@ import squidpony.squidgrid.gui.gdx.SColor;
  *
  * @author Eben Howard - http://squidpony.com
  */
-public class Terrain extends Physical {
+public class Terrain {
 
     public SColor background;
 
+    public Stone stone;
+    public Inclusion inclusion;
     public boolean extrusive;
     public boolean intrusive;
     public boolean metamorphic;

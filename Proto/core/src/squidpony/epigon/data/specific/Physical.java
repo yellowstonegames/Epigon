@@ -24,6 +24,7 @@ import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Liquid;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Legible;
+import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.mixin.Wearable;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.mixin.Zappable;
@@ -41,6 +42,7 @@ import squidpony.squidmath.ProbabilityTable;
 public class Physical extends EpiData {
 
     public PhysicalBlueprint parent;
+    public Set<PhysicalBlueprint> countsAs = new HashSet<>();
     public Set<Physical> createdFrom = new HashSet<>();//only important items should track this since it will cause object lifetimes to extend
 
     public char symbol;
@@ -81,6 +83,9 @@ public class Physical extends EpiData {
     public Wearable wearableData;
     public Wieldable wieldableData;
     public Zappable zappableData;
+
+    // Non-action mixins
+    public Terrain terrainData;
 
     /**
      * Returns true if this Creature has the condition or a parent of the condition.

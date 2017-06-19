@@ -1,6 +1,6 @@
 package squidpony.epigon.mapping;
 
-import squidpony.epigon.data.specific.Terrain;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 
@@ -183,7 +183,7 @@ public class World {
                         color = SColor.DEEP_PINK;
                 }
                 EpiTile tile = new EpiTile();
-                Terrain floor = new Terrain();
+                Physical floor = new Physical();
                 floor.color = color;
                 floor.symbol = c;
                 tile.floor = floor;
