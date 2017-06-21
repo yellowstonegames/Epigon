@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
+import squidpony.epigon.data.specific.Physical;
 
 /**
  * A single unit of ammunition.
@@ -15,7 +15,7 @@ public class Ammunition {
 
     public Ammunition parent;
     public List<ConditionBlueprint> causes;//conditions imparted by a successful hit
-    public Set<PhysicalBlueprint> launchers;//what weapons can use this ammo
+    public Set<Physical> launchers;//what weapons can use this ammo
     public boolean throwable;
     public double hitChance;
     public double damage;

@@ -3,7 +3,9 @@ package squidpony.epigon.data.blueprint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.specific.Physical;
 
 /**
  * Contains the information related to a prebuilt map. The map is intended to represent a small area
@@ -16,7 +18,7 @@ public class RoomBlueprint extends EpiData {
     public List<RoomConnection> connections = new ArrayList<>();//can mark where stairs should lead
     public boolean repeatLeft, repeatRight, repeatTop, repeatBottom,
         mirrorLeft, mirrorRight, mirrorTop, mirrorBottom;
-    public Map<Character, PhysicalBlueprint> replacements;//maps characters to the physical objects that should replace them
+    public Map<Character, Physical> replacements;//maps characters to the physical objects that should replace them
     public boolean outside = false;
     public boolean landscape = false;//landscape is the middle layer between overworld and encounter level maps
     public boolean generic = false;
@@ -42,16 +44,6 @@ public class RoomBlueprint extends EpiData {
                 blueprint[x][y] = layout[y].charAt(x);
             }
         }
-    }
-
-    /**
-     * Adds the given pair to the list of things that will be replaced upon constructions.
-     *
-     * @param key
-     * @param contents
-     */
-    private void addReplacement(char key, PhysicalBlueprint contents) {
-        replacements.put(key, contents);
     }
 
     /**

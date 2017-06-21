@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.badlogic.gdx.utils.JsonWriter;
 
 import squidpony.DataConverter;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.specific.Physical;
 
@@ -33,7 +32,7 @@ public class Kickball {
         //convert.setIgnoreUnknownFields(true);
         //convert.setUsePrototypes(true);
 
-        List<PhysicalBlueprint> stones = Arrays.stream(Stone.values())
+        List<Physical> stones = Arrays.stream(Stone.values())
             .map(s -> makePhysicalFromStone(s))
             .collect(Collectors.toList());
 
@@ -43,8 +42,8 @@ public class Kickball {
         System.out.println(convert.prettyPrint(stones));
     }
 
-    private PhysicalBlueprint makePhysicalFromStone(Stone stone) {
-        PhysicalBlueprint pb = new PhysicalBlueprint();
+    private Physical makePhysicalFromStone(Stone stone) {
+        Physical pb = new Physical();
         pb.name = stone.toString();
         pb.color = stone.front;
 

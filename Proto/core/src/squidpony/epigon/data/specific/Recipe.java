@@ -1,8 +1,8 @@
 package squidpony.epigon.data.specific;
 
-import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.squidmath.OrderedMap;
+
+import squidpony.epigon.data.EpiData;
 
 /**
  * A specific in-game recipe which the player (or other creatures, including the Dungeon Master) may
@@ -15,7 +15,7 @@ import squidpony.squidmath.OrderedMap;
  */
 public class Recipe extends EpiData {
 
-    public OrderedMap<PhysicalBlueprint, Integer> consumed;
-    public OrderedMap<PhysicalBlueprint, Integer> catalyst;
-    public OrderedMap<PhysicalBlueprint, Integer> result;
+    public OrderedMap<Physical, Integer> consumed;
+    public OrderedMap<Physical, Integer> catalyst;
+    public OrderedMap<Physical, Integer> result;
 }

@@ -4,25 +4,26 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.OrderedMap;
 
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
-import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -37,7 +38,7 @@ public class RecipeMixer {
 
     public List<RecipeBlueprint> recipes;
 
-    public Stream<RecipeBlueprint> blueprintsContainingIngredient(PhysicalBlueprint ingredient) {
+    public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
 
@@ -47,7 +48,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalConsumed != null && !blueprint.optionalConsumed.isEmpty()) {
-            Entry<PhysicalBlueprint, Integer> entry = blueprint.optionalConsumed.randomEntry(rng);
+            Entry<Physical, Integer> entry = blueprint.optionalConsumed.randomEntry(rng);
             recipe.consumed.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
@@ -55,7 +56,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalCatalyst != null && !blueprint.optionalCatalyst.isEmpty()) {
-            Entry<PhysicalBlueprint, Integer> entry = blueprint.optionalCatalyst.randomEntry(rng);
+            Entry<Physical, Integer> entry = blueprint.optionalCatalyst.randomEntry(rng);
             recipe.catalyst.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
@@ -67,8 +68,8 @@ public class RecipeMixer {
         return recipe;
     }
 
-    public PhysicalBlueprint createBlueprint(Stone stone) {
-        PhysicalBlueprint blueprint = new PhysicalBlueprint();
+    public Physical createBlueprint(Stone stone) {
+        Physical blueprint = new Physical();
         blueprint.color = stone.front;
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
@@ -84,11 +85,11 @@ public class RecipeMixer {
         return blueprint;
     }
 
-    public Physical buildPhysical(PhysicalBlueprint blueprint) {
+    public Physical buildPhysical(Physical blueprint) {
         return buildPhysical(blueprint, Rating.NONE);
     }
 
-    public Physical buildPhysical(PhysicalBlueprint blueprint, Rating rarity) {
+    public Physical buildPhysical(Physical blueprint, Rating rarity) {
         if (blueprint.generic) {
             throw new IllegalArgumentException("Physical blueprint " + blueprint.name + " marked generic, cannot create.");
         }
@@ -98,43 +99,48 @@ public class RecipeMixer {
         }
 
         Physical physical = new Physical();
+
+        physical.description = blueprint.description;
+        physical.notes = blueprint.notes; // TODO - probably don't need these transfered
         physical.parent = blueprint;
-        physical.symbol = blueprint.symbol;
-        physical.baseValue = blueprint.baseValue;
-        physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
-        physical.large = blueprint.large;
 
         List<String> possibleNames = new ArrayList<>();
         possibleNames.addAll(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
         physical.name = rng.getRandomElement(possibleNames);
+        physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
+        
+        physical.countsAs.addAll(blueprint.countsAs);
+        physical.createdFrom.add(blueprint); // TODO - limit to "important" items
+        physical.generic = blueprint.generic;
+        physical.unique = blueprint.unique;
+        physical.buildingBlock = blueprint.buildingBlock;
+        
+        physical.symbol = blueprint.symbol;
+        physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
+        physical.baseValue = blueprint.baseValue;
+        physical.large = blueprint.large;
 
-        physical.description = blueprint.description;
-        physical.notes = blueprint.notes; // TODO - probably don't need these transfered
+        physical.lightEmitted = blueprint.lightEmitted;
+        physical.lightEmittedStrength = blueprint.lightEmittedStrength;
 
         physical.whenUsedAsMaterial.addAll(blueprint.whenUsedAsMaterial);
 
         physical.passthroughResistances = new OrderedMap<>(blueprint.passthroughResistances);
         physical.elementalDamageMultiplyer = new OrderedMap<>(blueprint.elementalDamageMultiplyer);
 
-        physical.lightEmitted = blueprint.lightEmitted;
-        physical.lightEmittedStrength = blueprint.lightEmittedStrength;
+        // TODO - figure out whether conditions should be copied or only come from modifications
+//        for (ConditionBlueprint c : blueprint.conditions) {
+//            physical.applyCondition(createCondition(c));
+//        }
 
-        for (ConditionBlueprint c : blueprint.conditions) {
-            physical.applyCondition(createCondition(c));
-        }
-
-        if (!blueprint.possibleConditions.isEmpty()) {
-            physical.applyCondition(createCondition(rng.getRandomElement(blueprint.possibleConditions)));
-        }
-
-        blueprint.initialStats.entrySet().stream().forEach(kvp -> {
+        blueprint.stats.entrySet().stream().forEach(kvp -> {
             physical.stats.put(kvp.getKey(), new LiveValue(kvp.getValue()));
         });
 
         physical.statProgression.putAll(blueprint.statProgression);
 
-        blueprint.commonInventory.stream().forEach(i -> {
+        blueprint.inventory.stream().forEach(i -> {
             physical.inventory.add(buildPhysical(i));
         });
 
@@ -150,12 +156,19 @@ public class RecipeMixer {
         // TODO - add rest of mixins
         
         // finally work any modifications
-        for (Modification m : blueprint.modifications) {
+        for (Modification m : blueprint.requiredModifications) {
             applyModification(physical, m);
         }
 
-        if (!blueprint.possibleModifications.isEmpty()) {
-            applyModification(physical, rng.getRandomElement(blueprint.possibleModifications));
+        int count = rng.nextInt(blueprint.optionalModifications.size());
+        Set<Integer> ints = new HashSet<>();
+        for (int i = 0; i < count; i++){
+            int n;
+            do{
+                n = rng.nextInt(count);
+            } while (ints.contains(n));
+            ints.add(n);
+            applyModification(physical, blueprint.optionalModifications.get(n));
         }
 
         for (Rating rating : Rating.values()) {
@@ -200,7 +213,7 @@ public class RecipeMixer {
      */
     public void applyModification(Physical physical, Modification modification) {
         SquidColorCenter colorCenter = new SquidColorCenter();
-        physical.appliedModifications.add(modification.name);
+        physical.modifications.add(modification);
 
         if (modification.parentOverwrite != null) {
             physical.parent = modification.parentOverwrite;
@@ -209,7 +222,7 @@ public class RecipeMixer {
         }
 
         if (modification.contentsOverwrite != null) {
-            physical.countsAs = new HashSet<>(modification.countsAsOverwrite);
+            physical.countsAs = new HashSet<>(modification.countsAs);
         } else {
             if (modification.countsAsGained != null) {
                 physical.countsAs.addAll(modification.countsAsGained);
@@ -234,23 +247,23 @@ public class RecipeMixer {
             physical.symbol = modification.symbol;
         }
 
-        if (modification.colorOverwrite != null) {
-            physical.color = modification.colorOverwrite;
+        if (modification.color != null) {
+            physical.color = modification.color;
         }
 
-        if (modification.lightEmittedOverwrite != null) {
-            physical.lightEmitted = modification.lightEmittedOverwrite;
+        if (modification.lightEmitted != null) {
+            physical.lightEmitted = modification.lightEmitted;
         }
 
-        if (modification.lightEmittedStrenghtChanges != null) {
-            physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChanges);
+        if (modification.lightEmittedStrenghtChange != null) {
+            physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChange);
         }
 
-        physical.passthroughResistances.putAll(modification.passthroughResistancesOverwrite);
-        physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplierOverwrite);
+        physical.passthroughResistances.putAll(modification.passthroughResistances);
+        physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplier);
 
-        if (modification.whenUsedAsMaterialOverwrite != null) {
-            physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterialOverwrite);
+        if (modification.whenUsedAsMaterial != null) {
+            physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);
         }
     }
 }

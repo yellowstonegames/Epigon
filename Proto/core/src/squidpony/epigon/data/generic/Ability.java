@@ -5,13 +5,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import squidpony.squidmath.OrderedMap;
+
 import squidpony.epigon.actions.ActionParticipantType;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
-import squidpony.squidmath.OrderedMap;
 
 /**
  * An ability is an action choice a creature, item, or condition can make.
@@ -33,10 +34,10 @@ public class Ability extends EpiData {
     EnumMap<ActionParticipantType, Effect> effects = new EnumMap<>(ActionParticipantType.class);
 
     //preconditions that must be satisfied
-    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, List<PhysicalBlueprint>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> consumes = new EnumMap<>(ActionParticipantType.class);
-    public EnumMap<ActionParticipantType, List<Map<PhysicalBlueprint, Integer>>> consumesEquipped = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Physical>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> consumes = new EnumMap<>(ActionParticipantType.class);
+    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> consumesEquipped = new EnumMap<>(ActionParticipantType.class);
     public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustHaveCondition = new EnumMap<>(ActionParticipantType.class);
     public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustNotHaveCondition = new EnumMap<>(ActionParticipantType.class);
 

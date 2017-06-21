@@ -7,21 +7,22 @@ import java.util.Set;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.ProbabilityTable;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
+import squidpony.epigon.data.specific.Condition;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.RatingValueModification;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Represents a modification to another object.
@@ -37,48 +38,79 @@ import squidpony.squidmath.ProbabilityTable;
  */
 public class Modification extends EpiData {
     public Modification parent;
-    
-    // Modification might change the effective heirarchy
-    public PhysicalBlueprint parentOverwrite;
-    public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
-    public Set<PhysicalBlueprint> countsAsOverwrite;
-    public Set<PhysicalBlueprint> countsAsGained;
-    public Set<PhysicalBlueprint> countsAsLost;
 
     // Only one string out of the set of prefixes and postfixes should be used
     public List<String> possiblePrefix = new ArrayList<>();
     public List<String> possiblePostfix = new ArrayList<>();
+    public List<String> possibleAliases = new ArrayList<>();
+    public List<String> possibleAliasesAdd = new ArrayList<>();
+    
+    // Modification might change the effective heirarchy
+    public Physical parentOverwrite;
+    public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
+    public Set<Physical> countsAs;
+    public Set<Physical> countsAsGained;
+    public Set<Physical> countsAsLost;
+    
+    public Boolean generic;
+    public Boolean unique;
+    public Boolean buildingBlock;
 
     public Character symbol;
 
-    public SColor colorOverwrite;
+    public SColor color;
 
-    public SColor lightEmittedOverwrite;
-    public LiveValueModification lightEmittedStrenghtChanges;
+    public Double baseValue;
+    public Double baseValueMultiplier;
 
-    public OrderedMap<Element, LiveValue> passthroughResistancesOverwrite = new OrderedMap<>();
-    public OrderedMap<Element, LiveValue> elementalDamageMultiplierOverwrite = new OrderedMap<>();
+    public Boolean large;
 
-    public List<Modification> whenUsedAsMaterialOverwrite; // TODO - this might not make sense when more than one material is used
-    public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
+    public SColor lightEmitted;
+    public LiveValueModification lightEmittedStrenghtChange;
+
+    public List<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used
+    public List<Modification> whenUsedAsMaterialAdditiive; // In addition to the recipe's result
+
+    public List<Modification> requiredModifications;
+    public List<Modification> requiredModificationsAdditive;
+    public List<Modification> requiredModificationsSubtractive;
+
+    public List<Modification> optionalModifications;
+    public List<Modification> optionamModificationsAdditive;
+    public List<Modification> optionalModificationsSubtractive;
+
+    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
+
+    public List<Condition> conditions;
+    public List<Condition> conditionsAdditive;
+    public List<Condition> conditionsSubtractive;
+
+    public List<Condition> optionalConditions;
+    public List<Condition> optionalConditionsAdditive;
+    public List<Condition> optionalConditionsSubtractive;
+
+    public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, LiveValueModification> statChanges = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, RatingValueModification> statProgressionChanges = new EnumMap<>(Stat.class);
+
+    public List<Physical> inventory;
+    public List<Physical> inventoryAdditive;
+    public List<Physical> inventorySubtractive; // TODO - priority on loss? exact match? what if it's not there?
+    public List<Physical> optionalInventory;
+    public List<Physical> optionalInventoryAdditive;
+    public List<Physical> optionalInvntorySubtractive;
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
-    public List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>> physicalDropsOverwrite;
-    public EnumMap<Element, List<ProbabilityTable<ProbabilityTableEntry<PhysicalBlueprint>>>> elementDropsOverwrite = new EnumMap<>(Element.class);
-
-    public EnumMap<Stat, LiveValueModification> statChanges = new EnumMap<>(Stat.class);
-    public EnumMap<Stat, RatingValueModification> statProgressionChanges = new EnumMap<>(Stat.class);
+    public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDropsOverwrite;
+    public EnumMap<Element, List<ProbabilityTable<ProbabilityTableEntry<Physical>>>> elementDropsOverwrite = new EnumMap<>(Element.class);
 
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsOverwrite;
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsAdditive;
 
     public EnumMap<Rating, List<Modification>> rarityModificationsOverwrite = new EnumMap<>(Rating.class); // Only for blueprints
     public EnumMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumMap<>(Rating.class); // Only for blueprints
-
-    public Boolean largeOverwrite;
-
-    public List<PhysicalBlueprint> gainedItems;
-    public List<PhysicalBlueprint> lostItems; // TODO - priority on loss? exact match? what if it's not there?
 
     // Creature changes
     public Creature overwriteCreature; // Become a new creature (or become one for the first time)
@@ -103,9 +135,9 @@ public class Modification extends EpiData {
     public List<ConditionBlueprint> ammunitionCausesOverwrite;
     public Set<ConditionBlueprint> ammunitionCausesRemoved;
     public List<ConditionBlueprint> ammunitionCausesAdded;
-    public Set<PhysicalBlueprint> ammunitionLaunchersOverwrite;
-    public Set<PhysicalBlueprint> ammunitionLaunchersRemoved;
-    public Set<PhysicalBlueprint> ammunitionLaunchersAdded;
+    public Set<Physical> ammunitionLaunchersOverwrite;
+    public Set<Physical> ammunitionLaunchersRemoved;
+    public Set<Physical> ammunitionLaunchersAdded;
     public Boolean ammunitionThrowableOverwrite;
     public Double ammunitionHitChanceOverwrite;
     public Double ammunitionHitChanceDelta;
@@ -117,9 +149,9 @@ public class Modification extends EpiData {
     // Container changes
     public Double capacityOverwrite;
     public Double capacityDelta;
-    public List<PhysicalBlueprint> contentsOverwrite;
-    public List<PhysicalBlueprint> contentsRemoved;
-    public List<PhysicalBlueprint> contentsAdded;
+    public List<Physical> contentsOverwrite;
+    public List<Physical> contentsRemoved;
+    public List<Physical> contentsAdded;
 
     // Grouping changes
     public Integer quantityOverwrite;

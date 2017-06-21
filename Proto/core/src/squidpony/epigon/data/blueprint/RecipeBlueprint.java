@@ -1,8 +1,10 @@
 package squidpony.epigon.data.blueprint;
 
+import squidpony.squidmath.OrderedMap;
+
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.Modification;
-import squidpony.squidmath.OrderedMap;
+import squidpony.epigon.data.specific.Physical;
 
 
 /**
@@ -31,15 +33,15 @@ import squidpony.squidmath.OrderedMap;
  */
 public class RecipeBlueprint extends EpiData {
 
-    public OrderedMap<PhysicalBlueprint, Integer> requiredConsumed;
-    public OrderedMap<PhysicalBlueprint, Integer> requiredCatalyst; // ie: a Forge (not consumed)
-    public OrderedMap<PhysicalBlueprint, Integer> optionalConsumed; // can add various properties
-    public OrderedMap<PhysicalBlueprint, Integer> optionalCatalyst;
-    public OrderedMap<PhysicalBlueprint, Integer> result;
+    public OrderedMap<Physical, Integer> requiredConsumed;
+    public OrderedMap<Physical, Integer> requiredCatalyst; // ie: a Forge (not consumed)
+    public OrderedMap<Physical, Integer> optionalConsumed; // can add various properties
+    public OrderedMap<Physical, Integer> optionalCatalyst;
+    public OrderedMap<Physical, Integer> result;
 
-    public OrderedMap<PhysicalBlueprint, Modification> modifications; // mapping of what adding optionals does to the results
+    public OrderedMap<Physical, Modification> modifications; // mapping of what adding optionals does to the results
 
-    public boolean uses(PhysicalBlueprint ingredient) {
+    public boolean uses(Physical ingredient) {
         return requiredConsumed.keySet().stream().anyMatch(p -> p.countsAs(ingredient))
             || requiredCatalyst.keySet().stream().anyMatch(p -> p.countsAs(ingredient))
             || optionalConsumed.keySet().stream().anyMatch(p -> p.countsAs(ingredient))

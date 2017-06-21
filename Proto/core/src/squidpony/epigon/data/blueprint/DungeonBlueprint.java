@@ -3,8 +3,10 @@ package squidpony.epigon.data.blueprint;
 import java.util.Map;
 import java.util.Set;
 
-import squidpony.epigon.data.EpiData;
 import squidpony.squidmath.OrderedMap;
+
+import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.specific.Physical;
 
 /**
  * Holds for constructing a Dungeon out of rooms and terrain. A dungeon is any group of areas that
@@ -17,6 +19,6 @@ import squidpony.squidmath.OrderedMap;
  */
 public class DungeonBlueprint extends EpiData {
 
-    Map<Character, OrderedMap<PhysicalBlueprint, Integer>> mappings;
+    Map<Character, OrderedMap<Physical, Integer>> mappings;
     Set<RoomBlueprint> rooms;
 }
