@@ -1,5 +1,11 @@
 package squidpony.epigon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -13,15 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.dm.RecipeMixer;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.WorldGenerator;
-import squidpony.epigon.playground.HandBuilt;
-import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Stat;
+
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -34,11 +32,15 @@ import squidpony.squidmath.FlapRNG;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.dm.RecipeMixer;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.WorldGenerator;
+import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.

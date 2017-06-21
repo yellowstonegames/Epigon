@@ -9,12 +9,12 @@ import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
-import squidpony.epigon.data.blueprint.PhysicalBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
@@ -37,10 +37,9 @@ public class HandBuilt {
         extrusiveGemList = new ArrayList<>(),
         metamorphicGemList = new ArrayList<>();
 
-
-    public PhysicalBlueprint playerBlueprint;
-    public PhysicalBlueprint swordBlueprint;
-    public PhysicalBlueprint doorBlueprint;
+    public Physical playerBlueprint;
+    public Physical swordBlueprint;
+    public Physical doorBlueprint;
 
     public Modification makeWall;
     public Modification makeDoor;
@@ -49,7 +48,7 @@ public class HandBuilt {
     public HandBuilt() {
         initWallLists();
 
-        playerBlueprint = new PhysicalBlueprint();
+        playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
         playerBlueprint.description = "The main player's character.";
         playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
@@ -61,9 +60,8 @@ public class HandBuilt {
         Arrays.stream(Stat.values()).forEach(s -> {
             LiveValue lv = new LiveValue(rng.between(20, 100));
             lv.actual = lv.base * (rng.nextDouble() + 0.1);
-            playerBlueprint.initialStats.put(s, lv);
+            playerBlueprint.stats.put(s, lv);
         });
-        playerBlueprint.initialStats.put(Stat.OPACITY, new LiveValue(100)); // Make sure player's opaque after randomizing stats
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
@@ -75,12 +73,12 @@ public class HandBuilt {
         skill.name = "akido";
         cb.skills.put(skill, Rating.SLIGHT);
 
-        swordBlueprint = new PhysicalBlueprint();
+        swordBlueprint = new Physical();
         swordBlueprint.name = "sword";
         swordBlueprint.color = SColor.SILVER;
         swordBlueprint.symbol = '/';
 
-        doorBlueprint = new PhysicalBlueprint();
+        doorBlueprint = new Physical();
         doorBlueprint.name = "door";
         doorBlueprint.symbol = '+';
         doorBlueprint.color = SColor.WALNUT;
@@ -90,21 +88,20 @@ public class HandBuilt {
         makeWall = new Modification();
         makeWall.possiblePostfix.add("wall");
         makeWall.symbol = '#';
-        makeWall.largeOverwrite = true;
+        makeWall.large = true;
         for (Element e : Element.values()) {
-            makeWall.passthroughResistancesOverwrite.put(e, new LiveValue(1.0)); // walls block everything
+            makeWall.passthroughResistances.put(e, new LiveValue(1.0)); // walls block everything
         }
 
         makeDoor = new Modification();
         makeDoor.possiblePrefix.add("door of");
         makeDoor.symbol = '+';
-        makeDoor.largeOverwrite = true;
+        makeDoor.large = true;
         for (Element e : Element.values()) {
-            makeDoor.passthroughResistancesOverwrite.put(e, new LiveValue(1.0));
+            makeDoor.passthroughResistances.put(e, new LiveValue(1.0));
         }
-        makeDoor.passthroughResistancesOverwrite.put(Element.SONIC, new LiveValue(0.5));
+        makeDoor.passthroughResistances.put(Element.SONIC, new LiveValue(0.5));
     }
-
 
     private void initWallLists() {
         for (Stone stone : Stone.values()) {
