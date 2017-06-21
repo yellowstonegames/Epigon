@@ -64,10 +64,11 @@ public class WorldGenerator {
                     break;
                     default:
                         tile = world[0].contents[x][y];
-                        tile.largeObject = new Physical();
-                        tile.largeObject.symbol = EpiMap.altSymbolOf(c);
-                        tile.largeObject.color = EpiMap.colorOf(c);
-                        tile.largeObject.large = true;
+                        tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
+                        tile.floor.symbol = EpiMap.altSymbolOf(c);
+                        tile.floor.color = EpiMap.colorOf(c);
+                        tile.floor.name = "modified " + c;
+                        tile.largeObject = null;
                         break;
                 }
             }

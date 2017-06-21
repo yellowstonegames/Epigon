@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Camera;
@@ -188,7 +189,7 @@ public class Epigon extends Game {
         awaitedMoves = new ArrayList<>(100);
 
         //DijkstraMap is the pathfinding swiss-army knife we use here to find a path to the latest cursor position.
-        GreasedRegion floors = new GreasedRegion(map.resistances(Element.AIR), 1);
+        GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
         blocked = new GreasedRegion(BIG_MAP_WIDTH,  BIG_MAP_HEIGHT);
         player.location = floors.singleRandom(rng);
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
@@ -198,10 +199,11 @@ public class Epigon extends Game {
         display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
 
         playerToCursor = new DijkstraMap(simpleChars, DijkstraMap.Measurement.EUCLIDEAN);
-        double[][] resists = map.resistances(Element.LIGHT);
+        double[][] resists = map.opacities();
         for(int x =0;x<BIG_MAP_WIDTH;x++){
             for(int y = 0; y< BIG_MAP_HEIGHT; y++){
-                if (resists[x][y] >= 1){
+                EpiTile tile = map.contents[x][y];
+                if (tile.largeObject != null || (tile.creature != null && tile.creature != player)){
                     resists[x][y] = DijkstraMap.WALL;
                 } else {
                     resists[x][y] = DijkstraMap.FLOOR;
@@ -210,7 +212,7 @@ public class Epigon extends Game {
         }
         //playerToCursor.initializeCost(resists);
 
-        fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
+        fovResult = fov.calculateFOV(map.opacities(), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
         playerToCursor.setGoal(player.location);
         playerToCursor.scan(calculateBlocked());
 
@@ -232,7 +234,7 @@ public class Epigon extends Game {
     private void move(Direction dir) {
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].getSymbol() != '#') {
+        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].largeObject == null && map.contents[newX][newY].creature == null) {
             final float midX = player.location.x + dir.deltaX * 0.5f;
             final float midY = player.location.y + dir.deltaY * 0.5f;
             final Vector3 pos = camera.position.cpy();
@@ -242,7 +244,7 @@ public class Epigon extends Game {
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
             display.slide(playerEntity, newX, newY);
-            fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), newX, newY, MAP_WIDTH, Radius.CIRCLE);
+            fovResult = fov.calculateFOV(map.opacities(), newX, newY, MAP_WIDTH, Radius.CIRCLE);
             playerToCursor.setGoal(player.location);
             playerToCursor.scan(calculateBlocked());
             sound.playFootstep();
@@ -265,7 +267,7 @@ public class Epigon extends Game {
                     display.setGridOffsetY(player.location.y - (MAP_HEIGHT >> 1));
                     camera.position.set(original);
                     camera.update();
-                    fovResult = fov.calculateFOV(map.resistances(Element.LIGHT), player.location.x, player.location.y, MAP_WIDTH, Radius.CIRCLE);
+                    fovResult = fov.calculateFOV(map.opacities(), player.location.x, player.location.y, MAP_WIDTH, Radius.CIRCLE);
                     calculateBlocked();
                     playerToCursor.scan(blocked);
                 }
@@ -503,29 +505,50 @@ public class Epigon extends Game {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
-            if (awaitedMoves.isEmpty()) {
-                if (toCursor.isEmpty()) {
-                    cursor = Coord.get(sx, sy);
-                    //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
-                    // player position to the position the user clicked on. The "PreScanned" part is an optimization
-                    // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
-                    // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
-                    // moves, we only need to do a fraction of the work to find the best path with that info.
-                    playerToCursor.scan(blocked);
-                    toCursor = playerToCursor.findPathPreScanned(cursor);
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    if (awaitedMoves.isEmpty()) {
+                        if (toCursor.isEmpty()) {
+                            cursor = Coord.get(sx, sy);
+                            //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+                            // player position to the position the user clicked on. The "PreScanned" part is an optimization
+                            // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
+                            // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
+                            // moves, we only need to do a fraction of the work to find the best path with that info.
+                            playerToCursor.scan(blocked);
+                            toCursor = playerToCursor.findPathPreScanned(cursor);
 
-                    //findPathPreScanned includes the current cell (goal) by default, which is helpful when
-                    // you're finding a path to a monster or loot, and want to bump into it, but here can be
-                    // confusing because you would "move into yourself" as your first move without this.
-                    // Getting a sublist avoids potential performance issues with removing from the start of an
-                    // ArrayList, since it keeps the original list around and only gets a "view" of it.
-                    if (!toCursor.isEmpty()) {
-                        toCursor = toCursor.subList(1, toCursor.size());
+                            //findPathPreScanned includes the current cell (goal) by default, which is helpful when
+                            // you're finding a path to a monster or loot, and want to bump into it, but here can be
+                            // confusing because you would "move into yourself" as your first move without this.
+                            // Getting a sublist avoids potential performance issues with removing from the start of an
+                            // ArrayList, since it keeps the original list around and only gets a "view" of it.
+                            if (!toCursor.isEmpty()) {
+                                toCursor = toCursor.subList(1, toCursor.size());
+                            }
+                        }
+                        awaitedMoves.addAll(toCursor);
                     }
-
-                }
-                awaitedMoves.addAll(toCursor);
+                    break;
+                case Input.Buttons.RIGHT:
+                    String tileDescription = "[" + sx + ", " + sy + "]";
+                    EpiTile tile = map.contents[sx][sy];
+                    if (tile.floor != null){
+                        tileDescription += "  Floor of " + tile.floor.name;
+                    }
+                    if (tile.creature != null){
+                        tileDescription += "  Creature " + tile.creature.name;
+                    }
+                    if (tile.largeObject != null){
+                        tileDescription += "  Large Object of " + tile.largeObject.name;
+                    }
+                    if (tile.smallObjects != null && !tile.smallObjects.isEmpty()){
+                        tileDescription += "  Small object count is " + tile.smallObjects.size();
+                    }
+                    messages.addFirst(new IColoredString.Impl<>(tileDescription, SColor.SAFFRON));
+                    break;
             }
+
             return false;
         }
 

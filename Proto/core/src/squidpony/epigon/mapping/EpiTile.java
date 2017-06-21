@@ -5,9 +5,8 @@ import java.util.Stack;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.data.mixin.Terrain;
-import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * This class holds the objects in a single grid square.
@@ -25,31 +24,23 @@ public class EpiTile {
     public Physical creature;
 
     /**
-     * Returns the resistance this tile has to the provided key.
-     *
-     * @param key
-     * @return
+     * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
+     * fully transparent.
      */
-    public double resistance(Element key) {//TODO -- determine if resistance should be additive or just max baseValue
+    public double opeacity() {
         double resistance = 0f;
-        Double check;
         LiveValue lv = new LiveValue(resistance);
-        if (floor != null) {
-            resistance = floor.passthroughResistances.getOrDefault(key, lv).actual;
-        }
+        Stat key = Stat.OPACITY;
+//        if (floor != null) { // NOTE - floor shouldn't count for opacity but should for travel across
+//            resistance = floor.stats.getOrDefault(key, lv).actual;
+//        }
         if (largeObject != null) {
-            check = largeObject.passthroughResistances.getOrDefault(key, lv).actual;
-            resistance = Math.max(resistance, check);
+            resistance += largeObject.stats.getOrDefault(key, lv).actual;
         }
         if (creature != null) {
-            check = creature.passthroughResistances.getOrDefault(key, lv).actual;
-            resistance = Math.max(resistance,check);
+            resistance += creature.stats.getOrDefault(key, lv).actual;
         }
-        return resistance;
-    }
-
-    public boolean isPassable(Element key) {
-        return key == null || resistance(key) < 1;
+        return Math.min(resistance, 1.0);
     }
 
     /**

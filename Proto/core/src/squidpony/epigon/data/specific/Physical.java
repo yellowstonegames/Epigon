@@ -77,7 +77,6 @@ public class Physical extends EpiData {
     public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
     public List<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
 
-    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
     public OrderedMap<Element, LiveValue> elementalDamageMultiplyer = new OrderedMap<>();
 
     public List<Condition> conditions = new ArrayList<>();
@@ -129,7 +128,7 @@ public class Physical extends EpiData {
     public Terrain terrainData;
 
     public Physical() {
-        stats.put(Stat.OPACITY, new LiveValue(100)); // default to opaque
+        stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
     }
 
     public boolean countsAs(Physical blueprint) {

@@ -14,9 +14,9 @@ import squidpony.epigon.universe.Element;
  * This represents a single explorable map level.
  *
  * Each cell is considered to be 1 meter by 1 meter square.
- *
- * A null tile represents open space with no special properties or resistances to things passing
- * through. They should not be considered a vacuum, but rather normal air.
+
+ A null tile represents open space with no special properties or opacities to things passing
+ through. They should not be considered a vacuum, but rather normal air.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -75,7 +75,9 @@ public class EpiMap {
             Element key = move.element;
             Queue<Coord> points = move.moveList;
             for (Coord p : points) {
-                if (!inBounds(p) || !contents[p.x][p.y].isPassable(key) || (move.mover.creatureData != null && contents[p.x][p.y].creature != null)) {
+                if (!inBounds(p)
+                    || contents[p.x][p.y].largeObject != null
+                    || (move.mover.creatureData != null && contents[p.x][p.y].creature != null)) {
                     return false;//found a blocking area
                 }
             }
@@ -111,11 +113,11 @@ public class EpiMap {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
-    public double[][] resistances(Element element){
+    public double[][] opacities(){
         double[][] resistances = new double[width][height];
         for (int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
-                resistances[x][y] = contents[x][y].resistance(element);
+                resistances[x][y] = contents[x][y].opeacity();
             }
         }
         return resistances;

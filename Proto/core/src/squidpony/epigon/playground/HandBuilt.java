@@ -83,7 +83,6 @@ public class HandBuilt {
         doorBlueprint.symbol = '+';
         doorBlueprint.color = SColor.WALNUT;
         doorBlueprint.large = true;
-        Arrays.stream(Element.values()).forEach(e -> doorBlueprint.passthroughResistances.put(e, new LiveValue(1)));
 
         makeWall = new Modification();
         makeWall.possiblePostfix.add("wall");
