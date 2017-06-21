@@ -126,7 +126,6 @@ public class RecipeMixer {
 
         physical.whenUsedAsMaterial.addAll(blueprint.whenUsedAsMaterial);
 
-        physical.passthroughResistances = new OrderedMap<>(blueprint.passthroughResistances);
         physical.elementalDamageMultiplyer = new OrderedMap<>(blueprint.elementalDamageMultiplyer);
 
         // TODO - figure out whether conditions should be copied or only come from modifications
@@ -259,7 +258,6 @@ public class RecipeMixer {
             physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChange);
         }
 
-        physical.passthroughResistances.putAll(modification.passthroughResistances);
         physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplier);
 
         if (modification.whenUsedAsMaterial != null) {
