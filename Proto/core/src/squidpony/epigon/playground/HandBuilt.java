@@ -15,7 +15,6 @@ import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
@@ -50,7 +49,7 @@ public class HandBuilt {
 
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
-        playerBlueprint.description = "The main player's character.";
+        playerBlueprint.description = "It's you!";
         playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
         playerBlueprint.color = SColor.BRIGHT_PINK;
@@ -88,18 +87,11 @@ public class HandBuilt {
         makeWall.possiblePostfix.add("wall");
         makeWall.symbol = '#';
         makeWall.large = true;
-        for (Element e : Element.values()) {
-            makeWall.passthroughResistances.put(e, new LiveValue(1.0)); // walls block everything
-        }
 
         makeDoor = new Modification();
         makeDoor.possiblePrefix.add("door of");
         makeDoor.symbol = '+';
         makeDoor.large = true;
-        for (Element e : Element.values()) {
-            makeDoor.passthroughResistances.put(e, new LiveValue(1.0));
-        }
-        makeDoor.passthroughResistances.put(Element.SONIC, new LiveValue(0.5));
     }
 
     private void initWallLists() {

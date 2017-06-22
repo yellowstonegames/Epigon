@@ -79,7 +79,7 @@ public class Modification extends EpiData {
     public List<Modification> optionamModificationsAdditive;
     public List<Modification> optionalModificationsSubtractive;
 
-    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>();
+//    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>(); // TODO - this needs to be different than Element probably
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
 
     public List<Condition> conditions;
