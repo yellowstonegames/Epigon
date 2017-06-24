@@ -7,11 +7,15 @@ import java.util.prefs.Preferences;
  */
 public class Prefs {
 
-    static private Preferences prefs = Preferences.userRoot().node("/squidpony");
+    static private Preferences prefs;
     static private int screenWidth = Epigon.TOTAL_PIXEL_WIDTH;
     static private int screenHeight = Epigon.TOTAL_PIXEL_HEIGHT;
     static private String title = "Epigon - The Expected Beginning";
     static private boolean debug = true;
+
+    static{
+        prefs = Preferences.userNodeForPackage(Prefs.class);
+    }
 
     /**
      * No instances of this class should be made.

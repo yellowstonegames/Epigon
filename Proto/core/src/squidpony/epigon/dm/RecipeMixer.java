@@ -214,8 +214,25 @@ public class RecipeMixer {
         SquidColorCenter colorCenter = new SquidColorCenter();
         physical.modifications.add(modification);
 
-        if (modification.parentOverwrite != null) {
-            physical.parent = modification.parentOverwrite;
+        if (modification.possibleAliases != null){
+            physical.possibleAliases = new ArrayList<>(modification.possibleAliases);
+        }
+
+        physical.possibleAliases.addAll(modification.possibleAliasesAdd);
+
+        int count = modification.possiblePrefix.size() + modification.possiblePostfix.size();
+        if (count > 0) {
+            int i = rng.nextInt(count);
+            if (i < modification.possiblePrefix.size()) {
+                physical.name = modification.possiblePrefix.get(i) + " " + physical.name;
+            } else {
+                i -= modification.possiblePrefix.size();
+                physical.name += " " + modification.possiblePostfix.get(i);
+            }
+        }
+
+        if (modification.parent != null) {
+            physical.parent = modification.parent;
         } else if (modification.parentBecomesNull != null && modification.parentBecomesNull) {
             physical.parent = null;
         }
@@ -231,15 +248,16 @@ public class RecipeMixer {
             }
         }
 
-        int totalSize = modification.possiblePrefix.size() + modification.possiblePostfix.size();
-        if (totalSize > 0) {
-            int i = rng.nextInt(totalSize);
-            if (i < modification.possiblePrefix.size()) {
-                physical.name = modification.possiblePrefix.get(i) + " ";
-            } else {
-                i -= modification.possiblePrefix.size();
-                physical.name += " " + modification.possiblePostfix.get(i);
-            }
+        if (modification.generic != null){
+            physical.generic = modification.generic;
+        }
+
+        if (modification.unique != null){
+            physical.unique = modification.unique;
+        }
+
+        if (modification.buildingBlock != null){
+            physical.buildingBlock = modification.buildingBlock;
         }
 
         if (modification.symbol != null) {
@@ -248,6 +266,18 @@ public class RecipeMixer {
 
         if (modification.color != null) {
             physical.color = modification.color;
+        }
+
+        if (modification.baseValue != null){
+            physical.baseValue = modification.baseValue;
+        }
+
+        if (modification.baseValueMultiplier != null){
+            physical.baseValue *= modification.baseValueMultiplier;
+        }
+
+        if (modification.large != null){
+            physical.large = modification.large;
         }
 
         if (modification.lightEmitted != null) {

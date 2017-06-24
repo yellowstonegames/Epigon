@@ -44,31 +44,32 @@ public class WorldGenerator {
         char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
 
         EpiTile tile;
-        for (int x = 0; x < width; x++){
-            for (int y = 0; y < height; y++){
+        Physical adding;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 char c = simpleChars[x][y];
-                switch(c){
+                tile = world[0].contents[x][y];
+                if (tile.getLargeObject() != null) {
+                    tile.remove(tile.getLargeObject());
+                }
+                switch (c) {
                     case '.':
-                        tile = world[0].contents[x][y];
-                        tile.largeObject = null; // empty walkable tile in the dungeon gen
                         break;
                     case '#':
-                        tile = world[0].contents[x][y];
-                        tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
-                        mixer.applyModification(tile.largeObject, handBuilt.makeWall);
-                    break;
+                        adding = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                        mixer.applyModification(adding, handBuilt.makeWall);
+                        tile.add(adding);
+                        break;
                     case '+':
-                        tile = world[0].contents[x][y];
-                        tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
-                        mixer.applyModification(tile.largeObject, handBuilt.makeDoor);
-                    break;
+                        adding = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                        mixer.applyModification(adding, handBuilt.makeDoor);
+                        tile.add(adding);
+                        break;
                     default:
-                        tile = world[0].contents[x][y];
                         tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
                         tile.floor.symbol = EpiMap.altSymbolOf(c);
                         tile.floor.color = EpiMap.colorOf(c);
                         tile.floor.name = "modified " + c;
-                        tile.largeObject = null;
                         break;
                 }
             }
@@ -106,8 +107,9 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    tile.largeObject = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
-                    mixer.applyModification(tile.largeObject, handBuilt.makeWall);
+                    Physical p = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                    mixer.applyModification(p, handBuilt.makeWall);
+                    tile.add(p);
                 }
             }
         }

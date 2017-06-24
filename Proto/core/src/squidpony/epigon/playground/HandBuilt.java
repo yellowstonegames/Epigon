@@ -2,6 +2,7 @@ package squidpony.epigon.playground;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import squidpony.Maker;
 import static squidpony.epigon.Epigon.rng;
@@ -84,6 +85,7 @@ public class HandBuilt {
         doorBlueprint.large = true;
 
         makeWall = new Modification();
+        Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
         makeWall.possiblePostfix.add("wall");
         makeWall.symbol = '#';
         makeWall.large = true;

@@ -37,16 +37,15 @@ import squidpony.epigon.universe.Stat;
  * to be maintained in reference to the object.
  */
 public class Modification extends EpiData {
-    public Modification parent;
 
     // Only one string out of the set of prefixes and postfixes should be used
     public List<String> possiblePrefix = new ArrayList<>();
     public List<String> possiblePostfix = new ArrayList<>();
-    public List<String> possibleAliases = new ArrayList<>();
+    public List<String> possibleAliases;
     public List<String> possibleAliasesAdd = new ArrayList<>();
     
     // Modification might change the effective heirarchy
-    public Physical parentOverwrite;
+    public Physical parent;
     public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
     public Set<Physical> countsAs;
     public Set<Physical> countsAsGained;
