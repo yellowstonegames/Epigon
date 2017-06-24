@@ -39,7 +39,6 @@ import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
-import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 
@@ -88,7 +87,7 @@ public class Epigon extends Game {
 
     public static int seed1 = 0xBEEFD00D;
     public static int seed2 = 0xCAFEFEED;
-    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(seed1, seed2)); //new StatefulRNG(new ThunderRNG()); //
+    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(seed2, seed1)); //new StatefulRNG(new ThunderRNG()); //
     public static final RecipeMixer mixer = new RecipeMixer();
 
     // 
@@ -133,6 +132,7 @@ public class Epigon extends Game {
         sound = new SoundManager();
         colorCenter = new SquidColorCenter();
 
+        System.out.println("Generating world.");
         worldGenerator = new WorldGenerator();
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
@@ -203,7 +203,7 @@ public class Epigon extends Game {
         for(int x =0;x<BIG_MAP_WIDTH;x++){
             for(int y = 0; y< BIG_MAP_HEIGHT; y++){
                 EpiTile tile = map.contents[x][y];
-                if (tile.largeObject != null || (tile.creature != null && tile.creature != player)){
+                if (tile.getLargeObject() != null || (tile.getCreature() != null && tile.getCreature() != player)){
                     resists[x][y] = DijkstraMap.WALL;
                 } else {
                     resists[x][y] = DijkstraMap.FLOOR;
@@ -234,7 +234,7 @@ public class Epigon extends Game {
     private void move(Direction dir) {
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].largeObject == null && map.contents[newX][newY].creature == null) {
+        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].getLargeObject() == null && map.contents[newX][newY].getCreature() == null) {
             final float midX = player.location.x + dir.deltaX * 0.5f;
             final float midY = player.location.y + dir.deltaY * 0.5f;
             final Vector3 pos = camera.position.cpy();
@@ -429,11 +429,11 @@ public class Epigon extends Game {
         input.getMouse().reinitialize((float) width / TOTAL_WIDTH, (float) height / TOTAL_HEIGHT, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
         viewport.update(width, height, false);
         viewport.setScreenBounds(0, 0, width, height);
-        */
+         */
         // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
         float currentZoomX = (float) width / MAP_WIDTH,
-                // total new screen height in pixels divided by total number of rows on the screen
-                currentZoomY = (float)height / TOTAL_HEIGHT;
+            // total new screen height in pixels divided by total number of rows on the screen
+            currentZoomY = (float) height / TOTAL_HEIGHT;
         // message box should be given updated bounds since I don't think it will do this automatically
         messages.setBounds(0, 0, currentZoomX * MESSAGE_WIDTH, currentZoomY * MESSAGE_HEIGHT);
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
@@ -443,11 +443,9 @@ public class Epigon extends Game {
         //printText.bmpFont.getData().lineHeight /= currentZoomY;
         //printText.bmpFont.getData().descent /= currentZoomY;
         messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0, (int)messages.getWidth(), (int)messages.getHeight());
+        messageViewport.setScreenBounds(0, 0, (int) messages.getWidth(), (int) messages.getHeight());
         viewport.update(width, height, false);
-        viewport.setScreenBounds(0, (int)messages.getHeight(),
-                width, height - (int)messages.getHeight());
-
+        viewport.setScreenBounds(0, (int) messages.getHeight(), width, height - (int) messages.getHeight());
 
     }
 
@@ -533,17 +531,20 @@ public class Epigon extends Game {
                 case Input.Buttons.RIGHT:
                     String tileDescription = "[" + sx + ", " + sy + "]";
                     EpiTile tile = map.contents[sx][sy];
+                    int contentCount = tile.contents.size(); // TODO - this won't work right if the large is the creature
                     if (tile.floor != null){
                         tileDescription += "  Floor of " + tile.floor.name;
                     }
-                    if (tile.creature != null){
-                        tileDescription += "  Creature " + tile.creature.name;
+                    if (tile.getCreature() != null){
+                        tileDescription += "  Creature " + tile.getCreature().name;
+                        contentCount--;
                     }
-                    if (tile.largeObject != null){
-                        tileDescription += "  Large Object of " + tile.largeObject.name;
+                    if (tile.getLargeObject() != null){
+                        tileDescription += "  Large Object of " + tile.getLargeObject().name;
+                        contentCount--;
                     }
-                    if (tile.smallObjects != null && !tile.smallObjects.isEmpty()){
-                        tileDescription += "  Small object count is " + tile.smallObjects.size();
+                    if (contentCount > 0){
+                        tileDescription += "  Small object count is " + tile.contents.size();
                     }
                     messages.addFirst(new IColoredString.Impl<>(tileDescription, SColor.SAFFRON));
                     break;

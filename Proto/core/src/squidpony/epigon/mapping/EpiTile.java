@@ -1,6 +1,7 @@
 package squidpony.epigon.mapping;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -19,9 +20,7 @@ import squidpony.epigon.universe.Stat;
 public class EpiTile {
 
     public Physical floor;
-    public Physical largeObject;
-    public Stack<Physical> smallObjects = new Stack<>();
-    public Physical creature;
+    public List<Physical> contents = new ArrayList<>();
 
     /**
      * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
@@ -31,14 +30,11 @@ public class EpiTile {
         double resistance = 0f;
         LiveValue lv = new LiveValue(resistance);
         Stat key = Stat.OPACITY;
-//        if (floor != null) { // NOTE - floor shouldn't count for opacity but should for travel across
-//            resistance = floor.stats.getOrDefault(key, lv).actual;
-//        }
-        if (largeObject != null) {
-            resistance += largeObject.stats.getOrDefault(key, lv).actual;
+        if (getLargeObject() != null) {
+            resistance += getLargeObject().stats.getOrDefault(key, lv).actual;
         }
-        if (creature != null) {
-            resistance += creature.stats.getOrDefault(key, lv).actual;
+        if (getCreature() != null) {
+            resistance += getCreature().stats.getOrDefault(key, lv).actual;
         }
         return Math.min(resistance, 1.0);
     }
@@ -52,10 +48,10 @@ public class EpiTile {
         char rep = ' ';//default to no representation
 
         //check in order of preference
-        if (creature != null) {
-            rep = creature.symbol;
-        } else if (largeObject != null) {
-            rep = largeObject.symbol;
+        if (getCreature() != null) {
+            rep = getCreature().symbol;
+        } else if (getLargeObject() != null) {
+            rep = getLargeObject().symbol;
         } else if (floor != null) {
             rep = floor.symbol;
         }
@@ -77,11 +73,11 @@ public class EpiTile {
         SColor fore = null;//indicates that no particular color is used
 
         //check in order of preference
-        if (creature != null) {
-            fore = creature.color;
-        } else if (largeObject != null) {
-            fore = largeObject.color;
-        }else if (floor != null) {
+        if (getCreature() != null) {
+            fore = getCreature().color;
+        } else if (getLargeObject() != null) {
+            fore = getLargeObject().color;
+        } else if (floor != null) {
             fore = floor.color;
         }
 
@@ -89,13 +85,7 @@ public class EpiTile {
     }
 
     public void remove(Physical phys) {
-        if (phys == creature) {
-            creature = null;
-        } else if (largeObject == phys) {
-            largeObject = null;
-        } else {
-            smallObjects.remove(phys);
-        }
+        contents.remove(phys);
     }
 
     /**
@@ -105,12 +95,15 @@ public class EpiTile {
      * @param phys
      */
     public void add(Physical phys) {
-        if (phys.creatureData != null) {
-            creature = phys;
-        } else if (phys.parent.large) {
-            largeObject = phys;
-        } else {
-            smallObjects.add(phys);
-        }
+        // TODO - check that it can be added
+        contents.add(phys);
+    }
+
+    public Physical getCreature() {
+        return contents.stream().filter(c -> c.creatureData != null).findAny().orElse(null);
+    }
+
+    public Physical getLargeObject() {
+        return contents.stream().filter(l -> l.large).findAny().orElse(null);
     }
 }

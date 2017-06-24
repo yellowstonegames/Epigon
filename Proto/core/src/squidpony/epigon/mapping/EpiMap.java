@@ -76,8 +76,8 @@ public class EpiMap {
             Queue<Coord> points = move.moveList;
             for (Coord p : points) {
                 if (!inBounds(p)
-                    || contents[p.x][p.y].largeObject != null
-                    || (move.mover.creatureData != null && contents[p.x][p.y].creature != null)) {
+                    || contents[p.x][p.y].getLargeObject() != null
+                    || (move.mover.creatureData != null && contents[p.x][p.y].getCreature() != null)) {
                     return false;//found a blocking area
                 }
             }
