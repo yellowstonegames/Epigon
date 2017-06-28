@@ -8,7 +8,6 @@ import squidpony.squidmath.Coord;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.universe.Element;
 
 /**
  * This represents a single explorable map level.
@@ -72,16 +71,11 @@ public class EpiMap {
     public boolean actionValid(Action action) {
         if (action instanceof MovementAction) {
             MovementAction move = (MovementAction) action;
-            Element key = move.element;
             Queue<Coord> points = move.moveList;
-            for (Coord p : points) {
-                if (!inBounds(p)
-                    || contents[p.x][p.y].getLargeObject() != null
-                    || (move.mover.creatureData != null && contents[p.x][p.y].getCreature() != null)) {
-                    return false;//found a blocking area
-                }
-            }
-            return true;//no blocking areas found
+            return points.stream().parallel().noneMatch(p -> (
+                !inBounds(p)
+                || contents[p.x][p.y].getLargeObject() != null
+                || (move.mover.creatureData != null && contents[p.x][p.y].getCreature() != null)));
         }
 
         return false;//action type not dealt with so default to not valid
