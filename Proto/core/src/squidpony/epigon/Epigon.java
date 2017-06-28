@@ -2,7 +2,6 @@ package squidpony.epigon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -20,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import squidpony.epigon.actions.MovementAction;
 
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
@@ -214,7 +214,8 @@ public class Epigon extends Game {
 
         fovResult = fov.calculateFOV(map.opacities(), player.location.x, player.location.y, BIG_MAP_WIDTH, Radius.CIRCLE);
         playerToCursor.setGoal(player.location);
-        playerToCursor.scan(calculateBlocked());
+        blocked.refill(fovResult, 0.0);
+        playerToCursor.scan(blocked);
 
         bgColor = SColor.DB_INK;
 
@@ -232,9 +233,8 @@ public class Epigon extends Game {
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
     private void move(Direction dir) {
-        int newX = player.location.x + dir.deltaX;
-        int newY = player.location.y + dir.deltaY;
-        if (newX >= 0 && newY >= 0 && newX < BIG_MAP_WIDTH && newY < BIG_MAP_HEIGHT && map.contents[newX][newY].getLargeObject() == null && map.contents[newX][newY].getCreature() == null) {
+        MovementAction move = new MovementAction(player, dir, false);
+        if (map.actionValid(move)) {
             final float midX = player.location.x + dir.deltaX * 0.5f;
             final float midY = player.location.y + dir.deltaY * 0.5f;
             final Vector3 pos = camera.position.cpy();
@@ -243,14 +243,16 @@ public class Epigon extends Game {
             float cameraDeltaY = midY > BIG_MAP_HEIGHT - HALF_MAP_HEIGHT || midY < HALF_MAP_HEIGHT ? 0 : (dir.opposite().deltaY * CELL_HEIGHT);
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
+            int newX = player.location.x + dir.deltaX;
+            int newY = player.location.y + dir.deltaY;
             display.slide(playerEntity, newX, newY);
             fovResult = fov.calculateFOV(map.opacities(), newX, newY, MAP_WIDTH, Radius.CIRCLE);
             playerToCursor.setGoal(player.location);
-            playerToCursor.scan(calculateBlocked());
+            blocked.refill(fovResult, 0.0);
+            playerToCursor.scan(blocked);
             sound.playFootstep();
 
-            display.addAction(
-                new TemporalAction(display.getAnimationDuration()) {
+            display.addAction(new TemporalAction(display.getAnimationDuration()) {
                 @Override
                 protected void update(float percent) {
                     pos.lerp(nextPos, percent);
@@ -268,26 +270,11 @@ public class Epigon extends Game {
                     camera.position.set(original);
                     camera.update();
                     fovResult = fov.calculateFOV(map.opacities(), player.location.x, player.location.y, MAP_WIDTH, Radius.CIRCLE);
-                    calculateBlocked();
+                    blocked.refill(fovResult, 0.0);
                     playerToCursor.scan(blocked);
                 }
             });
         }
-    }
-
-    private Collection<Coord> calculateBlocked() {
-        blocked.refill(fovResult, 0.0);
-        /*
-        Set<Coord> blocked = new HashSet<>();
-        for (int x = 0; x < BIG_MAP_WIDTH; x++) {
-            for (int y = 0; y < BIG_MAP_HEIGHT; y++) {
-                if (fovResult[x][y] <= 0) {
-                    blocked.add(Coord.get(x, y));
-                }
-            }
-        }
-        */
-        return blocked;
     }
 
     /**

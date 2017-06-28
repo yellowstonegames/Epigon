@@ -86,12 +86,14 @@ public class EpiMap {
             if (action instanceof MovementAction) {
                 MovementAction move = (MovementAction) action;
                 Coord p;
+                Coord s = move.mover.location;
                 do {
                     p = move.moveList.poll();
+                    contents[s.x][s.y].remove(move.mover);
+                    contents[p.x][p.y].add(move.mover);
+                    move.mover.location = p;
+                    s = p;
                 } while (!move.moveList.isEmpty());
-                contents[move.start.x][move.start.y].remove(move.mover);
-                contents[p.x][p.y].add(move.mover);
-                move.mover.location = p;
                 return "Move completed.";
             }
         }
