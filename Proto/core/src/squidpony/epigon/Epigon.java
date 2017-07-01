@@ -106,7 +106,7 @@ public class Epigon extends Game {
     private WorldGenerator worldGenerator;
     private EpiMap map;
     private GreasedRegion blocked;
-    private DijkstraMap toPlayerDijktra;
+    private DijkstraMap toPlayerDijkstra;
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
@@ -157,8 +157,9 @@ public class Epigon extends Game {
         Coord.expandPoolTo(MAP_WIDTH, MAP_HEIGHT);
         display = new SquidLayers(MAP_VIEWPORT_WIDTH, MAP_VIEWPORT_HEIGHT, CELL_WIDTH, CELL_HEIGHT,
             DefaultResources.getStretchableSlabFont(),
-            DefaultResources.getSCC(),
-            DefaultResources.getSCC());
+            colorCenter,
+            colorCenter,
+            new char[MAP_WIDTH][MAP_HEIGHT]);
 
         display.setTextSize(CELL_WIDTH + 2, CELL_HEIGHT + 2); // weirdly, this seems to help with flicker
 
@@ -202,7 +203,7 @@ public class Epigon extends Game {
 
         calcFOV(player.location.x, player.location.y);
 
-        toPlayerDijktra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
+        toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
         blocked = new GreasedRegion(MAP_WIDTH,  MAP_HEIGHT);
         calcDijkstra();
 
@@ -218,28 +219,29 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        for (int i = 0; i < priorFovResult.length; i++){
-            System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
-        }
         fovResult = fov.calculateFOV(map.opacities(), checkX, checkY, MAP_VIEWPORT_WIDTH, Radius.CIRCLE);
     }
 
     private void mixFOV(int checkX, int checkY){
+        for (int i = 0; i < priorFovResult.length; i++){
+            System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
+        }
         fovResult = fov.calculateFOV(map.opacities(), checkX, checkY, MAP_VIEWPORT_WIDTH, Radius.CIRCLE);
         for (int x = 0; x < fovResult.length; x++){
             for (int y = 0; y < fovResult[0].length; y++){
-                fovResult[x][y] = Double.max(fovResult[x][y], priorFovResult[x][y]);
+                double found = fovResult[x][y];
+                fovResult[x][y] = Double.max(found, priorFovResult[x][y]);
+                priorFovResult[x][y] = found;
             }
         }
     }
 
     private void calcDijkstra(){
-        toPlayerDijktra.clearGoals();
-        toPlayerDijktra.setGoal(player.location);
+        toPlayerDijkstra.clearGoals();
+        toPlayerDijkstra.setGoal(player.location);
         blocked.refill(fovResult, 0.0);
-        toPlayerDijktra.scan(blocked);
+        toPlayerDijkstra.scan(blocked);
     }
-
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
@@ -490,8 +492,8 @@ public class Epigon extends Game {
                             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
                             // moves, we only need to do a fraction of the work to find the best path with that info.
-                            toPlayerDijktra.scan(blocked);
-                            toCursor = toPlayerDijktra.findPathPreScanned(cursor);
+                            toPlayerDijkstra.scan(blocked);
+                            toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
                             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
                             // you're finding a path to a monster or loot, and want to bump into it, but here can be
@@ -553,8 +555,8 @@ public class Epigon extends Game {
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
             // moves, we only need to do a fraction of the work to find the best path with that info.
-            toPlayerDijktra.scan(blocked);
-            toCursor = toPlayerDijktra.findPathPreScanned(cursor);
+            toPlayerDijkstra.scan(blocked);
+            toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
             // you're finding a path to a monster or loot, and want to bump into it, but here can be
