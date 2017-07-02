@@ -47,6 +47,7 @@ public class Modification extends EpiData {
     // Modification might change the effective heirarchy
     public Physical parent;
     public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
+    public Boolean retainPreviousParent; // When true the previous parent gets added to the countsAs list
     public Set<Physical> countsAs;
     public Set<Physical> countsAsGained;
     public Set<Physical> countsAsLost;

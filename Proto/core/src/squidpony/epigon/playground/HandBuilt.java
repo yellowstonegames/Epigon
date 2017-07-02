@@ -14,40 +14,48 @@ import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import static squidpony.epigon.Epigon.mixer;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.data.specific.Recipe;
 
 /**
  * Contains objects to use to test out connections.
  */
 public class HandBuilt {
 
-    public List<Stone> wallList = new ArrayList<>(),
-        sedimentaryList = new ArrayList<>(),
-        intrusiveList = new ArrayList<>(),
-        extrusiveList = new ArrayList<>(),
-        metamorphicList = new ArrayList<>();
+    public Map<Stone, Physical> stoneList = new HashMap<>(),
+        sedimentaryList = new HashMap<>(),
+        intrusiveList = new HashMap<>(),
+        extrusiveList = new HashMap<>(),
+        metamorphicList = new HashMap<>();
 
-    public List<Inclusion> gemList = new ArrayList<>(),
-        sedimentaryGemList = new ArrayList<>(),
-        intrusiveGemList = new ArrayList<>(),
-        extrusiveGemList = new ArrayList<>(),
-        metamorphicGemList = new ArrayList<>();
+    public Map<Inclusion, Physical> gemList = new HashMap<>(),
+        sedimentaryGemList = new HashMap<>(),
+        intrusiveGemList = new HashMap<>(),
+        extrusiveGemList = new HashMap<>(),
+        metamorphicGemList = new HashMap<>();
+
+    public Physical basePhysical = new Physical();
 
     public Physical playerBlueprint;
     public Physical swordBlueprint;
-    public Physical doorBlueprint;
+
+    public Recipe doorRecipe;
 
     public Modification makeWall;
-    public Modification makeDoor;
-    public Condition openDoor;
 
     public HandBuilt() {
-        initWallLists();
+        basePhysical.generic = true;
+        basePhysical.unique = true;
+
+        initStone();
+        initDoors();
 
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
@@ -80,55 +88,64 @@ public class HandBuilt {
         swordBlueprint.color = SColor.SILVER;
         swordBlueprint.symbol = '/';
 
+        makeWall = new Modification();
+        Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
+        makeWall.possiblePostfix.add("wall");
+        makeWall.symbol = '#';
+        makeWall.large = true;
+    }
+
+    private void initStone() {
+        for (Stone stone : Stone.values()) {
+            Physical phys = mixer.createBlueprint(stone);
+            stoneList.put(stone, phys);
+            if (stone.sedimentary) {
+                sedimentaryList.put(stone, phys);
+            }
+            if (stone.intrusive) {
+                intrusiveList.put(stone, phys);
+            }
+            if (stone.extrusive) {
+                extrusiveList.put(stone, phys);
+            }
+            if (stone.metamorphic) {
+                metamorphicList.put(stone, phys);
+            }
+        }
+
+        for (Inclusion inclusion : Inclusion.values()) {
+            Physical phys = mixer.createBlueprint(inclusion);
+            gemList.put(inclusion, phys);
+            if (inclusion.sedimentary) {
+                sedimentaryGemList.put(inclusion, phys);
+            }
+            if (inclusion.intrusive) {
+                intrusiveGemList.put(inclusion, phys);
+            }
+            if (inclusion.extrusive) {
+                extrusiveGemList.put(inclusion, phys);
+            }
+            if (inclusion.metamorphic) {
+                metamorphicGemList.put(inclusion, phys);
+            }
+        }
+    }
+
+    private void initDoors() {
+        Physical doorBlueprint;
+        Condition openDoor;
+
         doorBlueprint = new Physical();
         doorBlueprint.name = "door";
         doorBlueprint.symbol = '+';
         doorBlueprint.color = SColor.WALNUT;
         doorBlueprint.large = true;
 
-        makeWall = new Modification();
-        Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
-        makeWall.possiblePostfix.add("wall");
-        makeWall.symbol = '#';
-        makeWall.large = true;
+        RecipeBlueprint doorRecipeBlueprint;
+        doorRecipeBlueprint = new RecipeBlueprint();
+        doorRecipeBlueprint.requiredConsumed.put(basePhysical, 1);
+        doorRecipeBlueprint.result.put(doorBlueprint, 1);
 
-        makeDoor = new Modification();
-        makeDoor.possiblePrefix.add("door of");
-        makeDoor.symbol = '+';
-        makeDoor.large = true;
-    }
-
-    private void initWallLists() {
-        for (Stone stone : Stone.values()) {
-            wallList.add(stone);
-            if (stone.sedimentary) {
-                sedimentaryList.add(stone);
-            }
-            if (stone.intrusive) {
-                intrusiveList.add(stone);
-            }
-            if (stone.extrusive) {
-                extrusiveList.add(stone);
-            }
-            if (stone.metamorphic) {
-                metamorphicList.add(stone);
-            }
-        }
-
-        for (Inclusion inclusion : Inclusion.values()) {
-            gemList.add(inclusion);
-            if (inclusion.sedimentary) {
-                sedimentaryGemList.add(inclusion);
-            }
-            if (inclusion.intrusive) {
-                intrusiveGemList.add(inclusion);
-            }
-            if (inclusion.extrusive) {
-                extrusiveGemList.add(inclusion);
-            }
-            if (inclusion.metamorphic) {
-                metamorphicGemList.add(inclusion);
-            }
-        }
+        doorRecipe = mixer.createRecipe(doorRecipeBlueprint);
     }
 }
