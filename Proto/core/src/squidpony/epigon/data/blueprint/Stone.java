@@ -29,195 +29,35 @@ public enum Stone {
     CHERT(SColor.LIGHT_GRAY, SColor.DARK_GRAY, false, true, false, false, 1000, 1000),
     CLAYSTONE(SColor.BROWN, SColor.BROWNER, false, true, false, false),
     COAL(SColor.BLACK, SColor.DARK_GRAY, false, true, false, false, 300, 1000),
-    CONGLOMERATE(SColor.BROWNER, SColor.GRAY, false,true, false, false, 100, 1000),
-    COQUINA(SColor.TAN, SColor.KHAKI, false,true, false, false, 300, 1000),
-    DACITE(SColor.GRAY, SColor.BLACK,false,false,true,true, 100, 1000),
-     DIABASE(SColor.GRAY, SColor.BLACK,false,false,true,false,100, 1000),
-     DIATOMACEOUS_EARTH( SColor.LIGHT_GRAY,SColor.GRAY, false, true, false, false, 250,1000),
-      DIAMICTITE(SColor.GRAY,SColor.DARK_KHAKI,false, true, false, false,100,1000),
-     DIORITE(SColor.WHITE,SColor.GRAY,false,false,true,false,350,1000),
-     DOLOMITE(SColor.LIGHT_PINK,SColor.WHITE,false,true,false,false,200,1000),
-     DUNITE(SColor.GRAY_ASPARAGUS,SColor.DARK_GREEN,false, false,true,true, 100,1000),
-     ECLOGITE(SColor.RED_PIGMENT,SColor.GRAY, true, false, false, false,100,1000),
-     ENDERBITE(SColor.GRAY, SColor.BLACK, false, false,true,true,100, 1000),
-     ESSEXITE(SColor.DARK_GRAY,SColor.BLACK, false, false,true,true, 100, 1000);
-      /*
-     case EVAPORITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.KHAKI;
-     backColor = SColor.DARK_TAN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 200;
-     hardness = 1000;
-     break;
-     case FELSITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LIGHT_MAROON;
-     backColor = SColor.LIGHT_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 250;
-     hardness = 1000;
-     break;
-     case FLINT:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 800;
-     hardness = 1000;
-     break;
-     case FOIDOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GABBRO:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 350;
-     hardness = 1000;
-     break;
-     case GANISTER:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 200;
-     hardness = 1000;
-     break;
-     case GNEISS:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GOSSAN:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.RUST;
-     backColor = SColor.DARK_RED;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GRANITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DEEP_PINK;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 600;
-     hardness = 1000;
-     break;
-     case GRANODIORITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY_ASPARAGUS;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 150;
-     hardness = 1000;
-     break;
-     case GRANOPHYRE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.GRAY_ASPARAGUS;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GRANULITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LIGHT_GRAY;
-     backColor = SColor.BEIGE;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GREYWACKE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DEEP_CHESTNUT;
-     backColor = SColor.DARK_BROWN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case GREENSCHIST:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.PINE_GREEN;
-     backColor = SColor.DARK_SPRING_GREEN;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 250;
-     hardness = 1000;
-     break;
-     case GRITSTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.TAN;
-     backColor = SColor.DARK_TAN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 300;
-     hardness = 1000;
-     break;
-     case GYPSUM:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.TAWNY;
-     backColor = SColor.TAN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 400;
-     hardness = 1000;
-     break;
+    CONGLOMERATE(SColor.BROWNER, SColor.GRAY, false, true, false, false, 100, 1000),
+    COQUINA(SColor.TAN, SColor.KHAKI, false, true, false, false, 300, 1000),
+    DACITE(SColor.GRAY, SColor.BLACK, false, false, true, true, 100, 1000),
+    DIABASE(SColor.GRAY, SColor.BLACK, false, false, true, false, 100, 1000),
+    DIATOMACEOUS_EARTH(SColor.LIGHT_GRAY, SColor.GRAY, false, true, false, false, 250, 1000),
+    DIAMICTITE(SColor.GRAY, SColor.DARK_KHAKI, false, true, false, false, 100, 1000),
+    DIORITE(SColor.WHITE, SColor.GRAY, false, false, true, false, 350, 1000),
+    DOLOMITE(SColor.LIGHT_PINK, SColor.WHITE, false, true, false, false, 200, 1000),
+    DUNITE(SColor.GRAY_ASPARAGUS, SColor.DARK_GREEN, false, false, true, true, 100, 1000),
+    ECLOGITE(SColor.RED_PIGMENT, SColor.GRAY, true, false, false, false, 100, 1000),
+    ENDERBITE(SColor.GRAY, SColor.BLACK, false, false, true, true, 100, 1000),
+    ESSEXITE(SColor.DARK_GRAY, SColor.BLACK, false, false, true, true, 100, 1000),
+    EVAPORITE(SColor.KHAKI, SColor.DARK_TAN, false, true, false, false, 200, 1000),
+    FELSITE(SColor.LIGHT_MAROON, SColor.LIGHT_GRAY, false, false, true, true, 250, 1000),
+    FLINT(SColor.DARK_GREEN, SColor.GRAY, false, true, false, false, 800, 1000),
+    FOIDOLITE(SColor.GRAY, SColor.DARK_GRAY, false, false, true, false, 100, 1000),
+    GABBRO(SColor.DARK_GREEN, SColor.DARK_GRAY, false, false, true, true, 350, 1000),
+    GANISTER(SColor.GRAY, SColor.DARK_GRAY, false, true, false, false, 200, 1000),
+    GNEISS(SColor.GRAY, SColor.DARK_GRAY, true, false, false, false, 100, 1000),
+    GOSSAN(SColor.RUST, SColor.DARK_RED, false, true, false, false, 100, 1000),
+    GRANITE(SColor.DEEP_PINK, SColor.DARK_GRAY, false, false, true, false, 600, 1000),
+    GRANODIORITE(SColor.GRAY_ASPARAGUS, SColor.DARK_GRAY, false, false, true, false, 150, 1000),
+    GRANOPHYRE(SColor.GRAY, SColor.GRAY_ASPARAGUS, false, false, true, true, 100, 1000),
+    GRANULITE(SColor.LIGHT_GRAY, SColor.BEIGE, true, false, false, false, 100, 1000),
+    GREYWACKE(SColor.DEEP_CHESTNUT, SColor.DARK_BROWN, false, true, false, false, 100, 1000),
+    GREENSCHIST(SColor.PINE_GREEN, SColor.DARK_SPRING_GREEN, true, false, false, false, 250, 1000),
+    GRITSTONE(SColor.TAN, SColor.DARK_TAN, false, true, false, false, 300, 1000),
+    GYPSUM(SColor.TAWNY, SColor.TAN, false, true, false, false, 400, 1000);
+    /*
      case HORNFELS:
      myName = type.toString().toLowerCase().replace('_', ' ');
      frontColor = SColor.GRAY;

@@ -254,7 +254,7 @@ public class Epigon extends Game {
     }
 
     private Color calcFadeoutColor(Color color, double amount){
-        double d = Double.max(amount, 0.5);
+        double d = Double.max(amount, 0.3);
         return colorCenter.lerp(SColor.BLACK, color, d);
     }
 
