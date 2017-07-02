@@ -64,6 +64,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
         });
         playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
+
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
         cb.skills = new OrderedMap<>();
