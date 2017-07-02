@@ -1,13 +1,12 @@
 package squidpony.epigon.mapping;
 
-import java.util.Queue;
-
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Coord;
-
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.Coord;
+
+import java.util.Queue;
 
 /**
  * This represents a single explorable map level.
@@ -132,9 +131,9 @@ public class EpiMap {
     public static char altSymbolOf(char symbol) {
 
         switch (symbol) {
+            case '¸'://grass
             case '"':
                 return '¸';
-            case '¸'://grass
             case '~':
                 return '≈';
             case 'ø':

@@ -16,8 +16,13 @@ public class RememberedTile {
     public Color back = SColor.TRANSPARENT;
 
     public RememberedTile(EpiTile tile) {
+        remake(tile);
+    }
+
+    public void remake(EpiTile tile)
+    {
         symbol = tile.getSymbol();
-        front = tile.getForegroundColor() == null ? SColor.TRANSPARENT : tile.getForegroundColor();
-        back = tile.getBackgroundColor() == null ? SColor.TRANSPARENT : tile.getBackgroundColor();
+        front = tile.getForegroundColor() == null ? SColor.TRANSPARENT : tile.getForegroundColor().cpy().lerp(Color.BLACK, 0.75f);
+        back = tile.getBackgroundColor() == null ? SColor.TRANSPARENT : tile.getBackgroundColor().cpy().lerp(Color.BLACK, 0.75f);
     }
 }

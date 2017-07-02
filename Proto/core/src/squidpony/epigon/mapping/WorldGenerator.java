@@ -1,15 +1,12 @@
 package squidpony.epigon.mapping;
 
-import static squidpony.epigon.Epigon.handBuilt;
-
-import static squidpony.epigon.Epigon.mixer;
-import static squidpony.epigon.Epigon.rng;
-
 import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.mixin.Terrain;
+import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.DungeonUtility;
+
+import static squidpony.epigon.Epigon.*;
 
 /**
  * Creates and populates a world.
@@ -41,6 +38,7 @@ public class WorldGenerator {
         //sdg.addGrass(15);
         sdg.addWater(15);
         sdg.addDoors(20, true);
+        sdg.addGrass(10);
         char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
 
         EpiTile tile;

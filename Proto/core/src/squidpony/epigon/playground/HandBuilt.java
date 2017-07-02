@@ -1,15 +1,7 @@
 package squidpony.epigon.playground;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import squidpony.Maker;
-import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
-
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
@@ -19,6 +11,15 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * Contains objects to use to test out connections.
@@ -63,7 +64,6 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
         });
         playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
-
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
         cb.skills = new OrderedMap<>();

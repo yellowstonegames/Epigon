@@ -1,8 +1,5 @@
 package squidpony.epigon;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -17,19 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
-import squidpony.panel.IColoredString;
-import squidpony.squidai.DijkstraMap;
-import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.FOV;
-import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.FlapRNG;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.StatefulRNG;
-
 import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.dm.RecipeMixer;
@@ -38,6 +22,30 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.Stat;
+import squidpony.panel.IColoredString;
+import squidpony.squidai.DijkstraMap;
+import squidpony.squidgrid.Direction;
+import squidpony.squidgrid.FOV;
+import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.gui.gdx.AnimatedEntity;
+import squidpony.squidgrid.gui.gdx.DefaultResources;
+import squidpony.squidgrid.gui.gdx.GDXMarkup;
+import squidpony.squidgrid.gui.gdx.LinesPanel;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.gui.gdx.SquidLayers;
+import squidpony.squidgrid.gui.gdx.SquidMouse;
+import squidpony.squidgrid.gui.gdx.TextCellFactory;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.LightRNG;
+import squidpony.squidmath.StatefulRNG;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -46,8 +54,8 @@ import squidpony.epigon.playground.HandBuilt;
 public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final int MAP_WIDTH = 100;
-    public static final int MAP_HEIGHT = 30;
+    public static final int MAP_WIDTH = 300;
+    public static final int MAP_HEIGHT = 90;
     public static final int MAP_VIEWPORT_WIDTH = 100;
     public static final int MAP_VIEWPORT_HEIGHT = 30;
 
@@ -82,9 +90,10 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static int seed1 = 0xBEEFD00D;
-    public static int seed2 = 0xFADEFEED;
-    public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(seed2, seed1)); //new StatefulRNG(new ThunderRNG()); //
+    public static long seed = 0xBEEFD00DFADEFEEDL;
+    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
+    public static final LightRNG lightRNG = new LightRNG(seed);
+    public static final StatefulRNG rng = new StatefulRNG(lightRNG);
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
 
@@ -194,6 +203,7 @@ public class Epigon extends Game {
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
         
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
+
         player.location = floors.singleRandom(rng);
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
@@ -220,13 +230,16 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        fovResult = fov.calculateFOV(map.opacities(), checkX, checkY, MAP_VIEWPORT_WIDTH, Radius.CIRCLE);
+        FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual, Radius.CIRCLE);
         for (int x = 0; x < MAP_WIDTH; x++) {
             for (int y = 0; y < MAP_HEIGHT; y++) {
                 if (fovResult[x][y] > 0) {
-                    remembered[x][y] = new RememberedTile(map.contents[x][y]);
-                    remembered[x][y].front = calcFadeoutColor(remembered[x][y].front, 0);
-                    remembered[x][y].back = calcFadeoutColor(remembered[x][y].back, 0);
+                    if(remembered[x][y] == null)
+                        remembered[x][y] = new RememberedTile(map.contents[x][y]);
+                    else
+                    {
+                        remembered[x][y].remake(map.contents[x][y]);
+                    }
                 }
             }
         }
@@ -248,9 +261,10 @@ public class Epigon extends Game {
 
     private void calcDijkstra() {
         toPlayerDijkstra.clearGoals();
+        toPlayerDijkstra.resetMap();
         toPlayerDijkstra.setGoal(player.location);
-        blocked.refill(fovResult, 0.0);
-        toPlayerDijkstra.scan(blocked);
+        blocked.refill(fovResult, 0.0001, 1000.0).fringe8way();
+        toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
     }
 
     private Color calcFadeoutColor(Color color, double amount){
@@ -514,7 +528,7 @@ public class Epigon extends Game {
                             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
                             // moves, we only need to do a fraction of the work to find the best path with that info.
-                            toPlayerDijkstra.scan(blocked);
+                            toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
                             toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
                             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
@@ -577,7 +591,7 @@ public class Epigon extends Game {
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
             // moves, we only need to do a fraction of the work to find the best path with that info.
-            toPlayerDijkstra.scan(blocked);
+            toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
             toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
