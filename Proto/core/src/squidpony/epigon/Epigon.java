@@ -46,6 +46,7 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -544,22 +545,17 @@ public class Epigon extends Game {
                     }
                     break;
                 case Input.Buttons.RIGHT:
-                    String tileDescription = "[" + sx + ", " + sy + "]";
+                    String tileDescription = "[" + sx + ", " + sy + "] ";
                     EpiTile tile = map.contents[sx][sy];
-                    int contentCount = tile.contents.size(); // TODO - this won't work right if the large is the creature
-                    if (tile.floor != null){
-                        tileDescription += "  Floor of " + tile.floor.name;
+                    if (tile.floor != null) {
+                        tileDescription += tile.floor.name + " floor";
+                    } else {
+                        tileDescription += "empty space";
                     }
-                    if (tile.getCreature() != null){
-                        tileDescription += "  Creature " + tile.getCreature().name;
-                        contentCount--;
-                    }
-                    if (tile.getLargeObject() != null){
-                        tileDescription += "  Large Object of " + tile.getLargeObject().name;
-                        contentCount--;
-                    }
-                    if (contentCount > 0){
-                        tileDescription += "  Small object count is " + tile.contents.size();
+                    if (!tile.contents.isEmpty()) {
+                        tileDescription = tile.contents.stream()
+                            .map(p -> p.name)
+                            .collect(Collectors.joining(", ", tileDescription + ", ", ""));
                     }
                     messages.addFirst(new IColoredString.Impl<>(tileDescription, SColor.SAFFRON));
                     break;

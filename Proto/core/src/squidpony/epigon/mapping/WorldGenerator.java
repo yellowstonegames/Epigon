@@ -69,7 +69,9 @@ public class WorldGenerator {
                         Stone stone = tile.floor.terrainData.stone;
                         adding = mixer.getPhysical(stone);
                         List<Physical> adds = mixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
-                        tile.add(adds);
+                        Physical door = adds.get(0);
+                        mixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
+                        tile.add(door);
                         break;
                     default:
                         tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it

@@ -52,6 +52,8 @@ public class EpiTile {
             rep = getCreature().symbol;
         } else if (getLargeObject() != null) {
             rep = getLargeObject().symbol;
+        } else if (!contents.isEmpty()){
+            rep = contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
             rep = floor.symbol;
         }
@@ -77,6 +79,8 @@ public class EpiTile {
             fore = getCreature().color;
         } else if (getLargeObject() != null) {
             fore = getLargeObject().color;
+        } else if (!contents.isEmpty()){
+            fore = contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
             fore = floor.color;
         }
