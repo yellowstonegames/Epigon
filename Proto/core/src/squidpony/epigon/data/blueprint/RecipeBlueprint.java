@@ -33,11 +33,11 @@ import squidpony.epigon.data.specific.Physical;
  */
 public class RecipeBlueprint extends EpiData {
 
-    public OrderedMap<Physical, Integer> requiredConsumed;
-    public OrderedMap<Physical, Integer> requiredCatalyst; // ie: a Forge (not consumed)
-    public OrderedMap<Physical, Integer> optionalConsumed; // can add various properties
-    public OrderedMap<Physical, Integer> optionalCatalyst;
-    public OrderedMap<Physical, Integer> result;
+    public OrderedMap<Physical, Integer> requiredConsumed = new OrderedMap<>();
+    public OrderedMap<Physical, Integer> requiredCatalyst = new OrderedMap<>(); // ie: a Forge (not consumed)
+    public OrderedMap<Physical, Integer> optionalConsumed = new OrderedMap<>(); // can add various properties
+    public OrderedMap<Physical, Integer> optionalCatalyst = new OrderedMap<>();
+    public OrderedMap<Physical, Integer> result = new OrderedMap<>();
 
     public OrderedMap<Physical, Modification> modifications; // mapping of what adding optionals does to the results
 

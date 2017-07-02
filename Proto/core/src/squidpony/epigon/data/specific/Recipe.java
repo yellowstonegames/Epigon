@@ -15,7 +15,7 @@ import squidpony.epigon.data.EpiData;
  */
 public class Recipe extends EpiData {
 
-    public OrderedMap<Physical, Integer> consumed;
-    public OrderedMap<Physical, Integer> catalyst;
-    public OrderedMap<Physical, Integer> result;
+    public OrderedMap<Physical, Integer> consumed = new OrderedMap<>();
+    public OrderedMap<Physical, Integer> catalyst = new OrderedMap<>();
+    public OrderedMap<Physical, Integer> result = new OrderedMap<>();
 }

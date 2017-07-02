@@ -88,15 +88,15 @@ public class EpiTile {
         contents.remove(phys);
     }
 
-    /**
-     * Adds the provided creature or item as appropriate. Overwrites the current one if the item is
-     * large or a creature.
-     *
-     * @param phys
-     */
     public void add(Physical phys) {
         // TODO - check that it can be added
         contents.add(phys);
+    }
+
+    public void add(List<Physical> adding) {
+        for (Physical p : adding) {
+            add(p);
+        }
     }
 
     public Physical getCreature() {

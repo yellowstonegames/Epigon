@@ -2,9 +2,12 @@ package squidpony.epigon.dm;
 
 import java.util.Map.Entry;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -24,6 +27,9 @@ import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.universe.LiveValueModification;
+import squidpony.epigon.universe.Stat;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -68,20 +74,76 @@ public class RecipeMixer {
         return recipe;
     }
 
+    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
+        List<Physical> result = new ArrayList<>();
+        recipe.result.entrySet().stream()
+            .forEach(e -> IntStream.range(0, e.getValue())
+            .forEach(i -> {
+                Physical physical = buildPhysical(e.getKey());
+                Stream.of(consumed.stream(), catalyst.stream())
+                    .flatMap(m -> m)
+                    .map(m -> m.whenUsedAsMaterial)
+                    .flatMap(Collection::stream)
+                    .forEach(modification -> applyModification(physical, modification));
+                result.add(physical);
+            }));
+        return result;
+    }
+
     public Physical createBlueprint(Stone stone) {
         Physical blueprint = new Physical();
         blueprint.color = stone.front;
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
         blueprint.symbol = '.';
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(stone.hardness * 0.01));
+
+        Modification stoneMod = new Modification();
+        stoneMod.baseValueMultiplier = stone.value * 0.01;
+        stoneMod.color = stone.front;
+        stoneMod.possiblePrefix = Collections.singletonList(stone.toString());
+        LiveValueModification lvm = new LiveValueModification();
+        lvm.baseOverwrite = stone.hardness * 0.01;
+        stoneMod.statChanges.put(Stat.STRUCTURE, lvm);
+        blueprint.whenUsedAsMaterial.add(stoneMod);
+
         Terrain terrain = new Terrain();
-        blueprint.terrainData = terrain;
         terrain.background = stone.back;
         terrain.stone = stone;
         terrain.extrusive = stone.extrusive;
         terrain.intrusive = stone.intrusive;
         terrain.metamorphic = stone.metamorphic;
         terrain.sedimentary = stone.sedimentary;
+        blueprint.terrainData = terrain;
+
+        return blueprint;
+    }
+
+    public Physical createBlueprint(Inclusion inclusion) {
+        Physical blueprint = new Physical();
+        blueprint.color = inclusion.front;
+        blueprint.name = inclusion.toString();
+        blueprint.baseValue = inclusion.value;
+        blueprint.symbol = '.';
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(inclusion.hardness * 0.01));
+
+        Modification stoneMod = new Modification();
+        stoneMod.baseValueMultiplier = inclusion.value * 0.01;
+        stoneMod.color = inclusion.front;
+        stoneMod.possiblePrefix = Collections.singletonList(inclusion.toString());
+        LiveValueModification lvm = new LiveValueModification();
+        lvm.baseOverwrite = inclusion.hardness * 0.01;
+        stoneMod.statChanges.put(Stat.STRUCTURE, lvm);
+        blueprint.whenUsedAsMaterial.add(stoneMod);
+
+        Terrain terrain = new Terrain();
+        terrain.background = inclusion.back;
+        terrain.extrusive = inclusion.extrusive;
+        terrain.intrusive = inclusion.intrusive;
+        terrain.metamorphic = inclusion.metamorphic;
+        terrain.sedimentary = inclusion.sedimentary;
+        blueprint.terrainData = terrain;
+
         return blueprint;
     }
 
@@ -109,13 +171,13 @@ public class RecipeMixer {
         possibleNames.add(blueprint.name);
         physical.name = rng.getRandomElement(possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
-        
+
         physical.countsAs.addAll(blueprint.countsAs);
         physical.createdFrom.add(blueprint); // TODO - limit to "important" items
         physical.generic = blueprint.generic;
         physical.unique = blueprint.unique;
         physical.buildingBlock = blueprint.buildingBlock;
-        
+
         physical.symbol = blueprint.symbol;
         physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
         physical.baseValue = blueprint.baseValue;
@@ -132,7 +194,6 @@ public class RecipeMixer {
 //        for (ConditionBlueprint c : blueprint.conditions) {
 //            physical.applyCondition(createCondition(c));
 //        }
-
         blueprint.stats.entrySet().stream().forEach(kvp -> {
             physical.stats.put(kvp.getKey(), new LiveValue(kvp.getValue()));
         });
@@ -153,7 +214,7 @@ public class RecipeMixer {
         physical.terrainData = blueprint.terrainData;
 
         // TODO - add rest of mixins
-        
+
         // finally work any modifications
         for (Modification m : blueprint.requiredModifications) {
             applyModification(physical, m);
@@ -161,9 +222,9 @@ public class RecipeMixer {
 
         int count = rng.nextInt(blueprint.optionalModifications.size());
         Set<Integer> ints = new HashSet<>();
-        for (int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             int n;
-            do{
+            do {
                 n = rng.nextInt(count);
             } while (ints.contains(n));
             ints.add(n);
@@ -214,7 +275,7 @@ public class RecipeMixer {
         SquidColorCenter colorCenter = new SquidColorCenter();
         physical.modifications.add(modification);
 
-        if (modification.possibleAliases != null){
+        if (modification.possibleAliases != null) {
             physical.possibleAliases = new ArrayList<>(modification.possibleAliases);
         }
 
@@ -232,6 +293,9 @@ public class RecipeMixer {
         }
 
         if (modification.parent != null) {
+            if (modification.retainPreviousParent != null && modification.retainPreviousParent && physical.parent != null) {
+                physical.countsAs.add(physical.parent);
+            }
             physical.parent = modification.parent;
         } else if (modification.parentBecomesNull != null && modification.parentBecomesNull) {
             physical.parent = null;
@@ -248,15 +312,15 @@ public class RecipeMixer {
             }
         }
 
-        if (modification.generic != null){
+        if (modification.generic != null) {
             physical.generic = modification.generic;
         }
 
-        if (modification.unique != null){
+        if (modification.unique != null) {
             physical.unique = modification.unique;
         }
 
-        if (modification.buildingBlock != null){
+        if (modification.buildingBlock != null) {
             physical.buildingBlock = modification.buildingBlock;
         }
 
@@ -268,15 +332,15 @@ public class RecipeMixer {
             physical.color = modification.color;
         }
 
-        if (modification.baseValue != null){
+        if (modification.baseValue != null) {
             physical.baseValue = modification.baseValue;
         }
 
-        if (modification.baseValueMultiplier != null){
+        if (modification.baseValueMultiplier != null) {
             physical.baseValue *= modification.baseValueMultiplier;
         }
 
-        if (modification.large != null){
+        if (modification.large != null) {
             physical.large = modification.large;
         }
 

@@ -1,5 +1,7 @@
 package squidpony.epigon.mapping;
 
+import java.util.Collections;
+import java.util.List;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
@@ -59,9 +61,10 @@ public class WorldGenerator {
                         tile.add(adding);
                         break;
                     case '+':
-                        adding = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
-                        mixer.applyModification(adding, handBuilt.makeDoor);
-                        tile.add(adding);
+                        Stone stone = tile.floor.terrainData.stone;
+                        adding = mixer.buildPhysical(mixer.createBlueprint(stone));
+                        List<Physical> adds = mixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
+                        tile.add(adds);
                         break;
                     default:
                         tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
@@ -80,7 +83,7 @@ public class WorldGenerator {
      * Randomly places minerals in the provided map.
      */
     private void mineralPlacement() {
-        Physical floor = mixer.buildPhysical(mixer.createBlueprint(rng.getRandomElement(handBuilt.wallList)));
+        Physical floor = mixer.buildPhysical(rng.getRandomElement(handBuilt.stoneList.values()));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -133,7 +136,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = mixer.buildPhysical(mixer.createBlueprint(rng.getRandomElement(handBuilt.wallList)));
+                    blueprint = mixer.buildPhysical(rng.getRandomElement(handBuilt.stoneList.values()));
                 }
             }
 
@@ -195,7 +198,7 @@ public class WorldGenerator {
     }
 
     private void intrudeMap() {
-        Stone intruder = rng.getRandomElement(handBuilt.intrusiveList);
+        Stone intruder = rng.getRandomElement(handBuilt.intrusiveList.keySet());
         int startX = rng.nextInt(width - 2) + 1;
         int startY = rng.nextInt(height - 2) + 1;
         int startZ = rng.nextInt(depth) + depth / 2;
@@ -251,7 +254,7 @@ public class WorldGenerator {
     }
 
     private void extrudeMap() {
-        Stone extruder = rng.getRandomElement(handBuilt.extrusiveList);
+        Stone extruder = rng.getRandomElement(handBuilt.extrusiveList.keySet());
         Physical blueprint;
         int extrudeX = -1;
         int extrudeY = -1;
@@ -296,11 +299,11 @@ public class WorldGenerator {
         Stone changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = rng.getRandomElement(handBuilt.metamorphicList);
+        changer = rng.getRandomElement(handBuilt.metamorphicList.keySet());
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer =  rng.getRandomElement(handBuilt.metamorphicList);
+                changer =  rng.getRandomElement(handBuilt.metamorphicList.keySet());
             }
             for (int i = 1; i < width - 1; i++) {
                 for (int k = 1; k < height - 1; k++) {
@@ -347,7 +350,7 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = rng.getRandomElement(handBuilt.metamorphicList);
+                changer = rng.getRandomElement(handBuilt.metamorphicList.keySet());
             }
             for (int i = width - 1; i > 1; i--) {
                 for (int k = height - 1; k > 1; k--) {
