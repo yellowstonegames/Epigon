@@ -46,10 +46,10 @@ import squidpony.epigon.playground.HandBuilt;
 public class Epigon extends Game {
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
+    public static final int MAP_WIDTH = 100;
+    public static final int MAP_HEIGHT = 30;
     public static final int MAP_VIEWPORT_WIDTH = 100;
-    public static final int MAP_WIDTH = 200;
     public static final int MAP_VIEWPORT_HEIGHT = 30;
-    public static final int MAP_HEIGHT = 100;
 
     public static final int INFO_WIDTH = 30;
     public static final int INFO_HEIGHT = MAP_VIEWPORT_HEIGHT;
