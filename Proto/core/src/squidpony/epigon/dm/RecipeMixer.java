@@ -4,8 +4,10 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -44,6 +46,8 @@ public class RecipeMixer {
 
     public List<RecipeBlueprint> recipes;
 
+    private Map<Stone, Physical> stones = new HashMap<>();
+
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
@@ -79,7 +83,7 @@ public class RecipeMixer {
         recipe.result.entrySet().stream()
             .forEach(e -> IntStream.range(0, e.getValue())
             .forEach(i -> {
-                Physical physical = buildPhysical(e.getKey());
+                Physical physical = RecipeMixer.this.buildPhysical(e.getKey());
                 Stream.of(consumed.stream(), catalyst.stream())
                     .flatMap(m -> m)
                     .map(m -> m.whenUsedAsMaterial)
@@ -90,8 +94,13 @@ public class RecipeMixer {
         return result;
     }
 
-    public Physical createBlueprint(Stone stone) {
-        Physical blueprint = new Physical();
+    public Physical getPhysical(Stone stone) {
+        Physical blueprint = stones.get(stone);
+        if (blueprint != null) {
+            return blueprint;
+        }
+
+        blueprint = new Physical();
         blueprint.color = stone.front;
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
@@ -116,10 +125,11 @@ public class RecipeMixer {
         terrain.sedimentary = stone.sedimentary;
         blueprint.terrainData = terrain;
 
+        stones.put(stone, blueprint);
         return blueprint;
     }
 
-    public Physical createBlueprint(Inclusion inclusion) {
+    public Physical buildPhysical(Inclusion inclusion) {
         Physical blueprint = new Physical();
         blueprint.color = inclusion.front;
         blueprint.name = inclusion.toString();
@@ -148,7 +158,7 @@ public class RecipeMixer {
     }
 
     public Physical buildPhysical(Physical blueprint) {
-        return buildPhysical(blueprint, Rating.NONE);
+        return RecipeMixer.this.buildPhysical(blueprint, Rating.NONE);
     }
 
     public Physical buildPhysical(Physical blueprint, Rating rarity) {
@@ -201,7 +211,7 @@ public class RecipeMixer {
         physical.statProgression.putAll(blueprint.statProgression);
 
         blueprint.inventory.stream().forEach(i -> {
-            physical.inventory.add(buildPhysical(i));
+            physical.inventory.add(RecipeMixer.this.buildPhysical(i));
         });
 
         physical.physicalDrops = blueprint.physicalDrops;
