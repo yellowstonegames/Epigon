@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
@@ -36,6 +35,7 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
 
@@ -83,7 +83,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
     public static int seed1 = 0xBEEFD00D;
-    public static int seed2 = 0xAFADFEED;
+    public static int seed2 = 0xFADEFEED;
     public static final StatefulRNG rng = new StatefulRNG(new FlapRNG(seed2, seed1)); //new StatefulRNG(new ThunderRNG()); //
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
@@ -105,6 +105,7 @@ public class Epigon extends Game {
     // World
     private WorldGenerator worldGenerator;
     private EpiMap map;
+    private RememberedTile[][] remembered = new RememberedTile[MAP_WIDTH][MAP_HEIGHT];
     private GreasedRegion blocked;
     private DijkstraMap toPlayerDijkstra;
     private Coord cursor;
@@ -146,7 +147,7 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
 
         // Set up the text display portions
-        bgColor = SColor.DB_INK;
+        bgColor = SColor.BLACK_DYE;
         printText = DefaultResources.getStretchablePrintFont()
             .width(5f)
             .height(CELL_HEIGHT * 1.18f)
@@ -214,21 +215,30 @@ public class Epigon extends Game {
         message("Use mouse, numpad, or arrow keys to move.");
     }
 
-    private void message(String text){
+    private void message(String text) {
         messages.addLast(new IColoredString.Impl<>(text, Color.WHITE));
     }
 
     private void calcFOV(int checkX, int checkY) {
         fovResult = fov.calculateFOV(map.opacities(), checkX, checkY, MAP_VIEWPORT_WIDTH, Radius.CIRCLE);
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            for (int y = 0; y < MAP_HEIGHT; y++) {
+                if (fovResult[x][y] > 0) {
+                    remembered[x][y] = new RememberedTile(map.contents[x][y]);
+                    remembered[x][y].front = calcFadeoutColor(remembered[x][y].front, 0);
+                    remembered[x][y].back = calcFadeoutColor(remembered[x][y].back, 0);
+                }
+            }
+        }
     }
 
-    private void mixFOV(int checkX, int checkY){
-        for (int i = 0; i < priorFovResult.length; i++){
+    private void mixFOV(int checkX, int checkY) {
+        for (int i = 0; i < priorFovResult.length; i++) {
             System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
         }
-        fovResult = fov.calculateFOV(map.opacities(), checkX, checkY, MAP_VIEWPORT_WIDTH, Radius.CIRCLE);
-        for (int x = 0; x < fovResult.length; x++){
-            for (int y = 0; y < fovResult[0].length; y++){
+        calcFOV(checkX, checkY);
+        for (int x = 0; x < fovResult.length; x++) {
+            for (int y = 0; y < fovResult[0].length; y++) {
                 double found = fovResult[x][y];
                 fovResult[x][y] = Double.max(found, priorFovResult[x][y]);
                 priorFovResult[x][y] = found;
@@ -236,12 +246,18 @@ public class Epigon extends Game {
         }
     }
 
-    private void calcDijkstra(){
+    private void calcDijkstra() {
         toPlayerDijkstra.clearGoals();
         toPlayerDijkstra.setGoal(player.location);
         blocked.refill(fovResult, 0.0);
         toPlayerDijkstra.scan(blocked);
     }
+
+    private Color calcFadeoutColor(Color color, double amount){
+        double d = Double.max(amount, 0.5);
+        return colorCenter.lerp(SColor.BLACK, color, d);
+    }
+
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
@@ -260,6 +276,7 @@ public class Epigon extends Game {
             int newY = player.location.y + dir.deltaY;
             display.slide(playerEntity, newX, newY);
             mixFOV(newX, newY);
+            player.location = Coord.get(newX, newY);
             sound.playFootstep();
 
             display.addAction(new TemporalAction(display.getAnimationDuration()) {
@@ -274,7 +291,6 @@ public class Epigon extends Game {
                 @Override
                 protected void end() {
                     super.end();
-                    player.location = Coord.get(newX, newY);
 
                     // Set the map and camera at the same time to have the same offset
                     display.setGridOffsetX(newX - (MAP_VIEWPORT_WIDTH >> 1));
@@ -299,18 +315,24 @@ public class Epigon extends Game {
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= MAP_VIEWPORT_WIDTH && x < MAP_WIDTH; i++, x++) {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= MAP_VIEWPORT_HEIGHT && y < MAP_HEIGHT; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
-                    EpiTile tile = map.contents[x][y];
-                    float f = (float)fovResult[x][y];
+                    double sightAmount = fovResult[x][y];
                     Color fore;
-                    if (f > 0){
-                        fore = colorCenter.lerp(tile.getForegroundColor(), SColor.DB_INK, 1f - f);
+                    Color back;
+                    if (sightAmount > 0) {
+                        EpiTile tile = map.contents[x][y];
+                        fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
+                        back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
+                        display.put(x, y, tile.getSymbol(), fore, back);
                     } else {
-                        fore = SColor.BLACK_CHESTNUT_OAK;
+                        RememberedTile rt = remembered[x][y];
+                        if (rt != null) {
+                            display.put(x, y, rt.symbol, rt.front, rt.back);
+                        } else {
+                            display.put(x, y, ' ', SColor.SLATE, bgColor);
+                        }
                     }
-                    Color back = colorCenter.lerp(SColor.LIGHT_GRAY, colorCenter.dimmest(tile.getBackgroundColor()),(1f - f));
-                    display.put(x, y, tile.getSymbol(), fore, back);
                 } else {
-                    display.put(x, y, ' ', SColor.SLATE, SColor.DB_INK);
+                    display.put(x, y, ' ', SColor.SLATE, bgColor);
                 }
             }
         }
