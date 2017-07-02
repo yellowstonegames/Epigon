@@ -62,6 +62,7 @@ public class HandBuilt {
             lv.actual = lv.base * (rng.nextDouble() + 0.1);
             playerBlueprint.stats.put(s, lv);
         });
+        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
