@@ -45,6 +45,7 @@ import squidpony.squidmath.LightRNG;
 import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -227,7 +228,7 @@ public class Epigon extends Game {
     }
 
     private void message(String text) {
-        messages.addLast(new IColoredString.Impl<>(text, Color.WHITE));
+        messages.addFirst(new IColoredString.Impl<>(text, Color.WHITE));
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -504,6 +505,30 @@ public class Epigon extends Game {
                 case 'd':
                     dir = Direction.RIGHT;
                     break;
+                case 'o': // Open all the doors nearby
+                    message("Opening nearby doors");
+                    Arrays.stream(Direction.OUTWARDS)
+                        .map(d -> player.location.translate(d))
+                        .filter(c -> map.inBounds(c))
+                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                        .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
+                        .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
+                    calcFOV(player.location.x, player.location.y);
+                    calcDijkstra();
+                    break;
+                case 'c': // Close all the doors nearby
+                    message("Closing nearby doors");
+                    Arrays.stream(Direction.OUTWARDS)
+                        .map(d -> player.location.translate(d))
+                        .filter(c -> map.inBounds(c))
+                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                        .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+                        .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
+                    calcFOV(player.location.x, player.location.y);
+                    calcDijkstra();
+                    break;
                 case SquidInput.ESCAPE: {
                     Gdx.app.exit();
                     break;
@@ -557,7 +582,7 @@ public class Epigon extends Game {
                             .map(p -> p.name)
                             .collect(Collectors.joining(", ", tileDescription + ", ", ""));
                     }
-                    messages.addFirst(new IColoredString.Impl<>(tileDescription, SColor.SAFFRON));
+                    message(tileDescription);
                     break;
             }
 

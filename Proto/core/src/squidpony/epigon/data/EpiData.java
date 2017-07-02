@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Data class for information shared by all data objects.
@@ -11,10 +12,16 @@ public abstract class EpiData {
     public String description;
     public String notes;
 
+    private final String id;
+
+    public EpiData(){
+        id = UUID.randomUUID().toString();
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 67 * hash + Objects.hashCode(this.name);
+        hash = 67 * hash + Objects.hashCode(id);
         return hash;
     }
 
@@ -30,7 +37,7 @@ public abstract class EpiData {
             return false;
         }
         final EpiData other = (EpiData) obj;
-        if (!Objects.equals(this.name, other.name)) {
+        if (!Objects.equals(id, other.id)) {
             return false;
         }
         return true;

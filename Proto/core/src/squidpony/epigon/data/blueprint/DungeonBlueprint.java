@@ -21,4 +21,5 @@ public class DungeonBlueprint extends EpiData {
 
     Map<Character, OrderedMap<Physical, Integer>> mappings;
     Set<RoomBlueprint> rooms;
+
 }

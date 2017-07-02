@@ -26,6 +26,10 @@ import squidpony.epigon.universe.LiveValueModification;
 public class HandBuilt {
 
     public Physical basePhysical = new Physical();
+    
+    public Physical doorBlueprint;
+    public Physical baseOpenDoor = new Physical();
+    public Physical baseClosedDoor = new Physical();
 
     public Physical playerBlueprint;
     public Physical swordBlueprint;
@@ -82,19 +86,23 @@ public class HandBuilt {
 
     private void initDoors() {
         openDoor = new Modification();
+        openDoor.countsAsLost = Collections.singleton(baseClosedDoor);
+        openDoor.countsAsGained = Collections.singleton(baseOpenDoor);
         openDoor.symbol = '/';
         openDoor.large = false;
         openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(0.0));
 
         closeDoor = new Modification();
+        closeDoor.countsAsLost = Collections.singleton(baseOpenDoor);
+        closeDoor.countsAsGained = Collections.singleton(baseClosedDoor);
         closeDoor.symbol = '+';
         closeDoor.large = true;
-        openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(1.0));
+        closeDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(1.0));
 
-        Physical doorBlueprint;
         doorBlueprint = new Physical();
         doorBlueprint.name = "door";
         doorBlueprint.color = SColor.WALNUT;
+        doorBlueprint.generic = true;
         mixer.applyModification(doorBlueprint, closeDoor);
 
         RecipeBlueprint doorRecipeBlueprint;

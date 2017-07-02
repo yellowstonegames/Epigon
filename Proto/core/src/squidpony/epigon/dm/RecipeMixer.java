@@ -163,7 +163,7 @@ public class RecipeMixer {
 
     public Physical buildPhysical(Physical blueprint, Rating rarity) {
         if (blueprint.generic) {
-            throw new IllegalArgumentException("Physical blueprint " + blueprint.name + " marked generic, cannot create.");
+            // TODO - figure out how to allow sub instances of generics to be used without using generics
         }
 
         if (blueprint.unique) {
@@ -182,7 +182,9 @@ public class RecipeMixer {
         physical.name = rng.getRandomElement(possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
 
-        physical.countsAs.addAll(blueprint.countsAs);
+        if (!blueprint.countsAs.isEmpty()) {
+            physical.countsAs.addAll(blueprint.countsAs);
+        }
         physical.createdFrom.add(blueprint); // TODO - limit to "important" items
         physical.generic = blueprint.generic;
         physical.unique = blueprint.unique;
