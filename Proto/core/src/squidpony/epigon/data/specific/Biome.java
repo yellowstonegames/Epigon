@@ -19,4 +19,5 @@ public class Biome extends EpiData {
     public BiomeSize size;//approximation of size
     public OrderedMap<Dungeon, Coord> dungeons;//contained dungeons and their location
     public Terrain[][] terrain;//layout of the biome itself
+
 }
