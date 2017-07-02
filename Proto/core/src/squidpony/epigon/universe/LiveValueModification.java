@@ -6,6 +6,7 @@ package squidpony.epigon.universe;
  * @author Eben Howard
  */
 public class LiveValueModification {
+
     public Double baseOverwrite;
     public Double maxOverwrite;
     public Double minOverwrite;
@@ -24,4 +25,21 @@ public class LiveValueModification {
     public Double minMultiply;
     public Double deltaMultiply;
     public Double inertiaMultiply;
+
+    public LiveValueModification(){}
+
+    /**
+     * Creates a live value modification with all values set to the provided value and no delta or
+     * inertia.
+     *
+     * @param value desired new base, max, and min value
+     */
+    public LiveValueModification(double value) {
+        baseOverwrite = value;
+        maxOverwrite = value;
+        minOverwrite = value;
+        deltaOverwrite = 0.0;
+        inertiaOverwrite = 0.0;
+        stableOverwrite = true;
+    }
 }

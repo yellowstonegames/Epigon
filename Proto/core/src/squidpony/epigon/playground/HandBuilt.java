@@ -1,12 +1,9 @@
 package squidpony.epigon.playground;
 
 import squidpony.Maker;
-import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
@@ -16,13 +13,12 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import static squidpony.epigon.Epigon.mixer;
 
 import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.specific.Recipe;
+import squidpony.epigon.universe.LiveValueModification;
 
 /**
  * Contains objects to use to test out connections.
@@ -35,6 +31,8 @@ public class HandBuilt {
     public Physical swordBlueprint;
 
     public Recipe doorRecipe;
+    public Modification openDoor;
+    public Modification closeDoor;
 
     public Modification makeWall;
 
@@ -83,14 +81,21 @@ public class HandBuilt {
     }
 
     private void initDoors() {
-        Physical doorBlueprint;
-        Condition openDoor;
+        openDoor = new Modification();
+        openDoor.symbol = '/';
+        openDoor.large = false;
+        openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(0.0));
 
+        closeDoor = new Modification();
+        closeDoor.symbol = '+';
+        closeDoor.large = true;
+        openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(1.0));
+
+        Physical doorBlueprint;
         doorBlueprint = new Physical();
         doorBlueprint.name = "door";
-        doorBlueprint.symbol = '+';
         doorBlueprint.color = SColor.WALNUT;
-        doorBlueprint.large = true;
+        mixer.applyModification(doorBlueprint, closeDoor);
 
         RecipeBlueprint doorRecipeBlueprint;
         doorRecipeBlueprint = new RecipeBlueprint();
