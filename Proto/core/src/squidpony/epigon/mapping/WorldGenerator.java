@@ -1,7 +1,11 @@
 package squidpony.epigon.mapping;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
@@ -19,6 +23,8 @@ public class WorldGenerator {
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
+
+    private Map<Stone, Physical> walls = new HashMap<>();
 
     public EpiMap[] buildWorld(int width, int height, int depth) {
         this.width = width;
@@ -56,13 +62,12 @@ public class WorldGenerator {
                     case '.':
                         break;
                     case '#':
-                        adding = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
-                        mixer.applyModification(adding, handBuilt.makeWall);
+                        adding = getWall(tile.floor.terrainData.stone);
                         tile.add(adding);
                         break;
                     case '+':
                         Stone stone = tile.floor.terrainData.stone;
-                        adding = mixer.buildPhysical(mixer.createBlueprint(stone));
+                        adding = mixer.getPhysical(stone);
                         List<Physical> adds = mixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
                         tile.add(adds);
                         break;
@@ -79,11 +84,23 @@ public class WorldGenerator {
         return world;
     }
 
+    private Physical getWall(Stone stone){
+        Physical wall = walls.get(stone);
+        if (wall != null){
+            return wall;
+        }
+
+        wall = mixer.buildPhysical(mixer.getPhysical(stone));
+        mixer.applyModification(wall, handBuilt.makeWall);
+        walls.put(stone, wall);
+        return wall;
+    }
+
     /**
      * Randomly places minerals in the provided map.
      */
     private void mineralPlacement() {
-        Physical floor = mixer.buildPhysical(rng.getRandomElement(handBuilt.stoneList.values()));
+        Physical floor = mixer.getPhysical(rng.getRandomElement(Stone.values()));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -108,7 +125,7 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    Physical p = mixer.buildPhysical(mixer.createBlueprint(tile.floor.terrainData.stone));
+                    Physical p = mixer.buildPhysical(mixer.getPhysical(tile.floor.terrainData.stone));
                     mixer.applyModification(p, handBuilt.makeWall);
                     tile.add(p);
                 }
@@ -136,7 +153,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = mixer.buildPhysical(rng.getRandomElement(handBuilt.stoneList.values()));
+                    blueprint = mixer.getPhysical(rng.getRandomElement(Stone.values()));
                 }
             }
 
@@ -198,7 +215,10 @@ public class WorldGenerator {
     }
 
     private void intrudeMap() {
-        Stone intruder = rng.getRandomElement(handBuilt.intrusiveList.keySet());
+        Stone intruder = rng.getRandomElement(Arrays
+            .stream(Stone.values())
+            .filter(s -> s.intrusive)
+            .collect(Collectors.toList()));
         int startX = rng.nextInt(width - 2) + 1;
         int startY = rng.nextInt(height - 2) + 1;
         int startZ = rng.nextInt(depth) + depth / 2;
@@ -242,7 +262,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = mixer.buildPhysical(mixer.createBlueprint(intruder)); // TODO - get from cache
+                        world[z].contents[x][y].floor = mixer.buildPhysical(mixer.getPhysical(intruder)); // TODO - get from cache
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -254,7 +274,10 @@ public class WorldGenerator {
     }
 
     private void extrudeMap() {
-        Stone extruder = rng.getRandomElement(handBuilt.extrusiveList.keySet());
+        Stone extruder = rng.getRandomElement(Arrays
+            .stream(Stone.values())
+            .filter(s -> s.extrusive)
+            .collect(Collectors.toList()));
         Physical blueprint;
         int extrudeX = -1;
         int extrudeY = -1;
@@ -285,7 +308,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = mixer.buildPhysical(mixer.createBlueprint(extruder)); // TODO - cache
+                                world[z].contents[x][y].floor = mixer.buildPhysical(mixer.getPhysical(extruder)); // TODO - cache
                             }
                         }
                     }
@@ -299,11 +322,17 @@ public class WorldGenerator {
         Stone changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = rng.getRandomElement(handBuilt.metamorphicList.keySet());
+        changer = rng.getRandomElement(Arrays
+            .stream(Stone.values())
+            .filter(s -> s.metamorphic)
+            .collect(Collectors.toList()));
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer =  rng.getRandomElement(handBuilt.metamorphicList.keySet());
+                changer = rng.getRandomElement(Arrays
+                    .stream(Stone.values())
+                    .filter(s -> s.metamorphic)
+                    .collect(Collectors.toList()));
             }
             for (int i = 1; i < width - 1; i++) {
                 for (int k = 1; k < height - 1; k++) {
@@ -339,7 +368,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.createBlueprint(changer)); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.getPhysical(changer)); // TODO - cache
                             }
                         }
                     }
@@ -350,7 +379,10 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = rng.getRandomElement(handBuilt.metamorphicList.keySet());
+                changer = rng.getRandomElement(Arrays
+                    .stream(Stone.values())
+                    .filter(s -> s.metamorphic)
+                    .collect(Collectors.toList()));
             }
             for (int i = width - 1; i > 1; i--) {
                 for (int k = height - 1; k > 1; k--) {
@@ -386,7 +418,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.createBlueprint(changer)); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.getPhysical(changer)); // TODO - cache
                             }
                         }
                     }

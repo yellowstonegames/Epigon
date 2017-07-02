@@ -29,18 +29,6 @@ import squidpony.epigon.data.specific.Recipe;
  */
 public class HandBuilt {
 
-    public Map<Stone, Physical> stoneList = new HashMap<>(),
-        sedimentaryList = new HashMap<>(),
-        intrusiveList = new HashMap<>(),
-        extrusiveList = new HashMap<>(),
-        metamorphicList = new HashMap<>();
-
-    public Map<Inclusion, Physical> gemList = new HashMap<>(),
-        sedimentaryGemList = new HashMap<>(),
-        intrusiveGemList = new HashMap<>(),
-        extrusiveGemList = new HashMap<>(),
-        metamorphicGemList = new HashMap<>();
-
     public Physical basePhysical = new Physical();
 
     public Physical playerBlueprint;
@@ -54,7 +42,6 @@ public class HandBuilt {
         basePhysical.generic = true;
         basePhysical.unique = true;
 
-        initStone();
         initDoors();
 
         playerBlueprint = new Physical();
@@ -93,42 +80,6 @@ public class HandBuilt {
         makeWall.possiblePostfix.add("wall");
         makeWall.symbol = '#';
         makeWall.large = true;
-    }
-
-    private void initStone() {
-        for (Stone stone : Stone.values()) {
-            Physical phys = mixer.createBlueprint(stone);
-            stoneList.put(stone, phys);
-            if (stone.sedimentary) {
-                sedimentaryList.put(stone, phys);
-            }
-            if (stone.intrusive) {
-                intrusiveList.put(stone, phys);
-            }
-            if (stone.extrusive) {
-                extrusiveList.put(stone, phys);
-            }
-            if (stone.metamorphic) {
-                metamorphicList.put(stone, phys);
-            }
-        }
-
-        for (Inclusion inclusion : Inclusion.values()) {
-            Physical phys = mixer.createBlueprint(inclusion);
-            gemList.put(inclusion, phys);
-            if (inclusion.sedimentary) {
-                sedimentaryGemList.put(inclusion, phys);
-            }
-            if (inclusion.intrusive) {
-                intrusiveGemList.put(inclusion, phys);
-            }
-            if (inclusion.extrusive) {
-                extrusiveGemList.put(inclusion, phys);
-            }
-            if (inclusion.metamorphic) {
-                metamorphicGemList.put(inclusion, phys);
-            }
-        }
     }
 
     private void initDoors() {
