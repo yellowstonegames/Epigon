@@ -90,7 +90,7 @@ public class Epigon extends Game {
     public static final int TOTAL_PIXEL_WIDTH  = TOTAL_WIDTH * CELL_WIDTH;
     public static final int TOTAL_PIXEL_HEIGHT = TOTAL_HEIGHT * CELL_HEIGHT;
 
-    public static long seed = 0xBEEFD00DFADEFEEDL;
+    public static long seed = 0xBEEFD00DFADEAFADL;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
     public static final LightRNG lightRNG = new LightRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(lightRNG);

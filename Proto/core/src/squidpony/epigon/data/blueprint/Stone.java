@@ -2,11 +2,10 @@ package squidpony.epigon.data.blueprint;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 
-
 /**
  * All possible types of stone.
  *
- * @author Eben Howard - http://squidpony.com
+ * @author Eben Howard - http(//squidpony.com
  */
 public enum Stone {
 
@@ -56,800 +55,709 @@ public enum Stone {
     GREYWACKE(SColor.DEEP_CHESTNUT, SColor.DARK_BROWN, false, true, false, false, 100, 1000),
     GREENSCHIST(SColor.PINE_GREEN, SColor.DARK_SPRING_GREEN, true, false, false, false, 250, 1000),
     GRITSTONE(SColor.TAN, SColor.DARK_TAN, false, true, false, false, 300, 1000),
-    GYPSUM(SColor.TAWNY, SColor.TAN, false, true, false, false, 400, 1000);
-    /*
-     case HORNFELS:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case HYALOCLASTITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 1000;
-     hardness = 1000;
-     break;
-     case IGNIMBRITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.TAN;
-     backColor = SColor.TAWNY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 150;
-     hardness = 1000;
-     break;
-     case IJOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.YELLOW_GREEN;
-     backColor = SColor.LIGHT_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case JADEITITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.FOREST_GREEN;
-     metamorphic = true; //blueschist only
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case JASPEROID:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.SLATE_GRAY;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 180;
-     hardness = 1000;
-     break;
-     case JASPILLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.SLATE_GRAY;
-     backColor = SColor.DARK_RED;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case KIMBERLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.DARK_RED;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case KOMATIITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.STEEL_BLUE;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case LAMPROITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case LAMPROPHYRE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case LARVIKITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.WHITE;
-     backColor = SColor.SILVER;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 800;
-     hardness = 1000;
-     break;
-     case LATITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.LIGHT_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case LIGNITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BROWNER;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 210;
-     hardness = 1000;
-     break;
-     case LITCHEFIELDITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BLACK;
-     backColor = SColor.TAN;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 230;
-     hardness = 1000;
-     break;
-     case LUXULLIANITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 760;
-     hardness = 1000;
-     break;
-     case MANGERITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case MARBLE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LINEN;
-     backColor = SColor.OLD_LACE;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 1000;
-     hardness = 1000;
-     break;
-     case MARL:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BLACK;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 180;
-     hardness = 1000;
-     break;
-     case MIGMATITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.STEEL_BLUE;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case MONZOGRANITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_CHESTNUT;
-     backColor = SColor.GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case MONZONITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case MUDSTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.RED_PIGMENT;
-     backColor = SColor.BROWNER;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case MYLONITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.LIGHT_GRAY;
-     metamorphic = true;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case NEPHELINE_SYENITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.PALE_PINK;
-     backColor = SColor.DARK_GREEN;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case NEPHELINITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GRAY;
-     backColor = SColor.DARK_GREEN;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case NORITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_GREEN;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case NOVACULITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.LIGHT_GRAY;
-     backColor = SColor.DARK_GRAY;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 460;
-     hardness = 1000;
-     break;
-     case OBSIDIAN:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.DARK_SLATE_GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = true;
-     value = 1340;
-     hardness = 1000;
-     break;
-     case OIL_SHALE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.BROWNER;
-     backColor = SColor.DARK_BROWN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 140;
-     hardness = 1000;
-     break;
-     case OOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GOLDEN_YELLOW;
-     backColor = SColor.GOLDEN_BROWN;
-     metamorphic = false;
-     sedimentary = true;
-     intrusive = false;
-     extrusive = false;
-     value = 190;
-     hardness = 1000;
-     break;
-     case PEGMATITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY_ASPARAGUS;
-     backColor = SColor.TAN;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PELITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.TAN;
-     backColor = SColor.GRAY;
-     metamorphic = true;//sedimentary only
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PERIDOTITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GREEN_YELLOW;
-     backColor = SColor.YELLOW_GREEN;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = true;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PHONOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.YELLOW_GREEN;
-     backColor = SColor.GRAY_ASPARAGUS;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = true;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PHYLLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.RUSSET;
-     metamorphic = true; //slate only
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PICRITE_BASALT:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PORPHYRY:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PSAMMITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PSEUDOTACHYLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PUMICE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case PYROXENITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case QUARTZITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case QUARTZ_DIORITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case QUARTZ_MONZONITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case RAPAKIVI:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case RHYODACITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case RHYOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case RHOMB_PORPHYRY:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SANDSTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SCHIST:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SCORIA:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SERPENTINITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SHALE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SILTSTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SKARN:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SLATE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SOAPSTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case SYENITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TACHYLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TACONITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TEPHRITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TEZONTLE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case THERALITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TONALITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TRACHYTE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TROCTOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TRONDHJEMITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case TUFF:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case UNAKITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case VARIOLITE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     break;
-     case WACKESTONE:
-     myName = type.toString().toLowerCase().replace('_', ' ');
-     frontColor = SColor.GRAY;
-     backColor = SColor.BLACK;
-     metamorphic = false;
-     sedimentary = false;
-     intrusive = false;
-     extrusive = false;
-     value = 100;
-     hardness = 1000;
-     */
+    GYPSUM(SColor.TAWNY, SColor.TAN, false, true, false, false, 400, 1000),
+    HORNFELS(SColor.GRAY, SColor.DARK_GRAY, true, false, false, false, 100, 1000),
+    HYALOCLASTITE(SColor.DARK_GRAY, SColor.BLACK, false, false, true, true, 1000, 1000),
+    IGNIMBRITE(
+        SColor.TAN,
+        SColor.TAWNY,
+        false,
+        false,
+        true,
+        true,
+        150,
+        1000
+    ),
+    IJOLITE(
+        SColor.YELLOW_GREEN,
+        SColor.LIGHT_GRAY,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    JADEITITE(
+        SColor.DARK_GREEN,
+        SColor.FOREST_GREEN,
+        true,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    JASPEROID(
+        SColor.DARK_GREEN,
+        SColor.SLATE_GRAY,
+        true,
+        false,
+        false,
+        false,
+        180,
+        1000
+    ),
+    JASPILLITE(
+        SColor.SLATE_GRAY,
+        SColor.DARK_RED,
+        false,
+        true,
+        false,
+        true,
+        100,
+        1000
+    ),
+    KIMBERLITE(
+        SColor.DARK_GREEN,
+        SColor.DARK_RED,
+        false,
+        false,
+        false,
+        true,
+        100,
+        1000
+    ),
+    KOMATIITE(
+        SColor.GRAY,
+        SColor.STEEL_BLUE,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    LAMPROITE(
+        SColor.GRAY,
+        SColor.DARK_GRAY,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    LAMPROPHYRE(
+        SColor.DARK_GRAY,
+        SColor.GRAY,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    LARVIKITE(
+        SColor.WHITE,
+        SColor.SILVER,
+        false,
+        false,
+        true,
+        true,
+        800,
+        1000
+    ),
+    LATITE(
+        SColor.GRAY,
+        SColor.LIGHT_GRAY,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    LIGNITE(
+        SColor.BROWNER,
+        SColor.DARK_GRAY,
+        false,
+        true,
+        false,
+        false,
+        210,
+        1000
+    ),
+    LITCHEFIELDITE(
+        SColor.BLACK,
+        SColor.TAN,
+        true,
+        false,
+        false,
+        false,
+        230,
+        1000
+    ),
+    LUXULLIANITE(
+        SColor.GRAY,
+        SColor.DARK_GRAY,
+        false,
+        false,
+        true,
+        true,
+        760,
+        1000
+    ),
+    MANGERITE(
+        SColor.DARK_GRAY,
+        SColor.GRAY,
+        false,
+        false,
+        true,
+        false,
+        100,
+        1000
+    ),
+    MARBLE(
+        SColor.LINEN,
+        SColor.OLD_LACE,
+        true,
+        false,
+        false,
+        false,
+        1000,
+        1000
+    ),
+    MARL(
+        SColor.BLACK,
+        SColor.DARK_GRAY,
+        false,
+        true,
+        false,
+        false,
+        180,
+        1000
+    ),
+    MIGMATITE(
+        SColor.GRAY,
+        SColor.STEEL_BLUE,
+        true,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    MONZOGRANITE(
+        SColor.DARK_CHESTNUT,
+        SColor.GRAY,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    MONZONITE(
+        SColor.GRAY,
+        SColor.DARK_GRAY,
+        false,
+        false,
+        false,
+        true,
+        100,
+        1000
+    ),
+    MUDSTONE(
+        SColor.RED_PIGMENT,
+        SColor.BROWNER,
+        false,
+        true,
+        false,
+        false,
+        100,
+        1000
+    ),
+    MYLONITE(
+        SColor.GRAY,
+        SColor.LIGHT_GRAY,
+        true,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    NEPHELINE_SYENITE(
+        SColor.PALE_PINK,
+        SColor.DARK_GREEN,
+        false,
+        false,
+        true,
+        false,
+        100,
+        1000
+    ),
+    NEPHELINITE(
+        SColor.DARK_GRAY,
+        SColor.DARK_GREEN,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    NORITE(
+        SColor.DARK_GREEN,
+        SColor.DARK_GRAY,
+        false,
+        false,
+        true,
+        false,
+        100,
+        1000
+    ),
+    NOVACULITE(
+        SColor.LIGHT_GRAY,
+        SColor.DARK_GRAY,
+        false,
+        true,
+        false,
+        false,
+        460,
+        1000
+    ),
+    OBSIDIAN(
+        SColor.DARK_SLATE_GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        true,
+        1340,
+        1000
+    ),
+    OIL_SHALE(
+        SColor.BROWNER,
+        SColor.DARK_BROWN,
+        false,
+        true,
+        false,
+        false,
+        140,
+        1000
+    ),
+    OOLITE(
+        SColor.GOLDEN_YELLOW,
+        SColor.GOLDEN_BROWN,
+        false,
+        true,
+        false,
+        false,
+        190,
+        1000
+    ),
+    PEGMATITE(
+        SColor.GRAY_ASPARAGUS,
+        SColor.TAN,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    PELITE(
+        SColor.TAN,
+        SColor.GRAY,
+        true,//sedimentary only
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PERIDOTITE(
+        SColor.GREEN_YELLOW,
+        SColor.YELLOW_GREEN,
+        false,
+        false,
+        true,
+        true,
+        100,
+        1000
+    ),
+    PHONOLITE(
+        SColor.YELLOW_GREEN,
+        SColor.GRAY_ASPARAGUS,
+        false,
+        false,
+        false,
+        true,
+        100,
+        1000
+    ),
+    PHYLLITE(
+        SColor.GRAY,
+        SColor.RUSSET,
+        true, //slate only
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PICRITE_BASALT(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PORPHYRY(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PSAMMITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PSEUDOTACHYLITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        100
+    ),
+    PUMICE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    PYROXENITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    QUARTZITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    QUARTZ_DIORITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    QUARTZ_MONZONITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    RAPAKIVI(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    RHYODACITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    RHYOLITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    RHOMB_PORPHYRY(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SANDSTONE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SCHIST(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SCORIA(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SERPENTINITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SHALE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SILTSTONE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SKARN(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SLATE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SOAPSTONE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    SYENITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TACHYLITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TACONITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TEPHRITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TEZONTLE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    THERALITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TONALITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TRACHYTE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TROCTOLITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TRONDHJEMITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    TUFF(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    UNAKITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    VARIOLITE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000
+    ),
+    WACKESTONE(
+        SColor.GRAY,
+        SColor.BLACK,
+        false,
+        false,
+        false,
+        false,
+        100,
+        1000);
+
     public SColor front, back;
     public int value;//base material is 100
     public int hardness;//average hardness
