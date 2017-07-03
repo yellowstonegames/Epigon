@@ -21,11 +21,14 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     // if you have magma, then smoke makes sense.
     SONIC(NATURE),
     ACID(NATURE),
-    ALKALAI(NATURE), // Misspelled. A correct alternative would be ALKALI, ALKALINE, or possibly CAUSTIC
+    CAUSTIC(NATURE),
     ICE(NATURE),
     WATER(NATURE),
+    LIGHTNING(NATURE),
     // You probably want electrical/lightning. This is a bizarre omission as it stands.
     // Maybe you want a disease element? Maybe radiation (possibly magical or nuclear)?
+    POISON(NATURE),
+
     // Magical
     MAGIC(),
     GEOMANCY(MAGIC), // Is this ley line location magic, feng-shui-like sacred geometry, or just dirt magic?
@@ -40,6 +43,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     LUNAR(ASTRONOMICAL),
     STELLAR(ASTRONOMICAL),
     COMETARY(ASTRONOMICAL), // Why both cometary and meteoric but no black hole magic? SINGULAR, I'd say.
+    GRAVITY(ASTRONOMICAL),
     PLANETARY(ASTRONOMICAL),
     METEORIC(ASTRONOMICAL),
     // maybe you want a VACUOUS element for the empty void between cosmic bodies?

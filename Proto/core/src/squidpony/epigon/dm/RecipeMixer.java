@@ -176,6 +176,8 @@ public class RecipeMixer {
         physical.notes = blueprint.notes; // TODO - probably don't need these transfered
         physical.parent = blueprint;
 
+        physical.attached = blueprint.attached;
+
         List<String> possibleNames = new ArrayList<>();
         possibleNames.addAll(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
@@ -322,6 +324,10 @@ public class RecipeMixer {
             if (modification.countsAsLost != null) {
                 physical.countsAs.removeAll(modification.countsAsLost);
             }
+        }
+
+        if (modification.attached != null){
+            physical.attached = modification.attached;
         }
 
         if (modification.generic != null) {
