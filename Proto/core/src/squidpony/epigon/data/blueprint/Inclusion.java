@@ -358,7 +358,8 @@ public enum Inclusion {
         this.hardness = hardness;
     }
 
-    public String getName() {
-        return toString().toLowerCase().replace('_', ' ');
+    @Override
+    public String toString() {
+        return name().toLowerCase().replace('_', ' ');
     }
 }

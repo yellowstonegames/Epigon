@@ -137,14 +137,14 @@ public class RecipeMixer {
         blueprint.symbol = '.';
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(inclusion.hardness * 0.01));
 
-        Modification stoneMod = new Modification();
-        stoneMod.baseValueMultiplier = inclusion.value * 0.01;
-        stoneMod.color = inclusion.front;
-        stoneMod.possiblePrefix = Collections.singletonList(inclusion.toString());
+        Modification inclusionMod = new Modification();
+        inclusionMod.baseValueMultiplier = inclusion.value * 0.01;
+        inclusionMod.color = inclusion.front;
+        inclusionMod.possiblePrefix = Collections.singletonList(inclusion.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = inclusion.hardness * 0.01;
-        stoneMod.statChanges.put(Stat.STRUCTURE, lvm);
-        blueprint.whenUsedAsMaterial.add(stoneMod);
+        inclusionMod.statChanges.put(Stat.STRUCTURE, lvm);
+        blueprint.whenUsedAsMaterial.add(inclusionMod);
 
         Terrain terrain = new Terrain();
         terrain.background = inclusion.back;

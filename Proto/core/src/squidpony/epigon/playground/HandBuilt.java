@@ -33,6 +33,7 @@ public class HandBuilt {
 
     public Physical playerBlueprint;
     public Physical swordBlueprint;
+    public Recipe swordRecipe;
 
     public Recipe doorRecipe;
     public Modification openDoor;
@@ -45,6 +46,7 @@ public class HandBuilt {
         basePhysical.unique = true;
 
         initDoors();
+        initItems();
 
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
@@ -71,11 +73,6 @@ public class HandBuilt {
         skill = new Skill();
         skill.name = "akido";
         cb.skills.put(skill, Rating.SLIGHT);
-
-        swordBlueprint = new Physical();
-        swordBlueprint.name = "sword";
-        swordBlueprint.color = SColor.SILVER;
-        swordBlueprint.symbol = '|';
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
@@ -111,5 +108,18 @@ public class HandBuilt {
         doorRecipeBlueprint.result.put(doorBlueprint, 1);
 
         doorRecipe = mixer.createRecipe(doorRecipeBlueprint);
+    }
+
+    private void initItems(){
+        swordBlueprint = new Physical();
+        swordBlueprint.name = "sword";
+        swordBlueprint.color = SColor.SILVER;
+        swordBlueprint.symbol = '|';
+
+        RecipeBlueprint swordRecipeBlueprint = new RecipeBlueprint();
+        swordRecipeBlueprint.requiredConsumed.put(basePhysical, 1);
+        swordRecipeBlueprint.result.put(swordBlueprint, 1);
+
+        swordRecipe = mixer.createRecipe(swordRecipeBlueprint);
     }
 }
