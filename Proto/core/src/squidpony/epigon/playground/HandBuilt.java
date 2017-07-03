@@ -75,7 +75,7 @@ public class HandBuilt {
         swordBlueprint = new Physical();
         swordBlueprint.name = "sword";
         swordBlueprint.color = SColor.SILVER;
-        swordBlueprint.symbol = '/';
+        swordBlueprint.symbol = '|';
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
