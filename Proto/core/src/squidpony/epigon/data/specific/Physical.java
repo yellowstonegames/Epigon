@@ -50,6 +50,7 @@ import squidpony.epigon.universe.Stat;
 public class Physical extends EpiData {
     // operational bits for live objects
     public Coord location;
+    public boolean attached; // cannot be removed for it's location (or inventory pile) without special means
     public boolean instantiated;
     public boolean aware; // knows where the player is
     public boolean wasSeen;

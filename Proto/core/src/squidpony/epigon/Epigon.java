@@ -47,6 +47,7 @@ import squidpony.squidmath.StatefulRNG;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -207,6 +208,11 @@ public class Epigon extends Game {
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
 
         player.location = floors.singleRandom(rng);
+        Arrays.stream(Direction.OUTWARDS)
+            .map(d -> player.location.translate(d))
+            .filter(c -> map.inBounds(c))
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildPhysical(handBuilt.swordBlueprint)));
+
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
         display.setGridOffsetX(player.location.x - (MAP_VIEWPORT_WIDTH >> 1));
@@ -528,6 +534,27 @@ public class Epigon extends Game {
                         .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
+                    break;
+                case 'g': // Pick everythin nearby up
+                    message("Picking up all nearby small things");
+                    Arrays.stream(Direction.values())
+                        .map(d -> player.location.translate(d))
+                        .filter(c -> map.inBounds(c))
+                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .map(c -> map.contents[c.x][c.y])
+                        .forEach(tile -> {
+                            Set<Physical> removing = tile.contents
+                                .stream()
+                                .filter(p -> !p.attached)
+                                .collect(Collectors.toSet());
+                            tile.contents.removeAll(removing);
+                            player.inventory.addAll(removing);
+                            });
+                    break;
+                case 'i': // List out inventory
+                    message(player.inventory.stream()
+                        .map(i -> i.name)
+                        .collect(Collectors.joining(", ", "Carrying: ", "")));
                     break;
                 case SquidInput.ESCAPE: {
                     Gdx.app.exit();
