@@ -39,268 +39,36 @@ public enum Inclusion {
     ANTIMONY(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
     AQUAMARINE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
     AZURITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
-    BENITOITE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    BIXBITE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    BLOODSTONE(
-        SColor.SCARLET,
-        SColor.DARK_GREEN,
-        true,
-        true,
-        false,
-        true,
-        350
-    ),
-    BLUE_GARNET(
-        SColor.SAPPHIRE,
-        SColor.PIGMENT_BLUE,
-        true,
-        false,
-        false,
-        false,
-        1230
-    ),
-    CARNELIAN(
-        SColor.RUSSET,
-        SColor.ORANGE_RED,
-        true,
-        true,
-        false,
-        true,
-        320
-    ),
+    BENITOITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    BIXBITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    BLOODSTONE(SColor.SCARLET, SColor.DARK_GREEN, true, true, false, true, 350),
+    BLUE_GARNET(SColor.SAPPHIRE, SColor.PIGMENT_BLUE, true, false, false, false, 1230),
+    CARNELIAN(SColor.RUSSET, SColor.ORANGE_RED, true, true, false, true, 320),
     CATS_EYE(SColor.YELLOW, SColor.BROWNER, false, false, true, false, 260), //myName = "cat's eye",
-    CHALCEDONY(
-        SColor.SLATE_GRAY,
-        SColor.GRAY,
-        true,
-        true,
-        false,
-        true,
-        140
-    ),
-    CHRYSOBERYL(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    CHRYSOCOLLA(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    CHRYSOPRASE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    CITRINE(
-        SColor.SCHOOL_BUS_YELLOW,
-        SColor.PUMPKIN,
-        true,
-        true,
-        false,
-        true,
-        1100
-    ),
-    COBALT_SPINEL(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    DEMANTOID(
-        SColor.YELLOW_GREEN,
-        SColor.DARK_GREEN,
-        true,
-        false,
-        true,
-        true,
-        9000
-    ),
-    DIAMOND(
-        SColor.ALICE_BLUE,
-        SColor.WHITE,
-        true,
-        false,
-        false,
-        false,
-        7000
-    ),
-    DIOPSIDE(
-        SColor.DARK_GREEN,
-        SColor.FOREST_GREEN,
-        false,
-        false,
-        false,
-        true,
-        650
-    ),
-    EMERALD(
-        SColor.EMERALD,
-        SColor.DARK_GREEN,
-        false,
-        true,
-        false,
-        false,
-        4500
-    ),
-    EUDIALYTE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    GOSHENITE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    HACKMANITE(
-        SColor.LIGHT_PINK,
-        SColor.DARK_PINK,
-        false,
-        false,
-        false,
-        true,
-        600
-    ),
-    HELIODOR(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    IOLITE(
-        SColor.SLATE_GRAY,
-        SColor.PIGMENT_BLUE,
-        true,
-        false,
-        true,
-        false,
-        180
-    ),
-    JADEITE(
-        SColor.KELLY_GREEN,
-        SColor.PEACH_ORANGE,
-        true,
-        false,
-        false,
-        false,
-        180
-    ),
-    JASPER(
-        SColor.FIREBRICK,
-        SColor.ORANGE_RED,
-        true,
-        true,
-        true,
-        true,
-        75
-    ),
-    JET(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    KUNZITE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    KYANITE(
-        SColor.MIDNIGHT_BLUE,
-        SColor.SLATE_GRAY,
-        true,
-        false,
-        false,
-        false,
-        60
-    ),
-    LABRADORITE(
-        SColor.LIGHT_BLUE,
-        SColor.MIDNIGHT_BLUE,
-        true,
-        false,
-        false,
-        true,
-        360
-    ),
-    LAPIS_LAZULI(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    MALACHITE(
-        SColor.GRAY,
-        SColor.BLACK,
-        false,
-        false,
-        false,
-        false,
-        100
-    ),
-    MALAYA(
-        SColor.ORANGE_RED,
-        SColor.SANGRIA,
-        true,
-        false,
-        false,
-        false,
-        1650
-    ),
+    CHALCEDONY(SColor.SLATE_GRAY, SColor.GRAY, true, true, false, true, 140),
+    CHRYSOBERYL(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    CHRYSOCOLLA(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    CHRYSOPRASE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    CITRINE(SColor.SCHOOL_BUS_YELLOW, SColor.PUMPKIN, true, true, false, true, 1100),
+    COBALT_SPINEL(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    DEMANTOID(SColor.YELLOW_GREEN, SColor.DARK_GREEN, true, false, true, true, 9000),
+    DIAMOND(SColor.ALICE_BLUE, SColor.WHITE, true, false, false, false, 7000),
+    DIOPSIDE(SColor.DARK_GREEN, SColor.FOREST_GREEN, false, false, false, true, 650),
+    EMERALD(SColor.EMERALD, SColor.DARK_GREEN, false, true, false, false, 4500),
+    EUDIALYTE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    GOSHENITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    HACKMANITE(SColor.LIGHT_PINK, SColor.DARK_PINK, false, false, false, true, 600),
+    HELIODOR(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    IOLITE(SColor.SLATE_GRAY, SColor.PIGMENT_BLUE, true, false, true, false, 180),
+    JADEITE(SColor.KELLY_GREEN, SColor.PEACH_ORANGE, true, false, false, false, 180),
+    JASPER(SColor.FIREBRICK, SColor.ORANGE_RED, true, true, true, true, 75),
+    JET(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    KUNZITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    KYANITE(SColor.MIDNIGHT_BLUE, SColor.SLATE_GRAY, true, false, false, false, 60),
+    LABRADORITE(SColor.LIGHT_BLUE, SColor.MIDNIGHT_BLUE, true, false, false, true, 360),
+    LAPIS_LAZULI(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    MALACHITE(SColor.GRAY, SColor.BLACK, false, false, false, false, 100),
+    MALAYA(SColor.ORANGE_RED, SColor.SANGRIA, true, false, false, false, 1650),
     MAW_SIT_SIT(SColor.FERN_GREEN, SColor.DARK_GREEN, true, false, false, false, 730),
     MELANITE(SColor.BLACK, SColor.MIDNIGHT_BLUE, true, false, false, false, 910),
     MOONSTONE(SColor.PALE_CORNFLOWER_BLUE, SColor.CAROLINA_BLUE, true, false, false, true, 850),
