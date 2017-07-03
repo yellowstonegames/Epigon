@@ -46,9 +46,11 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import squidpony.epigon.data.blueprint.Inclusion;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -211,14 +213,12 @@ public class Epigon extends Game {
         Arrays.stream(Direction.OUTWARDS)
             .map(d -> player.location.translate(d))
             .filter(c -> map.inBounds(c))
-            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildPhysical(handBuilt.swordBlueprint)));
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
         display.setGridOffsetX(player.location.x - (MAP_VIEWPORT_WIDTH >> 1));
         display.setGridOffsetY(player.location.y - (MAP_VIEWPORT_HEIGHT >> 1));
-        
-        Physical sword = mixer.buildPhysical(handBuilt.swordBlueprint);
 
         calcFOV(player.location.x, player.location.y);
 
