@@ -56,6 +56,7 @@ public class HandBuilt {
         playerBlueprint.color = SColor.BRIGHT_PINK;
         playerBlueprint.large = true;
         playerBlueprint.unique = true;
+        playerBlueprint.attached = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
         Arrays.stream(Stat.values()).forEach(s -> {
             LiveValue lv = new LiveValue(rng.between(20, 100));
@@ -79,6 +80,7 @@ public class HandBuilt {
         makeWall.possiblePostfix.add("wall");
         makeWall.symbol = '#';
         makeWall.large = true;
+        makeWall.attached = true;
     }
 
     private void initDoors() {
@@ -100,6 +102,7 @@ public class HandBuilt {
         doorBlueprint.name = "door";
         doorBlueprint.color = SColor.WALNUT;
         doorBlueprint.generic = true;
+        doorBlueprint.attached = true;
         mixer.applyModification(doorBlueprint, closeDoor);
 
         RecipeBlueprint doorRecipeBlueprint;

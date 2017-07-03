@@ -51,7 +51,8 @@ public class Modification extends EpiData {
     public Set<Physical> countsAs;
     public Set<Physical> countsAsGained;
     public Set<Physical> countsAsLost;
-    
+
+    public Boolean attached;
     public Boolean generic;
     public Boolean unique;
     public Boolean buildingBlock;
