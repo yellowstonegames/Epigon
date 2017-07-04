@@ -63,7 +63,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
 
-    public static long seed = 0xBEEFD00DFADEAFADL;
+    public static final long seed = 0xBEEFD00DFADEAFADL;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
     public static final LightRNG lightRNG = new LightRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(lightRNG);
@@ -76,10 +76,10 @@ public class Epigon extends Game {
     // Display
     SpriteBatch batch;
     private SquidColorCenter colorCenter;
-    private SquidLayers mapPanel;
-    private SquidLayers infoPanel;
-    private SquidLayers contextPanel;
-    private SquidLayers messagePanel;
+    private SquidLayers mapSLayers;
+    private SquidLayers infoSLayers;
+    private SquidLayers contextSLayers;
+    private SquidLayers messageSLayers;
     private SquidInput input;
     private Color bgColor;
     private int framesWithoutAnimation;
@@ -134,28 +134,28 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
 
         // Set up the text display portions
-        messagePanel = new SquidLayers(
+        messageSLayers = new SquidLayers(
             messageSize.gridWidth,
             messageSize.gridHeight,
             messageSize.cellWidth,
             messageSize.cellHeight,
             DefaultResources.getStretchableLeanFont());
 
-        infoPanel = new SquidLayers(
+        infoSLayers = new SquidLayers(
             infoSize.gridWidth,
             infoSize.gridHeight,
             infoSize.cellWidth,
             infoSize.cellHeight,
             DefaultResources.getStretchableLeanFont());
 
-        contextPanel = new SquidLayers(
+        contextSLayers = new SquidLayers(
             contextSize.gridWidth,
             contextSize.gridHeight,
             contextSize.cellWidth,
             contextSize.cellHeight,
             DefaultResources.getStretchableLeanFont());
 
-        mapPanel = new SquidLayers(
+        mapSLayers = new SquidLayers(
             mapSize.gridWidth,
             mapSize.gridHeight,
             mapSize.cellWidth,
@@ -165,14 +165,14 @@ public class Epigon extends Game {
             colorCenter,
             new char[map.width][map.height]);
 
-        mapPanel.setTextSize(mapSize.cellWidth, mapSize.cellHeight); // weirdly, this seems to help with flicker
+        mapSLayers.setTextSize(mapSize.cellWidth, mapSize.cellHeight); // weirdly, this seems to help with flicker
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        mapPanel.setAnimationDuration(0.13f);
+        mapSLayers.setAnimationDuration(0.13f);
 
-        messagePanel.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
-        infoPanel.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
-        mapPanel.setPosition(0, 0);
+        messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        mapSLayers.setPosition(0, 0);
         mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
         infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
 
@@ -185,10 +185,10 @@ public class Epigon extends Game {
         input = new SquidInput(keys, mapMouse);
         Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, input));
 
-        mapStage.addActor(mapPanel);
-        messageStage.addActor(messagePanel);
-        infoStage.addActor(infoPanel);
-        contextStage.addActor(contextPanel);
+        mapStage.addActor(mapSLayers);
+        messageStage.addActor(messageSLayers);
+        infoStage.addActor(infoSLayers);
+        contextStage.addActor(contextSLayers);
 
         startGame();
     }
@@ -218,10 +218,10 @@ public class Epigon extends Game {
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
-        playerEntity = mapPanel.animateActor(player.location.x, player.location.y, player.symbol, player.color);
+        playerEntity = mapSLayers.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
-        mapPanel.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
-        mapPanel.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
+        mapSLayers.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
+        mapSLayers.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
 
         calcFOV(player.location.x, player.location.y);
 
@@ -235,7 +235,7 @@ public class Epigon extends Game {
         message("Use ? for help, or q to quit.");
         message("Use mouse, numpad, or arrow keys to move.");
 
-        contextPanel.putString(5, 3, "CONTEXT", SColor.KIMONO_STORAGE, SColor.LIGHT_LIME);
+        contextSLayers.putString(5, 3, "CONTEXT", SColor.KIMONO_STORAGE, SColor.LIGHT_LIME);
     }
     
     private void runTurn(){
@@ -249,21 +249,21 @@ public class Epigon extends Game {
         Color background = colorCenter.dimmer(SColor.MIDNIGHT_BLUE);
         for (int x = 0; x < infoSize.gridWidth; x++) {
             for (int y = 0; y < infoSize.gridHeight; y++) {
-                infoPanel.put(x, y, ' ', SColor.TRANSPARENT, background);
+                infoSLayers.put(x, y, ' ', SColor.TRANSPARENT, background);
             }
         }
         for (int x = 0; x < infoSize.gridWidth; x++) {
-            infoPanel.put(x, 0, '-');
-            infoPanel.put(x, infoSize.gridHeight - 1, '-');
+            infoSLayers.put(x, 0, '-');
+            infoSLayers.put(x, infoSize.gridHeight - 1, '-');
         }
         for (int y = 0; y < infoSize.gridHeight; y++) {
-            infoPanel.put(0, y, '|');
-            infoPanel.put(infoSize.gridWidth - 1, y, '|');
+            infoSLayers.put(0, y, '|');
+            infoSLayers.put(infoSize.gridWidth - 1, y, '|');
         }
-        infoPanel.put(0, 0, '/');
-        infoPanel.put(infoSize.gridWidth - 1, 0, '\\');
-        infoPanel.put(0, infoSize.gridHeight - 1, '\\');
-        infoPanel.put(infoSize.gridWidth - 1, infoSize.gridHeight - 1, '/');
+        infoSLayers.put(0, 0, '/');
+        infoSLayers.put(infoSize.gridWidth - 1, 0, '\\');
+        infoSLayers.put(0, infoSize.gridHeight - 1, '\\');
+        infoSLayers.put(infoSize.gridWidth - 1, infoSize.gridHeight - 1, '/');
 
         Stat[] stats = Stat.values();
         int decimals = player.stats.values().stream()
@@ -274,19 +274,19 @@ public class Epigon extends Game {
         String format = "%0" + decimals + "d / %0" + decimals + "d";
 
         for (int s = 0; s < stats.length; s++) {
-            infoPanel.putString(1, s + 1, stats[s].toString());
+            infoSLayers.putString(1, s + 1, stats[s].toString());
 
             double actual = player.stats.get(stats[s]).actual;
             double base = player.stats.get(stats[s]).base;
             String num = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
             Color color = colorCenter.lerp(SColor.CRIMSON, SColor.BRIGHT_GREEN, actual / base);
-            infoPanel.putString(widestStatSize + 2, s + 1, num, color, background);
+            infoSLayers.putString(widestStatSize + 2, s + 1, num, color, background);
         }
     }
 
     private void message(String text) {
-        messagePanel.erase();
-        messagePanel.putString(1, 0, text, SColor.APRICOT, SColor.BLACK); // TODO - make this do the scroll things
+        messageSLayers.erase();
+        messageSLayers.putString(1, 0, text, SColor.APRICOT, SColor.BLACK); // TODO - make this do the scroll things
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -356,12 +356,12 @@ public class Epigon extends Game {
 
             int newX = player.location.x + dir.deltaX;
             int newY = player.location.y + dir.deltaY;
-            mapPanel.slide(playerEntity, newX, newY);
+            mapSLayers.slide(playerEntity, newX, newY);
             mixFOV(newX, newY);
             player.location = Coord.get(newX, newY);
             sound.playFootstep();
 
-            mapPanel.addAction(new TemporalAction(mapPanel.getAnimationDuration()) {
+            mapSLayers.addAction(new TemporalAction(mapSLayers.getAnimationDuration()) {
                 @Override
                 protected void update(float percent) {
                     pos.lerp(nextPos, percent);
@@ -375,8 +375,8 @@ public class Epigon extends Game {
                     super.end();
 
                     // Set the map and camera at the same time to have the same offset
-                    mapPanel.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
-                    mapPanel.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
+                    mapSLayers.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
+                    mapSLayers.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
                     camera.position.set(original);
                     camera.update();
 
@@ -393,8 +393,8 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        int offsetX = mapPanel.getGridOffsetX();
-        int offsetY = mapPanel.getGridOffsetY();
+        int offsetX = mapSLayers.getGridOffsetX();
+        int offsetY = mapSLayers.getGridOffsetY();
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapSize.gridWidth && x < map.width; i++, x++) {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
@@ -405,27 +405,27 @@ public class Epigon extends Game {
                         EpiTile tile = map.contents[x][y];
                         fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
                         back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
-                        mapPanel.put(x, y, tile.getSymbol(), fore, back);
+                        mapSLayers.put(x, y, tile.getSymbol(), fore, back);
                     } else {
                         RememberedTile rt = remembered[x][y];
                         if (rt != null) {
-                            mapPanel.put(x, y, rt.symbol, rt.front, rt.back);
+                            mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
                         } else {
-                            mapPanel.put(x, y, ' ', SColor.SLATE, bgColor);
+                            mapSLayers.put(x, y, ' ', SColor.SLATE, bgColor);
                         }
                     }
                 } else {
-                    mapPanel.put(x, y, ' ', SColor.SLATE, bgColor);
+                    mapSLayers.put(x, y, ' ', SColor.SLATE, bgColor);
                 }
             }
         }
 
         // Clear the tile the player is on
-        mapPanel.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
+        mapSLayers.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-            mapPanel.highlight(pt.x, pt.y, 100);
+            mapSLayers.highlight(pt.x, pt.y, 100);
         }
     }
 
@@ -445,7 +445,7 @@ public class Epigon extends Game {
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
-            if (!mapPanel.hasActiveAnimations()) {
+            if (!mapSLayers.hasActiveAnimations()) {
                 if (++framesWithoutAnimation >= 2) {
                     framesWithoutAnimation = 0;
                     Coord m = awaitedMoves.remove(0);
@@ -480,7 +480,7 @@ public class Epigon extends Game {
         mapStage.act();
         mapStage.draw();
         batch.begin();
-        mapPanel.drawActor(batch, 1.0f, playerEntity);
+        mapSLayers.drawActor(batch, 1.0f, playerEntity);
         batch.end();
     }
 
@@ -495,9 +495,9 @@ public class Epigon extends Game {
         float currentZoomY = (float) height / (mapSize.gridHeight + messageSize.gridHeight);
 
         // message box should be given updated bounds since I don't think it will do this automatically
-        messagePanel.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
-        infoPanel.setBounds(0, 0, currentZoomX * infoSize.gridWidth, currentZoomY * infoSize.gridHeight);
-        contextPanel.setBounds(0, 0, currentZoomX * contextSize.gridWidth, currentZoomY * contextSize.gridHeight);
+        messageSLayers.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
+        infoSLayers.setBounds(0, 0, currentZoomX * infoSize.gridWidth, currentZoomY * infoSize.gridHeight);
+        contextSLayers.setBounds(0, 0, currentZoomX * contextSize.gridWidth, currentZoomY * contextSize.gridHeight);
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         input.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
@@ -507,16 +507,16 @@ public class Epigon extends Game {
         //printText.bmpFont.getData().lineHeight /= currentZoomY;
         //printText.bmpFont.getData().descent /= currentZoomY;
         infoViewport.update(width, height, false);
-        infoViewport.setScreenBounds((int) messagePanel.getWidth(), (int) messagePanel.getHeight(), (int) infoPanel.getWidth(), (int) infoPanel.getHeight());
+        infoViewport.setScreenBounds((int) messageSLayers.getWidth(), (int) messageSLayers.getHeight(), (int) infoSLayers.getWidth(), (int) infoSLayers.getHeight());
 
         messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0, (int) messagePanel.getWidth(), (int) messagePanel.getHeight());
+        messageViewport.setScreenBounds(0, 0, (int) messageSLayers.getWidth(), (int) messageSLayers.getHeight());
 
         contextViewport.update(width, height, false);
-        contextViewport.setScreenBounds((int) messagePanel.getWidth(), 0, (int) contextPanel.getWidth(), (int) contextPanel.getHeight());
+        contextViewport.setScreenBounds((int) messageSLayers.getWidth(), 0, (int) contextSLayers.getWidth(), (int) contextSLayers.getHeight());
 
         mapViewport.update(width, height, false);
-        mapViewport.setScreenBounds(0, (int) messagePanel.getHeight(), width - (int) infoPanel.getWidth(), height - (int) messagePanel.getHeight());
+        mapViewport.setScreenBounds(0, (int) messageSLayers.getHeight(), width - (int) infoSLayers.getWidth(), height - (int) messageSLayers.getHeight());
     }
 
     @Override
@@ -627,7 +627,7 @@ public class Epigon extends Game {
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            int sx = screenX + mapPanel.getGridOffsetX(), sy = screenY + mapPanel.getGridOffsetY();
+            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (awaitedMoves.isEmpty()) {
@@ -685,7 +685,7 @@ public class Epigon extends Game {
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
-            int sx = screenX + mapPanel.getGridOffsetX(), sy = screenY + mapPanel.getGridOffsetY();
+            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
             if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)) {
                 return false;
             }
