@@ -49,14 +49,14 @@ public class Epigon extends Game {
         int cellH = 24;
         int bottomH = 6;
         int rightW = 30;
-        mapViewportSize = new PanelSize(w, h, cellW, cellH);
+        mapSize = new PanelSize(w, h, cellW, cellH);
         messageSize = new PanelSize(w, bottomH, cellW, cellH);
         infoSize = new PanelSize(rightW, h, cellW, cellH);
         contextSize = new PanelSize(rightW, bottomH, cellW, cellH);
     }
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final PanelSize mapViewportSize;
+    public static final PanelSize mapSize;
     public static final PanelSize messageSize;
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
@@ -117,7 +117,7 @@ public class Epigon extends Game {
         batch = new SpriteBatch();
 
         System.out.println("Putting together display.");
-        viewport = new StretchViewport(mapViewportSize.pixelWidth(), mapViewportSize.pixelHeight());
+        viewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
         infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
@@ -146,16 +146,16 @@ public class Epigon extends Game {
         infoPanel.clearingColor = null;
 
         display = new SquidLayers(
-            mapViewportSize.gridWidth,
-            mapViewportSize.gridHeight,
-            mapViewportSize.cellWidth,
-            mapViewportSize.cellHeight,
+            mapSize.gridWidth,
+            mapSize.gridHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
             DefaultResources.getStretchableSlabFont(),
             colorCenter,
             colorCenter,
             new char[map.width][map.height]);
 
-        display.setTextSize(mapViewportSize.cellWidth + 2, mapViewportSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        display.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.13f);
@@ -163,8 +163,8 @@ public class Epigon extends Game {
         messages.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoPanel.setBounds(0, contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
         display.setPosition(0, 0);
-        viewport.setScreenBounds(0, messageSize.pixelHeight(), mapViewportSize.pixelWidth(), mapViewportSize.pixelHeight());
-        infoViewport.setScreenBounds(mapViewportSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
+        viewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
+        infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
 
         cursor = Coord.get(-1, -1);
 
@@ -207,8 +207,8 @@ public class Epigon extends Game {
 
         playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
-        display.setGridOffsetX(player.location.x - (mapViewportSize.gridWidth >> 1));
-        display.setGridOffsetY(player.location.y - (mapViewportSize.gridHeight >> 1));
+        display.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
+        display.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
 
         calcFOV(player.location.x, player.location.y);
 
@@ -288,15 +288,15 @@ public class Epigon extends Game {
             final Vector3 pos = camera.position.cpy();
             final Vector3 original = camera.position.cpy();
 
-            double checkWidth = (mapViewportSize.gridWidth + 1) * 0.5f;
-            double checkHeight = (mapViewportSize.gridHeight + 1) * 0.5f;
+            double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
+            double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
             float cameraDeltaX = 0;
             if (midX <= map.width - checkWidth && midX >= checkWidth) {
-                cameraDeltaX = (dir.deltaX * mapViewportSize.cellWidth);
+                cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
             }
             float cameraDeltaY = 0;
             if (midY <= map.height - checkHeight && midY >= checkHeight) {
-                cameraDeltaY = (-dir.deltaY * mapViewportSize.cellHeight);
+                cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
             }
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
@@ -321,8 +321,8 @@ public class Epigon extends Game {
                     super.end();
 
                     // Set the map and camera at the same time to have the same offset
-                    display.setGridOffsetX(newX - (mapViewportSize.gridWidth >> 1));
-                    display.setGridOffsetY(newY - (mapViewportSize.gridHeight >> 1));
+                    display.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
+                    display.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
                     camera.position.set(original);
                     camera.update();
 
@@ -340,8 +340,8 @@ public class Epigon extends Game {
     public void putMap() {
         int offsetX = display.getGridOffsetX();
         int offsetY = display.getGridOffsetY();
-        for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapViewportSize.gridWidth && x < map.width; i++, x++) {
-            for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapViewportSize.gridHeight && y < map.height; j++, y++) {
+        for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapSize.gridWidth && x < map.width; i++, x++) {
+            for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     double sightAmount = fovResult[x][y];
                     Color fore;
@@ -372,16 +372,16 @@ public class Epigon extends Game {
 //        SColor back;
 
 //        back = SColor.OLD_LACE;
-//        for (int x = mapViewportSize.gridWidth; x < TOTAL_WIDTH; x++) {
+//        for (int x = mapSize.gridWidth; x < TOTAL_WIDTH; x++) {
 //            for (int y = 0; y < TOTAL_HEIGHT; y++) {
 //                display.getBackgroundLayer().put(x, y, back);
 //            }
 //        }
 
 //        front = SColor.JAPANESE_IRIS;
-//        display.putString(mapViewportSize.gridWidth + 4, 1, "STATS", front, back);
+//        display.putString(mapSize.gridWidth + 4, 1, "STATS", front, back);
 //        int y = 3;
-//        int x = mapViewportSize.gridWidth + 1;
+//        int x = mapSize.gridWidth + 1;
 //        int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
 //        for (Entry<Stat, LiveValue> e : player.stats.entrySet()) {
 //            int diff = (int) Math.round(e.getValue().actual - e.getValue().base);
@@ -461,16 +461,16 @@ public class Epigon extends Game {
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
 
         // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
-        float currentZoomX = (float) width / (mapViewportSize.gridWidth + infoSize.gridWidth);
+        float currentZoomX = (float) width / (mapSize.gridWidth + infoSize.gridWidth);
         // total new screen height in pixels divided by total number of rows on the screen
-        float currentZoomY = (float) height / (mapViewportSize.gridHeight + messageSize.gridHeight);
+        float currentZoomY = (float) height / (mapSize.gridHeight + messageSize.gridHeight);
 
         // message box should be given updated bounds since I don't think it will do this automatically
         messages.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
         infoPanel.setBounds(0, 0, currentZoomX * infoSize.gridWidth, currentZoomY * infoSize.gridHeight);
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
-        input.getMouse().reinitialize(currentZoomX, currentZoomY, mapViewportSize.gridWidth, mapViewportSize.gridHeight, 0, 0);
+        input.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
 
         //currentZoomX = CELL_WIDTH / currentZoomX;
         //currentZoomY = CELL_HEIGHT / currentZoomY;
@@ -505,11 +505,11 @@ public class Epigon extends Game {
     }
 
     public static int totalPixelWidth() {
-        return mapViewportSize.pixelWidth() + infoSize.pixelWidth();
+        return mapSize.pixelWidth() + infoSize.pixelWidth();
     }
 
     public static int totalPixelHeight() {
-        return mapViewportSize.pixelHeight() + messageSize.pixelHeight();
+        return mapSize.pixelHeight() + messageSize.pixelHeight();
     }
 
     private final KeyHandler keys = new KeyHandler() {
@@ -587,7 +587,7 @@ public class Epigon extends Game {
         }
     };
 
-    private final SquidMouse mapMouse = new SquidMouse(mapViewportSize.cellWidth, mapViewportSize.cellHeight, mapViewportSize.gridWidth, mapViewportSize.gridHeight, 0, 0, new InputAdapter() {
+    private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
