@@ -46,7 +46,7 @@ public class Epigon extends Game {
         int w = 70;
         int h = 30;
         int cellW = 12;
-        int cellH = 23;
+        int cellH = 24;
         int bottomH = 6;
         int rightW = 30;
         mapSize = new PanelSize(300, 90, cellW, cellH);
@@ -76,7 +76,8 @@ public class Epigon extends Game {
     // Display
     SpriteBatch batch;
     private SquidLayers display;
-    private TextCellFactory printText;
+    private TextCellFactory messageText;
+    private TextCellFactory infoText;
     private SquidColorCenter colorCenter;
     private LinesPanel<Color> messages, infoPanel;
     private SquidInput input;
@@ -139,15 +140,20 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
 
         // Set up the text display portions
-        printText = DefaultResources.getStretchablePrintFont()
+        messageText = DefaultResources.getStretchablePrintFont()
             .width(5f)
             .height(messageSize.cellHeight)
             .initBySize();
-        messages = new LinesPanel<>(new GDXMarkup(), printText, 6);
+        messages = new LinesPanel<>(new GDXMarkup(), messageText, messageSize.gridHeight);
         messages.clearingColor = null;
 
-        infoPanel = new LinesPanel<>(new GDXMarkup(), printText, 29);
+        infoText = DefaultResources.getStretchablePrintFont()
+            .width(5f)
+            .height(infoSize.cellHeight)
+            .initBySize();
+        infoPanel = new LinesPanel<>(new GDXMarkup(), infoText, infoSize.gridHeight);
         infoPanel.clearingColor = null;
+
         display = new SquidLayers(
             mapViewportSize.gridWidth,
             mapViewportSize.gridHeight,
@@ -430,14 +436,14 @@ public class Epigon extends Game {
         batch.begin();
         batch.setProjectionMatrix(messageViewport.getCamera().combined);
         batch.setColor(SColor.INDIGO_DYE);
-        batch.draw(printText.getSolid(), 0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        batch.draw(messageText.getSolid(), 0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         messageStage.getRoot().draw(batch, 1f);
 
         infoViewport.apply(false);
         infoStage.act();
         batch.setProjectionMatrix(infoStage.getCamera().combined);
         batch.setColor(SColor.PEACH_YELLOW);
-        batch.draw(printText.getSolid(), 0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        batch.draw(infoText.getSolid(), 0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
         infoStage.getRoot().draw(batch, 1f);
         batch.end();
 
@@ -455,11 +461,7 @@ public class Epigon extends Game {
     public void resize(int width, int height) {
         super.resize(width, height);
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
-        /*
-        input.getMouse().reinitialize((float) width / TOTAL_WIDTH, (float) height / TOTAL_HEIGHT, TOTAL_WIDTH, TOTAL_HEIGHT, 0, 0);
-        viewport.update(width, height, false);
-        viewport.setScreenBounds(0, 0, width, height);
-         */
+
         // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
         float currentZoomX = (float) width / (mapViewportSize.gridWidth + infoSize.gridWidth);
         // total new screen height in pixels divided by total number of rows on the screen
@@ -478,8 +480,10 @@ public class Epigon extends Game {
         //printText.bmpFont.getData().descent /= currentZoomY;
         infoViewport.update(width, height, false);
         infoViewport.setScreenBounds((int) messages.getWidth(), (int) messages.getHeight(), (int) infoPanel.getWidth(), (int) infoPanel.getHeight());
+
         messageViewport.update(width, height, false);
         messageViewport.setScreenBounds(0, 0, (int) messages.getWidth(), (int) messages.getHeight());
+
         viewport.update(width, height, false);
         viewport.setScreenBounds(0, (int) messages.getHeight(), width - (int) infoPanel.getWidth(), height - (int) messages.getHeight());
     }
