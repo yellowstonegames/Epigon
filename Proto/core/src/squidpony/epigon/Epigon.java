@@ -20,7 +20,6 @@ import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.universe.Stat;
-import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
@@ -34,6 +33,7 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import squidpony.epigon.universe.LiveValue;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -44,7 +44,7 @@ public class Epigon extends Game {
     // Set up sizing all in one place
     static{
         int w = 70;
-        int h = 30;
+        int h = 31;
         int cellW = 12;
         int cellH = 24;
         int bottomH = 6;
@@ -53,6 +53,8 @@ public class Epigon extends Game {
         messageSize = new PanelSize(w, bottomH, cellW, cellH);
         infoSize = new PanelSize(rightW, h, cellW, cellH);
         contextSize = new PanelSize(rightW, bottomH, cellW, cellH);
+
+        widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
     }
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
@@ -82,6 +84,7 @@ public class Epigon extends Game {
     private Color bgColor;
     private int framesWithoutAnimation;
     private List<Coord> toCursor;
+    private static final int widestStatSize;
 
     // World
     private WorldGenerator worldGenerator;
@@ -205,6 +208,7 @@ public class Epigon extends Game {
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
+        player.stats.put(Stat.SIGHT, new LiveValue(26));
 
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
@@ -229,14 +233,51 @@ public class Epigon extends Game {
         message("Bump into walls and stuff.");
         message("Use ? for help, or q to quit.");
         message("Use mouse, numpad, or arrow keys to move.");
-        Stat[] stats = Stat.values();
-
-        int y = 1;
-        for (int s = 0; s < stats.length; s++) {
-            infoPanel.putString(1, y + s, stats[s].toString());
-        }
 
         contextPanel.putString(5, 3, "CONTEXT", SColor.KIMONO_STORAGE, SColor.LIGHT_LIME);
+    }
+    
+    private void runTurn(){
+        
+    }
+
+    private void updateStats() {
+        Color background = colorCenter.dimmer(SColor.MIDNIGHT_BLUE);
+        for (int x = 0; x < infoSize.gridWidth; x++) {
+            for (int y = 0; y < infoSize.gridHeight; y++) {
+                infoPanel.put(x, y, ' ', SColor.TRANSPARENT, background);
+            }
+        }
+        for (int x = 0; x < infoSize.gridWidth; x++) {
+            infoPanel.put(x, 0, '-');
+            infoPanel.put(x, infoSize.gridHeight - 1, '-');
+        }
+        for (int y = 0; y < infoSize.gridHeight; y++) {
+            infoPanel.put(0, y, '|');
+            infoPanel.put(infoSize.gridWidth - 1, y, '|');
+        }
+        infoPanel.put(0, 0, '/');
+        infoPanel.put(infoSize.gridWidth - 1, 0, '\\');
+        infoPanel.put(0, infoSize.gridHeight - 1, '\\');
+        infoPanel.put(infoSize.gridWidth - 1, infoSize.gridHeight - 1, '/');
+
+        Stat[] stats = Stat.values();
+        int decimals = player.stats.values().stream()
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
+            .max()
+            .getAsInt();
+        decimals = Integer.toString(decimals).length();
+        String format = "%0" + decimals + "d / %0" + decimals + "d";
+
+        for (int s = 0; s < stats.length; s++) {
+            infoPanel.putString(1, s + 1, stats[s].toString());
+
+            double actual = player.stats.get(stats[s]).actual;
+            double base = player.stats.get(stats[s]).base;
+            String num = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
+            Color color = colorCenter.lerp(SColor.CRIMSON, SColor.BRIGHT_GREEN, actual / base);
+            infoPanel.putString(widestStatSize + 2, s + 1, num, color, background);
+        }
     }
 
     private void message(String text) {
@@ -376,34 +417,6 @@ public class Epigon extends Game {
         // Clear the tile the player is on
         mapPanel.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
 
-//        SColor front;
-//        SColor back;
-
-//        back = SColor.OLD_LACE;
-//        for (int x = mapSize.gridWidth; x < TOTAL_WIDTH; x++) {
-//            for (int y = 0; y < TOTAL_HEIGHT; y++) {
-//                display.getBackgroundLayer().put(x, y, back);
-//            }
-//        }
-
-//        front = SColor.JAPANESE_IRIS;
-//        display.putString(mapSize.gridWidth + 4, 1, "STATS", front, back);
-//        int y = 3;
-//        int x = mapSize.gridWidth + 1;
-//        int spacing = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().orElse(0) + 2;
-//        for (Entry<Stat, LiveValue> e : player.stats.entrySet()) {
-//            int diff = (int) Math.round(e.getValue().actual - e.getValue().base);
-//            String diffString = "";
-//            if (diff < 0) {
-//                diffString = " " + diff;
-//            } else {
-//                diffString = " +" + diff;
-//            }
-//            display.putString(x, y, e.getKey().toString() + ":", front, back);
-//            display.putString(x + spacing, y, (int)Math.round(e.getValue().base) + diffString, front, back);
-//            y++;
-//        }
-
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
             mapPanel.highlight(pt.x, pt.y, 100);
@@ -421,6 +434,7 @@ public class Epigon extends Game {
 
         // need to display the map every frame, since we clear the screen to avoid artifacts.
         putMap();
+        updateStats();
 
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
