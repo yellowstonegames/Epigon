@@ -73,15 +73,15 @@ public class Epigon extends Game {
 
     // Display
     SpriteBatch batch;
-    private SquidLayers display;
-    private TextCellFactory messageText;
-    private TextCellFactory infoText;
     private SquidColorCenter colorCenter;
-    private LinesPanel<Color> messages, infoPanel;
+    private SquidLayers mapPanel;
+    private SquidLayers infoPanel;
+    private SquidLayers contextPanel;
+    private SquidLayers messagePanel;
     private SquidInput input;
     private Color bgColor;
-    private List<Coord> toCursor;
     private int framesWithoutAnimation;
+    private List<Coord> toCursor;
 
     // World
     private WorldGenerator worldGenerator;
@@ -97,8 +97,8 @@ public class Epigon extends Game {
     private double[][] priorFovResult;
 
     // WIP stuff, needs large sample map
-    private Stage stage, messageStage, infoStage, contextStage;
-    private Viewport viewport, messageViewport, infoViewport, contextViewport;
+    private Stage mapStage, messageStage, infoStage, contextStage;
+    private Viewport mapViewport, messageViewport, infoViewport, contextViewport;
     private Camera camera;
     private AnimatedEntity playerEntity;
 
@@ -117,53 +117,60 @@ public class Epigon extends Game {
         batch = new SpriteBatch();
 
         System.out.println("Putting together display.");
-        viewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
+        mapViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
         infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
 
-        camera = viewport.getCamera();
+        camera = mapViewport.getCamera();
 
         // Here we make sure our Stages, which holds any text-based grids we make, uses our Batch.
-        stage = new Stage(viewport, batch);
+        mapStage = new Stage(mapViewport, batch);
         messageStage = new Stage(messageViewport, batch);
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
 
         // Set up the text display portions
-        messageText = DefaultResources.getStretchablePrintFont()
-            .width(5f)
-            .height(messageSize.cellHeight)
-            .initBySize();
-        messages = new LinesPanel<>(new GDXMarkup(), messageText, messageSize.gridHeight);
-        messages.clearingColor = null;
+        messagePanel = new SquidLayers(
+            messageSize.gridWidth,
+            messageSize.gridHeight,
+            messageSize.cellWidth,
+            messageSize.cellHeight,
+            DefaultResources.getStretchableLeanFont());
 
-        infoText = DefaultResources.getStretchablePrintFont()
-            .width(5f)
-            .height(infoSize.cellHeight)
-            .initBySize();
-        infoPanel = new LinesPanel<>(new GDXMarkup(), infoText, infoSize.gridHeight);
-        infoPanel.clearingColor = null;
+        infoPanel = new SquidLayers(
+            infoSize.gridWidth,
+            infoSize.gridHeight,
+            infoSize.cellWidth,
+            infoSize.cellHeight,
+            DefaultResources.getStretchableLeanFont());
 
-        display = new SquidLayers(
+        contextPanel = new SquidLayers(
+            contextSize.gridWidth,
+            contextSize.gridHeight,
+            contextSize.cellWidth,
+            contextSize.cellHeight,
+            DefaultResources.getStretchableLeanFont());
+
+        mapPanel = new SquidLayers(
             mapSize.gridWidth,
             mapSize.gridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            DefaultResources.getStretchableSlabFont(),
+            DefaultResources.getStretchableLeanFont(),
             colorCenter,
             colorCenter,
             new char[map.width][map.height]);
 
-        display.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        mapPanel.setTextSize(mapSize.cellWidth, mapSize.cellHeight); // weirdly, this seems to help with flicker
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        display.setAnimationDuration(0.13f);
+        mapPanel.setAnimationDuration(0.13f);
 
-        messages.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
-        infoPanel.setBounds(0, contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
-        display.setPosition(0, 0);
-        viewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
+        messagePanel.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        infoPanel.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        mapPanel.setPosition(0, 0);
+        mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
         infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
 
         cursor = Coord.get(-1, -1);
@@ -173,11 +180,12 @@ public class Epigon extends Game {
         awaitedMoves = new ArrayList<>(100);
 
         input = new SquidInput(keys, mapMouse);
-        Gdx.input.setInputProcessor(new InputMultiplexer(stage, messageStage, input));
+        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, input));
 
-        stage.addActor(display);
-        messageStage.addActor(messages);
+        mapStage.addActor(mapPanel);
+        messageStage.addActor(messagePanel);
         infoStage.addActor(infoPanel);
+        contextStage.addActor(contextPanel);
 
         startGame();
     }
@@ -205,10 +213,10 @@ public class Epigon extends Game {
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
-        playerEntity = display.animateActor(player.location.x, player.location.y, player.symbol, player.color);
+        playerEntity = mapPanel.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
-        display.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
-        display.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
+        mapPanel.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
+        mapPanel.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
 
         calcFOV(player.location.x, player.location.y);
 
@@ -222,17 +230,17 @@ public class Epigon extends Game {
         message("Use ? for help, or q to quit.");
         message("Use mouse, numpad, or arrow keys to move.");
         Stat[] stats = Stat.values();
+
+        int y = 1;
         for (int s = 0; s < stats.length; s++) {
-            info(stats[s].toString());
+            infoPanel.putString(1, y + s, stats[s].toString());
         }
+
+        contextPanel.putString(5, 3, "CONTEXT", SColor.KIMONO_STORAGE, SColor.LIGHT_LIME);
     }
 
     private void message(String text) {
-        messages.addFirst(new IColoredString.Impl<>(text, Color.WHITE));
-    }
-
-    private void info(String text) {
-        infoPanel.addLast(new IColoredString.Impl<>(text, SColor.DB_INK));
+        messagePanel.putString(1, 0, text, SColor.APRICOT, SColor.BLACK); // TODO - make this do the scroll things
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -302,12 +310,12 @@ public class Epigon extends Game {
 
             int newX = player.location.x + dir.deltaX;
             int newY = player.location.y + dir.deltaY;
-            display.slide(playerEntity, newX, newY);
+            mapPanel.slide(playerEntity, newX, newY);
             mixFOV(newX, newY);
             player.location = Coord.get(newX, newY);
             sound.playFootstep();
 
-            display.addAction(new TemporalAction(display.getAnimationDuration()) {
+            mapPanel.addAction(new TemporalAction(mapPanel.getAnimationDuration()) {
                 @Override
                 protected void update(float percent) {
                     pos.lerp(nextPos, percent);
@@ -321,8 +329,8 @@ public class Epigon extends Game {
                     super.end();
 
                     // Set the map and camera at the same time to have the same offset
-                    display.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
-                    display.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
+                    mapPanel.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
+                    mapPanel.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
                     camera.position.set(original);
                     camera.update();
 
@@ -338,8 +346,8 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        int offsetX = display.getGridOffsetX();
-        int offsetY = display.getGridOffsetY();
+        int offsetX = mapPanel.getGridOffsetX();
+        int offsetY = mapPanel.getGridOffsetY();
         for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapSize.gridWidth && x < map.width; i++, x++) {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
@@ -350,23 +358,23 @@ public class Epigon extends Game {
                         EpiTile tile = map.contents[x][y];
                         fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
                         back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
-                        display.put(x, y, tile.getSymbol(), fore, back);
+                        mapPanel.put(x, y, tile.getSymbol(), fore, back);
                     } else {
                         RememberedTile rt = remembered[x][y];
                         if (rt != null) {
-                            display.put(x, y, rt.symbol, rt.front, rt.back);
+                            mapPanel.put(x, y, rt.symbol, rt.front, rt.back);
                         } else {
-                            display.put(x, y, ' ', SColor.SLATE, bgColor);
+                            mapPanel.put(x, y, ' ', SColor.SLATE, bgColor);
                         }
                     }
                 } else {
-                    display.put(x, y, ' ', SColor.SLATE, bgColor);
+                    mapPanel.put(x, y, ' ', SColor.SLATE, bgColor);
                 }
             }
         }
 
         // Clear the tile the player is on
-        display.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
+        mapPanel.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
 
 //        SColor front;
 //        SColor back;
@@ -398,7 +406,7 @@ public class Epigon extends Game {
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-            display.highlight(pt.x, pt.y, 100);
+            mapPanel.highlight(pt.x, pt.y, 100);
         }
     }
 
@@ -417,7 +425,7 @@ public class Epigon extends Game {
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
-            if (!display.hasActiveAnimations()) {
+            if (!mapPanel.hasActiveAnimations()) {
                 if (++framesWithoutAnimation >= 2) {
                     framesWithoutAnimation = 0;
                     Coord m = awaitedMoves.remove(0);
@@ -431,27 +439,28 @@ public class Epigon extends Game {
         // the order here matters. We apply multiple viewports at different times to clip different areas.
         messageViewport.apply(false);
         messageStage.act();
+        messageStage.draw();
         batch.begin();
-        batch.setProjectionMatrix(messageViewport.getCamera().combined);
-        batch.setColor(SColor.INDIGO_DYE);
-        batch.draw(messageText.getSolid(), 0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
-        messageStage.getRoot().draw(batch, 1f);
+        batch.end();
 
         infoViewport.apply(false);
         infoStage.act();
-        batch.setProjectionMatrix(infoStage.getCamera().combined);
-        batch.setColor(SColor.PEACH_YELLOW);
-        batch.draw(infoText.getSolid(), 0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
-        infoStage.getRoot().draw(batch, 1f);
+        infoStage.draw();
+        batch.begin();
+        batch.end();
+
+        contextViewport.apply(false);
+        contextStage.act();
+        contextStage.draw();
+        batch.begin();
         batch.end();
 
         //here we apply the other viewport, which clips a different area while leaving the message area intact.
-        viewport.apply(false);
-        stage.act();
-        // each stage has its own batch that it starts an ends, so certain batch-wide effects only change one stage.
-        stage.draw();
+        mapViewport.apply(false);
+        mapStage.act();
+        mapStage.draw();
         batch.begin();
-        display.drawActor(batch, 1.0f, playerEntity);
+        mapPanel.drawActor(batch, 1.0f, playerEntity);
         batch.end();
     }
 
@@ -466,8 +475,9 @@ public class Epigon extends Game {
         float currentZoomY = (float) height / (mapSize.gridHeight + messageSize.gridHeight);
 
         // message box should be given updated bounds since I don't think it will do this automatically
-        messages.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
+        messagePanel.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
         infoPanel.setBounds(0, 0, currentZoomX * infoSize.gridWidth, currentZoomY * infoSize.gridHeight);
+        contextPanel.setBounds(0, 0, currentZoomX * contextSize.gridWidth, currentZoomY * contextSize.gridHeight);
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         input.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
@@ -477,13 +487,16 @@ public class Epigon extends Game {
         //printText.bmpFont.getData().lineHeight /= currentZoomY;
         //printText.bmpFont.getData().descent /= currentZoomY;
         infoViewport.update(width, height, false);
-        infoViewport.setScreenBounds((int) messages.getWidth(), (int) messages.getHeight(), (int) infoPanel.getWidth(), (int) infoPanel.getHeight());
+        infoViewport.setScreenBounds((int) messagePanel.getWidth(), (int) messagePanel.getHeight(), (int) infoPanel.getWidth(), (int) infoPanel.getHeight());
 
         messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0, (int) messages.getWidth(), (int) messages.getHeight());
+        messageViewport.setScreenBounds(0, 0, (int) messagePanel.getWidth(), (int) messagePanel.getHeight());
 
-        viewport.update(width, height, false);
-        viewport.setScreenBounds(0, (int) messages.getHeight(), width - (int) infoPanel.getWidth(), height - (int) messages.getHeight());
+        contextViewport.update(width, height, false);
+        contextViewport.setScreenBounds((int) messagePanel.getWidth(), 0, (int) contextPanel.getWidth(), (int) contextPanel.getHeight());
+
+        mapViewport.update(width, height, false);
+        mapViewport.setScreenBounds(0, (int) messagePanel.getHeight(), width - (int) infoPanel.getWidth(), height - (int) messagePanel.getHeight());
     }
 
     @Override
@@ -592,7 +605,7 @@ public class Epigon extends Game {
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
+            int sx = screenX + mapPanel.getGridOffsetX(), sy = screenY + mapPanel.getGridOffsetY();
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (awaitedMoves.isEmpty()) {
@@ -650,7 +663,7 @@ public class Epigon extends Game {
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
-            int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
+            int sx = screenX + mapPanel.getGridOffsetX(), sy = screenY + mapPanel.getGridOffsetY();
             if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)) {
                 return false;
             }
