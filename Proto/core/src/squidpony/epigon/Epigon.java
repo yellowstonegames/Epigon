@@ -49,7 +49,6 @@ public class Epigon extends Game {
         int cellH = 24;
         int bottomH = 6;
         int rightW = 30;
-        mapSize = new PanelSize(300, 90, cellW, cellH);
         mapViewportSize = new PanelSize(w, h, cellW, cellH);
         messageSize = new PanelSize(w, bottomH, cellW, cellH);
         infoSize = new PanelSize(rightW, h, cellW, cellH);
@@ -57,7 +56,6 @@ public class Epigon extends Game {
     }
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final PanelSize mapSize;
     public static final PanelSize mapViewportSize;
     public static final PanelSize messageSize;
     public static final PanelSize infoSize;
@@ -104,23 +102,16 @@ public class Epigon extends Game {
     private Camera camera;
     private AnimatedEntity playerEntity;
 
-    private void init(){
-        fovResult = new double[mapSize.gridWidth][mapSize.gridHeight];
-        priorFovResult = new double[mapSize.gridWidth][mapSize.gridHeight];
-        remembered = new RememberedTile[mapSize.gridWidth][mapSize.gridHeight];
-
-        Coord.expandPoolTo(mapSize.gridWidth, mapSize.gridHeight);
-        bgColor = SColor.BLACK_DYE;
-    }
-
     @Override
     public void create() {
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
-        init();
 
         System.out.println("Loading sound manager.");
         sound = new SoundManager();
         colorCenter = new SquidColorCenter();
+
+        // Set the map size early so things can reference it
+        map = new EpiMap(100, 50);
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -162,9 +153,9 @@ public class Epigon extends Game {
             DefaultResources.getStretchableSlabFont(),
             colorCenter,
             colorCenter,
-            new char[mapSize.gridWidth][mapSize.gridHeight]);
+            new char[map.width][map.height]);
 
-        display.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        display.setTextSize(mapViewportSize.cellWidth + 2, mapViewportSize.cellHeight + 2); // weirdly, this seems to help with flicker
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         display.setAnimationDuration(0.13f);
@@ -192,9 +183,16 @@ public class Epigon extends Game {
     }
 
     private void startGame() {
+        fovResult = new double[map.width][map.height];
+        priorFovResult = new double[map.width][map.height];
+        remembered = new RememberedTile[map.width][map.height];
+
+        Coord.expandPoolTo(map.width, map.height);
+        bgColor = SColor.BLACK_DYE;
+
         message("Generating world.");
         worldGenerator = new WorldGenerator();
-        map = worldGenerator.buildWorld(mapSize.gridWidth, mapSize.gridHeight, 1)[0];
+        map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
 
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
@@ -215,7 +213,7 @@ public class Epigon extends Game {
         calcFOV(player.location.x, player.location.y);
 
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
-        blocked = new GreasedRegion(mapSize.gridWidth, mapSize.gridHeight);
+        blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
         message("Have fun!");
@@ -239,8 +237,8 @@ public class Epigon extends Game {
 
     private void calcFOV(int checkX, int checkY) {
         FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual, Radius.CIRCLE);
-        for (int x = 0; x < mapSize.gridWidth; x++) {
-            for (int y = 0; y < mapSize.gridHeight; y++) {
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {
                     if (remembered[x][y] == null) {
                         remembered[x][y] = new RememberedTile(map.contents[x][y]);
@@ -293,11 +291,11 @@ public class Epigon extends Game {
             double checkWidth = (mapViewportSize.gridWidth + 1) * 0.5f;
             double checkHeight = (mapViewportSize.gridHeight + 1) * 0.5f;
             float cameraDeltaX = 0;
-            if (midX <= mapSize.gridWidth - checkWidth && midX >= checkWidth) {
+            if (midX <= map.width - checkWidth && midX >= checkWidth) {
                 cameraDeltaX = (dir.deltaX * mapViewportSize.cellWidth);
             }
             float cameraDeltaY = 0;
-            if (midY <= mapSize.gridHeight - checkHeight && midY >= checkHeight) {
+            if (midY <= map.height - checkHeight && midY >= checkHeight) {
                 cameraDeltaY = (-dir.deltaY * mapViewportSize.cellHeight);
             }
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
@@ -342,8 +340,8 @@ public class Epigon extends Game {
     public void putMap() {
         int offsetX = display.getGridOffsetX();
         int offsetY = display.getGridOffsetY();
-        for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapViewportSize.gridWidth && x < mapSize.gridWidth; i++, x++) {
-            for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapViewportSize.gridHeight && y < mapSize.gridHeight; j++, y++) {
+        for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapViewportSize.gridWidth && x < map.width; i++, x++) {
+            for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapViewportSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     double sightAmount = fovResult[x][y];
                     Color fore;
@@ -653,7 +651,7 @@ public class Epigon extends Game {
                 return false;
             }
             int sx = screenX + display.getGridOffsetX(), sy = screenY + display.getGridOffsetY();
-            if ((sx < 0 || sx >= mapSize.gridWidth || sy < 0 || sy >= mapSize.gridHeight) || (cursor.x == sx && cursor.y == sy)) {
+            if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)) {
                 return false;
             }
             cursor = Coord.get(sx, sy);
