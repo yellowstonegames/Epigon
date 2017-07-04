@@ -208,7 +208,8 @@ public class Epigon extends Game {
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.put(Stat.SIGHT, new LiveValue(26));
+        player.stats.get(Stat.HUNGER).delta = -1;
+        player.stats.get(Stat.HUNGER).min = 0;
 
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
@@ -238,7 +239,10 @@ public class Epigon extends Game {
     }
     
     private void runTurn(){
-        
+        // Update all the stats in motion
+        player.stats.values().stream().forEach(LiveValue::tick);
+
+        updateStats();
     }
 
     private void updateStats() {
@@ -281,6 +285,7 @@ public class Epigon extends Game {
     }
 
     private void message(String text) {
+        messagePanel.erase();
         messagePanel.putString(1, 0, text, SColor.APRICOT, SColor.BLACK); // TODO - make this do the scroll things
     }
 
@@ -377,6 +382,7 @@ public class Epigon extends Game {
 
                     calcFOV(newX, newY);
                     calcDijkstra();
+                    runTurn();
                 }
             });
         }
@@ -542,23 +548,26 @@ public class Epigon extends Game {
     private final KeyHandler keys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            Direction dir = Direction.NONE;
             switch (key) {
                 case SquidInput.UP_ARROW:
                 case 'w':
-                    dir = Direction.UP;
+                    move(Direction.UP);
                     break;
                 case SquidInput.DOWN_ARROW:
                 case 's':
-                    dir = Direction.DOWN;
+                    move(Direction.DOWN);
                     break;
                 case SquidInput.LEFT_ARROW:
                 case 'a':
-                    dir = Direction.LEFT;
+                    move(Direction.LEFT);
                     break;
                 case SquidInput.RIGHT_ARROW:
                 case 'd':
-                    dir = Direction.RIGHT;
+                    move(Direction.RIGHT);
+                    break;
+                case '.':
+                    message("Waiting...");
+                    runTurn();
                     break;
                 case 'o': // Open all the doors nearby
                     message("Opening nearby doors");
@@ -610,7 +619,6 @@ public class Epigon extends Game {
                     break;
                 }
             }
-            move(dir);
         }
     };
 
