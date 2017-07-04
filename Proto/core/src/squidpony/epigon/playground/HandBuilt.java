@@ -117,7 +117,7 @@ public class HandBuilt {
         swordBlueprint = new Physical();
         swordBlueprint.name = "sword";
         swordBlueprint.color = SColor.SILVER;
-        swordBlueprint.symbol = '|';
+        swordBlueprint.symbol = '(';
 
         RecipeBlueprint swordRecipeBlueprint = new RecipeBlueprint();
         swordRecipeBlueprint.requiredConsumed.put(basePhysical, 1);

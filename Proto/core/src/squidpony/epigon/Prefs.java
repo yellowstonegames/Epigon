@@ -8,8 +8,8 @@ import java.util.prefs.Preferences;
 public class Prefs {
 
     static private Preferences prefs;
-    static private int screenWidth = Epigon.TOTAL_PIXEL_WIDTH;
-    static private int screenHeight = Epigon.TOTAL_PIXEL_HEIGHT;
+    static private int screenWidth = Epigon.totalPixelWidth();
+    static private int screenHeight = Epigon.totalPixelHeight();
     static private String title = "Epigon - The Expected Beginning";
     static private boolean debug = true;
 
