@@ -246,7 +246,7 @@ public class Epigon extends Game {
     }
 
     private void updateStats() {
-        Color background = colorCenter.dimmer(SColor.MIDNIGHT_BLUE);
+        Color background = colorCenter.dimmer(SColor.DEEP_PURPLE);
         for (int x = 0; x < infoSize.gridWidth; x++) {
             for (int y = 0; y < infoSize.gridHeight; y++) {
                 infoSLayers.put(x, y, ' ', SColor.TRANSPARENT, background);
@@ -279,14 +279,14 @@ public class Epigon extends Game {
             double actual = player.stats.get(stats[s]).actual;
             double base = player.stats.get(stats[s]).base;
             String num = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
-            Color color = colorCenter.lerp(SColor.CRIMSON, SColor.BRIGHT_GREEN, actual / base);
-            infoSLayers.putString(widestStatSize + 2, s + 1, num, color, background);
+            Color color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, actual / base);
+            infoSLayers.putString(widestStatSize + 2, s + 1, num, color);
         }
     }
 
     private void message(String text) {
         messageSLayers.erase();
-        messageSLayers.putString(1, 0, text, SColor.APRICOT, SColor.BLACK); // TODO - make this do the scroll things
+        messageSLayers.putString(1, 0, text, SColor.APRICOT); // TODO - make this do the scroll things
     }
 
     private void calcFOV(int checkX, int checkY) {
