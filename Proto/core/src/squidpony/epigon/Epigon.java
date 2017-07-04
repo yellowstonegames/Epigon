@@ -19,6 +19,7 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -33,7 +34,6 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import squidpony.epigon.universe.LiveValue;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -51,7 +51,7 @@ public class Epigon extends Game {
         int rightW = 30;
         mapSize = new PanelSize(w, h, cellW, cellH);
         messageSize = new PanelSize(w, bottomH, cellW, cellH);
-        infoSize = new PanelSize(rightW, h, cellW, cellH);
+        infoSize = new PanelSize(rightW * 4 / 3, h * 4 / 3, cellW * 3, cellH * 3);
         contextSize = new PanelSize(rightW, bottomH, cellW, cellH);
 
         widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
@@ -85,6 +85,7 @@ public class Epigon extends Game {
     private int framesWithoutAnimation;
     private List<Coord> toCursor;
     private static final int widestStatSize;
+    TextCellFactory font;
 
     // World
     private WorldGenerator worldGenerator;
@@ -122,7 +123,7 @@ public class Epigon extends Game {
         System.out.println("Putting together display.");
         mapViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
-        infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
+        infoViewport = new StretchViewport(infoSize.pixelWidth() * 4, infoSize.pixelHeight() * 4);
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
 
         camera = mapViewport.getCamera();
@@ -132,49 +133,49 @@ public class Epigon extends Game {
         messageStage = new Stage(messageViewport, batch);
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
-
+        font = DefaultResources.getStretchableLeanFont();
         // Set up the text display portions
         messageSLayers = new SquidLayers(
             messageSize.gridWidth,
             messageSize.gridHeight,
             messageSize.cellWidth,
             messageSize.cellHeight,
-            DefaultResources.getStretchableLeanFont());
+            font);
 
         infoSLayers = new SquidLayers(
             infoSize.gridWidth,
             infoSize.gridHeight,
             infoSize.cellWidth,
             infoSize.cellHeight,
-            DefaultResources.getStretchableLeanFont());
+            font.copy().setSmoothingMultiplier(0.35f));
 
         contextSLayers = new SquidLayers(
             contextSize.gridWidth,
             contextSize.gridHeight,
             contextSize.cellWidth,
             contextSize.cellHeight,
-            DefaultResources.getStretchableLeanFont());
+            font);
 
         mapSLayers = new SquidLayers(
             mapSize.gridWidth,
             mapSize.gridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            DefaultResources.getStretchableLeanFont(),
+            font,
             colorCenter,
             colorCenter,
             new char[map.width][map.height]);
 
-        mapSLayers.setTextSize(mapSize.cellWidth, mapSize.cellHeight); // weirdly, this seems to help with flicker
-
+        mapSLayers.setTextSize(mapSize.cellWidth + 1, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         mapSLayers.setAnimationDuration(0.13f);
 
         messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
-        infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        infoSLayers.setBounds(0, 0, infoSize.pixelWidth() / 4, infoSize.pixelHeight() / 4);
         mapSLayers.setPosition(0, 0);
         mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
-        infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
+        infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth() / 4, infoSize.pixelHeight() / 4);
 
         cursor = Coord.get(-1, -1);
 
@@ -457,22 +458,27 @@ public class Epigon extends Game {
             input.next();
         }
         // the order here matters. We apply multiple viewports at different times to clip different areas.
-        messageViewport.apply(false);
-        messageStage.act();
-        messageStage.draw();
-        batch.begin();
-        batch.end();
-
         infoViewport.apply(false);
         infoStage.act();
-        infoStage.draw();
         batch.begin();
-        batch.end();
+        batch.setProjectionMatrix(infoStage.getCamera().combined);
+        //batch.setColor(SColor.PEACH_YELLOW);
+        //batch.draw(font.getSolid(), 0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        infoStage.getRoot().draw(batch, 1f);
+
+        messageViewport.apply(false);
+        messageStage.act();
+        batch.setProjectionMatrix(messageViewport.getCamera().combined);
+        //batch.setColor(SColor.INDIGO_DYE);
+        //batch.draw(font.getSolid(), 0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        messageStage.getRoot().draw(batch, 1f);
 
         contextViewport.apply(false);
         contextStage.act();
-        contextStage.draw();
-        batch.begin();
+        batch.setProjectionMatrix(contextStage.getCamera().combined);
+        //batch.setColor(SColor.PEACH_YELLOW);
+        //batch.draw(font.getSolid(), 0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
+        contextStage.getRoot().draw(batch, 1f);
         batch.end();
 
         //here we apply the other viewport, which clips a different area while leaving the message area intact.
@@ -490,13 +496,13 @@ public class Epigon extends Game {
         //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
 
         // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
-        float currentZoomX = (float) width / (mapSize.gridWidth + infoSize.gridWidth);
+        float currentZoomX = (float) width / (mapSize.gridWidth + infoSize.gridWidth * 0.75f);
         // total new screen height in pixels divided by total number of rows on the screen
         float currentZoomY = (float) height / (mapSize.gridHeight + messageSize.gridHeight);
 
         // message box should be given updated bounds since I don't think it will do this automatically
         messageSLayers.setBounds(0, 0, currentZoomX * messageSize.gridWidth, currentZoomY * messageSize.gridHeight);
-        infoSLayers.setBounds(0, 0, currentZoomX * infoSize.gridWidth, currentZoomY * infoSize.gridHeight);
+        infoSLayers.setBounds(0, 0, currentZoomX * infoSize.gridWidth * 0.75f, currentZoomY * infoSize.gridHeight * 0.75f);
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.gridWidth, currentZoomY * contextSize.gridHeight);
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
@@ -507,16 +513,20 @@ public class Epigon extends Game {
         //printText.bmpFont.getData().lineHeight /= currentZoomY;
         //printText.bmpFont.getData().descent /= currentZoomY;
         infoViewport.update(width, height, false);
-        infoViewport.setScreenBounds((int) messageSLayers.getWidth(), (int) messageSLayers.getHeight(), (int) infoSLayers.getWidth(), (int) infoSLayers.getHeight());
+        infoViewport.setScreenBounds((int) (currentZoomX * messageSize.gridWidth), (int) (currentZoomY * messageSize.gridHeight),
+                (int) (currentZoomX * infoSize.gridWidth * 3f), (int) (currentZoomY * infoSize.gridHeight * 3f));
 
         messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0, (int) messageSLayers.getWidth(), (int) messageSLayers.getHeight());
+        messageViewport.setScreenBounds(0, 0,
+                (int) (currentZoomX * messageSize.gridWidth), (int) (currentZoomY * messageSize.gridHeight));
 
         contextViewport.update(width, height, false);
-        contextViewport.setScreenBounds((int) messageSLayers.getWidth(), 0, (int) contextSLayers.getWidth(), (int) contextSLayers.getHeight());
+        contextViewport.setScreenBounds((int) (currentZoomX * messageSize.gridWidth), 0,
+                (int) (currentZoomX * contextSize.gridWidth), (int) (currentZoomY * contextSize.gridHeight));
 
         mapViewport.update(width, height, false);
-        mapViewport.setScreenBounds(0, (int) messageSLayers.getHeight(), width - (int) infoSLayers.getWidth(), height - (int) messageSLayers.getHeight());
+        mapViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.gridHeight),
+                width - (int) (currentZoomX * contextSize.gridWidth), height - (int) (currentZoomY * contextSize.gridHeight));
     }
 
     @Override
@@ -538,7 +548,7 @@ public class Epigon extends Game {
     }
 
     public static int totalPixelWidth() {
-        return mapSize.pixelWidth() + infoSize.pixelWidth();
+        return mapSize.pixelWidth() + infoSize.pixelWidth() / 4;
     }
 
     public static int totalPixelHeight() {
