@@ -149,10 +149,10 @@ public class Epigon extends Game {
         infoPanel = new LinesPanel<>(new GDXMarkup(), printText, 29);
         infoPanel.clearingColor = null;
         display = new SquidLayers(
-            mapSize.gridWidth,
-            mapSize.gridHeight,
-            mapSize.cellWidth,
-            mapSize.cellHeight,
+            mapViewportSize.gridWidth,
+            mapViewportSize.gridHeight,
+            mapViewportSize.cellWidth,
+            mapViewportSize.cellHeight,
             DefaultResources.getStretchableSlabFont(),
             colorCenter,
             colorCenter,
