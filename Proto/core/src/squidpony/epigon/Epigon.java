@@ -245,7 +245,6 @@ public class Epigon extends Game {
     private void runTurn(){
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
-
         updateStats();
     }
 
@@ -321,12 +320,15 @@ public class Epigon extends Game {
     }
 
     private void message(String text) {
-        messageSLayers.erase();
-        messageSLayers.putString(1, 0, text, SColor.APRICOT); // TODO - make this do the scroll things
+        clearAndBorder(messageSLayers, SColor.APRICOT, bgColor);
+        messageSLayers.putString(1, 1, text, SColor.APRICOT); // TODO - make this do the scroll things
     }
-    
+
     private void context(String[] text) {
-        
+        clearContents(contextSLayers, SColor.LIGHT_KHAKI);
+        for (int i = 0; i < text.length && i < contextSLayers.getGridHeight() - 2; i++) {
+            contextSLayers.putString(1, i + 1, text[i].substring(0, Integer.min(text[i].length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
+        }
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -713,9 +715,9 @@ public class Epigon extends Game {
                     if (!tile.contents.isEmpty()) {
                         tileDescription = tile.contents.stream()
                             .map(p -> p.name)
-                            .collect(Collectors.joining(", ", tileDescription + ", ", ""));
+                            .collect(Collectors.joining("\n", tileDescription + "\n", ""));
                     }
-                    message(tileDescription);
+                    context(tileDescription.split("\n"));
                     break;
             }
 
