@@ -70,6 +70,8 @@ public class Epigon extends Game {
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
 
+    public static final char[] eighthBlocks = new char[]{' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'};
+
     // Audio
     private SoundManager sound;
 
@@ -211,6 +213,7 @@ public class Epigon extends Game {
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.HUNGER).delta = -1;
         player.stats.get(Stat.HUNGER).min = 0;
+        player.stats.get(Stat.CONVICTION).actual = player.stats.get(Stat.CONVICTION).base * 1.7;
 
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
@@ -236,7 +239,7 @@ public class Epigon extends Game {
         message("Use ? for help, or q to quit.");
         message("Use mouse, numpad, or arrow keys to move.");
 
-        contextSLayers.putString(5, 3, "CONTEXT", SColor.KIMONO_STORAGE, SColor.LIGHT_LIME);
+        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
     }
     
     private void runTurn(){
@@ -246,48 +249,84 @@ public class Epigon extends Game {
         updateStats();
     }
 
-    private void updateStats() {
-        Color background = colorCenter.dimmer(SColor.DEEP_PURPLE);
-        for (int x = 0; x < infoSize.gridWidth; x++) {
-            for (int y = 0; y < infoSize.gridHeight; y++) {
-                infoSLayers.put(x, y, ' ', SColor.TRANSPARENT, background);
+    private void clearContents(SquidLayers layers, Color background) {
+        int w = layers.getGridWidth();
+        int h = layers.getGridHeight();
+        for (int x = 1; x < w - 1; x++) {
+            for (int y = 1; y < h - 1; y++) {
+                layers.put(x, y, ' ', SColor.TRANSPARENT, background);
             }
         }
-        for (int x = 0; x < infoSize.gridWidth; x++) {
-            infoSLayers.put(x, 0, '-');
-            infoSLayers.put(x, infoSize.gridHeight - 1, '-');
+    }
+
+    private void clearAndBorder(SquidLayers layers, Color borderColor, Color background) {
+        clearContents(layers, background);
+
+        int w = layers.getGridWidth();
+        int h = layers.getGridHeight();
+
+        for (int x = 0; x < w; x++) {
+            layers.put(x, 0, '-', borderColor, background);
+            layers.put(x, h - 1, '-', borderColor, background);
         }
-        for (int y = 0; y < infoSize.gridHeight; y++) {
-            infoSLayers.put(0, y, '|');
-            infoSLayers.put(infoSize.gridWidth - 1, y, '|');
+        for (int y = 0; y < h; y++) {
+            layers.put(0, y, '|', borderColor, background);
+            layers.put(w - 1, y, '|', borderColor, background);
         }
-        infoSLayers.put(0, 0, '/');
-        infoSLayers.put(infoSize.gridWidth - 1, 0, '\\');
-        infoSLayers.put(0, infoSize.gridHeight - 1, '\\');
-        infoSLayers.put(infoSize.gridWidth - 1, infoSize.gridHeight - 1, '/');
+        layers.put(0, 0, '/', borderColor, background);
+        layers.put(w - 1, 0, '\\', borderColor, background);
+        layers.put(0, h - 1, '\\', borderColor, background);
+        layers.put(w - 1, h - 1, '/', borderColor, background);
+    }
+
+    private void updateStats() {
+        Color background = colorCenter.dimmer(SColor.DEEP_PURPLE);
+        clearAndBorder(infoSLayers, SColor.THOUSAND_HERB, background);
 
         Stat[] stats = Stat.values();
-        int decimals = player.stats.values().stream()
+        int biggest = player.stats.values().stream()
             .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
             .max()
             .getAsInt();
-        decimals = Integer.toString(decimals).length();
-        String format = "%0" + decimals + "d / %0" + decimals + "d";
+        int biggestLength = Integer.toString(biggest).length();
+        String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
 
         for (int s = 0; s < stats.length; s++) {
             infoSLayers.putString(1, s + 1, stats[s].toString());
 
             double actual = player.stats.get(stats[s]).actual;
             double base = player.stats.get(stats[s]).base;
-            String num = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
-            Color color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, actual / base);
-            infoSLayers.putString(widestStatSize + 2, s + 1, num, color);
+            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
+            double filling = actual / base;
+            Color color;
+            if (filling <= 1) {
+                color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
+            } else {
+                color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
+            }
+            infoSLayers.putString(widestStatSize + 2, s + 1, numberText, color);
+
+            int blockValue = infoSLayers.getGridWidth() - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
+            filling = actual / biggest;
+            int fullBlocks = (int) (filling * blockValue);
+            double remainder = (filling * blockValue) % 1;
+            remainder *= 7;
+            String blockText = "";
+            for (int i = 0; i < fullBlocks; i++) {
+                blockText += eighthBlocks[7];
+            }
+            blockText += eighthBlocks[(int) Math.ceil(remainder)];
+            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + 1, blockText, color);
         }
     }
 
     private void message(String text) {
         messageSLayers.erase();
         messageSLayers.putString(1, 0, text, SColor.APRICOT); // TODO - make this do the scroll things
+    }
+    
+    private void context(String[] text) {
+        
     }
 
     private void calcFOV(int checkX, int checkY) {
