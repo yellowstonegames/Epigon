@@ -63,7 +63,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
 
-    public static final long seed = 0xBEEFD00DFADEAFADL;
+    public static final long seed = 0xBEEFD00DFADEFA1L;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
     public static final LightRNG lightRNG = new LightRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(lightRNG);
@@ -171,7 +171,7 @@ public class Epigon extends Game {
         mapSLayers.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
         infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        mapSLayers.setAnimationDuration(0.13f);
+        mapSLayers.setAnimationDuration(0.165f);
 
         messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth() / 4, infoSize.pixelHeight() / 4);
@@ -391,11 +391,11 @@ public class Epigon extends Game {
             double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
             double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
             float cameraDeltaX = 0;
-            if (midX <= map.width - checkWidth && midX >= checkWidth) {
+            if (midX <= map.width - checkWidth && midX >= checkWidth - 0.5f) { // not sure why the lower bound is offset...
                 cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
             }
             float cameraDeltaY = 0;
-            if (midY <= map.height - checkHeight && midY >= checkHeight) {
+            if (midY <= map.height - checkHeight && midY >= checkHeight - 0.5f) { // but it causes the camera to jerk without "- 0.5f"
                 cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
             }
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
@@ -531,6 +531,8 @@ public class Epigon extends Game {
         mapStage.act();
         mapStage.draw();
         batch.begin();
+        batch.setProjectionMatrix(mapStage.getCamera().combined);
+        mapStage.getRoot().draw(batch, 1f);
         mapSLayers.drawActor(batch, 1.0f, playerEntity);
         batch.end();
     }
