@@ -168,7 +168,7 @@ public class Epigon extends Game {
             colorCenter,
             new char[map.width][map.height]);
 
-        mapSLayers.setTextSize(mapSize.cellWidth + 1, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        mapSLayers.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
         infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         mapSLayers.setAnimationDuration(0.13f);
@@ -264,19 +264,25 @@ public class Epigon extends Game {
 
         int w = layers.getGridWidth();
         int h = layers.getGridHeight();
-
+        // all box drawing chars we know we can use:
+        // ┼├┤┴┬┌┐└┘│─
+        // ┌───┐
+        // │┌┐ │
+        // ├┴┼┬┤
+        // │ └┘│
+        // └───┘
         for (int x = 0; x < w; x++) {
-            layers.put(x, 0, '-', borderColor, background);
-            layers.put(x, h - 1, '-', borderColor, background);
+            layers.put(x, 0, '─', borderColor, background);
+            layers.put(x, h - 1, '─', borderColor, background);
         }
         for (int y = 0; y < h; y++) {
-            layers.put(0, y, '|', borderColor, background);
-            layers.put(w - 1, y, '|', borderColor, background);
+            layers.put(0, y, '│', borderColor, background);
+            layers.put(w - 1, y, '│', borderColor, background);
         }
-        layers.put(0, 0, '/', borderColor, background);
-        layers.put(w - 1, 0, '\\', borderColor, background);
-        layers.put(0, h - 1, '\\', borderColor, background);
-        layers.put(w - 1, h - 1, '/', borderColor, background);
+        layers.put(0, 0, '┌', borderColor, background);
+        layers.put(w - 1, 0, '┐', borderColor, background);
+        layers.put(0, h - 1, '└', borderColor, background);
+        layers.put(w - 1, h - 1, '┘', borderColor, background);
     }
 
     private void updateStats() {
