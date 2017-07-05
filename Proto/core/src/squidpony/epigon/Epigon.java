@@ -41,27 +41,13 @@ import java.util.stream.Collectors;
  */
 public class Epigon extends Game {
 
-    // Set up sizing all in one place
-    static{
-        int w = 70;
-        int h = 31;
-        int cellW = 12;
-        int cellH = 24;
-        int bottomH = 6;
-        int rightW = 30;
-        mapSize = new PanelSize(w, h, cellW, cellH);
-        messageSize = new PanelSize(w, bottomH, cellW, cellH);
-        infoSize = new PanelSize(rightW * 4 / 3, h * 4 / 3, cellW * 3, cellH * 3);
-        contextSize = new PanelSize(rightW, bottomH, cellW, cellH);
-
-        widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
-    }
-
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
     public static final PanelSize mapSize;
     public static final PanelSize messageSize;
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
+    public static final Coord contextLeft;
+    public static final Coord contextRight;
 
     public static final long seed = 0xBEEFD00DFADEAFADL;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
@@ -82,7 +68,8 @@ public class Epigon extends Game {
     private SquidLayers infoSLayers;
     private SquidLayers contextSLayers;
     private SquidLayers messageSLayers;
-    private SquidInput input;
+    private SquidInput mapInput;
+    private SquidInput contextInput;
     private Color bgColor;
     private int framesWithoutAnimation;
     private List<Coord> toCursor;
@@ -107,6 +94,25 @@ public class Epigon extends Game {
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport;
     private Camera camera;
     private AnimatedEntity playerEntity;
+
+    // Set up sizing all in one place
+    static {
+        int w = 70;
+        int h = 31;
+        int cellW = 12;
+        int cellH = 24;
+        int bottomH = 6;
+        int rightW = 30;
+        mapSize = new PanelSize(w, h, cellW, cellH);
+        messageSize = new PanelSize(w, bottomH, cellW, cellH);
+        infoSize = new PanelSize(rightW * 4 / 3, h * 4 / 3, cellW * 3, cellH * 3);
+        contextSize = new PanelSize(rightW, bottomH, cellW, cellH);
+
+        widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
+
+        contextLeft = Coord.get(0, contextSize.gridHeight / 2);
+        contextRight = Coord.get(contextSize.gridWidth - 1, contextSize.gridHeight / 2);
+    }
 
     @Override
     public void create() {
@@ -185,8 +191,9 @@ public class Epigon extends Game {
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
 
-        input = new SquidInput(keys, mapMouse);
-        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, input));
+        mapInput = new SquidInput(keys, mapMouse);
+        contextInput = new SquidInput(keys, contextMouse);
+        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput));
 
         mapStage.addActor(mapSLayers);
         messageStage.addActor(messageSLayers);
@@ -233,13 +240,12 @@ public class Epigon extends Game {
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
-        message("Have fun!");
-        message("The fate of the worlds is in your hands...");
-        message("Bump into walls and stuff.");
-        message("Use ? for help, or q to quit.");
-        message("Use mouse, numpad, or arrow keys to move.");
-
         clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        context(new String[]{"Have fun!",
+            "The fate of the worlds is in your hands...",
+            "Bump into walls and stuff.",
+            "Use ? for help, or q to quit.",
+            "Use mouse, numpad, or arrow keys to move."});
     }
     
     private void runTurn(){
@@ -329,6 +335,8 @@ public class Epigon extends Game {
         for (int i = 0; i < text.length && i < contextSLayers.getGridHeight() - 2; i++) {
             contextSLayers.putString(1, i + 1, text[i].substring(0, Integer.min(text[i].length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
         }
+        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -495,9 +503,12 @@ public class Epigon extends Game {
                     move(Direction.toGoTo(player.location, m));
                 }
             }
-        } else if (input.hasNext()) {// if we are waiting for the player's input and get input, process it.
-            input.next();
+        } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
+            mapInput.next();
+        } else if (contextInput.hasNext()) {
+            contextInput.next();
         }
+
         // the order here matters. We apply multiple viewports at different times to clip different areas.
         infoViewport.apply(false);
         infoStage.act();
@@ -547,7 +558,7 @@ public class Epigon extends Game {
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.gridWidth, currentZoomY * contextSize.gridHeight);
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
-        input.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
+        mapInput.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
 
         //currentZoomX = CELL_WIDTH / currentZoomX;
         //currentZoomY = CELL_HEIGHT / currentZoomY;
@@ -759,6 +770,38 @@ public class Epigon extends Game {
                 toCursor = toCursor.subList(1, toCursor.size());
             }
 
+            return false;
+        }
+    });
+
+    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, 0, 0, new InputAdapter() {
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            int sx = screenX + contextSLayers.getGridOffsetX(), sy = screenY + contextSLayers.getGridOffsetY();
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    if (sx == contextLeft.x && sy == contextLeft.y){
+                        context(new String[]{"Moving one panel left..."});
+                    } else if (sx == contextRight.x && sy == contextRight.y){
+                        context(new String[]{"Moving one panel right..."});
+                    }
+                    break;
+                case Input.Buttons.RIGHT:
+                    return false;
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            return mouseMoved(screenX, screenY);
+        }
+
+        // causes the path to the mouse position to become highlighted (toCursor contains a list of points that
+        // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
+        @Override
+        public boolean mouseMoved(int screenX, int screenY) {
             return false;
         }
     });
