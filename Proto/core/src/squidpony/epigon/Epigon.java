@@ -49,7 +49,7 @@ public class Epigon extends Game {
     public static final Coord contextLeft;
     public static final Coord contextRight;
 
-    public static final long seed = 0xBEEFD00DFADEAFADL;
+    public static final long seed = 0xBEEFD00DFADEFA1L;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
     public static final LightRNG lightRNG = new LightRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(lightRNG);
@@ -174,10 +174,10 @@ public class Epigon extends Game {
             colorCenter,
             new char[map.width][map.height]);
 
-        mapSLayers.setTextSize(mapSize.cellWidth + 1, mapSize.cellHeight + 2); // weirdly, this seems to help with flicker
+        mapSLayers.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
         infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        mapSLayers.setAnimationDuration(0.13f);
+        mapSLayers.setAnimationDuration(0.165f);
 
         messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth() / 4, infoSize.pixelHeight() / 4);
@@ -192,7 +192,7 @@ public class Epigon extends Game {
         awaitedMoves = new ArrayList<>(100);
 
         mapInput = new SquidInput(keys, mapMouse);
-        contextInput = new SquidInput(keys, contextMouse);
+        contextInput = new SquidInput(contextMouse);
         Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput));
 
         mapStage.addActor(mapSLayers);
@@ -269,19 +269,25 @@ public class Epigon extends Game {
 
         int w = layers.getGridWidth();
         int h = layers.getGridHeight();
-
+        // all box drawing chars we know we can use:
+        // ┼├┤┴┬┌┐└┘│─
+        // ┌───┐
+        // │┌┐ │
+        // ├┴┼┬┤
+        // │ └┘│
+        // └───┘
         for (int x = 0; x < w; x++) {
-            layers.put(x, 0, '-', borderColor, background);
-            layers.put(x, h - 1, '-', borderColor, background);
+            layers.put(x, 0, '─', borderColor, background);
+            layers.put(x, h - 1, '─', borderColor, background);
         }
         for (int y = 0; y < h; y++) {
-            layers.put(0, y, '|', borderColor, background);
-            layers.put(w - 1, y, '|', borderColor, background);
+            layers.put(0, y, '│', borderColor, background);
+            layers.put(w - 1, y, '│', borderColor, background);
         }
-        layers.put(0, 0, '/', borderColor, background);
-        layers.put(w - 1, 0, '\\', borderColor, background);
-        layers.put(0, h - 1, '\\', borderColor, background);
-        layers.put(w - 1, h - 1, '/', borderColor, background);
+        layers.put(0, 0, '┌', borderColor, background);
+        layers.put(w - 1, 0, '┐', borderColor, background);
+        layers.put(0, h - 1, '└', borderColor, background);
+        layers.put(w - 1, h - 1, '┘', borderColor, background);
     }
 
     private void updateStats() {
@@ -395,11 +401,11 @@ public class Epigon extends Game {
             double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
             double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
             float cameraDeltaX = 0;
-            if (midX <= map.width - checkWidth && midX >= checkWidth) {
+            if (midX <= map.width - checkWidth && midX >= checkWidth - 0.5f) { // not sure why the lower bound is offset...
                 cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
             }
             float cameraDeltaY = 0;
-            if (midY <= map.height - checkHeight && midY >= checkHeight) {
+            if (midY <= map.height - checkHeight && midY >= checkHeight - 0.5f) { // but it causes the camera to jerk without "- 0.5f"
                 cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
             }
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
@@ -538,6 +544,8 @@ public class Epigon extends Game {
         mapStage.act();
         mapStage.draw();
         batch.begin();
+        batch.setProjectionMatrix(mapStage.getCamera().combined);
+        mapStage.getRoot().draw(batch, 1f);
         mapSLayers.drawActor(batch, 1.0f, playerEntity);
         batch.end();
     }
@@ -559,6 +567,7 @@ public class Epigon extends Game {
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         mapInput.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
+        contextInput.getMouse().reinitialize(currentZoomX, currentZoomY, contextSize.gridWidth, contextSize.gridHeight, 0, 0);
 
         //currentZoomX = CELL_WIDTH / currentZoomX;
         //currentZoomY = CELL_HEIGHT / currentZoomY;
@@ -689,6 +698,10 @@ public class Epigon extends Game {
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            message("" + screenX + ", " + screenY);
+            if (screenX >= mapSize.gridWidth || screenY >= mapSize.gridHeight){ // Only process if it's in the map view area
+                return false;
+            }
             int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
             switch (button) {
                 case Input.Buttons.LEFT:
@@ -784,8 +797,10 @@ public class Epigon extends Game {
                         context(new String[]{"Moving one panel left..."});
                     } else if (sx == contextRight.x && sy == contextRight.y){
                         context(new String[]{"Moving one panel right..."});
+                    } else {
+                        context(new String[]{"Hit " + sx + ", " + sy});
                     }
-                    break;
+                    return true;
                 case Input.Buttons.RIGHT:
                     return false;
             }
