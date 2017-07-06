@@ -110,8 +110,8 @@ public class Epigon extends Game {
 
         widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
-        contextLeft = Coord.get(0, contextSize.gridHeight / 2);
-        contextRight = Coord.get(contextSize.gridWidth - 1, contextSize.gridHeight / 2);
+        contextLeft = Coord.get(1, 0);
+        contextRight = Coord.get(contextSize.gridWidth - 2, 0);
     }
 
     @Override
@@ -240,7 +240,8 @@ public class Epigon extends Game {
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
-        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+//        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
         contextTileContents(new String[]{"Have fun!",
             "The fate of the worlds is in your hands...",
             "Bump into walls and stuff.",
@@ -372,49 +373,53 @@ public class Epigon extends Game {
 
     private void contextStatDetails(Stat stat, LiveValue lv) {
         contextMode = ContextMode.STAT_DETAILS;
-        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+//        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
         int x = contextSLayers.getGridWidth() / 2 - "Stat Details".length() / 2;
         contextSLayers.putString(x, 0, "Stat Details", SColor.KIMONO_STORAGE);
         contextSLayers.putString(1, 1, stat.toString() + " (" + stat.nick() + ")", SColor.KIMONO_STORAGE);
         contextSLayers.putString(1, 2, "Base:  " + lv.base, SColor.KIMONO_STORAGE);
-        contextSLayers.putString(1, 3, "Delta: " + lv.delta, SColor.KIMONO_STORAGE);
-        contextSLayers.putString(1, 4, "Max:   " +lv.max, SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 3, "Max:   " + lv.max, SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 4, "Delta: " + lv.delta, SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '◀', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '▶', SColor.KIMONO_STORAGE);
     }
 
     private void contextMiniMap() {
         contextMode = ContextMode.MINI_MAP;
-        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+//        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
         int x = contextSLayers.getGridWidth() / 2 - "Map".length() / 2;
         contextSLayers.putString(x, 0, "Map", SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '◀', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '▶', SColor.KIMONO_STORAGE);
     }
 
     private void contextInventory() {
         contextMode = ContextMode.INVENTORY;
-        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+//        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
         int x = contextSLayers.getGridWidth() / 2 - "Inventory".length() / 2;
         contextSLayers.putString(x, 0, "Inventory", SColor.KIMONO_STORAGE);
         for (int i = 0; i < player.inventory.size() && i < contextSLayers.getGridHeight() - 2; i++) {
             String text = player.inventory.get(i).name;
             contextSLayers.putString(1, i + 1, text.substring(0, Integer.min(text.length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
         }
-        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '◀', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '▶', SColor.KIMONO_STORAGE);
     }
 
     private void contextTileContents(String[] text) {
         contextMode = ContextMode.TILE_CONTENTS;
-        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+//        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
         int x = contextSLayers.getGridWidth() / 2 - "Tile Contents".length() / 2;
         contextSLayers.putString(x, 0, "Tile Contents", SColor.KIMONO_STORAGE);
         for (int i = 0; i < text.length && i < contextSLayers.getGridHeight() - 2; i++) {
             contextSLayers.putString(1, i + 1, text[i].substring(0, Integer.min(text[i].length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
         }
-        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
-        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '◀', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '▶', SColor.KIMONO_STORAGE);
     }
 
     private void calcFOV(int checkX, int checkY) {
