@@ -787,7 +787,7 @@ public class Epigon extends Game {
         }
     });
 
-    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, 0, 0, new InputAdapter() {
+    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, mapSize.gridWidth, infoSize.gridHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             int sx = screenX + contextSLayers.getGridOffsetX(), sy = screenY + contextSLayers.getGridOffsetY();
