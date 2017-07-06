@@ -567,7 +567,8 @@ public class Epigon extends Game {
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         mapInput.getMouse().reinitialize(currentZoomX, currentZoomY, mapSize.gridWidth, mapSize.gridHeight, 0, 0);
-        contextInput.getMouse().reinitialize(currentZoomX, currentZoomY, contextSize.gridWidth, contextSize.gridHeight, 0, 0);
+        contextInput.getMouse().reinitialize(currentZoomX, currentZoomY, contextSize.gridWidth, contextSize.gridHeight,
+                -mapSize.pixelWidth(), -mapSize.pixelHeight());
 
         //currentZoomX = CELL_WIDTH / currentZoomX;
         //currentZoomY = CELL_HEIGHT / currentZoomY;
@@ -787,18 +788,18 @@ public class Epigon extends Game {
         }
     });
 
-    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, mapSize.gridWidth, infoSize.gridHeight, new InputAdapter() {
+    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
+            mapSize.gridWidth * mapSize.cellWidth, mapSize.gridHeight * mapSize.cellHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            int sx = screenX + contextSLayers.getGridOffsetX(), sy = screenY + contextSLayers.getGridOffsetY();
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (sx == contextLeft.x && sy == contextLeft.y){
+                    if (screenX == contextLeft.x && screenY == contextLeft.y){
                         context(new String[]{"Moving one panel left..."});
-                    } else if (sx == contextRight.x && sy == contextRight.y){
+                    } else if (screenX == contextRight.x && screenY == contextRight.y){
                         context(new String[]{"Moving one panel right..."});
                     } else {
-                        context(new String[]{"Hit " + sx + ", " + sy});
+                        context(new String[]{"Hit " + screenX + ", " + screenY});
                     }
                     return true;
                 case Input.Buttons.RIGHT:
