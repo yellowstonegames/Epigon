@@ -241,7 +241,7 @@ public class Epigon extends Game {
         calcDijkstra();
 
         clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
-        context(new String[]{"Have fun!",
+        contextTileContents(new String[]{"Have fun!",
             "The fate of the worlds is in your hands...",
             "Bump into walls and stuff.",
             "Use ? for help, or q to quit.",
@@ -336,8 +336,80 @@ public class Epigon extends Game {
         messageSLayers.putString(1, 1, text, SColor.APRICOT); // TODO - make this do the scroll things
     }
 
-    private void context(String[] text) {
-        clearContents(contextSLayers, SColor.LIGHT_KHAKI);
+    // TODO - pull this into a container class to manager the relevant info and layout
+    private enum ContextMode {
+        TILE_CONTENTS, INVENTORY, STAT_DETAILS, MINI_MAP;
+        
+        public ContextMode next(){
+            switch(this){
+                case TILE_CONTENTS:
+                    return INVENTORY;
+                case INVENTORY:
+                    return STAT_DETAILS;
+                case STAT_DETAILS:
+                    return MINI_MAP;
+                case MINI_MAP:
+                    return TILE_CONTENTS;
+            }
+            return INVENTORY;
+        }
+        
+        public ContextMode previous(){
+            switch(this){
+                case TILE_CONTENTS:
+                    return MINI_MAP;
+                case INVENTORY:
+                    return TILE_CONTENTS;
+                case STAT_DETAILS:
+                    return INVENTORY;
+                case MINI_MAP:
+                    return STAT_DETAILS;
+            }
+            return INVENTORY;
+        }
+    }
+    private ContextMode contextMode = ContextMode.TILE_CONTENTS;
+
+    private void contextStatDetails(Stat stat, LiveValue lv) {
+        contextMode = ContextMode.STAT_DETAILS;
+        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        int x = contextSLayers.getGridWidth() / 2 - "Stat Details".length() / 2;
+        contextSLayers.putString(x, 0, "Stat Details", SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 1, stat.toString() + " (" + stat.nick() + ")", SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 2, "Base:  " + lv.base, SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 3, "Delta: " + lv.delta, SColor.KIMONO_STORAGE);
+        contextSLayers.putString(1, 4, "Max:   " +lv.max, SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+    }
+
+    private void contextMiniMap() {
+        contextMode = ContextMode.MINI_MAP;
+        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        int x = contextSLayers.getGridWidth() / 2 - "Map".length() / 2;
+        contextSLayers.putString(x, 0, "Map", SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+    }
+
+    private void contextInventory() {
+        contextMode = ContextMode.INVENTORY;
+        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        int x = contextSLayers.getGridWidth() / 2 - "Inventory".length() / 2;
+        contextSLayers.putString(x, 0, "Inventory", SColor.KIMONO_STORAGE);
+        for (int i = 0; i < player.inventory.size() && i < contextSLayers.getGridHeight() - 2; i++) {
+            String text = player.inventory.get(i).name;
+            contextSLayers.putString(1, i + 1, text.substring(0, Integer.min(text.length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
+        }
+        contextSLayers.put(contextLeft.x, contextLeft.y, '<', SColor.KIMONO_STORAGE);
+        contextSLayers.put(contextRight.x, contextRight.y, '>', SColor.KIMONO_STORAGE);
+    }
+
+    private void contextTileContents(String[] text) {
+        contextMode = ContextMode.TILE_CONTENTS;
+        clearAndBorder(contextSLayers, SColor.KIMONO_STORAGE, SColor.LIGHT_KHAKI);
+        int x = contextSLayers.getGridWidth() / 2 - "Tile Contents".length() / 2;
+        contextSLayers.putString(x, 0, "Tile Contents", SColor.KIMONO_STORAGE);
         for (int i = 0; i < text.length && i < contextSLayers.getGridHeight() - 2; i++) {
             contextSLayers.putString(1, i + 1, text[i].substring(0, Integer.min(text[i].length(), contextSLayers.getGridWidth() - 2)), SColor.KIMONO_STORAGE);
         }
@@ -742,7 +814,7 @@ public class Epigon extends Game {
                             .map(p -> p.name)
                             .collect(Collectors.joining("\n", tileDescription + "\n", ""));
                     }
-                    context(tileDescription.split("\n"));
+                    contextTileContents(tileDescription.split("\n"));
                     break;
             }
 
@@ -794,12 +866,25 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             switch (button) {
                 case Input.Buttons.LEFT:
+                    ContextMode nextMode = contextMode;
                     if (screenX == contextLeft.x && screenY == contextLeft.y){
-                        context(new String[]{"Moving one panel left..."});
+                        nextMode = nextMode.next();
                     } else if (screenX == contextRight.x && screenY == contextRight.y){
-                        context(new String[]{"Moving one panel right..."});
-                    } else {
-                        context(new String[]{"Hit " + screenX + ", " + screenY});
+                        nextMode = nextMode.previous();
+                    }
+                    switch (nextMode){
+                        case TILE_CONTENTS:
+                        contextTileContents(new String[]{"Right click tile", "to get contents"});
+                            return true;
+                        case INVENTORY:
+                            contextInventory();
+                            return true;
+                        case MINI_MAP:
+                            contextMiniMap();
+                            return true;
+                        case STAT_DETAILS:
+                            contextStatDetails(Stat.LIFE_FORCE, player.stats.get(Stat.LIFE_FORCE));
+                            return true;
                     }
                     return true;
                 case Input.Buttons.RIGHT:
