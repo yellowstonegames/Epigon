@@ -130,6 +130,7 @@ public class Physical extends EpiData {
 
     public Physical() {
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
+        stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
     }
 
     public boolean countsAs(Physical blueprint) {

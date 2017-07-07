@@ -50,6 +50,7 @@ public enum Stat {
     HEARING("HE", "Controls how far auditory awareness extends."),
 
     // Utility (Both animate and inanimate objects have these)
+    MOBILITY("MO", "How far movement can take you."),
     VOLUME("VO", "Generalized accounting of approximate size. A human has a Volume of 100."),
     MASS("MA", "Approximate mass."),
     OPACITY("OP", "How much light is blocked."),
@@ -67,7 +68,9 @@ public enum Stat {
 
     public static final Stat[] senses = {SIGHT, HEARING};
 
-    public static final Stat[] utility = {VOLUME, MASS, OPACITY, STRUCTURE};
+    public static final Stat[] utility = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
+
+    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, CHARM, INTELLECT, SPIRIT, VITALITY};
 
     private final String nick;
     private final String description;
@@ -91,8 +94,8 @@ public enum Stat {
      *
      * If roll over damage cannot be rolled over, then null is returned.
      */
-    public Stat getRollover(Stat stat) {
-        switch (stat) {
+    public Stat getRollover() {
+        switch (this) {
             case LIFE_FORCE:
                 return null;//creature is dead if no life force remains
             case VITALITY:
@@ -103,6 +106,16 @@ public enum Stat {
                 return SPIRIT;
             case CHARM:
                 return VITALITY;
+            case HUNGER:
+                return VITALITY;
+            case THIRST:
+                return VITALITY;
+            case REST:
+                return INTELLECT;
+            case SLEEP:
+                return SANITY;
+            case SANITY:
+                return CHARM;
             default:
                 return null;
         }
