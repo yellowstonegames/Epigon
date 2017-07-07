@@ -255,9 +255,21 @@ public class Epigon extends Game {
     }
     
     private void runTurn(){
+
+
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
+        for (Stat s : Stat.rolloverProcessOrder){
+            double val = player.stats.get(s).actual;
+            if (val < 0){
+                player.stats.get(s).actual = 0;
+                player.stats.get(s.getRollover()).actual += val;
+            }
+        }
         updateStats();
+        if (player.stats.get(Stat.LIFE_FORCE).actual <= 0){
+            message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
+        }
     }
 
     private void clearContents(SquidLayers layers, Color background) {
@@ -299,8 +311,10 @@ public class Epigon extends Game {
     private void updateStats() {
         Color background = colorCenter.dimmer(SColor.DEEP_PURPLE);
         clearAndBorder(infoSLayers, SColor.THOUSAND_HERB, background);
-        Stat[] stats = Stat.values();
-        int biggest = player.stats.values().stream()
+        Stat[] stats = Stat.healths;
+        int offset = 1;
+        int biggest = Arrays.stream(stats)
+            .map(s -> player.stats.get(s))
             .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
             .max()
             .getAsInt();
@@ -308,7 +322,7 @@ public class Epigon extends Game {
         String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
 
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
-            infoSLayers.putString(1, s + 1, stats[s].toString());
+            infoSLayers.putString(1, s + offset, stats[s].toString());
 
             double actual = player.stats.get(stats[s]).actual;
             double base = player.stats.get(stats[s]).base;
@@ -320,7 +334,46 @@ public class Epigon extends Game {
             } else {
                 color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
             }
-            infoSLayers.putString(widestStatSize + 2, s + 1, numberText, color);
+            infoSLayers.putString(widestStatSize + 2, s + offset, numberText, color);
+
+            int blockValue = infoSLayers.getGridWidth() - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
+            filling = actual / biggest;
+            int fullBlocks = (int) (filling * blockValue);
+            double remainder = (filling * blockValue) % 1;
+            remainder *= 7;
+            String blockText = "";
+            for (int i = 0; i < fullBlocks; i++) {
+                blockText += eighthBlocks[7];
+            }
+            remainder = Math.max(remainder, 0);
+            blockText += eighthBlocks[(int) Math.ceil(remainder)];
+            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
+        }
+
+        offset += stats.length + 1;
+        stats = Stat.needs;
+        biggest = Arrays.stream(stats)
+            .map(s -> player.stats.get(s))
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
+            .max()
+            .getAsInt();
+        biggestLength = Integer.toString(biggest).length();
+        format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
+
+        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
+            infoSLayers.putString(1, s + offset, stats[s].toString());
+
+            double actual = player.stats.get(stats[s]).actual;
+            double base = player.stats.get(stats[s]).base;
+            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
+            double filling = actual / base;
+            Color color;
+            if (filling <= 1) {
+                color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
+            } else {
+                color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
+            }
+            infoSLayers.putString(widestStatSize + 2, s + offset, numberText, color);
 
             int blockValue = infoSLayers.getGridWidth() - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
             filling = actual / biggest;
@@ -332,7 +385,7 @@ public class Epigon extends Game {
                 blockText += eighthBlocks[7];
             }
             blockText += eighthBlocks[(int) Math.ceil(remainder)];
-            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + 1, blockText, color);
+            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
         }
     }
 

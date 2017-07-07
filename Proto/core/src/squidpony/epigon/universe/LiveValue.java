@@ -63,7 +63,7 @@ public class LiveValue {
 
         if (delta != 0) {
             actual += delta;
-            actual = Double.max(actual, min);
+            //actual = Double.max(actual, min); // TODO - reconcile with rollover for stat damage
             actual = Double.min(actual, max);
         }
     }
