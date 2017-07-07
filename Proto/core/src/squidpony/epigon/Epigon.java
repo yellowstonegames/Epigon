@@ -34,6 +34,7 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import squidpony.epigon.data.mixin.Creature;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -88,6 +89,7 @@ public class Epigon extends Game {
     private FOV fov = new FOV(FOV.SHADOW);
     private double[][] fovResult;
     private double[][] priorFovResult;
+    public List<Physical> creatures = new ArrayList<>();
 
     // WIP stuff, needs large sample map
     private Stage mapStage, messageStage, infoStage, contextStage;
@@ -234,6 +236,18 @@ public class Epigon extends Game {
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
+        for (Coord coord : rng.getRandomUniqueCells(0, 0, map.width, map.height, map.width * map.height / 8)){
+            //System.out.println("Testing map (" + map.width + ", " + map.height + ") found Coord: " + coord);
+            coord = Coord.get(coord.y, coord.x); // TODO - remove this once bug is fixed
+            if (map.contents[coord.x][coord.y].getLargeObject() == null){
+                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
+                mixer.applyModification(p, handBuilt.makeAlive);
+                p.location = coord;
+                map.contents[coord.x][coord.y].add(p);
+                creatures.add(p);
+            }
+        }
+
         playerEntity = mapSLayers.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
         mapSLayers.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
@@ -253,21 +267,35 @@ public class Epigon extends Game {
             "Use ? for help, or q to quit.",
             "Use mouse, numpad, or arrow keys to move."});
     }
-    
-    private void runTurn(){
 
+    private void runTurn() {
+        // TODO - track creatures as a group instead of this loop
+        for (Physical creature : creatures) {
+            Coord c = creature.location;
+            if (creature.stats.get(Stat.MOBILITY).actual > 0 && (fovResult[c.x][c.y] > 0 || remembered[c.x][c.y] != null)) {
+                List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
+                if (path != null && path.size() > 1) {
+                    Coord step = path.get(path.size() - 2);
+                    if (map.contents[step.x][step.y].getLargeObject() == null) {
+                        map.contents[c.x][c.y].remove(creature);
+                        map.contents[step.x][step.y].add(creature);
+                        creature.location = step;
+                    }
+                }
+            }
+        }
 
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
-        for (Stat s : Stat.rolloverProcessOrder){
+        for (Stat s : Stat.rolloverProcessOrder) {
             double val = player.stats.get(s).actual;
-            if (val < 0){
+            if (val < 0) {
                 player.stats.get(s).actual = 0;
                 player.stats.get(s.getRollover()).actual += val;
             }
         }
         updateStats();
-        if (player.stats.get(Stat.LIFE_FORCE).actual <= 0){
+        if (player.stats.get(Stat.LIFE_FORCE).actual <= 0) {
             message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
         }
     }

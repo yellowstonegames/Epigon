@@ -41,12 +41,15 @@ public class HandBuilt {
 
     public Modification makeWall;
 
+    public Modification makeAlive;
+
     public HandBuilt() {
         basePhysical.generic = true;
         basePhysical.unique = true;
 
         initDoors();
         initItems();
+        initAlive();
 
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
@@ -64,6 +67,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
         });
         playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
+        playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
@@ -124,5 +128,20 @@ public class HandBuilt {
         swordRecipeBlueprint.result.put(swordBlueprint, 1);
 
         swordRecipe = mixer.createRecipe(swordRecipeBlueprint);
+    }
+
+    private void initAlive(){
+        makeAlive = new Modification();
+        makeAlive.possiblePrefix = Arrays.asList(new String[]{"living", "animated"});
+        makeAlive.symbol = 's';
+        makeAlive.large = true;
+        Arrays.stream(Stat.values()).forEach(s -> {
+            LiveValueModification lvm = new LiveValueModification(rng.between(10, 20));
+            makeAlive.statChanges.put(s, lvm);
+        });
+        makeAlive.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
+        makeAlive.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
+        Creature c = new Creature();
+        makeAlive.creatureOverwrite = c;
     }
 }

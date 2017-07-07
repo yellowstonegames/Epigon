@@ -1,20 +1,21 @@
 package squidpony.epigon.mapping;
 
-import squidpony.epigon.actions.Action;
-import squidpony.epigon.actions.MovementAction;
-import squidpony.epigon.data.specific.Physical;
+import java.util.Queue;
+
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 
-import java.util.Queue;
+import squidpony.epigon.actions.Action;
+import squidpony.epigon.actions.MovementAction;
+import squidpony.epigon.data.specific.Physical;
 
 /**
  * This represents a single explorable map level.
  *
  * Each cell is considered to be 1 meter by 1 meter square.
-
- A null tile represents open space with no special properties or opacities to things passing
- through. They should not be considered a vacuum, but rather normal air.
+ *
+ * A null tile represents open space with no special properties or opacities to things passing
+ * through. They should not be considered a vacuum, but rather normal air.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -71,8 +72,7 @@ public class EpiMap {
         if (action instanceof MovementAction) {
             MovementAction move = (MovementAction) action;
             Queue<Coord> points = move.moveList;
-            return points.stream().parallel().noneMatch(p -> (
-                !inBounds(p)
+            return points.stream().parallel().noneMatch(p -> (!inBounds(p)
                 || contents[p.x][p.y].getLargeObject() != null
                 || (move.mover.creatureData != null && contents[p.x][p.y].getCreature() != null)));
         }
@@ -108,10 +108,10 @@ public class EpiMap {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
-    public double[][] opacities(){
+    public double[][] opacities() {
         double[][] resistances = new double[width][height];
-        for (int x = 0; x < width; x++){
-            for(int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 resistances[x][y] = contents[x][y].opeacity();
             }
         }

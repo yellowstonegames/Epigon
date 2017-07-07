@@ -114,7 +114,7 @@ public class Modification extends EpiData {
     public EnumMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumMap<>(Rating.class); // Only for blueprints
 
     // Creature changes
-    public Creature overwriteCreature; // Become a new creature (or become one for the first time)
+    public Creature creatureOverwrite; // Become a new creature (or become one for the first time)
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
     public OrderedMap<Skill, RatingValueModification> skillProgressionChagnes = new OrderedMap<>();
 
