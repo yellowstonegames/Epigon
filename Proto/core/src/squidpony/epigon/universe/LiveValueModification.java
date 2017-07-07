@@ -8,6 +8,7 @@ package squidpony.epigon.universe;
 public class LiveValueModification {
 
     public Double baseOverwrite;
+    public Double actualOverwrite;
     public Double maxOverwrite;
     public Double minOverwrite;
     public Double deltaOverwrite;
@@ -15,12 +16,14 @@ public class LiveValueModification {
     public Boolean stableOverwrite;
 
     public Double baseAdditive;
+    public Double actualAdditive;
     public Double maxAdditive;
     public Double minAdditive;
     public Double deltaAdditive;
     public Double inertiaAdditive;
 
     public Double baseMultiply;
+    public Double actualMultiply;
     public Double maxMultiply;
     public Double minMultiply;
     public Double deltaMultiply;
@@ -36,6 +39,7 @@ public class LiveValueModification {
      */
     public LiveValueModification(double value) {
         baseOverwrite = value;
+        actualOverwrite = value;
         maxOverwrite = value;
         minOverwrite = value;
         deltaOverwrite = 0.0;

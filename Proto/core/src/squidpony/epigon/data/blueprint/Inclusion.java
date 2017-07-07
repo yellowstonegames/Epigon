@@ -30,7 +30,7 @@ public enum Inclusion {
     AKAGANEITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
     AKATOREITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
     ALEXANDRITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
-    ALMANDINE(SColor.DARK_SCARLET, SColor.DARK_RED, true, false, false, false, 430),
+    ALMANDINE(SColor.DARK_PINK, SColor.DARK_RED, true, false, false, false, 430),
     AMAZONITE(SColor.BRIGHT_GREEN, SColor.PASTEL_GREEN, true, false, false, true, 380),
     AMBER(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 180),
     AMETHYST(SColor.PURPLE_TAUPE, SColor.PURPLE, true, true, true, true, 835),

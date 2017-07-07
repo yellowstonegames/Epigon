@@ -372,8 +372,22 @@ public class RecipeMixer {
 
         physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplier);
 
+        physical.stats.putAll(modification.stats);
+
+        modification.statChanges.entrySet()
+            .stream()
+            .forEach(e -> {
+                LiveValue lv = physical.stats.getOrDefault(e.getKey(), new LiveValue(1));
+                lv.modify(e.getValue());
+                physical.stats.put(e.getKey(), lv);
+            });
+
         if (modification.whenUsedAsMaterial != null) {
             physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);
+        }
+
+        if (modification.creatureOverwrite != null){
+            physical.creatureData = createCreature(modification.creatureOverwrite);
         }
     }
 }
