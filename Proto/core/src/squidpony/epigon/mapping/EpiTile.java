@@ -1,13 +1,12 @@
 package squidpony.epigon.mapping;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import squidpony.squidgrid.gui.gdx.SColor;
-
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.gui.gdx.SColor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class holds the objects in a single grid square.
@@ -26,7 +25,7 @@ public class EpiTile {
      * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
      * fully transparent.
      */
-    public double opeacity() {
+    public double opacity() {
         double resistance = 0f;
         LiveValue lv = new LiveValue(resistance);
         Stat key = Stat.OPACITY;
@@ -46,17 +45,42 @@ public class EpiTile {
      */
     public char getSymbol() {
         char rep = ' ';//default to no representation
-
+        Physical temp;
         //check in order of preference
-        if (getCreature() != null) {
-            rep = getCreature().symbol;
-        } else if (getLargeObject() != null) {
+        if ((temp = getCreature()) != null) {
+            rep = temp.symbol;
+        } else if ((temp = getLargeObject()) != null) {
+            rep = temp.symbol;
+        } else if (!contents.isEmpty()){
+            rep = contents.get(0).symbol; // arbitrarily get first thing in list
+        } else if (floor != null) {
+            rep = floor.symbol;
+        }
+
+        return rep;
+    }
+
+    /**
+     * Returns the character representation of this tile with no consideration for any Creature that may be present.
+     *
+     * @return
+     */
+    public char getSymbolUninhabited() {
+        char rep = ' ';//default to no representation
+        Physical temp;
+        //check in order of preference
+        if ((temp = getCreature()) != null) {
+            contents.remove(temp);
+        }
+        if (getLargeObject() != null) {
             rep = getLargeObject().symbol;
         } else if (!contents.isEmpty()){
             rep = contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
             rep = floor.symbol;
         }
+        if(temp != null)
+            contents.add(0, temp);
 
         return rep;
     }
@@ -109,5 +133,8 @@ public class EpiTile {
 
     public Physical getLargeObject() {
         return contents.stream().filter(l -> l.large).findAny().orElse(null);
+    }
+    public Physical getLargeNonCreature() {
+        return contents.stream().filter(l -> l.large && l.creatureData == null).findAny().orElse(null);
     }
 }

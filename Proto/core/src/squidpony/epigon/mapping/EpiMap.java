@@ -112,7 +112,7 @@ public class EpiMap {
         double[][] resistances = new double[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                resistances[x][y] = contents[x][y].opeacity();
+                resistances[x][y] = contents[x][y].opacity();
             }
         }
         return resistances;

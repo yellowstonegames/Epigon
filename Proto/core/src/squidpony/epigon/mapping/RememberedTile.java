@@ -21,8 +21,8 @@ public class RememberedTile {
 
     public void remake(EpiTile tile)
     {
-        symbol = tile.getSymbol();
-        front = tile.getForegroundColor() == null ? SColor.TRANSPARENT : tile.getForegroundColor().cpy().lerp(Color.BLACK, 0.75f);
-        back = tile.getBackgroundColor() == null ? SColor.TRANSPARENT : tile.getBackgroundColor().cpy().lerp(Color.BLACK, 0.75f);
+        symbol = tile.getSymbolUninhabited();
+        front = tile.getForegroundColor() == null ? SColor.TRANSPARENT : tile.getForegroundColor().cpy().lerp(Color.BLACK, 0.65f);
+        back = tile.getBackgroundColor() == null ? SColor.TRANSPARENT : tile.getBackgroundColor().cpy().lerp(Color.BLACK, 0.65f);
     }
 }
