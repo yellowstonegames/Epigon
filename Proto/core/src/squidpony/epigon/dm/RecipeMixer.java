@@ -1,37 +1,29 @@
 package squidpony.epigon.dm;
 
-import java.util.Map.Entry;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.generic.Modification;
+import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Terrain;
+import squidpony.epigon.data.specific.Condition;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Recipe;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.LiveValueModification;
+import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.OrderedMap;
 
-import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.generic.Modification;
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.specific.Condition;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.data.specific.Recipe;
-import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.mixin.Terrain;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Rating;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.universe.LiveValueModification;
-import squidpony.epigon.universe.Stat;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -202,7 +194,7 @@ public class RecipeMixer {
 
         physical.whenUsedAsMaterial.addAll(blueprint.whenUsedAsMaterial);
 
-        physical.elementalDamageMultiplyer = new OrderedMap<>(blueprint.elementalDamageMultiplyer);
+        physical.elementalDamageMultiplier = new OrderedMap<>(blueprint.elementalDamageMultiplier);
 
         // TODO - figure out whether conditions should be copied or only come from modifications
 //        for (ConditionBlueprint c : blueprint.conditions) {
@@ -370,7 +362,7 @@ public class RecipeMixer {
             physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChange);
         }
 
-        physical.elementalDamageMultiplyer.putAll(modification.elementalDamageMultiplier);
+        physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
 
         physical.stats.putAll(modification.stats);
 

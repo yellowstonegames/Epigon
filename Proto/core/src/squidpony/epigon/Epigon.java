@@ -34,7 +34,6 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import squidpony.epigon.data.mixin.Creature;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -179,7 +178,7 @@ public class Epigon extends Game {
             new char[map.width][map.height]);
 
         mapSLayers.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
-        smallFont.tweakWidth(infoSize.cellWidth + 8).tweakHeight(infoSize.cellHeight + 12).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth + 9).tweakHeight(infoSize.cellHeight + 12).initBySize();
         //infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         mapSLayers.setAnimationDuration(0.145f);
@@ -236,9 +235,10 @@ public class Epigon extends Game {
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
-        for (Coord coord : rng.getRandomUniqueCells(0, 0, map.width, map.height, map.width * map.height / 8)){
+        for (Coord coord : floors.quasiRandomSeparated(0.05))
+        //rng.getRandomUniqueCells(0, 0, map.width, map.height, map.width * map.height / 8)
+        {
             //System.out.println("Testing map (" + map.width + ", " + map.height + ") found Coord: " + coord);
-            coord = Coord.get(coord.y, coord.x); // TODO - remove this once bug is fixed
             if (map.contents[coord.x][coord.y].getLargeObject() == null){
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive);
@@ -256,6 +256,7 @@ public class Epigon extends Game {
         calcFOV(player.location.x, player.location.y);
 
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
+        toPlayerDijkstra.rng = DefaultResources.getGuiRandom();
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -276,7 +277,8 @@ public class Epigon extends Game {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
-                    if (map.contents[step.x][step.y].getLargeObject() == null) {
+                    if (map.contents[step.x][step.y].getLargeObject() == null
+                            && !(player.location.x == step.x && player.location.y == step.y)) {
                         map.contents[c.x][c.y].remove(creature);
                         map.contents[step.x][step.y].add(creature);
                         creature.location = step;
@@ -540,8 +542,8 @@ public class Epigon extends Game {
         toPlayerDijkstra.clearGoals();
         toPlayerDijkstra.resetMap();
         toPlayerDijkstra.setGoal(player.location);
-        blocked.refill(fovResult, 0.0001, 1000.0).fringe8way();
-        toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
+        //blocked.refill(fovResult, 0.0001, 1000.0).fringe8way();
+        toPlayerDijkstra.scan(blocked); //(int)(player.stats.get(Stat.SIGHT).actual * 1.45),
     }
 
     private Color calcFadeoutColor(Color color, double amount){
@@ -869,7 +871,8 @@ public class Epigon extends Game {
                             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
                             // moves, we only need to do a fraction of the work to find the best path with that info.
-                            toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
+
+                            //toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
                             toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
                             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
@@ -917,7 +920,8 @@ public class Epigon extends Game {
                 return false;
             }
             int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
-            if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)) {
+            if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)
+                    || fovResult[sx][sy] <= 0.01) {
                 return false;
             }
             cursor = Coord.get(sx, sy);
@@ -927,7 +931,7 @@ public class Epigon extends Game {
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
             // moves, we only need to do a fraction of the work to find the best path with that info.
-            toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
+            //toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
             toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
             //findPathPreScanned includes the current cell (goal) by default, which is helpful when

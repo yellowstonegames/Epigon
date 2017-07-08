@@ -1,37 +1,21 @@
 package squidpony.epigon.data.specific;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.ProbabilityTable;
-
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.mixin.Ammunition;
-import squidpony.epigon.data.mixin.Container;
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.mixin.Grouping;
-import squidpony.epigon.data.mixin.Interactable;
-import squidpony.epigon.data.mixin.Liquid;
-import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.data.mixin.Legible;
-import squidpony.epigon.data.mixin.Terrain;
-import squidpony.epigon.data.mixin.Wearable;
-import squidpony.epigon.data.mixin.Wieldable;
-import squidpony.epigon.data.mixin.Zappable;
+import squidpony.epigon.data.mixin.*;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.ProbabilityTable;
+
+import java.util.*;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -78,7 +62,7 @@ public class Physical extends EpiData {
     public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
     public List<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
 
-    public OrderedMap<Element, LiveValue> elementalDamageMultiplyer = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
 
     public List<Condition> conditions = new ArrayList<>();
 
