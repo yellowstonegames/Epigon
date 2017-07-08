@@ -62,44 +62,6 @@ public class EpiMap {
 
     }
 
-    /**
-     * Returns true if the provided action is valid.
-     *
-     * @param action
-     * @return
-     */
-    public boolean actionValid(Action action) {
-        if (action instanceof MovementAction) {
-            MovementAction move = (MovementAction) action;
-            Queue<Coord> points = move.moveList;
-            return points.stream().parallel().noneMatch(p -> (!inBounds(p)
-                || contents[p.x][p.y].getLargeObject() != null
-                || (move.mover.creatureData != null && contents[p.x][p.y].getCreature() != null)));
-        }
-
-        return false;//action type not dealt with so default to not valid
-    }
-
-    public String doAction(Action action) {
-        if (actionValid(action)) {
-            if (action instanceof MovementAction) {
-                MovementAction move = (MovementAction) action;
-                Coord p;
-                Coord s = move.mover.location;
-                do {
-                    p = move.moveList.poll();
-                    contents[s.x][s.y].remove(move.mover);
-                    contents[p.x][p.y].add(move.mover);
-                    move.mover.location = p;
-                    s = p;
-                } while (!move.moveList.isEmpty());
-                return "Move completed.";
-            }
-        }
-
-        return "Invalid action.";
-    }
-
     public boolean inBounds(Coord p) {
         return inBounds(p.x, p.y);
     }

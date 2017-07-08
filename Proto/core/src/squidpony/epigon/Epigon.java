@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.epigon.actions.MovementAction;
@@ -235,11 +236,8 @@ public class Epigon extends Game {
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
 
-        for (Coord coord : floors.quasiRandomSeparated(0.05))
-        //rng.getRandomUniqueCells(0, 0, map.width, map.height, map.width * map.height / 8)
-        {
-            //System.out.println("Testing map (" + map.width + ", " + map.height + ") found Coord: " + coord);
-            if (map.contents[coord.x][coord.y].getLargeObject() == null){
+        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
+            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive);
                 p.location = coord;
@@ -270,7 +268,6 @@ public class Epigon extends Game {
     }
 
     private void runTurn() {
-        // TODO - track creatures as a group instead of this loop
         for (Physical creature : creatures) {
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual > 0 && (fovResult[c.x][c.y] > 0 || remembered[c.x][c.y] != null)) {
@@ -300,6 +297,16 @@ public class Epigon extends Game {
         if (player.stats.get(Stat.LIFE_FORCE).actual <= 0) {
             message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
         }
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                move(rng.getRandomElement(Arrays.stream(Direction.OUTWARDS)
+                    .filter(d -> map.contents[player.location.x + d.deltaX][player.location.y + d.deltaY].getLargeNonCreature() == null)
+                    .collect(Collectors.toList())
+                ));
+            }
+        }, 0.2f);
     }
 
     private void clearContents(SquidLayers layers, Color background) {
@@ -555,10 +562,16 @@ public class Epigon extends Game {
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
     private void move(Direction dir) {
-        MovementAction move = new MovementAction(player, dir, false);
-        if (map.actionValid(move)) {
-            final float midX = player.location.x + dir.deltaX * 0.5f; // this was 0.2f instead of 0.5f.
-            final float midY = player.location.y + dir.deltaY * 0.5f; // 0.2f is bad and wrong. badong.
+
+        int newX = player.location.x + dir.deltaX;
+        int newY = player.location.y + dir.deltaY;
+        if (!map.inBounds(newX, newY)) {
+            return; // can't move, should probably be error or something
+        }
+
+        if (map.contents[newX][newY].getLargeObject() == null) {
+            final float midX = player.location.x + dir.deltaX * 0.5f;
+            final float midY = player.location.y + dir.deltaY * 0.5f;
             final Vector3 pos = camera.position.cpy();
             final Vector3 original = camera.position.cpy();
 
@@ -574,8 +587,6 @@ public class Epigon extends Game {
             }
             final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
-            int newX = player.location.x + dir.deltaX;
-            int newY = player.location.y + dir.deltaY;
             mapSLayers.slide(playerEntity, newX, newY);
             mixFOV(newX, newY);
             player.location = Coord.get(newX, newY);
@@ -605,6 +616,21 @@ public class Epigon extends Game {
                     runTurn();
                 }
             });
+        } else {
+            Physical creature = map.contents[newX][newY].getCreature();
+            if (creature != null) {
+                mapSLayers.bump(playerEntity, dir);
+                creatures.remove(creature);
+                map.contents[newX][newY].remove(creature);
+                message("Killed the " + creature.name);
+
+                calcFOV(newX, newY);
+                calcDijkstra();
+                runTurn();
+            } else {
+                message("Ran into " + map.contents[newX][newY].getLargeNonCreature().name);
+                runTurn();
+            }
         }
     }
 
