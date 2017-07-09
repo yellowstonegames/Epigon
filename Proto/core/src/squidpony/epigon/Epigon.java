@@ -1,5 +1,6 @@
 package squidpony.epigon;
 
+import squidpony.epigon.display.PanelSize;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -9,9 +10,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.epigon.actions.MovementAction;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.dm.RecipeMixer;
@@ -89,7 +90,9 @@ public class Epigon extends Game {
     private FOV fov = new FOV(FOV.SHADOW);
     private double[][] fovResult;
     private double[][] priorFovResult;
-    public List<Physical> creatures = new ArrayList<>();
+    private List<Physical> creatures = new ArrayList<>();
+    private int autoplayTurns = 0;
+    private boolean processingCommand = true;
 
     // WIP stuff, needs large sample map
     private Stage mapStage, messageStage, infoStage, contextStage;
@@ -265,20 +268,29 @@ public class Epigon extends Game {
             "Bump into walls and stuff.",
             "Use ? for help, or q to quit.",
             "Use mouse, numpad, or arrow keys to move."});
+
+        processingCommand = false; // let the player do input
     }
 
     private void runTurn() {
+        putMap();
+
         for (Physical creature : creatures) {
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual > 0 && (fovResult[c.x][c.y] > 0 || remembered[c.x][c.y] != null)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
-                    if (map.contents[step.x][step.y].getLargeObject() == null
-                            && !(player.location.x == step.x && player.location.y == step.y)) {
+                    if (map.contents[step.x][step.y].getLargeObject() == null && !(player.location.x == step.x && player.location.y == step.y)) {
+                        mapSLayers.slide(c.x, c.y, step.x, step.y);
                         map.contents[c.x][c.y].remove(creature);
-                        map.contents[step.x][step.y].add(creature);
-                        creature.location = step;
+                        Timer.schedule(new Task() {
+                            @Override
+                            public void run() {
+                                map.contents[step.x][step.y].add(creature);
+                                creature.location = step;
+                            }
+                        }, mapSLayers.getAnimationDuration());
                     }
                 }
             }
@@ -293,20 +305,24 @@ public class Epigon extends Game {
                 player.stats.get(s.getRollover()).actual += val;
             }
         }
+
         updateStats();
         if (player.stats.get(Stat.LIFE_FORCE).actual <= 0) {
             message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
         }
 
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                move(rng.getRandomElement(Arrays.stream(Direction.OUTWARDS)
-                    .filter(d -> map.contents[player.location.x + d.deltaX][player.location.y + d.deltaY].getLargeNonCreature() == null)
-                    .collect(Collectors.toList())
-                ));
-            }
-        }, 0.2f);
+        if (autoplayTurns > 0) {
+            autoplayTurns--;
+            Timer.schedule(new Task() {
+                @Override
+                public void run() {
+                    move(rng.getRandomElement(Arrays.stream(Direction.OUTWARDS)
+                        .filter(d -> map.contents[player.location.x + d.deltaX][player.location.y + d.deltaY].getLargeNonCreature() == null)
+                        .collect(Collectors.toList())
+                    ));
+                }
+            }, 0.2f);
+        }
     }
 
     private void clearContents(SquidLayers layers, Color background) {
