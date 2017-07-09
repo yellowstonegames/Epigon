@@ -1,4 +1,4 @@
-package squidpony.epigon;
+package squidpony.epigon.display;
 
 /**
  * Contains the information to create display panels the size desired.
