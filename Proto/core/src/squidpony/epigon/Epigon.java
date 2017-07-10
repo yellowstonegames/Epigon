@@ -1,6 +1,5 @@
 package squidpony.epigon;
 
-import squidpony.epigon.display.PanelSize;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -15,6 +14,8 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.display.ContextHandler;
+import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
@@ -36,7 +37,6 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import squidpony.epigon.display.ContextHandler;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -439,12 +439,38 @@ public class Epigon extends Game {
             infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
         }
 
+        //─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿╀╁╂╃╄╅╆╇╈╉╊╋╌╍╎╏═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡╢╣╤╥╦╧╨╩╪╫╬╭╮╯╰
+        /*
+          O
+        ╭┬╨┬╮
+        ││#││
+        ╽╞═╡╽
+         │ │
+         ┙ ┕
+         */
         offset += stats.length + 1;
-        infoSLayers.putString(1, offset + 0, "  0  ", SColor.BRIGHT_GREEN); // head
-        infoSLayers.putString(1, offset + 1, "\\┫^┣/", SColor.BRIGHT_GREEN); // chest
-        infoSLayers.putString(1, offset + 2, " [_] ", SColor.BRIGHT_GREEN); // waist
-        infoSLayers.putString(1, offset + 3, " ⌈ ⌉ ", SColor.BRIGHT_GREEN); // legs
-        infoSLayers.putString(1, offset + 4, " ┚ ┖ ", SColor.BRIGHT_GREEN); // feet
+        // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
+        infoSLayers.put(5, offset+0, 'O', SColor.BRIGHT_GREEN); // head
+        infoSLayers.put(4, offset+1, '┬', SColor.BRIGHT_GREEN); // left shoulder
+        infoSLayers.put(5, offset+1, '╨', SColor.BRIGHT_GREEN); // neck
+        infoSLayers.put(6, offset+1, '┬', SColor.BRIGHT_GREEN); // right shoulder
+        infoSLayers.put(4, offset+2, '│', SColor.BRIGHT_GREEN); // chest
+        infoSLayers.put(5, offset+2, '#', SColor.BRIGHT_GREEN); // chest
+        infoSLayers.put(6, offset+2, '│', SColor.BRIGHT_GREEN); // chest
+        infoSLayers.put(4, offset+3, '╞', SColor.BRIGHT_GREEN); // left hip, part of waist
+        infoSLayers.put(5, offset+3, '═', SColor.BRIGHT_GREEN); // waist/groin
+        infoSLayers.put(6, offset+3, '╡', SColor.BRIGHT_GREEN); // right hip, part of waist
+        infoSLayers.put(4, offset+4, '│', SColor.BRIGHT_GREEN); // left leg
+        infoSLayers.put(6, offset+4, '│', SColor.BRIGHT_GREEN); // right leg
+        infoSLayers.put(4, offset+5, '┙', SColor.BRIGHT_GREEN); // left foot
+        infoSLayers.put(6, offset+5, '┕', SColor.BRIGHT_GREEN); // right foot
+        infoSLayers.put(3, offset+1, '╭', SColor.BRIGHT_GREEN); // left arm
+        infoSLayers.put(3, offset+2, '│', SColor.BRIGHT_GREEN); // left arm
+        infoSLayers.put(3, offset+3, '╽', SColor.BRIGHT_GREEN); // left arm/hand
+        infoSLayers.put(7, offset+1, '╮', SColor.BRIGHT_GREEN); // right arm
+        infoSLayers.put(7, offset+2, '│', SColor.BRIGHT_GREEN); // right arm
+        infoSLayers.put(7, offset+3, '╽', SColor.BRIGHT_GREEN); // right arm/hand
+        //infoSLayers.putString(3, offset + 4, " ┚ ┖ ", SColor.BRIGHT_GREEN); // feet
     }
 
     private void message(String text) {
