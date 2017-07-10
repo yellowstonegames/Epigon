@@ -9,7 +9,6 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
@@ -93,57 +92,54 @@ public class ContextHandler {
 
         String title = contextMode.toString();
         int x = width / 2 - title.length() / 2;
-        front.put(x, 0, title);
+        put(x, 0, title, true);
 
-        front.put(arrowLeft.x, arrowLeft.y, '◀', SColor.KIMONO_STORAGE);
-        front.put(arrowRight.x, arrowRight.y, '▶', SColor.KIMONO_STORAGE);
+        put(arrowLeft.x, arrowLeft.y, '◀', true);
+        put(arrowRight.x, arrowRight.y, '▶', true);
     }
 
-    private void put(String[] text) {
+    private void put(String[] text, boolean cache) {
         clear();
         for (int y = 0; y < text.length && y < height - 2; y++) {
-            for (int x = 0; x < text.length && x < width - 2; x++) {
-                put(x + 1, y + 1, text[x].charAt(y));
-            }
+            put(1, y + 1, text[y], cache);
         }
     }
 
-    private void put(char[][] chars) {
+    private void put(char[][] chars, boolean cache) {
         if (chars == null) {
             clear();
         } else {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    put(x, y, chars[x][y]);
+                    put(x, y, chars[x][y], cache);
                 }
             }
         }
     }
 
-    private void put(int x, int y, char c) {
-        front.put(x, y, c);
+    private void put(int x, int y, String s, boolean cache) {
+        for (int sx = x; sx < s.length() && sx + x < width - 1; sx++) {
+            put(sx + x, y, s.charAt(sx), cache);
+        }
     }
 
-    private void cache() {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                cachedTexts.get(contextMode)[x][y] = front.getAt(x, y);
-            }
+    private void put(int x, int y, char c, boolean cache) {
+        front.put(x, y, c);
+        if (cache && x >= 0 && x < width && y >= 0 && y < height) {
+            cachedTexts.get(contextMode)[x][y] = c;
         }
     }
 
     public void next() {
-        cache();
         front.wiggle(arrowRight.x, arrowRight.y, 0.3f);
         contextMode = contextMode.next();
-        put(cachedTexts.get(contextMode));
+        put(cachedTexts.get(contextMode), false);
     }
 
     public void prior() {
-        cache();
         front.wiggle(arrowLeft.x, arrowLeft.y, 0.3f);
         contextMode = contextMode.prior();
-        put(cachedTexts.get(contextMode));
+        put(cachedTexts.get(contextMode), false);
     }
 
     public void contextStatDetails(Stat stat, LiveValue lv) {
@@ -154,7 +150,7 @@ public class ContextHandler {
             "Base:  " + lv.base,
             "Max:   " + lv.max,
             "Delta: " + lv.delta
-        });
+        }, true);
     }
 
     public void contextMiniMap() {
@@ -168,7 +164,8 @@ public class ContextHandler {
         put(inventory.stream()
             .map(i -> i.name)
             .collect(Collectors.toList())
-            .toArray(new String[]{}));
+            .toArray(new String[]{}),
+            true);
     }
 
     public void tileContents(Coord location, EpiTile tile) {
@@ -184,12 +181,12 @@ public class ContextHandler {
                 .map(p -> p.name)
                 .collect(Collectors.joining("\n", tileDescription + "\n", ""));
         }
-        put(tileDescription.split("\n"));
+        put(tileDescription.split("\n"), true);
     }
 
     public void message(String[] text) {
         contextMode = ContextMode.MESSAGE;
-        put(text);
+        put(text, true);
     }
 
 }

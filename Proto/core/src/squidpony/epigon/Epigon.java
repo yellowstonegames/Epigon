@@ -733,6 +733,12 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
+                case '[':
+                    contextHandler.prior();
+                    break;
+                case ']':
+                    contextHandler.next();
+                    break;
                 case SquidInput.UP_ARROW:
                 case 'w':
                     move(Direction.UP);
