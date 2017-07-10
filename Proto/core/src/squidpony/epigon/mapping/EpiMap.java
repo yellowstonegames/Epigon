@@ -1,13 +1,7 @@
 package squidpony.epigon.mapping;
 
-import java.util.Queue;
-
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
-
-import squidpony.epigon.actions.Action;
-import squidpony.epigon.actions.MovementAction;
-import squidpony.epigon.data.specific.Physical;
 
 /**
  * This represents a single explorable map level.
@@ -23,43 +17,17 @@ public class EpiMap {
 
     public int width, height;
     public EpiTile[][] contents;
-    public boolean[][] hasBeenSeen;
+    public RememberedTile[][] remembered;
 
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
         contents = new EpiTile[width][height];
-        hasBeenSeen = new boolean[width][height];
-    }
-
-    public EpiMap(EpiTile[][] contents) {
-        this.contents = contents;
-        this.width = contents.length;
-        this.height = contents[0].length;
+        remembered = new RememberedTile[width][height];
     }
 
     public EpiMap() {
-        this(80, 30);
-    }
-
-    public EpiMap(char[][] map) {
-        width = map.length;
-        height = map[0].length;
-        contents = new EpiTile[width][height];
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                char c = altSymbolOf(map[x][y]);
-                SColor color = colorOf(c);
-                EpiTile tile = new EpiTile();
-                Physical floor = new Physical();
-                floor.color = color;
-                floor.symbol = c;
-                tile.floor = floor;
-                contents[x][y] = tile;
-            }
-        }
-
+        this(3, 3);
     }
 
     public boolean inBounds(Coord p) {

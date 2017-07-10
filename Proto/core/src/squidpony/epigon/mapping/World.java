@@ -117,7 +117,7 @@ public class World {
     static public EpiMap getDefaultMap() {
         int width = DEFAULT_MAP[0].length();
         int height = DEFAULT_MAP.length;
-        EpiTile[][] tiles = new EpiTile[width][height];
+        EpiMap map = new EpiMap(width, height);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -182,17 +182,14 @@ public class World {
                     default://opaque items
                         color = SColor.DEEP_PINK;
                 }
-                EpiTile tile = new EpiTile();
+                EpiTile tile = map.contents[x][y];
                 Physical floor = new Physical();
                 floor.color = color;
                 floor.symbol = c;
                 tile.floor = floor;
-                tiles[x][y] = tile;
             }
         }
 
-//        currentMap = new EpiMap(tiles);
-//        return currentMap;
-        return new EpiMap(tiles);
+        return map;
     }
 }
