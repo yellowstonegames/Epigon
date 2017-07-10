@@ -1,17 +1,19 @@
 package squidpony.epigon.display;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import squidpony.ArrayTools;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
+
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the contents relevant to the current context mode, switching modes as needed.
@@ -72,23 +74,16 @@ public class ContextHandler {
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
         for (ContextMode mode : ContextMode.values()) {
-            cachedTexts.put(mode, new char[width][height]);
+            cachedTexts.put(mode, ArrayTools.fill(' ', width, height));
         }
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                back.put(x, y, back.getDefaultForegroundColor());
-                front.put(x, y, ' ');
-            }
-        }
+        ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(front.contents, ' ');
     }
 
     private void clear() {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                front.clear(x, y);
-            }
-        }
+        ArrayTools.fill(front.contents, ' ');
 
         String title = contextMode.toString();
         int x = width / 2 - title.length() / 2;
@@ -106,19 +101,16 @@ public class ContextHandler {
     }
 
     private void put(char[][] chars, boolean cache) {
-        if (chars == null) {
-            clear();
-        } else {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    put(x, y, chars[x][y], cache);
-                }
+        clear();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                put(x, y, chars[x][y], cache);
             }
         }
     }
 
     private void put(int x, int y, String s, boolean cache) {
-        for (int sx = x; sx < s.length() && sx + x < width - 1; sx++) {
+        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
             put(sx + x, y, s.charAt(sx), cache);
         }
     }
@@ -131,13 +123,15 @@ public class ContextHandler {
     }
 
     public void next() {
-        front.wiggle(arrowRight.x, arrowRight.y, 0.3f);
+        front.summon(arrowRight.x, arrowRight.y, arrowRight.x+1, arrowRight.y-2, '✔', SColor.CW_HONEYDEW,
+                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 1f),0f, 0.6f);
         contextMode = contextMode.next();
         put(cachedTexts.get(contextMode), false);
     }
 
     public void prior() {
-        front.wiggle(arrowLeft.x, arrowLeft.y, 0.3f);
+        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x+1, arrowLeft.y-2, '✔', SColor.CW_HONEYDEW,
+                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 1f),0f, 0.6f);
         contextMode = contextMode.prior();
         put(cachedTexts.get(contextMode), false);
     }
