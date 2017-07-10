@@ -438,6 +438,13 @@ public class Epigon extends Game {
             blockText += eighthBlocks[(int) Math.ceil(remainder)];
             infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
         }
+
+        offset += stats.length + 1;
+        infoSLayers.putString(1, offset + 0, "  0  ", SColor.BRIGHT_GREEN); // head
+        infoSLayers.putString(1, offset + 1, "\\┫^┣/", SColor.BRIGHT_GREEN); // chest
+        infoSLayers.putString(1, offset + 2, " [_] ", SColor.BRIGHT_GREEN); // waist
+        infoSLayers.putString(1, offset + 3, " ⌈ ⌉ ", SColor.BRIGHT_GREEN); // legs
+        infoSLayers.putString(1, offset + 4, " ┚ ┖ ", SColor.BRIGHT_GREEN); // feet
     }
 
     private void message(String text) {
