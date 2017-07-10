@@ -266,8 +266,9 @@ public class Epigon extends Game {
             "Bump into walls and stuff.",
             "Use ? for help, or q to quit.",
             "Use mouse, numpad, or arrow keys to move."});
-
         processingCommand = false; // let the player do input
+        putMap();
+        updateStats();
     }
 
     private void runTurn() {
@@ -439,9 +440,8 @@ public class Epigon extends Game {
             infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
         }
 
-        //─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿╀╁╂╃╄╅╆╇╈╉╊╋╌╍╎╏═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡╢╣╤╥╦╧╨╩╪╫╬╭╮╯╰
         /*
-          O
+          Ω
         ╭┬╨┬╮
         ││#││
         ╽╞═╡╽
@@ -450,7 +450,7 @@ public class Epigon extends Game {
          */
         offset += stats.length + 1;
         // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
-        infoSLayers.put(5, offset+0, 'O', SColor.BRIGHT_GREEN); // head
+        infoSLayers.put(5, offset+0, 'Ω', SColor.BRIGHT_GREEN); // head
         infoSLayers.put(4, offset+1, '┬', SColor.BRIGHT_GREEN); // left shoulder
         infoSLayers.put(5, offset+1, '╨', SColor.BRIGHT_GREEN); // neck
         infoSLayers.put(6, offset+1, '┬', SColor.BRIGHT_GREEN); // right shoulder
@@ -646,10 +646,6 @@ public class Epigon extends Game {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         Gdx.gl.glEnable(GL20.GL_BLEND);
 
-        // need to display the map every frame, since we clear the screen to avoid artifacts.
-        putMap();
-        updateStats();
-
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
@@ -659,12 +655,18 @@ public class Epigon extends Game {
                     Coord m = awaitedMoves.remove(0);
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
+                    putMap();
+                    updateStats();
                 }
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
             mapInput.next();
+            putMap();
+            updateStats();
         } else if (contextInput.hasNext()) {
             contextInput.next();
+            putMap();
+            updateStats();
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
@@ -885,7 +887,7 @@ public class Epigon extends Game {
                     contextHandler.tileContents(Coord.get(sx, sy), map.contents[sx][sy]);
                     break;
             }
-
+            putMap();
             return false;
         }
 
@@ -924,7 +926,7 @@ public class Epigon extends Game {
             if (!toCursor.isEmpty()) {
                 toCursor = toCursor.subList(1, toCursor.size());
             }
-
+            putMap();
             return false;
         }
     });
@@ -935,14 +937,13 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             switch (button) {
                 case Input.Buttons.LEFT:
-                    Coord c = Coord.get(screenX, screenY);
-                    if (c.equals(contextHandler.arrowLeft)){
+                    if (screenX == contextHandler.arrowLeft.x && screenY == contextHandler.arrowLeft.y){
                         contextHandler.prior();
-                    } else if (c.equals(contextHandler.arrowRight)){
+                    } else if (screenX == contextHandler.arrowRight.x && screenY == contextHandler.arrowRight.y){
                         contextHandler.next();
-                    } else {
-                        //contextHandler.message(new String[]{"Hit " + c}); // TEMP - debugging
-                    }
+                    } //else {
+                      //contextHandler.message(new String[]{"Hit " + c}); // TEMP - debugging
+                      //}
                     return true;
                 case Input.Buttons.RIGHT:
                     return false;
