@@ -144,8 +144,8 @@ public class Epigon extends Game {
         messageStage = new Stage(messageViewport, batch);
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
-        font = DefaultResources.getStretchableLeanFont();
-        TextCellFactory smallFont = font.copy().setSmoothingMultiplier(0.35f);
+        font = DefaultResources.getStretchableLeanFont().setSmoothingMultiplier(1.45f);
+        TextCellFactory smallFont = font.copy().setSmoothingMultiplier(0.36f);
         // Set up the text display portions
         messageSLayers = new SquidLayers(
             messageSize.gridWidth,
@@ -167,8 +167,8 @@ public class Epigon extends Game {
             contextSize.cellWidth,
             contextSize.cellHeight,
             smallFont);
-        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.LIGHT_KHAKI);
-        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.KIMONO_STORAGE);
+        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.COSMIC_LATTE);
+        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.FLIRTATIOUS_INDIGO_TEA);
         contextHandler = new ContextHandler(contextSLayers);
 
         mapSLayers = new SquidLayers(
@@ -181,7 +181,7 @@ public class Epigon extends Game {
             colorCenter,
             new char[map.width][map.height]);
 
-        mapSLayers.setTextSize(mapSize.cellWidth + 2, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
+        mapSLayers.setTextSize(mapSize.cellWidth + 2f, mapSize.cellHeight + 3); // weirdly, this seems to help with flicker
         smallFont.tweakWidth(infoSize.cellWidth + 9).tweakHeight(infoSize.cellHeight + 12).initBySize();
         //infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
@@ -260,7 +260,7 @@ public class Epigon extends Game {
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
-        clearAndBorder(contextSLayers, SColor.LIGHT_KHAKI, SColor.LIGHT_KHAKI);
+        clearAndBorder(contextSLayers, SColor.FLIRTATIOUS_INDIGO_TEA, SColor.COSMIC_LATTE);
         contextHandler.message(new String[]{"Have fun!",
             "The fate of the worlds is in your hands...",
             "Bump into walls and stuff.",
@@ -281,15 +281,21 @@ public class Epigon extends Game {
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
                     if (map.contents[step.x][step.y].getLargeObject() == null && !(player.location.x == step.x && player.location.y == step.y)) {
-                        mapSLayers.slide(c.x, c.y, step.x, step.y);
                         map.contents[c.x][c.y].remove(creature);
-                        Timer.schedule(new Task() {
-                            @Override
-                            public void run() {
-                                map.contents[step.x][step.y].add(creature);
-                                creature.location = step;
-                            }
-                        }, mapSLayers.getAnimationDuration());
+                        mapSLayers.getForegroundLayer().slide(c.x, c.y, null, null, step.x, step.y, mapSLayers.getAnimationDuration(), () ->
+                                {
+                                    map.contents[step.x][step.y].add(creature);
+                                    creature.location = step;
+                                }
+                        );
+                        mapSLayers.put(c.x, c.y, map.contents[c.x][c.y].floor.symbol, map.contents[c.x][c.y].floor.color);
+//                        Timer.schedule(new Task() {
+//                            @Override
+//                            public void run() {
+//                                map.contents[step.x][step.y].add(creature);
+//                                creature.location = step;
+//                            }
+//                        }, mapSLayers.getAnimationDuration());
                     }
                 }
             }
@@ -670,28 +676,38 @@ public class Epigon extends Game {
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
-        batch.begin();
         infoViewport.apply(false);
         infoStage.act();
-        batch.setProjectionMatrix(infoStage.getCamera().combined);
-        infoStage.getRoot().draw(batch, 1f);
+        // the next line is similar to the next two but handles starting and ending the batch
+        infoStage.draw();
+        //batch.setProjectionMatrix(infoStage.getCamera().combined);
+        //infoStage.getRoot().draw(batch, 1f);
 
         contextViewport.apply(false);
         contextStage.act();
-        batch.setProjectionMatrix(contextStage.getCamera().combined);
-        contextStage.getRoot().draw(batch, 1f);
+        // the next line is similar to the next two but handles starting and ending the batch
+        contextStage.draw();
+        //batch.setProjectionMatrix(contextStage.getCamera().combined);
+        //contextStage.getRoot().draw(batch, 1f);
 
         messageViewport.apply(false);
         messageStage.act();
-        batch.setProjectionMatrix(messageViewport.getCamera().combined);
-        messageStage.getRoot().draw(batch, 1f);
+        // the next line is similar to the next two but handles starting and ending the batch
+        messageStage.draw();
+        //batch.setProjectionMatrix(messageViewport.getCamera().combined);
+        //messageStage.getRoot().draw(batch, 1f);
 
         //here we apply the other viewport, which clips a different area while leaving the message area intact.
         mapViewport.apply(false);
         mapStage.act();
+        //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
         batch.setProjectionMatrix(mapStage.getCamera().combined);
+        //then we start a batch and manually draw the stage without having it handle its batch...
+        batch.begin();
         mapStage.getRoot().draw(batch, 1f);
+        //so we can draw the actors independently of the stage while still in the same batch
         mapSLayers.drawActor(batch, 1.0f, playerEntity);
+        //we still need to end
         batch.end();
     }
 
