@@ -58,7 +58,6 @@ public class Epigon extends Game {
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
 
-    public static final char[] eighthBlocks = new char[]{' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'};
 
     // Audio
     private SoundManager sound;
@@ -75,7 +74,6 @@ public class Epigon extends Game {
     private Color bgColor;
     private int framesWithoutAnimation;
     private List<Coord> toCursor;
-    private static final int widestStatSize;
     private TextCellFactory font;
 
     // World
@@ -114,8 +112,6 @@ public class Epigon extends Game {
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
         infoSize = new PanelSize(smallW * 4 / 3, smallH * 4 / 3, cellW * 3, cellH * 3);
         contextSize = new PanelSize(smallW * 4 / 3, (bigH + bottomH - smallH) * 4 / 3, cellW * 3, cellH * 3);
-
-        widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
     }
 
@@ -162,7 +158,9 @@ public class Epigon extends Game {
             infoSize.cellWidth,
             infoSize.cellHeight,
             smallFont);
-        infoHandler = new InfoHandler(infoSLayers);
+        infoSLayers.getBackgroundLayer().setDefaultForeground(colorCenter.dimmer(SColor.DEEP_PURPLE));
+        infoSLayers.getForegroundLayer().setDefaultForeground(SColor.THOUSAND_HERB);
+        infoHandler = new InfoHandler(infoSLayers, colorCenter);
 
         contextSLayers = new SquidLayers(
             contextSize.gridWidth,
@@ -233,6 +231,7 @@ public class Epigon extends Game {
         player.stats.get(Stat.HUNGER).delta = -1;
         player.stats.get(Stat.HUNGER).min = 0;
         player.stats.get(Stat.CONVICTION).actual = player.stats.get(Stat.CONVICTION).base * 1.7;
+        player.stats.values().forEach(lv -> lv.max = Double.max(lv.max, lv.actual));
 
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
@@ -240,6 +239,7 @@ public class Epigon extends Game {
             .filter(c -> map.inBounds(c))
             .filter(c -> rng.nextBoolean())
             .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
+        infoHandler.setPlayer(player);
 
         for (Coord coord : floors.quasiRandomSeparated(0.05)) {
             if (map.contents[coord.x][coord.y].getLargeObject() == null) {
@@ -271,7 +271,7 @@ public class Epigon extends Game {
             "Use mouse, numpad, or arrow keys to move."});
         processingCommand = false; // let the player do input
         putMap();
-        updateStats();
+        infoHandler.showPlayerHealthAndArmor();
     }
 
     private void runTurn() {
@@ -314,7 +314,7 @@ public class Epigon extends Game {
             }
         }
 
-        updateStats();
+        infoHandler.updateDisplay();
         if (player.stats.get(Stat.LIFE_FORCE).actual <= 0) {
             message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
         }
@@ -367,118 +367,6 @@ public class Epigon extends Game {
         layers.put(w - 1, 0, '┐', borderColor, background);
         layers.put(0, h - 1, '└', borderColor, background);
         layers.put(w - 1, h - 1, '┘', borderColor, background);
-    }
-
-    private void updateStats() {
-        Color background = colorCenter.dimmer(SColor.DEEP_PURPLE);
-        clearAndBorder(infoSLayers, SColor.THOUSAND_HERB, background);
-        Stat[] stats = Stat.healths;
-        int offset = 1;
-        int biggest = Arrays.stream(stats)
-            .map(s -> player.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
-            .max()
-            .getAsInt();
-        int biggestLength = Integer.toString(biggest).length();
-        String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
-
-        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
-            infoSLayers.putString(1, s + offset, stats[s].toString());
-
-            double actual = player.stats.get(stats[s]).actual;
-            double base = player.stats.get(stats[s]).base;
-            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
-            double filling = actual / base;
-            Color color;
-            if (filling <= 1) {
-                color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
-            } else {
-                color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
-            }
-            infoSLayers.putString(widestStatSize + 2, s + offset, numberText, color);
-
-            int blockValue = infoSLayers.getGridWidth() - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
-            filling = actual / biggest;
-            int fullBlocks = (int) (filling * blockValue);
-            double remainder = (filling * blockValue) % 1;
-            remainder *= 7;
-            String blockText = "";
-            for (int i = 0; i < fullBlocks; i++) {
-                blockText += eighthBlocks[7];
-            }
-            remainder = Math.max(remainder, 0);
-            blockText += eighthBlocks[(int) Math.ceil(remainder)];
-            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
-        }
-
-        offset += stats.length + 1;
-        stats = Stat.needs;
-        biggest = Arrays.stream(stats)
-            .map(s -> player.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
-            .max()
-            .getAsInt();
-        biggestLength = Integer.toString(biggest).length();
-        format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
-
-        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
-            infoSLayers.putString(1, s + offset, stats[s].toString());
-
-            double actual = player.stats.get(stats[s]).actual;
-            double base = player.stats.get(stats[s]).base;
-            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
-            double filling = actual / base;
-            Color color;
-            if (filling <= 1) {
-                color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
-            } else {
-                color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
-            }
-            infoSLayers.putString(widestStatSize + 2, s + offset, numberText, color);
-
-            int blockValue = infoSLayers.getGridWidth() - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
-            filling = actual / biggest;
-            int fullBlocks = (int) (filling * blockValue);
-            double remainder = (filling * blockValue) % 1;
-            remainder *= 7;
-            String blockText = "";
-            for (int i = 0; i < fullBlocks; i++) {
-                blockText += eighthBlocks[7];
-            }
-            blockText += eighthBlocks[(int) Math.ceil(remainder)];
-            infoSLayers.putString(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
-        }
-
-        /* 
-          Ω
-        ╭┬╨┬╮
-        ││#││
-        ╽╞═╡╽
-         │ │
-         ┙ ┕
-         */
-        offset += stats.length + 1;
-        // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
-        infoSLayers.put(5, offset+0, 'Ω', SColor.BRIGHT_GREEN); // head
-        infoSLayers.put(4, offset+1, '┬', SColor.BRIGHT_GREEN); // left shoulder
-        infoSLayers.put(5, offset+1, '╨', SColor.BRIGHT_GREEN); // neck
-        infoSLayers.put(6, offset+1, '┬', SColor.BRIGHT_GREEN); // right shoulder
-        infoSLayers.put(4, offset+2, '│', SColor.BRIGHT_GREEN); // chest
-        infoSLayers.put(5, offset+2, '#', SColor.BRIGHT_GREEN); // chest
-        infoSLayers.put(6, offset+2, '│', SColor.BRIGHT_GREEN); // chest
-        infoSLayers.put(4, offset+3, '╞', SColor.BRIGHT_GREEN); // left hip, part of waist
-        infoSLayers.put(5, offset+3, '═', SColor.BRIGHT_GREEN); // waist/groin
-        infoSLayers.put(6, offset+3, '╡', SColor.BRIGHT_GREEN); // right hip, part of waist
-        infoSLayers.put(4, offset+4, '│', SColor.BRIGHT_GREEN); // left leg
-        infoSLayers.put(6, offset+4, '│', SColor.BRIGHT_GREEN); // right leg
-        infoSLayers.put(4, offset+5, '┙', SColor.BRIGHT_GREEN); // left foot
-        infoSLayers.put(6, offset+5, '┕', SColor.BRIGHT_GREEN); // right foot
-        infoSLayers.put(3, offset+1, '╭', SColor.BRIGHT_GREEN); // left arm
-        infoSLayers.put(3, offset+2, '│', SColor.BRIGHT_GREEN); // left arm
-        infoSLayers.put(3, offset+3, '╽', SColor.BRIGHT_GREEN); // left arm/hand
-        infoSLayers.put(7, offset+1, '╮', SColor.BRIGHT_GREEN); // right arm
-        infoSLayers.put(7, offset+2, '│', SColor.BRIGHT_GREEN); // right arm
-        infoSLayers.put(7, offset+3, '╽', SColor.BRIGHT_GREEN); // right arm/hand
     }
 
     private void message(String text) {
@@ -664,17 +552,17 @@ public class Epigon extends Game {
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
                     putMap();
-                    updateStats();
+            infoHandler.updateDisplay();
                 }
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
             mapInput.next();
             putMap();
-            updateStats();
+            infoHandler.updateDisplay();
         } else if (contextInput.hasNext()) {
             contextInput.next();
             putMap();
-            updateStats();
+            infoHandler.updateDisplay();
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
