@@ -30,10 +30,10 @@ public class EpiTile {
         LiveValue lv = new LiveValue(resistance);
         Stat key = Stat.OPACITY;
         if (getLargeObject() != null) {
-            resistance += getLargeObject().stats.getOrDefault(key, lv).actual;
+            resistance += getLargeObject().stats.getOrDefault(key, lv).actual();
         }
         if (getCreature() != null) {
-            resistance += getCreature().stats.getOrDefault(key, lv).actual;
+            resistance += getCreature().stats.getOrDefault(key, lv).actual();
         }
         return Math.min(resistance, 1.0);
     }

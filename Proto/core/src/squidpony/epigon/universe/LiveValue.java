@@ -16,15 +16,25 @@ package squidpony.epigon.universe;
  */
 public class LiveValue {
 
-    public double base;
-    public double max;
-    public double min;
-    public double actual;
-    public double delta; // change per turn
-    public double inertia; // change in delta per turn
-    public boolean stable; // when true inertia will not reverse the delta's sign whne it crosses zero
+    /**
+     * All values set to 0 and cannot be changed.
+     */
+    public static final LiveValue ZERO = new UnModifiableLiveValue(0.0);
 
-    public LiveValue(){
+    /**
+     * All values set to 1 and cannot be changed.
+     */
+    public static final LiveValue ONE = new UnModifiableLiveValue(1.0);
+
+    private double base;
+    private double max;
+    private double min;
+    private double actual;
+    private double delta; // change per turn
+    private double inertia; // change in delta per turn
+    private boolean stable; // when true inertia will not reverse the delta's sign whne it crosses zero
+
+    public LiveValue() {
         this(1.0);
     }
 
@@ -38,7 +48,7 @@ public class LiveValue {
         stable = true;
     }
 
-    public LiveValue(LiveValue other){
+    public LiveValue(LiveValue other) {
         base = other.base;
         max = other.max;
         min = other.min;
@@ -94,4 +104,113 @@ public class LiveValue {
         delta = mod.deltaMultiply == null ? delta : mod.deltaMultiply;
         inertia = mod.inertiaMultiply == null ? inertia : mod.inertiaMultiply;
     }
+
+    public double base() {
+        return base;
+    }
+
+    public void base(double base) {
+        this.base = base;
+    }
+
+    public double max() {
+        return max;
+    }
+
+    public void max(double max) {
+        this.max = max;
+    }
+
+    public double min() {
+        return min;
+    }
+
+    public void min(double min) {
+        this.min = min;
+    }
+
+    public double actual() {
+        return actual;
+    }
+
+    public void actual(double actual) {
+        this.actual = actual;
+    }
+
+    public double delta() {
+        return delta;
+    }
+
+    public void delta(double delta) {
+        this.delta = delta;
+    }
+
+    public double inertia() {
+        return inertia;
+    }
+
+    public void inertia(double inertia) {
+        this.inertia = inertia;
+    }
+
+    public boolean stable() {
+        return stable;
+    }
+
+    public void stable(boolean stable) {
+        this.stable = stable;
+    }
+
+    private static class UnModifiableLiveValue extends LiveValue {
+
+        private UnModifiableLiveValue(double d) {
+            super(d);
+        }
+
+        @Override
+        public void tick() {
+            // noop
+        }
+
+        @Override
+        public void modify(LiveValueModification mod) {
+            // noop
+        }
+
+        @Override
+        public void base(double base) {
+            // noop
+        }
+
+        @Override
+        public void max(double max) {
+            // noop
+        }
+
+        @Override
+        public void min(double min) {
+            // noop
+        }
+
+        @Override
+        public void actual(double actual) {
+            // noop
+        }
+
+        @Override
+        public void delta(double delta) {
+            // noop
+        }
+
+        @Override
+        public void inertia(double inertia) {
+            // noop
+        }
+
+        @Override
+        public void stable(boolean stable) {
+            // noop
+        }
+    }
+
 }

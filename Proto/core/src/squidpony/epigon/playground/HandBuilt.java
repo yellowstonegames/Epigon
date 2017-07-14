@@ -63,7 +63,7 @@ public class HandBuilt {
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
         Arrays.stream(Stat.values()).forEach(s -> {
             LiveValue lv = new LiveValue(rng.between(20, 100));
-            lv.actual = lv.base * (rng.nextDouble() + 0.1);
+            lv.actual(lv.base() * (rng.nextDouble() + 0.1));
             playerBlueprint.stats.put(s, lv);
         });
         playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));

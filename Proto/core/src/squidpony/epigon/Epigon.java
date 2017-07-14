@@ -37,6 +37,7 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.display.InfoHandler;
 
 /**
@@ -228,10 +229,15 @@ public class Epigon extends Game {
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.HUNGER).delta = -1;
-        player.stats.get(Stat.HUNGER).min = 0;
-        player.stats.get(Stat.CONVICTION).actual = player.stats.get(Stat.CONVICTION).base * 1.7;
-        player.stats.values().forEach(lv -> lv.max = Double.max(lv.max, lv.actual));
+        player.stats.get(Stat.HUNGER).delta(-1);
+        player.stats.get(Stat.HUNGER).min(0);
+        player.stats.get(Stat.CONVICTION).actual(player.stats.get(Stat.CONVICTION).base() * 1.7);
+        player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
+
+        player.stats.get(Stat.LIFE_FORCE).actual(player.stats.get(Stat.LIFE_FORCE).base());
+        System.out.println("Beserk: " + Formula.beserkAttack.result(player));
+        player.stats.get(Stat.LIFE_FORCE).actual(player.stats.get(Stat.LIFE_FORCE).base() * 0.02);
+        System.out.println("Beserk: " + Formula.beserkAttack.result(player));
 
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
@@ -279,7 +285,7 @@ public class Epigon extends Game {
 
         for (Physical creature : creatures) {
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual > 0 && (fovResult[c.x][c.y] > 0 || map.remembered[c.x][c.y] != null)) {
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0 || map.remembered[c.x][c.y] != null)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
@@ -307,16 +313,16 @@ public class Epigon extends Game {
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
         for (Stat s : Stat.rolloverProcessOrder) {
-            double val = player.stats.get(s).actual;
+            double val = player.stats.get(s).actual();
             if (val < 0) {
-                player.stats.get(s).actual = 0;
-                player.stats.get(s.getRollover()).actual += val;
+                player.stats.get(s).actual(0);
+                player.stats.get(s.getRollover()).actual(player.stats.get(s.getRollover()).actual() + val);
             }
         }
 
         infoHandler.updateDisplay();
-        if (player.stats.get(Stat.LIFE_FORCE).actual <= 0) {
-            message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual);
+        if (player.stats.get(Stat.LIFE_FORCE).actual() <= 0) {
+            message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual());
         }
 
         if (autoplayTurns > 0) {
@@ -375,7 +381,7 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual, Radius.CIRCLE);
+        FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {

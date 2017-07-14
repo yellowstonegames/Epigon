@@ -1,24 +1,18 @@
 package squidpony.epigon.data.generic;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import squidpony.epigon.actions.Action;
+import java.util.List;
 
 /**
- *
- * @author SquidPony
+ * Describes what series of things happens to create a change in the world
  */
 public class Effect {
 
-    private Queue<Effect> followUpOnSuccess = new LinkedList<>();
-    private Queue<Effect> followUpOnFailure = new LinkedList<>();
-    public Action action;
+    public Formula successFormula;
 
-    public Effect getNextSuccessFollowUp() {
-        return followUpOnSuccess.poll();
-    }
+    public List<Modification> sourceModifications;
+    public List<Modification> targetModifications;
 
-    public Effect getNextFailureFollowUp() {
-        return followUpOnFailure.poll();
-    }
+    public List<Effect> followUpOnSuccess;
+    public List<Effect> followUpOnFailure;
+
 }
