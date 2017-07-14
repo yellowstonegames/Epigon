@@ -17,12 +17,12 @@ import squidpony.epigon.universe.Stat;
 public class Formula {
 
     // example to support: physical attack that does extra critical damage when health is low
-    public static Formula beserkAttack;
+    public static Formula berserkAttack;
 
     static {
-        beserkAttack = new Formula();
-        beserkAttack.formulas.add(new DirectValueMultiplierAdditive(Stat.IMPACT, 1.0));
-        beserkAttack.formulas.add(new UnderPercentConstantMultiplier(Stat.LIFE_FORCE, 3.0, 0.2));
+        berserkAttack = new Formula();
+        berserkAttack.formulas.add(new DirectValueMultiplierAdditive(Stat.IMPACT, 1.0));
+        berserkAttack.formulas.add(new UnderPercentConstantMultiplier(Stat.LIFE_FORCE, 3.0, 0.2));
     }
 
     public List<DetailFormula> formulas = new ArrayList<>();

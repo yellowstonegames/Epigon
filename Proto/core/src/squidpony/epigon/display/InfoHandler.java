@@ -1,12 +1,7 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.stream.Collectors;
-
 import squidpony.ArrayTools;
-import static squidpony.epigon.Epigon.infoSize;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -14,6 +9,11 @@ import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static squidpony.epigon.Epigon.infoSize;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -65,6 +65,7 @@ public class InfoHandler {
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
 
         ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(back.contents, '\0');
         ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
         ArrayTools.fill(front.contents, ' ');
     }
