@@ -141,9 +141,9 @@ public class ContextHandler {
         clear();
         put(new String[]{
             stat.toString() + " (" + stat.nick() + ")",
-            "Base:  " + lv.base,
-            "Max:   " + lv.max,
-            "Delta: " + lv.delta
+            "Base:  " + lv.base(),
+            "Max:   " + lv.max(),
+            "Delta: " + lv.delta()
         }, true);
     }
 

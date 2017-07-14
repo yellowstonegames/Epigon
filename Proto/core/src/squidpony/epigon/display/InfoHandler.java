@@ -179,7 +179,7 @@ public class InfoHandler {
         int offset = 1;
         int biggest = Arrays.stream(stats)
             .map(s -> physical.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
             .max()
             .getAsInt();
         int biggestLength = Integer.toString(biggest).length();
@@ -188,8 +188,8 @@ public class InfoHandler {
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
             put(1, s + offset, stats[s].toString());
 
-            double actual = physical.stats.get(stats[s]).actual;
-            double base = physical.stats.get(stats[s]).base;
+            double actual = physical.stats.get(stats[s]).actual();
+            double base = physical.stats.get(stats[s]).base();
             String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
             double filling = actual / base;
             Color color;
@@ -224,7 +224,7 @@ public class InfoHandler {
         int offset = 1;
         int biggest = Arrays.stream(stats)
             .map(s -> physical.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
             .max()
             .getAsInt();
         int biggestLength = Integer.toString(biggest).length();
@@ -233,8 +233,8 @@ public class InfoHandler {
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
             put(1, s + offset, stats[s].toString());
 
-            double actual = physical.stats.get(stats[s]).actual;
-            double base = physical.stats.get(stats[s]).base;
+            double actual = physical.stats.get(stats[s]).actual();
+            double base = physical.stats.get(stats[s]).base();
             String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
             double filling = actual / base;
             Color color;
@@ -263,7 +263,7 @@ public class InfoHandler {
         stats = Stat.needs;
         biggest = Arrays.stream(stats)
             .map(s -> physical.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base, s.actual)))
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
             .max()
             .getAsInt();
         biggestLength = Integer.toString(biggest).length();
@@ -272,8 +272,8 @@ public class InfoHandler {
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
             put(1, s + offset, stats[s].toString());
 
-            double actual = physical.stats.get(stats[s]).actual;
-            double base = physical.stats.get(stats[s]).base;
+            double actual = physical.stats.get(stats[s]).actual();
+            double base = physical.stats.get(stats[s]).base();
             String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
             double filling = actual / base;
             Color color;
