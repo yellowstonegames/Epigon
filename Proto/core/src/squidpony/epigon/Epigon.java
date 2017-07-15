@@ -236,11 +236,6 @@ public class Epigon extends Game {
         player.stats.get(Stat.CONVICTION).actual(player.stats.get(Stat.CONVICTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
-        player.stats.get(Stat.LIFE_FORCE).actual(player.stats.get(Stat.LIFE_FORCE).base());
-        System.out.println("Berserk: " + Formula.berserkAttack.result(player));
-        player.stats.get(Stat.LIFE_FORCE).actual(player.stats.get(Stat.LIFE_FORCE).base() * 0.02);
-        System.out.println("Berserk: " + Formula.berserkAttack.result(player));
-
         player.location = floors.singleRandom(rng);
         Arrays.stream(Direction.OUTWARDS)
             .map(d -> player.location.translate(d))

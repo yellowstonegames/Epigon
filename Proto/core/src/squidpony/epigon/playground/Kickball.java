@@ -7,11 +7,15 @@ import java.util.stream.Collectors;
 import com.badlogic.gdx.utils.JsonWriter;
 
 import squidpony.DataConverter;
+import static squidpony.epigon.Epigon.handBuilt;
+import static squidpony.epigon.Epigon.mixer;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.specific.Physical;
-
 import squidpony.epigon.data.DataMaster;
-
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.generic.Formula;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Stat;
 
 /**
  * A class for doing various tests and utility work.
@@ -23,8 +27,25 @@ public class Kickball {
     }
 
     private void go() {
-        testJSON();
+        testFormulas();
+//        testJSON();
 //        printStones();
+    }
+
+    private void testFormulas() {
+        Physical source = mixer.buildPhysical(handBuilt.playerBlueprint);
+        Physical target = mixer.buildPhysical(Inclusion.ANDALUSITE);
+        source.stats.put(Stat.AIM, new LiveValue(60));
+        target.stats.put(Stat.DODGE, new LiveValue(1));
+
+        testBaseHitChance(source, target);
+    }
+
+    private void testBaseHitChance(Physical source, Physical target) {
+        System.out.println("Hit chance of " + source.stats.get(Stat.AIM).actual()
+            + " vs " + target.stats.get(Stat.DODGE).actual()
+            + " is " + Formula.baseHitChance(source, target));
+
     }
 
     private void printStones() {
@@ -59,24 +80,17 @@ public class Kickball {
 
         // Create an actual player
         //Physical player = starter.player;
-
 //        System.out.println(convert.prettyPrint(player));
-
-       // Physical sword = starter.sword;
+        // Physical sword = starter.sword;
 //        System.out.println(convert.prettyPrint(sword));
-
         //PhysicalBlueprint pj = starter.playerBlueprint;
-
-
 //        System.out.println(convert.prettyPrint(playerBlueprint));
-
 //        String playerFile = Gdx.files.internal("config/player.json").readString();
 //        playerBlueprint = convert.fromJson(PhysicalBlueprint.class, playerFile);
         //String json = convert.prettyPrint(pj);
 //        System.out.println(json);
         //pj = convert.fromJson(PhysicalBlueprint.class, json);
-       // System.out.println(convert.prettyPrint(playerBlueprint));
-
+        // System.out.println(convert.prettyPrint(playerBlueprint));
         DataMaster dm = new DataMaster();
 //        dm.add(player);
 //        dm.add(sword);

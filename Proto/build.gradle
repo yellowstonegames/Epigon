@@ -47,7 +47,4 @@ project(":core") {
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
         compile "com.github.tommyettinger:regexodus:$regexodusVersion"
     }
-
-    //apply plugin: 'idea'
-    //idea.module.downloadJavadoc = true
 }
