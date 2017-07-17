@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.display.ContextHandler;
 import squidpony.epigon.display.InfoHandler;
@@ -105,14 +104,14 @@ public class Epigon extends Game {
         int bigW = 70;
         int bigH = 31;
         int smallW = 43;
-        int smallH = 20;
-        int cellW = 10;
-        int cellH = 21;
+        int smallH = 22;
+        int cellW = 12;
+        int cellH = 24;
         int bottomH = 3;
         mapSize = new PanelSize(bigW, bigH, cellW, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 3 / 2, 7, 14);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 7, 14);
+        infoSize = new PanelSize(smallW, smallH * 3 / 2, 8, 16);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 8, 16);
 
     }
 
@@ -160,7 +159,7 @@ public class Epigon extends Game {
             infoSize.cellHeight,
             smallFont);
         infoSLayers.getBackgroundLayer().setDefaultForeground(colorCenter.dimmest(SColor.CW_DARK_VIOLET));
-        infoSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_AZURE);
+        infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
 
         contextSLayers = new SquidLayers(
@@ -186,7 +185,7 @@ public class Epigon extends Game {
         mapSLayers.setTextSize(mapSize.cellWidth + 1.5f, mapSize.cellHeight + 2f); // weirdly, this seems to help with flicker
         //contextSLayers.setTextSize(infoSize.cellWidth + 1.25f, infoSize.cellHeight + 1.25f);
         //infoSLayers.setTextSize(infoSize.cellWidth + 1.2f, infoSize.cellHeight + 1.2f);
-        smallFont.tweakWidth(infoSize.cellWidth + 2f).tweakHeight(infoSize.cellHeight + 2f).setSmoothingMultiplier(2.25f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth + 1.5f).tweakHeight(infoSize.cellHeight + 3f).setSmoothingMultiplier(1.6f).initBySize();
         //infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         mapSLayers.setAnimationDuration(0.145f);
