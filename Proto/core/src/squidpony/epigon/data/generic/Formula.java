@@ -16,28 +16,17 @@ public class Formula {
         if (sourceAim == null || sourceAim.actual() <= 0.0) {
             return 0.0;
         }
-        double aim = sourceAim.actual();
-        double chance = aim;
         LiveValue targetDodge = target.stats.get(Stat.DODGE);
         if (targetDodge == null || targetDodge.actual() <= 0) {
-            return chance;
+            return 1.0;
         }
 
-        double dodge = targetDodge.actual();
-        double difference = chance - dodge;
-        int magnitude = 1;
-        while (difference > 10){
-            magnitude++;
-            difference /= 10;
-        }
-        double percent = 1 - (dodge / aim) % 1;
+        int[] chances = new int[]{1, 4, 22, 38, 54, 70, 78, 85, 87, 92, 94, 97, 98, 99}; // -5 -> +8
+        double difference = sourceAim.actual() - targetDodge.actual();
+        difference = Math.max(-5.0, difference);
+        difference = Math.min(8.0, difference);
 
-        for (int i = 1; i < dodge / aim; i++) {
-            chance *= 0.5;
-        }
-        chance = 0.5 * (chance + chance * percent);
-
-        return chance / magnitude;
+        return chances[(int) Math.round(difference) + 5];
     }
 
     public static double beserkDamage(Physical source) {
