@@ -29,7 +29,7 @@ public class Formula {
         return chances[(int) Math.round(difference) + 5];
     }
 
-    public static double beserkDamage(Physical source) {
+    public static double berserkDamage(Physical source) {
         LiveValue lv = source.stats.get(Stat.IMPACT);
         if (lv == null) {
             return 0.0;
