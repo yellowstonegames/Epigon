@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import squidpony.ArrayTools;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.display.ContextHandler;
@@ -125,6 +126,9 @@ public class Epigon extends Game {
 
         // Set the map size early so things can reference it
         map = new EpiMap(100, 50);
+        Coord.expandPoolTo(map.width, map.height);
+
+        bgColor = SColor.BLACK_DYE;
 
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
@@ -160,7 +164,6 @@ public class Epigon extends Game {
             smallFont);
         infoSLayers.getBackgroundLayer().setDefaultForeground(colorCenter.dimmest(SColor.CW_DARK_VIOLET));
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
-        infoHandler = new InfoHandler(infoSLayers, colorCenter);
 
         contextSLayers = new SquidLayers(
             contextSize.gridWidth,
@@ -170,7 +173,6 @@ public class Epigon extends Game {
             smallFont);
         contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.COSMIC_LATTE);
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.FLIRTATIOUS_INDIGO_TEA);
-        contextHandler = new ContextHandler(contextSLayers);
 
         mapSLayers = new SquidLayers(
             mapSize.gridWidth,
@@ -181,6 +183,11 @@ public class Epigon extends Game {
             colorCenter,
             colorCenter,
             new char[map.width][map.height]);
+        ArrayTools.fill(mapSLayers.getForegroundLayer().colors, 0f);
+        ArrayTools.fill(mapSLayers.getBackgroundLayer().colors, bgColor.toFloatBits());
+        infoHandler = new InfoHandler(infoSLayers, colorCenter);
+        contextHandler = new ContextHandler(contextSLayers, mapSLayers);
+
 
         mapSLayers.setTextSize(mapSize.cellWidth + 1.5f, mapSize.cellHeight + 2f); // weirdly, this seems to help with flicker
         //contextSLayers.setTextSize(infoSize.cellWidth + 1.25f, infoSize.cellHeight + 1.25f);
@@ -219,10 +226,6 @@ public class Epigon extends Game {
     private void startGame() {
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
-
-        Coord.expandPoolTo(map.width, map.height);
-        bgColor = SColor.BLACK_DYE;
-
         message("Generating world.");
         worldGenerator = new WorldGenerator();
         map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
@@ -505,29 +508,28 @@ public class Epigon extends Game {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     double sightAmount = fovResult[x][y];
-                    Color fore;
-                    Color back;
+//                    Color fore;
+//                    Color back;
                     if (sightAmount > 0) {
                         EpiTile tile = map.contents[x][y];
-                        fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
-                        back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
-                        mapSLayers.put(x, y, tile.getSymbol(), fore, back);
+                        //fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
+                        //back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
+                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor()
+                                , 280 + (int) (50 * sightAmount));
                     } else {
                         RememberedTile rt = map.remembered[x][y];
                         if (rt != null) {
                             mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
-                        } else {
-                            mapSLayers.put(x, y, ' ', SColor.SLATE, bgColor);
-                        }
+                        } /*else {
+                            mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, bgColor);
+                        }*/
                     }
-                } else {
-                    mapSLayers.put(x, y, ' ', SColor.SLATE, bgColor);
                 }
             }
         }
 
         // Clear the tile the player is on
-        mapSLayers.put(player.location.x, player.location.y, ' ', SColor.TRANSPARENT);
+        mapSLayers.put(player.location.x, player.location.y, ' ', player.color);
 
         for (Coord pt : toCursor) {
             // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.

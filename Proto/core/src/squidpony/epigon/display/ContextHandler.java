@@ -58,6 +58,7 @@ public class ContextHandler {
 
     private SquidPanel back;
     private SquidPanel front;
+    private SquidPanel miniMap;
     private int width;
     private int height;
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
@@ -66,11 +67,17 @@ public class ContextHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public ContextHandler(SquidLayers layers) {
+    public ContextHandler(SquidLayers layers, SquidLayers mainMap) {
         width = layers.getGridWidth();
         height = layers.getGridHeight();
         back = layers.getBackgroundLayer();
         front = layers.getForegroundLayer();
+        miniMap = new SquidPanel(mainMap.getTotalWidth(), mainMap.getTotalHeight(),
+                layers.getTextFactory().copy().width(3f).height(3f), front.getColorCenter(), 0, mainMap.getTotalHeight() * 1.5f,
+                new char[mainMap.getTotalWidth()][mainMap.getTotalHeight()]);
+        miniMap.colors = mainMap.getForegroundLayer().colors;
+        layers.setExtraPanel(miniMap, 3);
+        miniMap.setVisible(false);
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
         for (ContextMode mode : ContextMode.values()) {
@@ -78,13 +85,13 @@ public class ContextHandler {
         }
 
         ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(back.contents, '\0');
         ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
         ArrayTools.fill(front.contents, ' ');
     }
 
     private void clear() {
         ArrayTools.fill(front.contents, ' ');
-
         String title = contextMode.toString();
         int x = width / 2 - title.length() / 2;
         put(x, 0, title, true);
@@ -124,16 +131,24 @@ public class ContextHandler {
 
     public void next() {
         front.summon(arrowRight.x, arrowRight.y, arrowRight.x+1, arrowRight.y-2, '✔', SColor.CW_HONEYDEW,
-                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 1f),0f, 0.6f);
+                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f),0f, 0.6f);
+        if(contextMode == ContextMode.MINI_MAP)
+            miniMap.setVisible(false);
         contextMode = contextMode.next();
         put(cachedTexts.get(contextMode), false);
+        if(contextMode == ContextMode.MINI_MAP)
+            contextMiniMap();
     }
 
     public void prior() {
         front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x+1, arrowLeft.y-2, '✔', SColor.CW_HONEYDEW,
-                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 1f),0f, 0.6f);
+                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f),0f, 0.6f);
+        if(contextMode == ContextMode.MINI_MAP)
+            miniMap.setVisible(false);
         contextMode = contextMode.prior();
         put(cachedTexts.get(contextMode), false);
+        if(contextMode == ContextMode.MINI_MAP)
+            contextMiniMap();
     }
 
     public void contextStatDetails(Stat stat, LiveValue lv) {
@@ -150,6 +165,7 @@ public class ContextHandler {
     public void contextMiniMap() {
         contextMode = ContextMode.MINI_MAP;
         clear();
+        miniMap.setVisible(true);
     }
 
     public void contextInventory(List<Physical> inventory) {
