@@ -35,9 +35,9 @@ public class Kickball {
     private void testFormulas() {
         Physical source = mixer.buildPhysical(handBuilt.playerBlueprint);
         Physical target = mixer.buildPhysical(Inclusion.ANDALUSITE);
-        source.stats.put(Stat.AIM, new LiveValue(60));
-        target.stats.put(Stat.DODGE, new LiveValue(1));
-        source.stats.put(Stat.IMPACT, new LiveValue(60));
+        source.stats.put(Stat.AIM, new LiveValue(52.5));
+        target.stats.put(Stat.DODGE, new LiveValue(52));
+        source.stats.put(Stat.IMPACT, new LiveValue(64));
         target.stats.put(Stat.TOUGHNESS, new LiveValue(57));
 
         testBaseHitChance(source, target);

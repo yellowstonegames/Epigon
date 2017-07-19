@@ -3,18 +3,19 @@ package squidpony.epigon.universe;
 /**
  * Represents all of the possible base stats.
  *
- * Still to be decided: do all stats have expected normal range of 0-100 like aim?
+ * Range of stats is 0 to 20 for physicals, magicals, and socials. Typically a 0 means that
+ * there is no ability whatsoever while a 20 is demi-god like abilities.
  *
  * @author Eben Howard
  */
 public enum Stat {
     // Physical Offense
-    AIM("AI", "Controls chance of hitting targets with physical attacks."), // 100 aim vs 0 dodge should be 100% chance to hit (maybe slightly less for gameplay purposes)
+    AIM("AI", "Controls chance of hitting targets with physical attacks."),
     IMPACT("IM", "Controls how much damage is dealt with physical attacks."),
     //PRECISION("PR", "Controls chance of critical damage with physical attacks"), // turned into skill
 
     // Physical Defense
-    DODGE("do", "Controls chance to completely avoid enemy physical attacks."),
+    DODGE("DO", "Controls chance to completely avoid enemy physical attacks."),
     //DEFLECTION("DE", "Controls chance to reduce the base damage dealt by enemy physical attacks."), // turned into skill
     TOUGHNESS("TO", "Controls chance to reduce the critical damage dealt by enemy physical attacks."),
 
