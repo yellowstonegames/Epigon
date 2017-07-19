@@ -29,6 +29,30 @@ public class Formula {
         return chances[(int) Math.round(difference) + 5];
     }
 
+    public static double baseDamageDealt(Physical source, Physical target){
+
+        LiveValue sourceImpact = source.stats.get(Stat.IMPACT);
+        if (sourceImpact == null || sourceImpact.actual() <= 0.0) {
+            return 0.0;
+        }
+        LiveValue targetToughness = target.stats.get(Stat.TOUGHNESS);
+        if (targetToughness == null || targetToughness.actual() <= 0) {
+            return 1.0;
+        }
+
+        double difference = sourceImpact.actual() - targetToughness.actual();
+        if (difference < -3){
+            return 1.0;
+        }
+        if (difference < -2){
+            return 2.0;
+        }
+
+        // Xn^1.2 + Xn^(0.2 + 5)
+        // Xn starts at 5 for difference of -2
+        return Math.pow(difference, 1.2) + Math.pow(difference, 0.2) + 5;
+    }
+
     public static double berserkDamage(Physical source) {
         LiveValue lv = source.stats.get(Stat.IMPACT);
         if (lv == null) {

@@ -37,14 +37,24 @@ public class Kickball {
         Physical target = mixer.buildPhysical(Inclusion.ANDALUSITE);
         source.stats.put(Stat.AIM, new LiveValue(60));
         target.stats.put(Stat.DODGE, new LiveValue(1));
+        source.stats.put(Stat.IMPACT, new LiveValue(60));
+        target.stats.put(Stat.TOUGHNESS, new LiveValue(57));
 
         testBaseHitChance(source, target);
+        testBaseDamageDealt(source, target);
     }
 
     private void testBaseHitChance(Physical source, Physical target) {
         System.out.println("Hit chance of " + source.stats.get(Stat.AIM).actual()
             + " vs " + target.stats.get(Stat.DODGE).actual()
             + " is " + Formula.baseHitChance(source, target));
+
+    }
+
+    private void testBaseDamageDealt(Physical source, Physical target) {
+        System.out.println("Damage dealt of " + source.stats.get(Stat.IMPACT).actual()
+            + " vs " + target.stats.get(Stat.TOUGHNESS).actual()
+            + " is " + Formula.baseDamageDealt(source, target));
 
     }
 
