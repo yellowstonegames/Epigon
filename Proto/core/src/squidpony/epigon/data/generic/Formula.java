@@ -1,8 +1,8 @@
 package squidpony.epigon.data.generic;
 
-import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 
 /**
@@ -14,6 +14,53 @@ public class Formula {
 
     private static int[] chances = new int[]{1, 4, 22, 38, 54, 70, 78, 85, 87, 92, 94, 97, 98, 99}; // -5 -> +8
     private static int inflection = 5; // how far into the array is 0 stat difference
+
+    private Formula() {
+    }
+
+    public static int healthForLevel(int level, Rating rating) {
+        int base;
+        double multiplier;
+        switch (rating) {
+            case NONE:
+                base = 0;
+                multiplier = 1.27; // just for consistency with the other values
+                break;
+            case SLIGHT:
+                base = 2;
+                multiplier = 1.26;
+                break;
+            case TYPICAL:
+                base = 4;
+                multiplier = 1.25;
+                break;
+            case GOOD:
+                base = 6;
+                multiplier = 1.24;
+                break;
+            case HIGH:
+                base = 9;
+                multiplier = 1.23;
+                break;
+            case SUPERB:
+                base = 13;
+                multiplier = 1.22;
+                break;
+            case AMAZING:
+                base = 19;
+                multiplier = 1.21;
+                break;
+            case ULTIMATE:
+                base = 29;
+                multiplier = 1.20;
+                break;
+            default:
+                base = 0;
+                multiplier = 0;
+        }
+
+        return (int) Math.floor(base + base * Math.pow(multiplier, level - 1));
+    }
 
     public static double opposedRoll(double source, double target) {
 

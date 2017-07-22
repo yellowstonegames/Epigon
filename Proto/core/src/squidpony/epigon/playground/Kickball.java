@@ -15,6 +15,7 @@ import squidpony.epigon.data.DataMaster;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 
 /**
@@ -42,6 +43,11 @@ public class Kickball {
 
         testBaseHitChance(source, target);
         testBaseDamageDealt(source, target);
+
+        int[] tests = new int[]{2, 4, 30};
+        for (int n : tests) {
+            System.out.println("Primary for " + n + " is " + Formula.healthForLevel(n, Rating.GOOD));
+        }
     }
 
     private void testBaseHitChance(Physical source, Physical target) {
@@ -55,7 +61,6 @@ public class Kickball {
         System.out.println("Damage dealt of " + source.stats.get(Stat.IMPACT).actual()
             + " vs " + target.stats.get(Stat.TOUGHNESS).actual()
             + " is " + Formula.baseDamageDealt(source, target));
-
     }
 
     private void printStones() {
