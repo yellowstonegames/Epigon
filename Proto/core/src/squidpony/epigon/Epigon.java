@@ -72,6 +72,7 @@ public class Epigon extends Game {
     private SquidLayers messageSLayers;
     private SquidInput mapInput;
     private SquidInput contextInput;
+    private SquidInput infoInput;
     private Color bgColor;
     private int framesWithoutAnimation;
     private List<Coord> toCursor;
@@ -113,7 +114,6 @@ public class Epigon extends Game {
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
         infoSize = new PanelSize(smallW, smallH * 3 / 2, 8, 16);
         contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 8, 16);
-
     }
 
     @Override
@@ -162,7 +162,7 @@ public class Epigon extends Game {
             infoSize.cellWidth,
             infoSize.cellHeight,
             smallFont);
-        infoSLayers.getBackgroundLayer().setDefaultForeground(colorCenter.dimmest(SColor.CW_DARK_VIOLET));
+        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.BLACK);
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SquidLayers(
@@ -213,7 +213,8 @@ public class Epigon extends Game {
 
         mapInput = new SquidInput(keys, mapMouse);
         contextInput = new SquidInput(contextMouse);
-        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput));
+        infoInput = new SquidInput(infoMouse);
+        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput, infoInput));
 
         mapStage.addActor(mapSLayers);
         messageStage.addActor(messageSLayers);
@@ -567,6 +568,10 @@ public class Epigon extends Game {
             contextInput.next();
             putMap();
             infoHandler.updateDisplay();
+        } else if (infoInput.hasNext()){
+            infoInput.next();;
+            putMap();
+            infoHandler.updateDisplay();
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
@@ -685,6 +690,12 @@ public class Epigon extends Game {
                     break;
                 case ']':
                     contextHandler.next();
+                    break;
+                case '{':
+                    infoHandler.prior();;
+                    break;
+                case '}':
+                    infoHandler.next();;
                     break;
                 case SquidInput.UP_ARROW:
                 case 'w':
@@ -867,8 +878,37 @@ public class Epigon extends Game {
             return mouseMoved(screenX, screenY);
         }
 
-        // causes the path to the mouse position to become highlighted (toCursor contains a list of points that
-        // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
+        @Override
+        public boolean mouseMoved(int screenX, int screenY) {
+            return false;
+        }
+    });
+
+    private final SquidMouse infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
+            mapSize.gridWidth * mapSize.cellWidth, 0, new InputAdapter() {
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            System.out.println("info: " + screenX + ", " + screenY);
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    if (screenX == infoHandler.arrowLeft.x && screenY == infoHandler.arrowLeft.y){
+                        infoHandler.prior();
+                    } else if (screenX == infoHandler.arrowRight.x && screenY == infoHandler.arrowRight.y){
+                        infoHandler.next();
+                    }
+                    return true;
+                case Input.Buttons.RIGHT:
+                default:
+                    return false;
+            }
+        }
+
+
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            return mouseMoved(screenX, screenY);
+        }
+
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
             return false;

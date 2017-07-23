@@ -29,7 +29,7 @@ public class ContextHandler {
 
         private ContextMode() {
             name = Arrays.stream(name().split("_"))
-                .map(s -> s.substring(0, 1) + s.substring(1))
+                .map(s -> s.substring(0, 1) + s.substring(1).toLowerCase())
                 .collect(Collectors.joining(" "));
         }
 
