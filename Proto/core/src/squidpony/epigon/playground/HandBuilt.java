@@ -17,6 +17,7 @@ import static squidpony.epigon.Epigon.mixer;
 
 import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.universe.LiveValueModification;
 
@@ -26,7 +27,7 @@ import squidpony.epigon.universe.LiveValueModification;
 public class HandBuilt {
 
     public Physical basePhysical = new Physical();
-    
+
     public Physical doorBlueprint;
     public Physical baseOpenDoor = new Physical();
     public Physical baseClosedDoor = new Physical();
@@ -43,14 +44,26 @@ public class HandBuilt {
 
     public Modification makeAlive;
 
+    public Physical nan = new Physical();//trade currency (dust that's used for enchanting things and casting spells)
+
     public HandBuilt() {
         basePhysical.generic = true;
         basePhysical.unique = true;
 
+        initPlayer();
         initDoors();
         initItems();
         initAlive();
 
+        makeWall = new Modification();
+        Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
+        makeWall.possiblePostfix.add("wall");
+        makeWall.symbol = '#';
+        makeWall.large = true;
+        makeWall.attached = true;
+    }
+
+    private void initPlayer() {
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
         playerBlueprint.description = "It's you!";
@@ -61,12 +74,44 @@ public class HandBuilt {
         playerBlueprint.unique = true;
         playerBlueprint.attached = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
-        Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValue lv = new LiveValue(rng.between(20, 100));
-            lv.actual(lv.base() * (rng.nextDouble() + 0.1));
+        for (Stat s : Stat.bases) {
+            Rating rating = rng.getRandomElement(Rating.values());
+            if (rating == Rating.NONE) {
+                rating = Rating.SLIGHT;
+            }
+            LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel());
             playerBlueprint.stats.put(s, lv);
-        });
+            playerBlueprint.statProgression.put(s, rating);
+        }
+        for (Stat s : Stat.healths) {
+            Rating rating = rng.getRandomElement(Rating.values());
+            if (rating == Rating.NONE) {
+                rating = Rating.SLIGHT;
+            }
+            LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
+            playerBlueprint.stats.put(s, lv);
+            playerBlueprint.statProgression.put(s, rating);
+        }
+        for (Stat s : Stat.needs) {
+            Rating rating = rng.getRandomElement(Rating.values());
+            if (rating == Rating.NONE) {
+                rating = Rating.SLIGHT;
+            }
+            LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
+            playerBlueprint.stats.put(s, lv);
+            playerBlueprint.statProgression.put(s, rating);
+        }
+        for (Stat s : Stat.utilities) {
+            Rating rating = rng.getRandomElement(Rating.values());
+            if (rating == Rating.NONE) {
+                rating = Rating.SLIGHT;
+            }
+            LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
+            playerBlueprint.stats.put(s, lv);
+            playerBlueprint.statProgression.put(s, rating);
+        }
         playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
+        playerBlueprint.stats.put(Stat.HEARING, new LiveValue(12));
         playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 
         Creature cb = new Creature();
@@ -78,13 +123,6 @@ public class HandBuilt {
         skill = new Skill();
         skill.name = "akido";
         cb.skills.put(skill, Rating.SLIGHT);
-
-        makeWall = new Modification();
-        Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
-        makeWall.possiblePostfix.add("wall");
-        makeWall.symbol = '#';
-        makeWall.large = true;
-        makeWall.attached = true;
     }
 
     private void initDoors() {
@@ -117,7 +155,7 @@ public class HandBuilt {
         doorRecipe = mixer.createRecipe(doorRecipeBlueprint);
     }
 
-    private void initItems(){
+    private void initItems() {
         swordBlueprint = new Physical();
         swordBlueprint.name = "sword";
         swordBlueprint.color = SColor.SILVER;
@@ -130,7 +168,7 @@ public class HandBuilt {
         swordRecipe = mixer.createRecipe(swordRecipeBlueprint);
     }
 
-    private void initAlive(){
+    private void initAlive() {
         makeAlive = new Modification();
         makeAlive.possiblePrefix = Arrays.asList(new String[]{"living", "animated"});
         makeAlive.symbol = 's';

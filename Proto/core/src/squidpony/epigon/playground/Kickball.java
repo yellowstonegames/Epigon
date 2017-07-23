@@ -19,7 +19,7 @@ import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 
 /**
- * A class for doing various tests and utility work.
+ * A class for doing various tests and utilities work.
  */
 public class Kickball {
 
