@@ -65,13 +65,15 @@ public enum Stat {
 
     public static final Stat[] socials = {APPEARANCE, CONVICTION, AUTHORITY};
 
+    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, DOMINION, APPEARANCE, CONVICTION, AUTHORITY};
+
     public static final Stat[] healths = {LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM, SANITY};
 
     public static final Stat[] needs = {HUNGER, THIRST, REST, SLEEP};
 
     public static final Stat[] senses = {SIGHT, HEARING};
 
-    public static final Stat[] utility = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
+    public static final Stat[] utilities = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
 
     public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, CHARM, INTELLECT, SPIRIT, VITALITY};
 

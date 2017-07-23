@@ -1,5 +1,6 @@
 package squidpony.epigon.data.generic;
 
+import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
@@ -16,6 +17,25 @@ public class Formula {
     private static int inflection = 5; // how far into the array is 0 stat difference
 
     private Formula() {
+    }
+
+    public static int randomizedStartingStatLevel(){
+        int n = rng.nextInt(100);
+        if (n < 45){
+            return 1;
+        } else if (n < 65){
+            return 2;
+        } else if (n < 80){
+            return 3;
+        } else if (n < 88){
+            return 4;
+        } else if (n < 94){
+            return 5;
+        } else if (n < 98){
+            return 6;
+        } else {
+            return 7;
+        }
     }
 
     public static int healthForLevel(int level, Rating rating) {
