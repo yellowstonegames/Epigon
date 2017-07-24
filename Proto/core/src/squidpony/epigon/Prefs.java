@@ -1,21 +1,16 @@
 package squidpony.epigon;
 
-import java.util.prefs.Preferences;
+import com.badlogic.gdx.Gdx;
 
 /**
  * A static class that holds player adjustable environment wide variables.
  */
 public class Prefs {
 
-    static private Preferences prefs;
     static private int screenWidth = Epigon.totalPixelWidth();
     static private int screenHeight = Epigon.totalPixelHeight();
     static private String title = "Epigon - The Expected Beginning";
     static private boolean debug = true;
-
-    static{
-        prefs = Preferences.userNodeForPackage(Prefs.class);
-    }
 
     /**
      * No instances of this class should be made.
@@ -32,66 +27,68 @@ public class Prefs {
     }
 
     public static int getScreenWidth() {
-        return prefs.getInt("screenWidth", screenWidth);
+        return screenWidth;
+        //return Gdx.app.getPreferences("Epigon").getInteger("screenWidth", screenWidth);
     }
 
     public static void setScreenWidth(int width) {
-        prefs.putInt("screenWidth", width);
+        Gdx.app.getPreferences("Epigon").putInteger("screenWidth", width).flush();
     }
 
     public static int getScreenHeight() {
-        return prefs.getInt("screenHeight", screenHeight);
+        return screenHeight;
+        //return Gdx.app.getPreferences("Epigon").getInteger("screenHeight", screenHeight);
     }
 
     public static void setScreenHeight(int height) {
-        prefs.putInt("screenHeight", height);
+        Gdx.app.getPreferences("Epigon").putInteger("screenHeight", height).flush();
     }
 
     public static int getScreenXLocation() {
-        return prefs.getInt("screenXLocation", 0);
+        return Gdx.app.getPreferences("Epigon").getInteger("screenXLocation", 0);
     }
 
     public static void setScreenXLocation(int x) {
-        prefs.putInt("screenXLocation", x);
+        Gdx.app.getPreferences("Epigon").putInteger("screenXLocation", x).flush();
     }
 
     public static int getScreenYLocation() {
-        return prefs.getInt("screenYLocation", 0);
+        return Gdx.app.getPreferences("Epigon").getInteger("screenYLocation", 0);
     }
 
     public static void setScreenYLoaction(int y) {
-        prefs.putInt("screenYLocation", y);
+        Gdx.app.getPreferences("Epigon").putInteger("screenYLocation", y).flush();
     }
 
     public static boolean isSoundfxOn() {
-        return prefs.getBoolean("soundfxOn", true);
+        return Gdx.app.getPreferences("Epigon").getBoolean("soundfxOn", true);
     }
 
     public static void setSoundfxOn(boolean soundfxOn) {
-        prefs.putBoolean("soundfxOn", soundfxOn);
+        Gdx.app.getPreferences("Epigon").putBoolean("soundfxOn", soundfxOn).flush();
     }
 
     public static boolean isMusicOn() {
-        return prefs.getBoolean("musicOn", true);
+        return Gdx.app.getPreferences("Epigon").getBoolean("musicOn", true);
     }
 
     public static void setMusicOn(boolean musicOn) {
-        prefs.putBoolean("musicOn", musicOn);
+        Gdx.app.getPreferences("Epigon").putBoolean("musicOn", musicOn).flush();
     }
 
     public static float getSoundfxVolume() {
-        return prefs.getFloat("soundfxVolume", 0.5f);
+        return Gdx.app.getPreferences("Epigon").getFloat("soundfxVolume", 0.5f);
     }
 
     public static void setSoundfxVolume(float soundfxVolume) {
-        prefs.putFloat("soundfxVolume", soundfxVolume);
+        Gdx.app.getPreferences("Epigon").putFloat("soundfxVolume", soundfxVolume).flush();
     }
 
     public static float getMusicVolume() {
-        return prefs.getFloat("musicVolume", 0.7f);
+        return Gdx.app.getPreferences("Epigon").getFloat("musicVolume", 0.7f);
     }
 
     public static void setMusicVolume(float musicVolume) {
-        prefs.putFloat("musicVolume", musicVolume);
+        Gdx.app.getPreferences("Epigon").putFloat("musicVolume", musicVolume).flush();
     }
 }
