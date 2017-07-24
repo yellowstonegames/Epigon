@@ -162,7 +162,7 @@ public class Epigon extends Game {
             infoSize.cellWidth,
             infoSize.cellHeight,
             smallFont);
-        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.BLACK);
+        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SquidLayers(

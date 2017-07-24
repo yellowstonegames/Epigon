@@ -11,11 +11,17 @@ import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.infoSize;
-import squidpony.epigon.display.ContextHandler.ContextMode;
+import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.mixin.EquippedData;
+import squidpony.epigon.universe.ClothingSlot;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -204,45 +210,6 @@ public class InfoHandler {
         }
     }
 
-    private void showStats(int offset, Stat[] stats, Physical physical) {
-        int biggest = Arrays.stream(stats)
-            .map(s -> physical.stats.get(s))
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
-            .max()
-            .getAsInt();
-        int biggestLength = Integer.toString(biggest).length();
-        String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
-
-        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
-            Color color = physical.statProgression.get(stats[s]).color();
-            put(1, s + offset, stats[s].toString(), color);
-
-            double actual = physical.stats.get(stats[s]).actual();
-            double base = physical.stats.get(stats[s]).base();
-            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
-            double filling = actual / base;
-            if (filling <= 1) {
-                color = colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
-            } else {
-                color = colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
-            }
-            put(widestStatSize + 2, s + offset, numberText, color);
-
-            int blockValue = width - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
-            filling = actual / biggest;
-            int fullBlocks = (int) (filling * blockValue);
-            double remainder = (filling * blockValue) % 1;
-            remainder *= 7;
-            String blockText = "";
-            for (int i = 0; i < fullBlocks; i++) {
-                blockText += eighthBlocks[7];
-            }
-            remainder = Math.max(remainder, 0);
-            blockText += eighthBlocks[(int) Math.ceil(remainder)];
-            put(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
-        }
-    }
-
     private void infoFullStats(Physical physical) {
         clear();
         if (physical == null) {
@@ -263,35 +230,104 @@ public class InfoHandler {
         offset += Stat.healths.length + 1;
         showStats(offset, Stat.needs, physical);
 
-        /* 
-          Ω
-        ╭┬╨┬╮
-        ││#││
-        ╽╞═╡╽
-         │ │
-         ┙ ┕
-         */
-        offset += Stat.healths.length + 1;
-        // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
-        put(5, offset + 0, 'Ω', SColor.BRIGHT_GREEN); // head
-        put(4, offset + 1, '┬', SColor.BRIGHT_GREEN); // left shoulder
-        put(5, offset + 1, '╨', SColor.BRIGHT_GREEN); // neck
-        put(6, offset + 1, '┬', SColor.BRIGHT_GREEN); // right shoulder
-        put(4, offset + 2, '│', SColor.BRIGHT_GREEN); // chest
-        put(5, offset + 2, '#', SColor.BRIGHT_GREEN); // chest
-        put(6, offset + 2, '│', SColor.BRIGHT_GREEN); // chest
-        put(4, offset + 3, '╞', SColor.BRIGHT_GREEN); // left hip, part of waist
-        put(5, offset + 3, '═', SColor.BRIGHT_GREEN); // waist/groin
-        put(6, offset + 3, '╡', SColor.BRIGHT_GREEN); // right hip, part of waist
-        put(4, offset + 4, '│', SColor.BRIGHT_GREEN); // left leg
-        put(6, offset + 4, '│', SColor.BRIGHT_GREEN); // right leg
-        put(4, offset + 5, '┙', SColor.BRIGHT_GREEN); // left foot
-        put(6, offset + 5, '┕', SColor.BRIGHT_GREEN); // right foot
-        put(3, offset + 1, '╭', SColor.BRIGHT_GREEN); // left arm
-        put(3, offset + 2, '│', SColor.BRIGHT_GREEN); // left arm
-        put(3, offset + 3, '╽', SColor.BRIGHT_GREEN); // left arm/hand
-        put(7, offset + 1, '╮', SColor.BRIGHT_GREEN); // right arm
-        put(7, offset + 2, '│', SColor.BRIGHT_GREEN); // right arm
-        put(7, offset + 3, '╽', SColor.BRIGHT_GREEN); // right arm/hand
+        if (physical.creatureData != null) {
+
+            /*
+            Ω
+          ╭┬╨┬╮
+          ││#││
+          ╽╞═╡╽
+           │ │
+           ┙ ┕
+             */
+            offset += Stat.healths.length + 1;
+            EquippedData ed = physical.creatureData.equippedData;
+            EnumMap<ClothingSlot, Physical> armor = ed == null ? new EnumMap<>(ClothingSlot.class) : ed.getArmor();
+            // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
+            double actual = 0;
+            double base = 0;
+            Physical p = armor.get(ClothingSlot.HEAD);
+            if (p != null) {
+                LiveValue lv = p.stats.get(Stat.STRUCTURE);
+                if (lv != null) {
+                    actual += lv.actual();
+                    base += lv.base();
+                }
+            }
+            p = armor.get(ClothingSlot.FACE);
+            if (p != null) {
+                LiveValue lv = p.stats.get(Stat.STRUCTURE);
+                if (lv != null) {
+                    actual += lv.actual();
+                    base += lv.base();
+                }
+            }
+
+            put(5, offset + 0, 'Ω', base <= 0 ? Rating.NONE.color() : percentColor(actual, base)); // head
+            put(4, offset + 1, '┬', rng.getRandomElement(Rating.values()).color()); // left shoulder
+            put(5, offset + 1, '╨', rng.getRandomElement(Rating.values()).color()); // neck
+            put(6, offset + 1, '┬', rng.getRandomElement(Rating.values()).color()); // right shoulder
+            put(4, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // chest
+            put(5, offset + 2, '#', rng.getRandomElement(Rating.values()).color()); // chest
+            put(6, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // chest
+            put(4, offset + 3, '╞', rng.getRandomElement(Rating.values()).color()); // left hip, part of waist
+            put(5, offset + 3, '═', rng.getRandomElement(Rating.values()).color()); // waist/groin
+            put(6, offset + 3, '╡', rng.getRandomElement(Rating.values()).color()); // right hip, part of waist
+            put(4, offset + 4, '│', rng.getRandomElement(Rating.values()).color()); // left leg
+            put(6, offset + 4, '│', rng.getRandomElement(Rating.values()).color()); // right leg
+            put(4, offset + 5, '┙', rng.getRandomElement(Rating.values()).color()); // left foot
+            put(6, offset + 5, '┕', rng.getRandomElement(Rating.values()).color()); // right foot
+            put(3, offset + 1, '╭', rng.getRandomElement(Rating.values()).color()); // left arm
+            put(3, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // left arm
+            put(3, offset + 3, '╽', rng.getRandomElement(Rating.values()).color()); // left arm/hand
+            put(7, offset + 1, '╮', rng.getRandomElement(Rating.values()).color()); // right arm
+            put(7, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // right arm
+            put(7, offset + 3, '╽', rng.getRandomElement(Rating.values()).color()); // right arm/hand
+            put(3, offset + 6, "Armor");
+        }
+    }
+
+    private Color percentColor(double actual, double base) {
+        double filling = actual / base;
+        if (filling <= 1) {
+            return colorCenter.lerp(SColor.RED, SColor.BRIGHT_GREEN, filling);
+        } else {
+            return colorCenter.lerp(SColor.BRIGHT_GREEN, SColor.BABY_BLUE, filling - 1);
+        }
+    }
+
+    private void showStats(int offset, Stat[] stats, Physical physical) {
+        int biggest = Arrays.stream(stats)
+            .map(s -> physical.stats.get(s))
+            .filter(s -> s != null)
+            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
+            .max()
+            .getAsInt();
+        int biggestLength = Integer.toString(biggest).length();
+        String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
+
+        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
+            Color color = physical.statProgression.get(stats[s]).color();
+            put(1, s + offset, stats[s].toString(), color);
+
+            double actual = physical.stats.get(stats[s]).actual();
+            double base = physical.stats.get(stats[s]).base();
+            String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
+            color = percentColor(actual, base);
+            put(widestStatSize + 2, s + offset, numberText, color);
+
+            int blockValue = width - 2 - widestStatSize - 2 - numberText.length() - 1; // Calc how much horizontal space is left
+            double filling = actual / biggest;
+            int fullBlocks = (int) (filling * blockValue);
+            double remainder = (filling * blockValue) % 1;
+            remainder *= 7;
+            String blockText = "";
+            for (int i = 0; i < fullBlocks; i++) {
+                blockText += eighthBlocks[7];
+            }
+            remainder = Math.max(remainder, 0);
+            blockText += eighthBlocks[(int) Math.ceil(remainder)];
+            put(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
+        }
     }
 }
