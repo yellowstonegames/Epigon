@@ -1,0 +1,36 @@
+﻿[
+{	"name": "salad"},
+{	"name": "pie"},
+{
+	"name": "cosmetics",
+	"plural": "cosmetics"
+},
+{	"parent": "cosmetics",
+	"name": "perfume",
+	"plural": "units of perfume",
+	"color": "lavender",
+	
+	"materialPhase": {
+		"phase": "liquid",
+		"viscosity": 1,
+		"ingested": {
+			"health": "wits",
+			"increases": false,
+			"element": "poison",
+			"amount": 5
+		},
+		"external": {
+			"stat": "appearance",
+			"increases": true,
+			"element": "nature",
+			"amount": 1
+		}
+	}
+},
+{	"name": "jelly",
+	"plural": "jellies",
+	"materialPhase": {"phase": "liquid"}
+},
+{	"name": "alcohol",
+	"plural": "units of alcohol"}
+]

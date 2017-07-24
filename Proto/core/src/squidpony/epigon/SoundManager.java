@@ -19,7 +19,7 @@ import static squidpony.epigon.Epigon.rng;
 public class SoundManager {
 
     private static final String footstep = "footstep0";
-    private static final int totalFoosteps = 9;
+    private static final int totalFootsteps = 9;
     private int lastFootstep = 0;
 
     private boolean musicLoaded = false, soundfxLoaded = false;
@@ -196,7 +196,7 @@ public class SoundManager {
     public void playFootstep(){
         int step;
         do {
-            step = rng.nextInt(totalFoosteps);
+            step = rng.nextInt(totalFootsteps);
         } while (step == lastFootstep);
 
         playSoundFX(footstep + step);
