@@ -11,10 +11,8 @@ import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.infoSize;
 import static squidpony.epigon.Epigon.rng;
@@ -307,11 +305,11 @@ public class InfoHandler {
         String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
 
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
-            Color color = physical.statProgression.get(stats[s]).color();
+            Color color = physical.statProgression.getOrDefault(stats[s], Rating.NONE).color();
             put(1, s + offset, stats[s].toString(), color);
 
-            double actual = physical.stats.get(stats[s]).actual();
-            double base = physical.stats.get(stats[s]).base();
+            double actual = physical.stats.getOrDefault(stats[s], LiveValue.ZERO).actual();
+            double base = physical.stats.getOrDefault(stats[s], LiveValue.ZERO).base();
             String numberText = String.format(format, (int) Math.ceil(actual), (int) Math.ceil(base));
             color = percentColor(actual, base);
             put(widestStatSize + 2, s + offset, numberText, color);

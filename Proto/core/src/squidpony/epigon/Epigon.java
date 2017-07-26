@@ -557,7 +557,7 @@ public class Epigon extends Game {
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
                     putMap();
-            infoHandler.updateDisplay();
+                    infoHandler.updateDisplay();
                 }
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
@@ -858,6 +858,9 @@ public class Epigon extends Game {
             mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            if (screenX < 0 || screenX >= infoSize.gridWidth || screenY < 0 || screenY >= infoSize.gridHeight){
+                return false;
+            }
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (screenX == contextHandler.arrowLeft.x && screenY == contextHandler.arrowLeft.y){

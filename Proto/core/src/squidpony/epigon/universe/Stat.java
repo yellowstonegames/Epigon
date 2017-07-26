@@ -63,9 +63,11 @@ public enum Stat {
 
     public static final Stat[] magicals = {POTENCY, ATTUNEMENT, DOMINION};
 
+    public static final Stat[] intellects = {IQ, CREATIVITY, KNOWLEDGE};
+
     public static final Stat[] socials = {APPEARANCE, CONVICTION, AUTHORITY};
 
-    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, DOMINION, APPEARANCE, CONVICTION, AUTHORITY};
+    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, DOMINION, IQ, CREATIVITY, KNOWLEDGE, APPEARANCE, CONVICTION, AUTHORITY};
 
     public static final Stat[] healths = {LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM, SANITY};
 
