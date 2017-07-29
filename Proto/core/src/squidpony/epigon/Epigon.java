@@ -513,17 +513,18 @@ public class Epigon extends Game {
 //                    Color back;
                     if (sightAmount > 0) {
                         EpiTile tile = map.contents[x][y];
-                        //fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
-                        //back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
-                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor()
-                                , 280 + (int) (50 * sightAmount));
+//                        fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
+//                        back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
+                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor(),
+                             280 + (int) (50 * sightAmount));
                     } else {
                         RememberedTile rt = map.remembered[x][y];
                         if (rt != null) {
                             mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
-                        } /*else {
-                            mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, bgColor);
-                        }*/
+                        }
+//                        else {
+//                            mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, bgColor);
+//                        }
                     }
                 }
             }
@@ -613,30 +614,24 @@ public class Epigon extends Game {
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        //very important to have the mouse behave correctly if the user fullscreens or resizes the game!
 
-        // message box won't respond to clicks on the far right if the stage hasn't been updated with a larger size
         float currentZoomX = (float) width / totalPixelWidth();
-        // total new screen height in pixels divided by total previous screen height in pixels
         float currentZoomY = (float) height / totalPixelHeight();
 
-        // message box should be given updated bounds since I don't think it will do this automatically
         messageSLayers.setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         mapInput.getMouse().reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-                mapSize.gridWidth, mapSize.gridHeight, 0, 0);
+            mapSize.gridWidth, mapSize.gridHeight, 0, 0);
         contextInput.getMouse().reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
-                contextSize.gridWidth, contextSize.gridHeight,
-                -(int) (messageSLayers.getRight()),
-                -(int) (infoSLayers.getTop() + 8f));
-
-        //currentZoomX = CELL_WIDTH / currentZoomX;
-        //currentZoomY = CELL_HEIGHT / currentZoomY;
-        //printText.bmpFont.getData().lineHeight /= currentZoomY;
-        //printText.bmpFont.getData().descent /= currentZoomY;
+            contextSize.gridWidth, contextSize.gridHeight,
+            -(int) (messageSLayers.getRight()),
+            -(int) (infoSLayers.getTop() + 8f));
+        infoInput.getMouse().reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
+            infoSize.gridWidth, infoSize.gridHeight,
+            -(int) (messageSLayers.getRight()), 0);
 
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
@@ -888,7 +883,7 @@ public class Epigon extends Game {
     });
 
     private final SquidMouse infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, 0, new InputAdapter() {
+            mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             System.out.println("info: " + screenX + ", " + screenY);
