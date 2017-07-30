@@ -70,7 +70,6 @@ public class InfoHandler {
     private int width;
     private int height;
     private InfoMode infoMode = InfoMode.HEALTH_AND_ARMOR;
-    private EnumMap<InfoMode, char[][]> cachedTexts = new EnumMap<>(InfoMode.class);
     private SquidColorCenter colorCenter;
     private Physical player;
     private Physical target;
