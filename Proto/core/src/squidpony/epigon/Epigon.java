@@ -39,6 +39,8 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import squidpony.epigon.display.FxHandler;
+import squidpony.epigon.universe.Element;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -81,6 +83,7 @@ public class Epigon extends Game {
     // World
     private WorldGenerator worldGenerator;
     private EpiMap map;
+    private FxHandler fxHandler;
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
     private GreasedRegion blocked;
@@ -185,15 +188,15 @@ public class Epigon extends Game {
             new char[map.width][map.height]);
         ArrayTools.fill(mapSLayers.getForegroundLayer().colors, 0f);
         ArrayTools.fill(mapSLayers.getBackgroundLayer().colors, bgColor.toFloatBits());
+        SquidPanel fx = mapSLayers.addExtraLayer().getLayer(3);//first added panel adds at level 3
+        fxHandler = new FxHandler(mapSLayers, fx, colorCenter);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
 
         mapSLayers.setTextSize(mapSize.cellWidth + 1.5f, mapSize.cellHeight + 2f); // weirdly, this seems to help with flicker
-        //contextSLayers.setTextSize(infoSize.cellWidth + 1.25f, infoSize.cellHeight + 1.25f);
-        //infoSLayers.setTextSize(infoSize.cellWidth + 1.2f, infoSize.cellHeight + 1.2f);
         smallFont.tweakWidth(infoSize.cellWidth + 1.5f).tweakHeight(infoSize.cellHeight + 3f).setSmoothingMultiplier(1.6f).initBySize();
-        //infoSLayers.setTextSize(infoSize.cellWidth + 8, infoSize.cellHeight + 12);
+
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         mapSLayers.setAnimationDuration(0.145f);
 
@@ -281,8 +284,6 @@ public class Epigon extends Game {
     }
 
     private void runTurn() {
-        putMap();
-
         for (Physical creature : creatures) {
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0 || map.remembered[c.x][c.y] != null)) {
@@ -298,17 +299,12 @@ public class Epigon extends Game {
                                 }
                         );
                         mapSLayers.put(c.x, c.y, map.contents[c.x][c.y].floor.symbol, map.contents[c.x][c.y].floor.color);
-//                        Timer.schedule(new Task() {
-//                            @Override
-//                            public void run() {
-//                                map.contents[step.x][step.y].add(creature);
-//                                creature.location = step;
-//                            }
-//                        }, mapSLayers.getAnimationDuration());
                     }
                 }
             }
         }
+
+        putMap();
 
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
@@ -509,12 +505,8 @@ public class Epigon extends Game {
             for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
                 if (map.inBounds(Coord.get(x, y))) {
                     double sightAmount = fovResult[x][y];
-//                    Color fore;
-//                    Color back;
                     if (sightAmount > 0) {
                         EpiTile tile = map.contents[x][y];
-//                        fore = calcFadeoutColor(tile.getForegroundColor(), sightAmount);
-//                        back = calcFadeoutColor(tile.getBackgroundColor(), sightAmount);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor(),
                              280 + (int) (50 * sightAmount));
                     } else {
@@ -522,9 +514,6 @@ public class Epigon extends Game {
                         if (rt != null) {
                             mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
                         }
-//                        else {
-//                            mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, bgColor);
-//                        }
                     }
                 }
             }
@@ -680,6 +669,9 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
+                case 'x':
+                    fxHandler.elementBurst(player.location, Element.MAGMA, 3, Radius.CIRCLE);
+                    break;
                 case '[':
                     contextHandler.prior();
                     break;
