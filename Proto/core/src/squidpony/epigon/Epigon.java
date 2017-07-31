@@ -16,6 +16,7 @@ import squidpony.ArrayTools;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.display.ContextHandler;
+import squidpony.epigon.display.FxHandler;
 import squidpony.epigon.display.InfoHandler;
 import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.dm.RecipeMixer;
@@ -24,6 +25,7 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidai.DijkstraMap;
@@ -39,8 +41,6 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import squidpony.epigon.display.FxHandler;
-import squidpony.epigon.universe.Element;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -188,8 +188,6 @@ public class Epigon extends Game {
             new char[map.width][map.height]);
         ArrayTools.fill(mapSLayers.getForegroundLayer().colors, 0f);
         ArrayTools.fill(mapSLayers.getBackgroundLayer().colors, bgColor.toFloatBits());
-        SquidPanel fx = mapSLayers.addExtraLayer().getLayer(3);//first added panel adds at level 3
-        fxHandler = new FxHandler(mapSLayers, fx, colorCenter);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
@@ -230,6 +228,8 @@ public class Epigon extends Game {
     private void startGame() {
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
+        SquidPanel fx = mapSLayers.addExtraLayer().getLayer(3);//first added panel adds at level 3
+        fxHandler = new FxHandler(fx, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
         map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
@@ -670,7 +670,7 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
                 case 'x':
-                    fxHandler.elementBurst(player.location, Element.MAGMA, 3, Radius.CIRCLE);
+                    fxHandler.elementBurst(player.location, Element.SONIC, 5, Radius.CIRCLE);
                     break;
                 case '[':
                     contextHandler.prior();

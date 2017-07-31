@@ -15,17 +15,16 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     NATURE(),
     STONE(NATURE),
     CRYSTAL(STONE),
-    FIRE(NATURE, "fire", "hot hot hot", SColor.FIREBRICK),
-    MAGMA(FIRE, "magma", "flowing hotness", SColor.BURNT_ORANGE),
+    FIRE(NATURE, "fire", "hot hot hot", SColor.ORANGE_PEEL),
+    MAGMA(FIRE, "magma", "flowing hotness", SColor.CW_BRIGHT_ORANGE),
     AIR(NATURE),
     // if you have magma, then smoke makes sense.
-    SONIC(NATURE),
-    ACID(NATURE),
-    CAUSTIC(NATURE),
-    ICE(NATURE),
-    WATER(NATURE),
-    LIGHTNING(NATURE),
-    // You probably want electrical/lightning. This is a bizarre omission as it stands.
+    SONIC(NATURE, "sonic", "THEN THE BASS GOES BRRRRR WRRRR WOOP WOOP WOOP", new SColor(0xE3, 0xD7, 0xB4, 0x55, "Smoky Glass")),
+    ACID(NATURE, "acid", "*Kssshh...* AYEEEE, IT BURNS!", SColor.CW_BRIGHT_LIME),
+    CAUSTIC(NATURE, "caustic", "lay in the lye, just may die", SColor.CW_SEAFOAM),
+    ICE(NATURE, "ice", "frosty chillin", SColor.CW_PALE_AZURE),
+    WATER(NATURE, "water", "go with the flow", SColor.CW_FLUSH_AZURE),
+    LIGHTNING(NATURE, "lightning", "DON'T TASE ME BRO", SColor.CW_LIGHT_VIOLET),
     // Maybe you want a disease element? Maybe radiation (possibly magical or nuclear)?
     POISON(NATURE),
 
