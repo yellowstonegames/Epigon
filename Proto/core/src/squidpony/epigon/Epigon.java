@@ -54,7 +54,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
 
-    public static final long seed = 0xBEEFD00DFADEFA1L;
+    public static final long seed = 0xBEEFD00DFADEFEEL;
     // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
     public static final LightRNG lightRNG = new LightRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(lightRNG);
@@ -670,7 +670,7 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
                 case 'x':
-                    fxHandler.elementBurst(player.location, Element.SONIC, 5, Radius.CIRCLE);
+                    fxHandler.elementBurst(player.location, Element.ACID, 8, Radius.SQUARE);
                     break;
                 case '[':
                     contextHandler.prior();
