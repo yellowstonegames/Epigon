@@ -13,6 +13,7 @@ import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.DungeonUtility;
 
 import static squidpony.epigon.Epigon.*;
+import squidpony.squidgrid.mapping.OrganicMapGenerator;
 
 /**
  * Creates and populates a world.
@@ -42,12 +43,15 @@ public class WorldGenerator {
 
         makeSolid();
 
-        DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
-        //sdg.addGrass(15);
-        sdg.addWater(15);
-        sdg.addDoors(20, true);
-        sdg.addGrass(10);
-        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
+//        DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
+//        //sdg.addGrass(15);
+//        sdg.addWater(15);
+//        sdg.addDoors(20, true);
+//        sdg.addGrass(10);
+//        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
+
+        OrganicMapGenerator omg = new OrganicMapGenerator(width, height, rng);
+        char[][] simpleChars = omg.generate();
 
         EpiTile tile;
         Physical adding;
