@@ -25,12 +25,13 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     ICE(NATURE, "ice", "frosty chillin", SColor.CW_PALE_AZURE),
     WATER(NATURE, "water", "go with the flow", SColor.CW_FLUSH_AZURE),
     LIGHTNING(NATURE, "lightning", "DON'T TASE ME BRO", SColor.CW_LIGHT_VIOLET),
-    // Maybe you want a disease element? Maybe radiation (possibly magical or nuclear)?
     POISON(NATURE),
+    DISEASE(NATURE),
+    RADIATION(NATURE),
 
     // Magical
     MAGIC(),
-    GEOMANCY(MAGIC), // Is this ley line location magic, feng-shui-like sacred geometry, or just dirt magic?
+    GEOMANCY(MAGIC), // Is this ley line location magic, feng-shui-like sacred geometry, or just dirt magic? Answer: just dirt
     CHRONOMANCY(MAGIC),
     // transforming (polymorph) attacks work well as an element that, instead of killing, changes the target's shape
     // may want divine/morally-based magic, which might just smite anyone who isn't the user
@@ -45,7 +46,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     GRAVITY(ASTRONOMICAL),
     PLANETARY(ASTRONOMICAL),
     METEORIC(ASTRONOMICAL),
-    // maybe you want a VACUOUS element for the empty void between cosmic bodies?
+    VACUOUS(ASTRONOMICAL),
     // Misc
     LIGHT(null, "light", "Basic lighting, not related to magical or other effects.", SColor.ALICE_BLUE),
     DEATH(),
