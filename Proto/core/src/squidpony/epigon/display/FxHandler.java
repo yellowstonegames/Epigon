@@ -1,21 +1,25 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.List;
-import java.util.stream.Collectors;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
-import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.GreasedRegion;
-
-import static squidpony.epigon.Epigon.rng;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
+import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.gui.gdx.PanelEffect;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SquidPanel;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.SeededNoise;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -45,7 +49,8 @@ public class FxHandler {
     public void elementBurst(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
                 origin, size,
-                Maker.makeList(colorCenter.saturate(element.color, 0.3), // for some reason this now gives error: incompatible types: no instance(s) of type variable(s) T exist so that ArrayList<T> conforms to double
+                90.0, // the constructor below takes a double before it takes the List<Color>; this was missing
+                Maker.makeList(colorCenter.saturate(element.color, 0.3),
                         colorCenter.light(colorCenter.saturate(element.color, 0.15)),
                         colorCenter.lightest(element.color),
                         colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
