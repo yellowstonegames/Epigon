@@ -4,20 +4,15 @@ import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
-import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.PanelEffect;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidPanel;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.SeededNoise;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
 
@@ -49,7 +44,8 @@ public class FxHandler {
     public void elementBurst(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
                 origin, size,
-                90.0, // the constructor below takes a double before it takes the List<Color>; this was missing
+                rng.nextDouble(360.0), // the constructor below takes a double before it takes the List<Color>; this was missing
+                radius,
                 Maker.makeList(colorCenter.saturate(element.color, 0.3),
                         colorCenter.light(colorCenter.saturate(element.color, 0.15)),
                         colorCenter.lightest(element.color),
@@ -70,10 +66,6 @@ public class FxHandler {
 
     public static class ConeEffect extends PanelEffect
     {
-        private final Coord center;
-        private final double angle; // This is the full angle of the bilaterally symmetrical shaped triangle coming from the source
-        private final int distance;
-
         /**
          * The default explosion colors are normal for (non-chemical, non-electrical) fire and smoke, going from orange
          * at the start to yellow, very light yellow, and then back to a different orange before going to smoke and
@@ -110,27 +102,25 @@ public class FxHandler {
          */
         public List<Coord> affected;
 
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle)
+        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius)
         {
             super(targeting, duration, valid);
-            this.center = center;
-            this.distance = distance;
-            this.angle = angle;
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
-            FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance);
+            FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius, angle, 75.0);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
-            affected = Radius.inCircle(center.x, center.y, distance, false, validCells.width, validCells.height)
-                .stream()
-                .filter(c -> Direction.toGoTo(center, c) == Direction.UP)
-                .collect(Collectors.toList());
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+//            affected = Radius.inCircle(center.x, center.y, distance, false, validCells.width, validCells.height)
+//                .stream()
+//                .filter(c -> Direction.toGoTo(center, c) == Direction.UP)
+//                .collect(Collectors.toList());
         }
 
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, List<? extends Color> coloring)
+        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring)
         {
-            this(targeting, duration, valid, center, distance, angle);
+            this(targeting, duration, valid, center, distance, angle, radius);
             if(colors.length != coloring.size())
                 colors = new float[coloring.size()];
             for (int i = 0; i < colors.length; i++) {

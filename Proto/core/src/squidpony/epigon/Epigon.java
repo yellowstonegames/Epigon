@@ -670,7 +670,7 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
                 case 'x':
-                    fxHandler.elementBurst(player.location, Element.ACID, 8, Radius.SQUARE);
+                    fxHandler.elementBurst(player.location, Element.ACID, 7, Radius.CIRCLE);
                     break;
                 case '[':
                     contextHandler.prior();
