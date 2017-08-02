@@ -45,7 +45,7 @@ public class FxHandler {
     public void elementBurst(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
                 origin, size,
-                Maker.makeList(colorCenter.saturate(element.color, 0.3),
+                Maker.makeList(colorCenter.saturate(element.color, 0.3), // for some reason this now gives error: incompatible types: no instance(s) of type variable(s) T exist so that ArrayList<T> conforms to double
                         colorCenter.light(colorCenter.saturate(element.color, 0.15)),
                         colorCenter.lightest(element.color),
                         colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
@@ -62,16 +62,13 @@ public class FxHandler {
 //        timing += 2f;
 //        fx.summon(timing, x, y, x, y, c, color, colorCenter.desaturate(color, tint), false, 0, 0, 0.2f);
     }
+
     public static class ConeEffect extends PanelEffect
     {
-        /**
-         * Normally you should set this in the constructor, and not change it later.
-         */
-        public Coord center;
-        /**
-         * Normally you should set this in the constructor, and not change it later.
-         */
-        public int radius = 2;
+        private final Coord center;
+        private final double angle; // This is the full angle of the bilaterally symmetrical shaped triangle coming from the source
+        private final int distance;
+
         /**
          * The default explosion colors are normal for (non-chemical, non-electrical) fire and smoke, going from orange
          * at the start to yellow, very light yellow, and then back to a different orange before going to smoke and
@@ -95,87 +92,40 @@ public class FxHandler {
          * Used internally to determine how the explosion should spread; derived from {@link #validCells}.
          */
         public double[][] resMap,
+
         /**
          * The internal representation of how affected each cell is by the explosion, based on proximity to center.
          */
         lightMap;
+
         /**
          * The raw list of Coords that might be affected by the explosion; may include some cells that aren't going to
          * show as exploding (it usually has some false positives), but shouldn't exclude any cells that should show as
          * such (no false negatives). You can edit this if you need to, but it isn't recommended.
          */
         public List<Coord> affected;
-        /**
-         * Constructs an ExplosionEffect with explicit settings for some fields. The valid cells this can affect will be
-         * the full expanse of the SquidPanel. The duration will be 1 second.
-         * @param targeting the SquidPanel to affect
-         * @param center the center of the explosion
-         * @param radius the radius of the explosion, in cells
-         */
 
-        public ConeEffect(SquidPanel targeting, Coord center, int radius)
-        {
-            this(targeting, 1f, center, radius);
-        }
-        /**
-         * Constructs an ExplosionEffect with explicit settings for some fields. The valid cells this can affect will be
-         * the full expanse of the SquidPanel.
-         * @param targeting the SquidPanel to affect
-         * @param duration the duration of this PanelEffect in seconds, as a float
-         * @param center the center of the explosion
-         * @param radius the radius of the explosion, in cells
-         */
-        public ConeEffect(SquidPanel targeting, float duration, Coord center, int radius)
-        {
-            super(targeting, duration);
-            this.center = center;
-            this.radius = radius;
-            resMap = new double[validCells.width][validCells.height];
-            lightMap = new double[validCells.width][validCells.height];
-            FOV.reuseFOV(resMap, lightMap, center.x, center.y, radius);
-            affected = Radius.inCircle(center.x, center.y, radius, false, validCells.width, validCells.height)
-                .stream()
-                .filter(c -> Direction.toGoTo(center, c) == Direction.UP)
-                .collect(Collectors.toList());
-        }
-        /**
-         * Constructs an ExplosionEffect with explicit settings for most fields.
-         * @param targeting the SquidPanel to affect
-         * @param duration the duration of this PanelEffect in seconds, as a float
-         * @param valid the valid cells that can be changed by this PanelEffect, as a GreasedRegion
-         * @param center the center of the explosion
-         * @param radius the radius of the explosion, in cells
-         */
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int radius)
+        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle)
         {
             super(targeting, duration, valid);
             this.center = center;
-            this.radius = radius;
+            this.distance = distance;
+            this.angle = angle;
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
-            FOV.reuseFOV(resMap, lightMap, center.x, center.y, radius);
+            FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
-            affected = Radius.inCircle(center.x, center.y, radius, false, validCells.width, validCells.height)
+            affected = Radius.inCircle(center.x, center.y, distance, false, validCells.width, validCells.height)
                 .stream()
                 .filter(c -> Direction.toGoTo(center, c) == Direction.UP)
                 .collect(Collectors.toList());
         }
 
-        /**
-         * Constructs an ExplosionEffect with explicit settings for most fields but also an alternate group of Color
-         * objects that it will use to color the explosion instead of using fiery/smoke colors.
-         * @param targeting the SquidPanel to affect
-         * @param duration the duration of this PanelEffect in seconds, as a float
-         * @param valid the valid cells that can be changed by this PanelEffect, as a GreasedRegion
-         * @param center the center of the explosion
-         * @param radius the radius of the explosion, in cells
-         * @param coloring a List of Color or subclasses thereof that will replace the default fire/smoke colors here
-         */
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int radius, List<? extends Color> coloring)
+        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, List<? extends Color> coloring)
         {
-            this(targeting, duration, valid, center, radius);
+            this(targeting, duration, valid, center, distance, angle);
             if(colors.length != coloring.size())
                 colors = new float[coloring.size()];
             for (int i = 0; i < colors.length; i++) {
