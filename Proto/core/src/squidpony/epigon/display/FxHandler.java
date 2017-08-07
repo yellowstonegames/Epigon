@@ -1,18 +1,18 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.Collection;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.SeededNoise;
+import squidpony.squidgrid.gui.gdx.PanelEffect;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SquidPanel;
+import squidpony.squidmath.*;
 
+import java.util.Collection;
 import java.util.List;
 
 import static squidpony.epigon.Epigon.rng;
@@ -64,12 +64,24 @@ public class FxHandler {
                 colorCenter.lightest(element.color),
                 colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
                 colorCenter.desaturate(element.color, 0.3),
-                colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
-                colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f))));
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.45), 0.1),
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
+            )));
     }
 
     public static char randomBraille(){
-        return (char) rng.between(0x2801, 0x2800 + 256);
+        return (char) rng.between(0x2801, 0x2900);
+    }
+    public static String[] brailleByDots = {"⠀",
+            "⠁⠂⠄⠈⠐⠠⡀⢀",
+            "⠃⠅⠆⠉⠊⠌⠑⠒⠔⠘⠡⠢⠤⠨⠰⡁⡂⡄⡈⡐⡠⢁⢂⢄⢈⢐⢠⣀",
+            "⠇⠋⠍⠎⠓⠕⠖⠙⠚⠜⠣⠥⠦⠩⠪⠬⠱⠲⠴⠸⡃⡅⡆⡉⡊⡌⡑⡒⡔⡘⡡⡢⡤⡨⡰⢃⢅⢆⢉⢊⢌⢑⢒⢔⢘⢡⢢⢤⢨⢰⣁⣂⣄⣈⣐⣠",
+            "⠏⠗⠛⠝⠞⠧⠫⠭⠮⠳⠵⠶⠹⠺⠼⡇⡋⡍⡎⡓⡕⡖⡙⡚⡜⡣⡥⡦⡩⡪⡬⡱⡲⡴⡸⢇⢋⢍⢎⢓⢕⢖⢙⢚⢜⢣⢥⢦⢩⢪⢬⢱⢲⢴⢸⣃⣅⣆⣉⣊⣌⣑⣒⣔⣘⣡⣢⣤⣨⣰",
+            "⠟⠯⠷⠻⠽⠾⡏⡗⡛⡝⡞⡧⡫⡭⡮⡳⡵⡶⡹⡺⡼⢏⢗⢛⢝⢞⢧⢫⢭⢮⢳⢵⢶⢹⢺⢼⣇⣋⣍⣎⣓⣕⣖⣙⣚⣜⣣⣥⣦⣩⣪⣬⣱⣲⣴⣸",
+            "⠿⡟⡯⡷⡻⡽⡾⢟⢯⢷⢻⢽⢾⣏⣗⣛⣝⣞⣧⣫⣭⣮⣳⣵⣶⣹⣺⣼", "⡿⢿⣟⣯⣷⣻⣽⣾", "⣿"};
+    public static char randomBraille(long seed, int dots) {
+        String s = brailleByDots[dots % 9];
+        return s.charAt(LightRNG.determineBounded(seed, s.length()));
     }
 
     public static char brailleFor(Collection<Coord> coords) {
@@ -139,14 +151,14 @@ public class FxHandler {
             int len = affected.size();
             Coord c;
             float f, color;
-            int idx, seed = System.identityHashCode(this);
+            int idx, seed = System.identityHashCode(this), seed2 = seed;
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
                 }
-                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
-                    * 0.17f + percent * 1.2f;
+                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
+                    * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
                 }
@@ -156,7 +168,7 @@ public class FxHandler {
                 } else {
                     color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
                 }
-                target.put(c.x, c.y,randomBraille(), color);
+                target.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int)(percent * 8) + 1 : (int)(7.625 - percent * 7)), color);
             }
         }
     }
