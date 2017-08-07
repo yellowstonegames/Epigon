@@ -1,6 +1,7 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import java.util.Collection;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
@@ -24,6 +25,7 @@ import static squidpony.epigon.Epigon.rng;
 public class FxHandler {
 
     private static char[] explosionChars = new char[]{'%', '$', '&', '!'};
+    private static char[] zapChars = new char[]{};
 
     private SquidPanel fx;
     private int width;
@@ -43,25 +45,120 @@ public class FxHandler {
 
     public void elementBurst(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
-                origin, size,
-                rng.nextDouble(360.0), // the constructor below takes a double before it takes the List<Color>; this was missing
-                radius,
-                Maker.makeList(colorCenter.saturate(element.color, 0.3),
-                        colorCenter.light(colorCenter.saturate(element.color, 0.15)),
-                        colorCenter.lightest(element.color),
-                        colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
-                        colorCenter.desaturate(element.color, 0.3),
-                        colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
-                        colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0,0,0,0.85f))));
+            origin, size,
+            rng.nextDouble(360.0), // the constructor below takes a double before it takes the List<Color>; this was missing
+            radius,
+            Maker.makeList(colorCenter.saturate(element.color, 0.3),
+                colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                colorCenter.lightest(element.color),
+                colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                colorCenter.desaturate(element.color, 0.3),
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
+                colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f))));
     }
 
-    private void doBurst(int x, int y, Color color) {
-        //double tint = 0.5 + rng.nextDouble() / 4;
-        char c = explosionChars[rng.nextIntHasty(explosionChars.length)]; // this is pretty much all rng.getRandomElement does
-        float timing = rng.nextFloat() * 0.5f;
-        fx.summon(timing, x, y, x, y, c, SColor.TRANSPARENT.cpy().sub(0, 0, 0, 1f), color, false, 0, 0, 0.5f);
-//        timing += 2f;
-//        fx.summon(timing, x, y, x, y, c, color, colorCenter.desaturate(color, tint), false, 0, 0, 0.2f);
+    public void staticStorm(Coord origin, Element element, int size, Radius radius) {
+        fx.addAction(new DustEffect(fx, 1f, viable.refill(seen, 0.001, 999.0), origin, size, radius,
+            Maker.makeList(colorCenter.saturate(element.color, 0.3),
+                colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                colorCenter.lightest(element.color),
+                colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                colorCenter.desaturate(element.color, 0.3),
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
+                colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f))));
+    }
+
+    public static char randomBraille(){
+        return (char) rng.between(0x2801, 0x2800 + 256);
+    }
+
+    public static char brailleFor(Collection<Coord> coords) {
+        char b = 0x2800;
+        for (Coord c : coords) {
+            if (c.x == 0) {
+                switch (c.y) {
+                    case 0:
+                        b += 0x1;
+                        break;
+                    case 1:
+                        b += 0x2;
+                        break;
+                    case 2:
+                        b += 0x4;
+                        break;
+                    case 3:
+                        b += 0x40;
+                        break;
+                }
+            } else if (c.x == 1) {
+                switch (c.y) {
+                    case 0:
+                        b += 0x8;
+                        break;
+                    case 1:
+                        b += 0x10;
+                        break;
+                    case 2:
+                        b += 0x20;
+                        break;
+                    case 3:
+                        b += 0x80;
+                        break;
+                }
+            }
+        }
+        return b;
+    }
+    
+    public static class DustEffect extends PanelEffect
+    {
+        public float[] colors;
+
+        public double[][] resMap,
+            lightMap;
+
+        public List<Coord> affected;
+
+        public DustEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, Radius radius, List<? extends Color> coloring) {
+            super(targeting, duration, valid);
+            resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
+            validCells.writeDoublesInto(resMap, 0.0);
+            lightMap = new double[validCells.width][validCells.height];
+            FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius);
+            validCells.not().writeDoublesInto(lightMap, 0.0);
+            validCells.not();
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+            colors = new float[coloring.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = coloring.get(i).toFloatBits();
+            }
+        }
+
+        @Override
+        protected void update(float percent) {
+            int len = affected.size();
+            Coord c;
+            float f, color;
+            int idx, seed = System.identityHashCode(this);
+            for (int i = 0; i < len; i++) {
+                c = affected.get(i);
+                if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
+                    continue;
+                }
+                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                    * 0.17f + percent * 1.2f;
+                if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
+                    continue;
+                }
+                idx = (int) (f * colors.length);
+                if (idx >= colors.length - 1) {
+                    color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+                } else {
+                    color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+                }
+                target.put(c.x, c.y,randomBraille(), color);
+            }
+        }
     }
 
     public static class ConeEffect extends PanelEffect
@@ -112,10 +209,6 @@ public class FxHandler {
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
             affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
-//            affected = Radius.inCircle(center.x, center.y, distance, false, validCells.width, validCells.height)
-//                .stream()
-//                .filter(c -> Direction.toGoTo(center, c) == Direction.UP)
-//                .collect(Collectors.toList());
         }
 
         public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring)

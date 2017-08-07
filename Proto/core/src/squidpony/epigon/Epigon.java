@@ -672,6 +672,9 @@ public class Epigon extends Game {
                 case 'x':
                     fxHandler.elementBurst(player.location, Element.ACID, 7, Radius.CIRCLE);
                     break;
+                case 'z':
+                    fxHandler.staticStorm(player.location, Element.LIGHTNING, 7, Radius.CIRCLE);
+                    break;
                 case '[':
                     contextHandler.prior();
                     break;
