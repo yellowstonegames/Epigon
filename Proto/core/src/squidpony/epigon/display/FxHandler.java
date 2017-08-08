@@ -69,6 +69,23 @@ public class FxHandler {
             )));
     }
 
+    public void twinkle(Coord origin, Element element) {
+        fx.addAction(new TwinkleEffect(fx, (float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
+            Maker.makeList(
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
+                colorCenter.desaturate(element.color, 0.3),
+                colorCenter.saturate(element.color, 0.3),
+                colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                colorCenter.lightest(element.color),
+                colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                colorCenter.desaturate(element.color, 0.3),
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.45), 0.1),
+                colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
+            )));
+    }
+
+    public static String twinkles = "+※+¤";
+
     public static char randomBraille(){
         return (char) rng.between(0x2801, 0x2900);
     }
@@ -121,9 +138,39 @@ public class FxHandler {
         }
         return b;
     }
-    
-    public static class DustEffect extends PanelEffect
-    {
+
+    public static class TwinkleEffect extends PanelEffect {
+        public int cycles;
+        public float[] colors;
+        public Coord c;
+
+        public TwinkleEffect(SquidPanel targeting, float duration, int cycles, Coord center, List<? extends Color> coloring) {
+            super(targeting, duration);
+            this.cycles = cycles;
+            c = center;
+            colors = new float[coloring.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = coloring.get(i).toFloatBits();
+            }
+        }
+
+        @Override
+        protected void update(float percent) {
+            float f, color;
+            int idx, seed = System.identityHashCode(this);
+            f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
+            idx = (int) (f * colors.length);
+            if (idx >= colors.length - 1) {
+                color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+            } else {
+                color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+            }
+            target.put(c.x, c.y, twinkles.charAt((int)Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color);
+        }
+    }
+
+    public static class DustEffect extends PanelEffect {
+
         public float[] colors;
 
         public double[][] resMap,

@@ -675,6 +675,11 @@ public class Epigon extends Game {
                 case 'z':
                     fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
                     break;
+                case 'Z':
+                    for (Coord c : rng.getRandomUniqueCells(mapSLayers.getGridOffsetX(), mapSLayers.getGridOffsetY(), mapSize.gridWidth, mapSize.gridHeight, 90)) {
+                        fxHandler.twinkle(c, Element.LIGHT);
+                    }
+                    break;
                 case '[':
                     contextHandler.prior();
                     break;
