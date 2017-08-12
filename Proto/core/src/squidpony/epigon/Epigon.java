@@ -243,22 +243,26 @@ public class Epigon extends Game {
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
         player.location = floors.singleRandom(rng);
-        Arrays.stream(Direction.OUTWARDS)
-            .map(d -> player.location.translate(d))
-            .filter(c -> map.inBounds(c))
-            .filter(c -> rng.nextBoolean())
-            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
+
+//        Arrays.stream(Direction.OUTWARDS)
+//            .map(d -> player.location.translate(d))
+//            .filter(c -> map.inBounds(c))
+//            .filter(c -> rng.nextBoolean())
+//            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
+
+
         infoHandler.setPlayer(player);
 
-        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
-            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
-                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
-                mixer.applyModification(p, handBuilt.makeAlive);
-                p.location = coord;
-                map.contents[coord.x][coord.y].add(p);
-                creatures.add(p);
-            }
-        }
+        // NOTE - turn off creatures while testing other things
+//        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
+//            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
+//                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
+//                mixer.applyModification(p, handBuilt.makeAlive);
+//                p.location = coord;
+//                map.contents[coord.x][coord.y].add(p);
+//                creatures.add(p);
+//            }
+//        }
 
         playerEntity = mapSLayers.animateActor(player.location.x, player.location.y, player.symbol, player.color);
 
@@ -522,10 +526,11 @@ public class Epigon extends Game {
         // Clear the tile the player is on
         mapSLayers.put(player.location.x, player.location.y, ' ', player.color);
 
-        for (Coord pt : toCursor) {
-            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-            mapSLayers.highlight(pt.x, pt.y, 100);
-        }
+        // NOTE - turned off while testing things
+//        for (Coord pt : toCursor) {
+//            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
+//            mapSLayers.highlight(pt.x, pt.y, 100);
+//        }
     }
 
     @Override
@@ -670,7 +675,11 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             switch (key) {
                 case 'x':
-                    fxHandler.elementBurst(player.location, Element.ACID, 7, Radius.CIRCLE);
+                    fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
+                    break;
+                case 'X':
+                    Element e = rng.getRandomElement(new Element[]{Element.LIGHTNING, Element.ACID, Element.CAUSTIC, Element.ICE, Element.WATER, Element.FIRE, Element.MAGMA});
+                    fxHandler.zapBoom(player.location, player.location.add(Coord.get(rng.between(-20, 20), rng.between(-10, 10))), e);
                     break;
                 case 'z':
                     fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);

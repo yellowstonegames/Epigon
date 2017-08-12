@@ -1,6 +1,7 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
@@ -14,8 +15,13 @@ import squidpony.squidmath.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.squidgrid.Direction;
+import squidpony.squidgrid.LOS;
+import squidpony.squidgrid.gui.gdx.AnimatedEntity;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -43,10 +49,10 @@ public class FxHandler {
         seen = visible;
     }
 
-    public void elementBurst(Coord origin, Element element, int size, Radius radius) {
+    public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
             origin, size,
-            rng.nextDouble(360.0), // the constructor below takes a double before it takes the List<Color>; this was missing
+            rng.nextDouble(360.0),
             radius,
             Maker.makeList(colorCenter.saturate(element.color, 0.3),
                 colorCenter.light(colorCenter.saturate(element.color, 0.15)),
@@ -82,6 +88,23 @@ public class FxHandler {
                 colorCenter.dim(colorCenter.desaturate(element.color, 0.45), 0.1),
                 colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
             )));
+    }
+
+    public void line(Coord origin, Coord end, Element element) {
+        Coord[] path = Bresenham.line2D_(origin, end);
+        fx.addAction(new LineEffect(fx, path.length * 0.2f, path,
+            colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 32)));
+    }
+
+    public void zapBoom(Coord origin, Coord end, Element element) {
+        Coord[] path = Bresenham.line2D_(origin, end);
+        List<Color> colors = colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 6);
+        fx.addAction(
+            Actions.sequence(
+                new LineEffect(fx, path.length * 0.06f, path, colors),
+                Actions.parallel(
+                    new TwinkleEffect(fx, 0.4f, rng.between(2, 4), end, colors.stream().map(c -> colorCenter.lighter(c)).collect(Collectors.toList())),
+                    new DustEffect(fx, 0.3f, viable.refill(seen, 0.001, 999.0), end, 3, Radius.DIAMOND, colors))));
     }
 
     public static String twinkles = "+※+¤";
@@ -139,6 +162,58 @@ public class FxHandler {
         return b;
     }
 
+    /**
+     * Provides a String full of lines appropriate for the direction. If a stable set is
+     * desired, using the first character from the set returned will work nicely.
+     */
+    public static String linesFor(Direction dir) {
+        switch (dir) {
+            case DOWN:
+            case UP:
+                return "|｜∣ǀ";
+            case DOWN_LEFT:
+            case UP_RIGHT:
+                return "/／╱⁄";
+            case DOWN_RIGHT:
+            case UP_LEFT:
+                return "\\＼╲";
+            case LEFT:
+            case RIGHT:
+                return "-－−‐‑‒–—―";
+            case NONE:
+            default:
+                return "+＋✚✕✖✗";
+        }
+    }
+
+    /**
+     * Provides a String full of arrows appropriate for the direction. If a stable set is
+     * desired, using the first character from the set returned will work nicely.
+     */
+    public static String arrowsFor(Direction dir) {
+        switch (dir) {
+            case DOWN:
+                return "↓↡";
+            case DOWN_LEFT:
+                return "↙";
+            case DOWN_RIGHT:
+                return "↘";
+            case LEFT:
+                return "←↞↢";
+            case UP:
+                return "↑↟";
+            case UP_LEFT:
+                return "↖";
+            case UP_RIGHT:
+                return "↗";
+            case RIGHT:
+                return "→↠↣";
+            case NONE:
+            default:
+                return "⊙⊛";
+        }
+    }
+
     public static class TwinkleEffect extends PanelEffect {
         public int cycles;
         public float[] colors;
@@ -155,6 +230,12 @@ public class FxHandler {
         }
 
         @Override
+        protected void end() {
+            super.end();
+            target.clear(c.x, c.y);
+        }
+
+        @Override
         protected void update(float percent) {
             float f, color;
             int idx, seed = System.identityHashCode(this);
@@ -166,6 +247,53 @@ public class FxHandler {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
             target.put(c.x, c.y, twinkles.charAt((int)Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color);
+        }
+    }
+
+    public static class LineEffect extends PanelEffect {
+
+        public float[] colors;
+        public Coord[] path;
+
+        public LineEffect(SquidPanel targeting, float duration, Coord[] path, List<? extends Color> coloring) {
+            super(targeting, duration);
+            this.path = path;
+
+            colors = new float[coloring.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = coloring.get(i).toFloatBits();
+            }
+        }
+
+        @Override
+        protected void end() {
+            super.end();
+            target.clear(path[path.length - 1].x, path[path.length - 1].y);
+        }
+
+        @Override
+        protected void update(float percent) {
+            float pathPercent = path.length * percent;
+            int pathIndex = Math.min(path.length - 1, Math.round(pathPercent));
+            pathPercent %= 1; // get just the fractional part
+            Coord c = path[pathIndex];
+            String lines;
+
+            if (pathIndex == 0) {
+                lines = linesFor(Direction.toGoTo(c, path[pathIndex + 1]));
+            } else {
+                lines = linesFor(Direction.toGoTo(path[pathIndex - 1], c));
+            }
+
+            float color = colors[Math.min(colors.length - 1, Math.round(pathPercent))];
+
+            // clear rest of line
+            for (Coord clearing : path) {
+                target.clear(clearing.x, clearing.y);
+            }
+
+            // put new line segment
+            target.put(c.x, c.y, lines.charAt(0), color);
         }
     }
 
