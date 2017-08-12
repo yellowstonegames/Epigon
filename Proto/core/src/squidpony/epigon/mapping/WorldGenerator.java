@@ -50,8 +50,20 @@ public class WorldGenerator {
 //        sdg.addGrass(10);
 //        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
 
-        OrganicMapGenerator omg = new OrganicMapGenerator(width, height, rng);
-        char[][] simpleChars = omg.generate();
+//        OrganicMapGenerator omg = new OrganicMapGenerator(width, height, rng);
+//        char[][] simpleChars = omg.generate();
+
+        char[][] simpleChars = new char[width][height];
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (x <= 0 || y <= 0 || x >= width -1 || y >= height -1){
+                    simpleChars[x][y] = '#';
+                } else {
+                    simpleChars[x][y] = '.';
+                }
+            }
+        }
 
         EpiTile tile;
         Physical adding;

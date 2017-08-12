@@ -110,7 +110,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
+        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(24));
         playerBlueprint.stats.put(Stat.HEARING, new LiveValue(12));
         playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 
