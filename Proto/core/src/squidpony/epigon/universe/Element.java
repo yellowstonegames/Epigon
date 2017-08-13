@@ -36,6 +36,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     // transforming (polymorph) attacks work well as an element that, instead of killing, changes the target's shape
     // may want divine/morally-based magic, which might just smite anyone who isn't the user
     // may want magic based on authority/bond-of-word/pacts, to fit the theme of a relative of royalty
+    CONTRACTUAL(MAGIC, SColor.STEEL_BLUE),
     // may want attacks via teleporting the target to be an element
     // Astronomical
     ASTRONOMICAL(SColor.CW_PALE_YELLOW),
