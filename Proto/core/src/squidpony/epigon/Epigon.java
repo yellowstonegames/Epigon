@@ -678,7 +678,7 @@ public class Epigon extends Game {
                     fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
                     break;
                 case 'X':
-                    Element e = rng.getRandomElement(new Element[]{Element.LIGHTNING, Element.ACID, Element.CAUSTIC, Element.ICE, Element.WATER, Element.FIRE, Element.MAGMA});
+                    Element e = rng.getRandomElement(Element.values());
                     fxHandler.zapBoom(player.location, player.location.add(Coord.get(rng.between(-20, 20), rng.between(-10, 10))), e);
                     break;
                 case 'z':
