@@ -1,15 +1,17 @@
 package squidpony.epigon.display;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidLayers;
-import squidpony.squidgrid.gui.gdx.SquidPanel;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -58,25 +60,45 @@ public class ContextHandler {
 
     private SquidPanel back;
     private SquidPanel front;
-    private SquidPanel miniMap;
+    private Actor miniMap;
     private int width;
     private int height;
+    private TextCellFactory miniMapFont;
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
     private EnumMap<ContextMode, char[][]> cachedTexts = new EnumMap<>(ContextMode.class);
 
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public ContextHandler(SquidLayers layers, SquidLayers mainMap) {
+    public ContextHandler(SquidLayers layers, SparseLayers mainMap) {
         width = layers.getGridWidth();
         height = layers.getGridHeight();
         back = layers.getBackgroundLayer();
         front = layers.getForegroundLayer();
-        miniMap = new SquidPanel(mainMap.getTotalWidth(), mainMap.getTotalHeight(),
-                layers.getTextFactory().copy().width(3f).height(3f), front.getColorCenter(), 0, mainMap.getTotalHeight() * 1.5f,
-                new char[mainMap.getTotalWidth()][mainMap.getTotalHeight()]);
-        miniMap.colors = mainMap.getForegroundLayer().colors;
-        layers.setExtraPanel(miniMap, 3);
+        miniMap = new Actor(){
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                super.draw(batch, parentAlpha);
+                float xo = getX(), yo = getY(), yOff = yo + 1f + mainMap.gridHeight * 3f;
+                mainMap.font.configureShader(batch);
+                mainMap.getLayer(0).draw(batch, miniMapFont, xo, yOff, '\u0000');
+                int x, y;
+                ArrayList<TextCellFactory.Glyph> glyphs = mainMap.glyphs;
+                for (int i = 0, n = glyphs.size(); i < n; i++) {
+                    TextCellFactory.Glyph glyph = glyphs.get(i);
+                    if(glyph == null)
+                        continue;
+                    glyph.act(Gdx.graphics.getDeltaTime());
+                    if((x = Math.round((glyph.getX() - xo) / 3)) < 0 || x >= mainMap.gridWidth ||
+                            (y = Math.round((glyph.getY() - yOff) / -3 + mainMap.gridHeight)) < 0 || y >= mainMap.gridHeight ||
+                            mainMap.backgrounds[x][y] == 0f)
+                        continue;
+                    miniMapFont.draw(batch, '\u0000', glyph.color, glyph.getX(), glyph.getY());
+                }
+            }
+        };
+        miniMapFont = mainMap.font.copy().width(3f).height(3f).initBySize();
+        layers.addActor(miniMap);
         miniMap.setVisible(false);
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);

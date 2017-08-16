@@ -1,11 +1,15 @@
 package squidpony.epigon.playground;
 
 import squidpony.Maker;
+import squidpony.epigon.data.blueprint.RecipeBlueprint;
+import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -13,13 +17,9 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.Arrays;
 import java.util.Collections;
-import static squidpony.epigon.Epigon.mixer;
 
+import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.generic.Formula;
-import squidpony.epigon.data.specific.Recipe;
-import squidpony.epigon.universe.LiveValueModification;
 
 /**
  * Contains objects to use to test out connections.
@@ -110,7 +110,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(24));
+        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
         playerBlueprint.stats.put(Stat.HEARING, new LiveValue(12));
         playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 

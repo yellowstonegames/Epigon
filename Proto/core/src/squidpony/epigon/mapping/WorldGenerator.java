@@ -1,19 +1,15 @@
 package squidpony.epigon.mapping;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.DungeonUtility;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static squidpony.epigon.Epigon.*;
-import squidpony.squidgrid.mapping.OrganicMapGenerator;
 
 /**
  * Creates and populates a world.
@@ -43,27 +39,27 @@ public class WorldGenerator {
 
         makeSolid();
 
-//        DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
-//        //sdg.addGrass(15);
-//        sdg.addWater(15);
-//        sdg.addDoors(20, true);
-//        sdg.addGrass(10);
-//        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
+        DungeonGenerator sdg = new DungeonGenerator(width, height, rng);
+        //sdg.addGrass(15);
+        sdg.addWater(15);
+        sdg.addDoors(20, true);
+        sdg.addGrass(10);
+        char[][] simpleChars = DungeonUtility.closeDoors(sdg.generate());
 
 //        OrganicMapGenerator omg = new OrganicMapGenerator(width, height, rng);
 //        char[][] simpleChars = omg.generate();
 
-        char[][] simpleChars = new char[width][height];
+//        char[][] simpleChars = new char[width][height];
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                if (x <= 0 || y <= 0 || x >= width -1 || y >= height -1){
-                    simpleChars[x][y] = '#';
-                } else {
-                    simpleChars[x][y] = '.';
-                }
-            }
-        }
+//        for (int x = 0; x < width; x++) {
+//            for (int y = 0; y < height; y++) {
+//                if (x <= 0 || y <= 0 || x >= width -1 || y >= height -1){
+//                    simpleChars[x][y] = '#';
+//                } else {
+//                    simpleChars[x][y] = '.';
+//                }
+//            }
+//        }
 
         EpiTile tile;
         Physical adding;
