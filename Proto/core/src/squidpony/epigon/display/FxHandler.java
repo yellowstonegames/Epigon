@@ -5,23 +5,20 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.universe.Element;
+import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.PanelEffect;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
-import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.LOS;
-import squidpony.squidgrid.gui.gdx.AnimatedEntity;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -33,24 +30,26 @@ public class FxHandler {
     private static char[] explosionChars = new char[]{'%', '$', '&', '!'};
     private static char[] zapChars = new char[]{};
 
-    private SquidPanel fx;
+    private SparseLayers fx;
+    private int layer;
     private int width;
     private int height;
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
     double[][] seen;
 
-    public FxHandler(SquidPanel panel, SquidColorCenter colorCenter, double[][] visible) {
-        fx = panel;
-        width = panel.gridWidth();
-        height = panel.gridHeight();
+    public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
+        fx = layers;
+        width = layers.gridWidth();
+        height = layers.gridHeight();
+        layer = layerNumber;
         this.colorCenter = colorCenter;
         viable = new GreasedRegion(visible.length, visible[0].length);
         seen = visible;
     }
 
     public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
-        fx.addAction(new ConeEffect(fx, 0.85f, viable.refill(seen, 0.001, 999.0),
+        fx.addAction(new ConeEffect(0.85f, viable.refill(seen, 0.001, 999.0),
             origin, size,
             rng.nextDouble(360.0),
             radius,
@@ -64,7 +63,7 @@ public class FxHandler {
     }
 
     public void staticStorm(Coord origin, Element element, int size, Radius radius) {
-        fx.addAction(new DustEffect(fx, 1f, viable.refill(seen, 0.001, 999.0), origin, size, radius,
+        fx.addAction(new DustEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius,
             Maker.makeList(colorCenter.saturate(element.color, 0.3),
                 colorCenter.light(colorCenter.saturate(element.color, 0.15)),
                 colorCenter.lightest(element.color),
@@ -76,7 +75,7 @@ public class FxHandler {
     }
 
     public void twinkle(Coord origin, Element element) {
-        fx.addAction(new TwinkleEffect(fx, (float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
+        fx.addAction(new TwinkleEffect((float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
             Maker.makeList(
                 colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
                 colorCenter.desaturate(element.color, 0.3),
@@ -92,7 +91,7 @@ public class FxHandler {
 
     public void line(Coord origin, Coord end, Element element) {
         Coord[] path = Bresenham.line2D_(origin, end);
-        fx.addAction(new LineEffect(fx, path.length * 0.2f, path,
+        fx.addAction(new LineEffect(path.length * 0.2f, path,
             colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 32)));
     }
 
@@ -101,10 +100,10 @@ public class FxHandler {
         List<Color> colors = colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 6);
         fx.addAction(
             Actions.sequence(
-                new LineEffect(fx, path.length * 0.06f, path, colors),
+                new LineEffect(path.length * 0.06f, path, colors),
                 Actions.parallel(
-                    new TwinkleEffect(fx, 0.4f, rng.between(2, 4), end, colors.stream().map(c -> colorCenter.lighter(c)).collect(Collectors.toList())),
-                    new DustEffect(fx, 0.3f, viable.refill(seen, 0.001, 999.0), end, 3, Radius.DIAMOND, colors))));
+                    new TwinkleEffect(0.4f, rng.between(2, 4), end, colors.stream().map(c -> colorCenter.lighter(c)).collect(Collectors.toList())),
+                    new DustEffect(0.3f, viable.refill(seen, 0.001, 999.0), end, 3, Radius.DIAMOND, colors))));
     }
 
     public static String twinkles = "+※+¤";
@@ -214,13 +213,13 @@ public class FxHandler {
         }
     }
 
-    public static class TwinkleEffect extends PanelEffect {
+    public class TwinkleEffect extends PanelEffect {
         public int cycles;
         public float[] colors;
         public Coord c;
 
-        public TwinkleEffect(SquidPanel targeting, float duration, int cycles, Coord center, List<? extends Color> coloring) {
-            super(targeting, duration);
+        public TwinkleEffect(float duration, int cycles, Coord center, List<? extends Color> coloring) {
+            super(fx, duration);
             this.cycles = cycles;
             c = center;
             colors = new float[coloring.size()];
@@ -232,7 +231,7 @@ public class FxHandler {
         @Override
         protected void end() {
             super.end();
-            target.clear(c.x, c.y);
+            fx.clear(c.x, c.y, layer);
         }
 
         @Override
@@ -246,17 +245,17 @@ public class FxHandler {
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            target.put(c.x, c.y, twinkles.charAt((int)Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color);
+            fx.put(c.x, c.y, twinkles.charAt((int)Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color, 0f, layer);
         }
     }
 
-    public static class LineEffect extends PanelEffect {
+    public class LineEffect extends PanelEffect {
 
         public float[] colors;
         public Coord[] path;
 
-        public LineEffect(SquidPanel targeting, float duration, Coord[] path, List<? extends Color> coloring) {
-            super(targeting, duration);
+        public LineEffect(float duration, Coord[] path, List<? extends Color> coloring) {
+            super(fx, duration);
             this.path = path;
 
             colors = new float[coloring.size()];
@@ -268,7 +267,7 @@ public class FxHandler {
         @Override
         protected void end() {
             super.end();
-            target.clear(path[path.length - 1].x, path[path.length - 1].y);
+            fx.clear(path[path.length - 1].x, path[path.length - 1].y, layer);
         }
 
         @Override
@@ -289,15 +288,15 @@ public class FxHandler {
 
             // clear rest of line
             for (Coord clearing : path) {
-                target.clear(clearing.x, clearing.y);
+                fx.clear(clearing.x, clearing.y, layer);
             }
 
             // put new line segment
-            target.put(c.x, c.y, lines.charAt(0), color);
+            fx.put(c.x, c.y, lines.charAt(0), color, 0f, layer);
         }
     }
 
-    public static class DustEffect extends PanelEffect {
+    public class DustEffect extends PanelEffect {
 
         public float[] colors;
 
@@ -306,8 +305,8 @@ public class FxHandler {
 
         public List<Coord> affected;
 
-        public DustEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, Radius radius, List<? extends Color> coloring) {
-            super(targeting, duration, valid);
+        public DustEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, List<? extends Color> coloring) {
+            super(fx, duration, valid);
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
@@ -343,12 +342,12 @@ public class FxHandler {
                 } else {
                     color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
                 }
-                target.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int)(percent * 8) + 1 : (int)(7.625 - percent * 7)), color);
+                fx.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int)(percent * 8) + 1 : (int)(7.625 - percent * 7)), color, 0f, layer);
             }
         }
     }
 
-    public static class ConeEffect extends PanelEffect
+    public class ConeEffect extends PanelEffect
     {
         /**
          * The default explosion colors are normal for (non-chemical, non-electrical) fire and smoke, going from orange
@@ -386,9 +385,9 @@ public class FxHandler {
          */
         public List<Coord> affected;
 
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius)
+        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius)
         {
-            super(targeting, duration, valid);
+            super(fx, duration, valid);
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
@@ -398,9 +397,9 @@ public class FxHandler {
             affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
         }
 
-        public ConeEffect(SquidPanel targeting, float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring)
+        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring)
         {
-            this(targeting, duration, valid, center, distance, angle, radius);
+            this(duration, valid, center, distance, angle, radius);
             if(colors.length != coloring.size())
                 colors = new float[coloring.size()];
             for (int i = 0; i < colors.length; i++) {
@@ -432,7 +431,7 @@ public class FxHandler {
                     color = SColor.lerpFloatColors(colors[colors.length-1], NumberTools.setSelectedByte(colors[colors.length-1], 3, (byte)0), (Math.min(0.99f, f) * colors.length) % 1f);
                 else
                     color = SColor.lerpFloatColors(colors[idx], colors[idx+1], (f * colors.length) % 1f);
-                target.put(c.x, c.y, color);
+                fx.put(c.x, c.y, '\u0000', color, 0f, layer);
             }
         }
     }

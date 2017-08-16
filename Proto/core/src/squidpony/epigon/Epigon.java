@@ -5,15 +5,12 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
-import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.display.ContextHandler;
 import squidpony.epigon.display.FxHandler;
@@ -39,7 +36,10 @@ import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.LightRNG;
 import squidpony.squidmath.StatefulRNG;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -68,7 +68,7 @@ public class Epigon extends Game {
     // Display
     SpriteBatch batch;
     private SquidColorCenter colorCenter;
-    private SquidLayers mapSLayers;
+    private SparseLayers mapSLayers;
     private SquidLayers infoSLayers;
     private SquidLayers contextSLayers;
     private SquidLayers messageSLayers;
@@ -102,7 +102,7 @@ public class Epigon extends Game {
     private Stage mapStage, messageStage, infoStage, contextStage;
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport;
     private Camera camera;
-    private AnimatedEntity playerEntity;
+    private TextCellFactory.Glyph playerEntity;
 
     // Set up sizing all in one place
     static {
@@ -177,26 +177,22 @@ public class Epigon extends Game {
         contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.COSMIC_LATTE);
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.FLIRTATIOUS_INDIGO_TEA);
 
-        mapSLayers = new SquidLayers(
-            mapSize.gridWidth,
-            mapSize.gridHeight,
+        mapSLayers = new SparseLayers(
+            map.width,
+            map.height,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            font,
-            colorCenter,
-            colorCenter,
-            new char[map.width][map.height]);
-        ArrayTools.fill(mapSLayers.getForegroundLayer().colors, 0f);
-        ArrayTools.fill(mapSLayers.getBackgroundLayer().colors, bgColor.toFloatBits());
+            font);
+        ArrayTools.fill(mapSLayers.getBackgrounds(), bgColor.toFloatBits());
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
 
-        mapSLayers.setTextSize(mapSize.cellWidth + 1.5f, mapSize.cellHeight + 2f); // weirdly, this seems to help with flicker
+        mapSLayers.font.tweakWidth(mapSize.cellWidth * 1.1f).tweakHeight(mapSize.cellHeight * 1.1f);
         smallFont.tweakWidth(infoSize.cellWidth + 1.5f).tweakHeight(infoSize.cellHeight + 3f).setSmoothingMultiplier(1.6f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
-        mapSLayers.setAnimationDuration(0.145f);
+        //mapSLayers.setAnimationDuration(0.145f);
 
         messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
@@ -228,8 +224,8 @@ public class Epigon extends Game {
     private void startGame() {
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
-        SquidPanel fx = mapSLayers.addExtraLayer().getLayer(3);//first added panel adds at level 3
-        fxHandler = new FxHandler(fx, colorCenter, fovResult);
+        mapSLayers.addLayer();//first added panel adds at level 1
+        fxHandler = new FxHandler(mapSLayers, 1, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
         map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
@@ -264,10 +260,10 @@ public class Epigon extends Game {
 //            }
 //        }
 
-        playerEntity = mapSLayers.animateActor(player.location.x, player.location.y, player.symbol, player.color);
+        playerEntity = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
-        mapSLayers.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
-        mapSLayers.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
+//        mapSLayers.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
+//        mapSLayers.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
 
         calcFOV(player.location.x, player.location.y);
 
@@ -296,8 +292,10 @@ public class Epigon extends Game {
                     Coord step = path.get(path.size() - 2);
                     if (map.contents[step.x][step.y].getLargeObject() == null && !(player.location.x == step.x && player.location.y == step.y)) {
                         map.contents[c.x][c.y].remove(creature);
-                        mapSLayers.getForegroundLayer().slide(c.x, c.y, null, null, step.x, step.y, mapSLayers.getAnimationDuration(), () ->
+                        TextCellFactory.Glyph critter = mapSLayers.glyphFromGrid(c.x, c.y);
+                        mapSLayers.slide(critter, c.x, c.y, step.x, step.y, 0.145f, () ->
                                 {
+                                    mapSLayers.recallToGrid(critter);
                                     map.contents[step.x][step.y].add(creature);
                                     creature.location = step;
                                 }
@@ -434,56 +432,61 @@ public class Epigon extends Game {
         }
 
         if (map.contents[newX][newY].getLargeObject() == null) {
-            final float midX = player.location.x + dir.deltaX * 0.5f;
-            final float midY = player.location.y + dir.deltaY * 0.5f;
-            final Vector3 pos = camera.position.cpy();
-            final Vector3 original = camera.position.cpy();
+//            final float midX = player.location.x + dir.deltaX * 0.5f;
+//            final float midY = player.location.y + dir.deltaY * 0.5f;
+//            final Vector3 pos = camera.position.cpy();
+//            final Vector3 original = camera.position.cpy();
+//
+//            double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
+//            double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
+//            float cameraDeltaX = 0;
+//            if (midX <= map.width - checkWidth && midX >= checkWidth - 0.5f) { // not sure why the lower bound is offset...
+//                cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
+//            }
+//            float cameraDeltaY = 0;
+//            if (midY <= map.height - checkHeight && midY >= checkHeight - 0.5f) { // but it causes the camera to jerk without "- 0.5f"
+//                cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
+//            }
+//            final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
 
-            double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
-            double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
-            float cameraDeltaX = 0;
-            if (midX <= map.width - checkWidth && midX >= checkWidth - 0.5f) { // not sure why the lower bound is offset...
-                cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
-            }
-            float cameraDeltaY = 0;
-            if (midY <= map.height - checkHeight && midY >= checkHeight - 0.5f) { // but it causes the camera to jerk without "- 0.5f"
-                cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
-            }
-            final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
-
-            mapSLayers.slide(playerEntity, newX, newY);
-            mixFOV(newX, newY);
+            mapSLayers.slide(playerEntity, player.location.x, player.location.y, newX, newY, 0.145f, () ->
+            {
+                calcFOV(newX, newY);
+                calcDijkstra();
+                runTurn();
+            });
+//            mixFOV(newX, newY);
             player.location = Coord.get(newX, newY);
             sound.playFootstep();
 
-            mapSLayers.addAction(new TemporalAction(mapSLayers.getAnimationDuration()) {
-                @Override
-                protected void update(float percent) {
-                    pos.lerp(nextPos, percent);
-                    camera.position.set(pos);
-                    pos.set(original);
-                    camera.update();
-                }
-
-                @Override
-                protected void end() {
-                    super.end();
-
-                    // Set the map and camera at the same time to have the same offset
-                    mapSLayers.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
-                    mapSLayers.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
-                    camera.position.set(original);
-                    camera.update();
-
-                    calcFOV(newX, newY);
-                    calcDijkstra();
-                    runTurn();
-                }
-            });
+//            mapSLayers.addAction(new TemporalAction(0.145f) {
+//                @Override
+//                protected void update(float percent) {
+//                    pos.lerp(nextPos, percent);
+//                    camera.position.set(pos);
+//                    pos.set(original);
+//                    camera.update();
+//                }
+//
+//                @Override
+//                protected void end() {
+//                    super.end();
+//
+//                    // Set the map and camera at the same time to have the same offset
+////                    mapSLayers.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
+////                    mapSLayers.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
+//                    camera.position.set(original);
+//                    camera.update();
+//
+//                    calcFOV(newX, newY);
+//                    calcDijkstra();
+//                    runTurn();
+//                }
+//            });
         } else {
             Physical creature = map.contents[newX][newY].getCreature();
             if (creature != null) {
-                mapSLayers.bump(playerEntity, dir);
+                mapSLayers.bump(playerEntity, dir, 0.145f);
                 creatures.remove(creature);
                 map.contents[newX][newY].remove(creature);
                 message("Killed the " + creature.name);
@@ -503,21 +506,18 @@ public class Epigon extends Game {
      * player.
      */
     public void putMap() {
-        int offsetX = mapSLayers.getGridOffsetX();
-        int offsetY = mapSLayers.getGridOffsetY();
-        for (int i = -1, x = Math.max(0, offsetX - 1); i <= mapSize.gridWidth && x < map.width; i++, x++) {
-            for (int j = -1, y = Math.max(0, offsetY - 1); j <= mapSize.gridHeight && y < map.height; j++, y++) {
-                if (map.inBounds(Coord.get(x, y))) {
-                    double sightAmount = fovResult[x][y];
-                    if (sightAmount > 0) {
-                        EpiTile tile = map.contents[x][y];
-                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor(),
-                             280 + (int) (50 * sightAmount));
-                    } else {
-                        RememberedTile rt = map.remembered[x][y];
-                        if (rt != null) {
-                            mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
-                        }
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                double sightAmount = fovResult[x][y];
+                if (sightAmount > 0) {
+                    EpiTile tile = map.contents[x][y];
+                    mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor().toFloatBits(),
+                            SColor.lerpFloatColors(tile.getBackgroundColor().toFloatBits(),
+                                    mapSLayers.defaultPackedForeground, 0.5f + (0.2f * (float) sightAmount)));
+                } else {
+                    RememberedTile rt = map.remembered[x][y];
+                    if (rt != null) {
+                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
                     }
                 }
             }
@@ -542,18 +542,18 @@ public class Epigon extends Game {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         Gdx.gl.glEnable(GL20.GL_BLEND);
 
+        mapStage.getCamera().position.x = playerEntity.getX();
+        mapStage.getCamera().position.y = playerEntity.getY();
+
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!mapSLayers.hasActiveAnimations()) {
-                if (++framesWithoutAnimation >= 2) {
-                    framesWithoutAnimation = 0;
                     Coord m = awaitedMoves.remove(0);
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
                     putMap();
                     infoHandler.updateDisplay();
-                }
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
             mapInput.next();
@@ -600,7 +600,7 @@ public class Epigon extends Game {
         batch.begin();
         mapStage.getRoot().draw(batch, 1f);
         //so we can draw the actors independently of the stage while still in the same batch
-        mapSLayers.drawActor(batch, 1.0f, playerEntity);
+        playerEntity.draw(batch, 1.0f);
         //we still need to end
         batch.end();
     }
@@ -616,9 +616,15 @@ public class Epigon extends Game {
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
 
-        // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
+// SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
+        // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
+        // (gridWidth & 1) is 1 if gridWidth is odd or 0 if it is even; it's good to know and faster than using % , plus
+        // in some other cases it has useful traits (x % 2 can be 0, 1, or -1 depending on whether x is negative, while
+        // x & 1 will always be 0 or 1).
         mapInput.getMouse().reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-            mapSize.gridWidth, mapSize.gridHeight, 0, 0);
+                mapSize.gridWidth, mapSize.gridHeight,
+                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
         contextInput.getMouse().reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
             contextSize.gridWidth, contextSize.gridHeight,
             -(int) (messageSLayers.getRight()),
@@ -685,7 +691,7 @@ public class Epigon extends Game {
                     fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
                     break;
                 case 'Z':
-                    for (Coord c : rng.getRandomUniqueCells(mapSLayers.getGridOffsetX(), mapSLayers.getGridOffsetY(), mapSize.gridWidth, mapSize.gridHeight, 90)) {
+                    for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
                         fxHandler.twinkle(c, Element.LIGHT);
                     }
                     break;
@@ -779,16 +785,18 @@ public class Epigon extends Game {
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            message("" + screenX + ", " + screenY);
-            if (screenX >= mapSize.gridWidth || screenY >= mapSize.gridHeight){ // Only process if it's in the map view area
+            screenX += player.location.x - (mapSize.gridWidth >> 1);
+            screenY += player.location.y - (mapSize.gridHeight >> 1);
+            message("TOUCH_UP: " + screenX + ", " + screenY);
+            if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height){ // Only process if it's in the map view area
                 return false;
             }
-            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
+//            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (awaitedMoves.isEmpty()) {
                         if (toCursor.isEmpty()) {
-                            cursor = Coord.get(sx, sy);
+                            cursor = Coord.get(screenX, screenY);
                             //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
                             // player position to the position the user clicked on. The "PreScanned" part is an optimization
                             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
@@ -811,7 +819,7 @@ public class Epigon extends Game {
                     }
                     break;
                 case Input.Buttons.RIGHT:
-                    contextHandler.tileContents(Coord.get(sx, sy), map.contents[sx][sy]);
+                    contextHandler.tileContents(Coord.get(screenX, screenY), map.contents[screenX][screenY]);
                     break;
             }
             putMap();
@@ -830,12 +838,15 @@ public class Epigon extends Game {
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
-            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
-            if ((sx < 0 || sx >= map.width || sy < 0 || sy >= map.height) || (cursor.x == sx && cursor.y == sy)
-                    || fovResult[sx][sy] <= 0.01) {
+            screenX += player.location.x - (mapSize.gridWidth >> 1);
+            screenY += player.location.y - (mapSize.gridHeight >> 1);
+            message(screenX + ", " + screenY + "; player x=" + player.location.x + ", player y="  + player.location.y);
+            //int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
+            if ((screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height) || (cursor.x == screenX && cursor.y == screenY)
+                    || fovResult[screenX][screenY] <= 0.0) {
                 return false;
             }
-            cursor = Coord.get(sx, sy);
+            cursor = Coord.get(screenX, screenY);
 
             //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
             // player position to the position the user clicked on. The "PreScanned" part is an optimization

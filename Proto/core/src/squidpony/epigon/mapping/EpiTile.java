@@ -87,12 +87,12 @@ public class EpiTile {
 
     /**
      * Returns the background color this tile should use. If there is no specific background color
-     * for this tile, then null is returned.
+     * for this tile, then a fully transparent color is returned.
      *
      * @return
      */
     public SColor getBackgroundColor() {
-        return floor == null || floor.terrainData != null ? null : floor.terrainData.background;
+        return floor == null || floor.terrainData != null ? SColor.TRANSPARENT : floor.terrainData.background;
     }
 
     public SColor getForegroundColor() {
