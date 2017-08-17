@@ -188,8 +188,8 @@ public class Epigon extends Game {
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
 
-        mapSLayers.font.tweakWidth(mapSize.cellWidth * 1.1f).tweakHeight(mapSize.cellHeight * 1.1f);
-        smallFont.tweakWidth(infoSize.cellWidth + 1.5f).tweakHeight(infoSize.cellHeight + 3f).setSmoothingMultiplier(1.6f).initBySize();
+        font.tweakWidth(mapSize.cellWidth * 1.1f).tweakHeight(mapSize.cellHeight * 1.1f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.15f).tweakHeight(infoSize.cellHeight * 1.15f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
@@ -685,7 +685,7 @@ public class Epigon extends Game {
                     break;
                 case 'X':
                     Element e = rng.getRandomElement(Element.values());
-                    fxHandler.zapBoom(player.location, player.location.add(Coord.get(rng.between(-20, 20), rng.between(-10, 10))), e);
+                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
                     break;
                 case 'z':
                     fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
