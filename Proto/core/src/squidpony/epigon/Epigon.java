@@ -695,6 +695,12 @@ public class Epigon extends Game {
                         fxHandler.twinkle(c, Element.LIGHT);
                     }
                     break;
+                case '=':
+                    fxHandler.layeredSparkle(player.location,4, Radius.CIRCLE);
+                    break;
+                case '+':
+                    fxHandler.layeredSparkle(player.location,8, Radius.CIRCLE);
+                    break;
                 case '[':
                     contextHandler.prior();
                     break;
