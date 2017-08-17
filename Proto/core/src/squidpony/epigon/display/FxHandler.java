@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
+import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -104,6 +105,20 @@ public class FxHandler {
                 Actions.parallel(
                     new TwinkleEffect(0.4f, rng.between(2, 4), end, colors.stream().map(c -> colorCenter.lighter(c)).collect(Collectors.toList())),
                     new DustEffect(0.3f, viable.refill(seen, 0.001, 999.0), end, 3, Radius.DIAMOND, colors))));
+    }
+
+    public void layeredSparkle(Coord origin, int size, Radius radius) {
+        fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius
+                /*, new Color[][]{
+                        { CW_PALE_RED, CW_LIGHT_RED, CW_BRIGHT_RED, CW_RED, CW_FLUSH_RED, CW_RICH_RED, CW_DARK_RED },
+                        { CW_PALE_APRICOT, CW_LIGHT_APRICOT, CW_BRIGHT_APRICOT, CW_APRICOT, CW_FLUSH_APRICOT, CW_RICH_APRICOT, CW_DARK_APRICOT },
+                        { CW_PALE_YELLOW, CW_LIGHT_YELLOW, CW_BRIGHT_YELLOW, CW_YELLOW, CW_FLUSH_YELLOW, CW_RICH_YELLOW, CW_DARK_YELLOW },
+                        { CW_PALE_LIME, CW_LIGHT_LIME, CW_BRIGHT_LIME, CW_LIME, CW_FLUSH_LIME, CW_RICH_LIME, CW_DARK_LIME },
+                        { CW_PALE_JADE, CW_LIGHT_JADE, CW_BRIGHT_JADE, CW_JADE, CW_FLUSH_JADE, CW_RICH_JADE, CW_DARK_JADE },
+                        { CW_PALE_AZURE, CW_LIGHT_AZURE, CW_BRIGHT_AZURE, CW_AZURE, CW_FLUSH_AZURE, CW_RICH_AZURE, CW_DARK_AZURE },
+                        { CW_PALE_SAPPHIRE, CW_LIGHT_SAPPHIRE, CW_BRIGHT_SAPPHIRE, CW_SAPPHIRE, CW_FLUSH_SAPPHIRE, CW_RICH_SAPPHIRE, CW_DARK_SAPPHIRE },
+                        { CW_PALE_PURPLE, CW_LIGHT_PURPLE, CW_BRIGHT_PURPLE, CW_PURPLE, CW_FLUSH_PURPLE, CW_RICH_PURPLE, CW_DARK_PURPLE },
+                }*/));
     }
 
     public static String twinkles = "+※+¤";
@@ -435,4 +450,81 @@ public class FxHandler {
             }
         }
     }
+    private static Color[][] randomColors(int innerSize)
+    {
+        Color[][] cs = new Color[8][innerSize];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < innerSize; j++) {
+                cs[i][j] = rng.getRandomElement(COLOR_WHEEL_PALETTE);
+            }
+        }
+        return cs;
+    }
+
+    public class ColorSparkleEffect extends PanelEffect {
+        public float[][] colors;
+        public double[][] resMap,
+                lightMap;
+        public List<Coord> affected;
+        private final char[] dots = "⠁⠂⠄⠈⠐⠠⡀⢀".toCharArray();
+
+        public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius) {
+            this(duration, valid, center, distance, radius, randomColors(8));
+        }
+        public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, Color[][] coloring) {
+            super(fx, duration, valid);
+            resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
+            validCells.writeDoublesInto(resMap, 0.0);
+            lightMap = new double[validCells.width][validCells.height];
+            FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius);
+            validCells.not().writeDoublesInto(lightMap, 0.0);
+            validCells.not();
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+            colors = new float[8][];
+            for (int i = 0; i < 8; i++) {
+                colors[i] = new float[coloring[i % coloring.length].length];
+                for (int j = 0; j < coloring[i % coloring.length].length; j++) {
+                    colors[i][j] = coloring[i % coloring.length][j].toFloatBits();
+                }
+            }
+        }
+        
+        @Override
+        protected void end() {
+            super.end();
+            for (int i = 1; i < 9; i++) {
+                fx.clear(layer + i);
+            }
+        }
+        
+        @Override
+        protected void update(float percent) {
+            int len = affected.size();
+            Coord c;
+            float f, color;
+            int idx, seed = System.identityHashCode(this), seed2 = seed;
+            for (int i = 0; i < len; i++) {
+                c = affected.get(i);
+                if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
+                    continue;
+                }
+                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
+                        * 0.125f + percent;
+                if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
+                    continue;
+                }
+                for (int j = 0; j < 8; j++) {
+                    idx = (int) (f * colors[j].length);
+                    if (idx >= colors[j].length - 1) {
+                        color = SColor.lerpFloatColors(colors[j][colors[j].length - 1], NumberTools.setSelectedByte(colors[j][colors[j].length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+                    } else {
+                        color = SColor.lerpFloatColors(colors[j][idx], colors[j][idx + 1], (f * colors[j].length) % 1f);
+                    }
+                    fx.put(c.x, c.y, dots[j], color, 0f, layer + j + 1);
+                }
+            }
+        }
+
+    }
+
 }
