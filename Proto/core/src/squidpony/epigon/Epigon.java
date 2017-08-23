@@ -603,6 +603,10 @@ public class Epigon extends Game {
         playerEntity.draw(batch, 1.0f);
         //we still need to end
         batch.end();
+        //uncomment the upcoming line if you want to see how fast this can run at top speed...
+        //for me, tommyettinger, on a laptop with recent integrated graphics, I get about 500 FPS.
+        //this needs vsync set to false in DesktopLauncher.
+        //Gdx.graphics.setTitle(Gdx.graphics.getFramesPerSecond() + " FPS");
     }
 
     @Override

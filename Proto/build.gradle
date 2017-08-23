@@ -13,7 +13,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "EpigonProto"
-        squidlibVersion = '7436e6a7d0'
+        squidlibVersion = '4159f9a401'
         jacksonVersion = '2.8.6'
         gdxVersion = '1.9.6'
         roboVMVersion = '1.12.0'
@@ -34,7 +34,7 @@ allprojects {
 project(":desktop") {
     dependencies {
         compile project(":core")
-        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
@@ -43,8 +43,9 @@ project(":core") {
     dependencies {
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
-        compile "com.github.tommyettinger:regexodus:$regexodusVersion"
+        ///// implicitly included by dep on squidlib; don't need to explicitly require
+        //compile "com.github.tommyettinger:regexodus:$regexodusVersion"
+        //compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
     }
 }
