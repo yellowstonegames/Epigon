@@ -512,8 +512,7 @@ public class Epigon extends Game {
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor().toFloatBits(),
-                            SColor.lerpFloatColors(tile.getBackgroundColor().toFloatBits(),
-                                    mapSLayers.defaultPackedForeground, 0.5f + (0.2f * (float) sightAmount)));
+                            tile.getBackgroundColor().toFloatBits());
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
