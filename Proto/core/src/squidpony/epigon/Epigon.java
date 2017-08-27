@@ -279,8 +279,8 @@ public class Epigon extends Game {
             "Use ? for help, or q to quit.",
             "Use mouse, numpad, or arrow keys to move."});
         processingCommand = false; // let the player do input
-        putMap();
         infoHandler.showPlayerHealthAndArmor();
+        putMap();
     }
 
     private void runTurn() {
@@ -509,10 +509,15 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 double sightAmount = fovResult[x][y];
-                if (sightAmount > 0) {
+                if(sightAmount >= 1.0) // only true for player currently; may need changing if light sources are added
+                {
+                    mapSLayers.put(x, y, map.contents[x][y].getBackgroundColor());
+                }
+                else if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
-                    mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor().toFloatBits(),
-                            tile.getBackgroundColor().toFloatBits());
+                    mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
+                            tile.getBackgroundColor() // this can be null to use no background (transparent)
+                    );
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
@@ -523,7 +528,7 @@ public class Epigon extends Game {
         }
 
         // Clear the tile the player is on
-        mapSLayers.put(player.location.x, player.location.y, ' ', player.color);
+        //mapSLayers.clear(player.location.x, player.location.y, 0);
 
         // NOTE - turned off while testing things
 //        for (Coord pt : toCursor) {
@@ -539,7 +544,6 @@ public class Epigon extends Game {
         // standard clear the background routine for libGDX
         Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.gl.glEnable(GL20.GL_BLEND);
 
         mapStage.getCamera().position.x = playerEntity.getX();
         mapStage.getCamera().position.y = playerEntity.getY();

@@ -92,7 +92,8 @@ public class EpiTile {
      * @return
      */
     public SColor getBackgroundColor() {
-        return floor == null || floor.terrainData != null ? SColor.TRANSPARENT : floor.terrainData.background;
+        return SColor.TRANSPARENT;
+                //floor != null && floor.terrainData != null ? floor.terrainData.background : SColor.TRANSPARENT ;
     }
 
     public SColor getForegroundColor() {
