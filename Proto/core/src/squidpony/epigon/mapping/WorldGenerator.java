@@ -3,8 +3,7 @@ package squidpony.epigon.mapping;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.squidgrid.mapping.DungeonGenerator;
-import squidpony.squidgrid.mapping.DungeonUtility;
+import squidpony.squidgrid.mapping.FlowingCaveGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,18 +47,19 @@ public class WorldGenerator {
 
 //        OrganicMapGenerator omg = new OrganicMapGenerator(width, height, rng);
 //        char[][] simpleChars = omg.generate();
-
-        char[][] simpleChars = new char[width][height];
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                if (x <= 0 || y <= 0 || x >= width -1 || y >= height -1){
-                    simpleChars[x][y] = '#';
-                } else {
-                    simpleChars[x][y] = '.';
-                }
-            }
-        }
+//        char[][] simpleChars = new char[width][height];
+//
+//        for (int x = 0; x < width; x++) {
+//            for (int y = 0; y < height; y++) {
+//                if (x <= 0 || y <= 0 || x >= width -1 || y >= height -1){
+//                    simpleChars[x][y] = '#';
+//                } else {
+//                    simpleChars[x][y] = '.';
+//                }
+//            }
+//        }
+        FlowingCaveGenerator flow = new FlowingCaveGenerator(width, height, null, rng);
+        char[][] simpleChars = flow.generate();
 
         EpiTile tile;
         Physical adding;

@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
+import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.display.ContextHandler;
 import squidpony.epigon.display.FxHandler;
@@ -250,15 +251,15 @@ public class Epigon extends Game {
         infoHandler.setPlayer(player);
 
         // NOTE - turn off creatures while testing other things
-//        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
-//            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
-//                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
-//                mixer.applyModification(p, handBuilt.makeAlive);
-//                p.location = coord;
-//                map.contents[coord.x][coord.y].add(p);
-//                creatures.add(p);
-//            }
-//        }
+        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
+            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
+                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
+                mixer.applyModification(p, handBuilt.makeAlive);
+                p.location = coord;
+                map.contents[coord.x][coord.y].add(p);
+                creatures.add(p);
+            }
+        }
 
         playerEntity = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
@@ -286,17 +287,21 @@ public class Epigon extends Game {
     private void runTurn() {
         for (Physical creature : creatures) {
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0 || map.remembered[c.x][c.y] != null)) {
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0/* || map.remembered[c.x][c.y] != null*/)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
                     if (map.contents[step.x][step.y].getLargeObject() == null && !(player.location.x == step.x && player.location.y == step.y)) {
                         map.contents[c.x][c.y].remove(creature);
-                        TextCellFactory.Glyph critter = mapSLayers.glyphFromGrid(c.x, c.y);
-                        mapSLayers.slide(critter, c.x, c.y, step.x, step.y, 0.145f, () ->
+                        if(creature.appearance == null)
+                            creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
+                        else
+                            creature.appearance.shown = creature.symbol;
+                        mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, () ->
                                 {
-                                    mapSLayers.recallToGrid(critter);
+                                    //mapSLayers.recallToGrid(critter);
                                     map.contents[step.x][step.y].add(creature);
+                                    creature.appearance.shown = ' ';
                                     creature.location = step;
                                 }
                         );
@@ -305,8 +310,6 @@ public class Epigon extends Game {
                 }
             }
         }
-
-        putMap();
 
         // Update all the stats in motion
         player.stats.values().stream().forEach(LiveValue::tick);
@@ -487,6 +490,7 @@ public class Epigon extends Game {
             Physical creature = map.contents[newX][newY].getCreature();
             if (creature != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
+                mapSLayers.glyphs.remove(creature.appearance);
                 creatures.remove(creature);
                 map.contents[newX][newY].remove(creature);
                 message("Killed the " + creature.name);
@@ -511,7 +515,7 @@ public class Epigon extends Game {
                 double sightAmount = fovResult[x][y];
                 if(sightAmount >= 1.0) // only true for player currently; may need changing if light sources are added
                 {
-                    mapSLayers.put(x, y, map.contents[x][y].getBackgroundColor());
+                    mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, map.contents[x][y].getBackgroundColor());
                 }
                 else if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
@@ -531,10 +535,10 @@ public class Epigon extends Game {
         //mapSLayers.clear(player.location.x, player.location.y, 0);
 
         // NOTE - turned off while testing things
-//        for (Coord pt : toCursor) {
-//            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-//            mapSLayers.highlight(pt.x, pt.y, 100);
-//        }
+        for (Coord pt : toCursor) {
+            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
+            mapSLayers.backgrounds[pt.x][pt.y] = SColor.lerpFloatColors(mapSLayers.backgrounds[pt.x][pt.y], SColor.COSMIC_LATTE.toFloatBits(), 0.7f);
+        }
     }
 
     @Override
@@ -547,7 +551,7 @@ public class Epigon extends Game {
 
         mapStage.getCamera().position.x = playerEntity.getX();
         mapStage.getCamera().position.y = playerEntity.getY();
-
+        putMap();
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
@@ -555,20 +559,16 @@ public class Epigon extends Game {
                     Coord m = awaitedMoves.remove(0);
                     toCursor.remove(0);
                     move(Direction.toGoTo(player.location, m));
-                    putMap();
                     infoHandler.updateDisplay();
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
             mapInput.next();
-            putMap();
             infoHandler.updateDisplay();
         } else if (contextInput.hasNext()) {
             contextInput.next();
-            putMap();
             infoHandler.updateDisplay();
         } else if (infoInput.hasNext()){
             infoInput.next();;
-            putMap();
             infoHandler.updateDisplay();
         }
 
@@ -835,7 +835,6 @@ public class Epigon extends Game {
                     contextHandler.tileContents(Coord.get(screenX, screenY), map.contents[screenX][screenY]);
                     break;
             }
-            putMap();
             return false;
         }
 
@@ -877,7 +876,6 @@ public class Epigon extends Game {
             if (!toCursor.isEmpty()) {
                 toCursor = toCursor.subList(1, toCursor.size());
             }
-            putMap();
             return false;
         }
     });

@@ -110,7 +110,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(28));
+        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
         playerBlueprint.stats.put(Stat.HEARING, new LiveValue(12));
         playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 
@@ -170,7 +170,7 @@ public class HandBuilt {
 
     private void initAlive() {
         makeAlive = new Modification();
-        makeAlive.possiblePrefix = Arrays.asList(new String[]{"living", "animated"});
+        makeAlive.possiblePrefix = Arrays.asList("living", "animated");
         makeAlive.symbol = 's';
         makeAlive.large = true;
         Arrays.stream(Stat.values()).forEach(s -> {
@@ -179,7 +179,6 @@ public class HandBuilt {
         });
         makeAlive.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         makeAlive.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
-        Creature c = new Creature();
-        makeAlive.creatureOverwrite = c;
+        makeAlive.creatureOverwrite = new Creature();
     }
 }
