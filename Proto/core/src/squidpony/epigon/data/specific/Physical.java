@@ -11,6 +11,7 @@ import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
@@ -38,6 +39,7 @@ public class Physical extends EpiData {
     public boolean instantiated;
     public boolean aware; // knows where the player is
     public boolean wasSeen;
+    public TextCellFactory.Glyph appearance; // for things that move, we should use Glyph, which is a kind of Actor
 
     // backing data
     public Physical parent;   
