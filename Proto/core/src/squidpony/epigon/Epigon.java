@@ -1,7 +1,6 @@
 package squidpony.epigon;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -32,10 +31,7 @@ import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.LightRNG;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +73,6 @@ public class Epigon extends Game {
     private SquidInput contextInput;
     private SquidInput infoInput;
     private Color bgColor;
-    private int framesWithoutAnimation;
     private List<Coord> toCursor;
     private TextCellFactory font;
 
@@ -95,14 +90,14 @@ public class Epigon extends Game {
     private FOV fov = new FOV(FOV.SHADOW);
     private double[][] fovResult;
     private double[][] priorFovResult;
-    private List<Physical> creatures = new ArrayList<>();
+    private OrderedMap<Coord, Physical> creatures = new OrderedMap<>();
     private int autoplayTurns = 0;
     private boolean processingCommand = true;
 
     // WIP stuff, needs large sample map
     private Stage mapStage, messageStage, infoStage, contextStage;
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport;
-    private Camera camera;
+    //private Camera camera;
     private TextCellFactory.Glyph playerEntity;
 
     // Set up sizing all in one place
@@ -143,7 +138,7 @@ public class Epigon extends Game {
         infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
 
-        camera = mapViewport.getCamera();
+        //camera = mapViewport.getCamera();
 
         // Here we make sure our Stages, which holds any text-based grids we make, uses our Batch.
         mapStage = new Stage(mapViewport, batch);
@@ -257,7 +252,7 @@ public class Epigon extends Game {
                 mixer.applyModification(p, handBuilt.makeAlive);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
-                creatures.add(p);
+                creatures.put(coord, p);
             }
         }
 
@@ -285,27 +280,27 @@ public class Epigon extends Game {
     }
 
     private void runTurn() {
-        for (Physical creature : creatures) {
+        int size = creatures.size();
+        for (int i = 0; i < size; i++) {
+            final Physical creature = creatures.getAt(i);
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0/* || map.remembered[c.x][c.y] != null*/)) {
-                List<Coord> path = toPlayerDijkstra.findPathPreScanned(Coord.get(c.x, c.y)); // TODO - figure out why this messes up mouse cursor
+                List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
-                    if (map.contents[step.x][step.y].getLargeObject() == null && !(player.location.x == step.x && player.location.y == step.y)) {
+                    if (map.contents[step.x][step.y].getLargeObject() == null
+                            && !(player.location.x == step.x && player.location.y == step.y)
+                            && !creatures.containsKey(step)) {
                         map.contents[c.x][c.y].remove(creature);
                         if(creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
-                        else
-                            creature.appearance.shown = creature.symbol;
-                        mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, () ->
-                                {
-                                    //mapSLayers.recallToGrid(critter);
-                                    map.contents[step.x][step.y].add(creature);
-                                    creature.appearance.shown = ' ';
-                                    creature.location = step;
-                                }
-                        );
-                        mapSLayers.put(c.x, c.y, map.contents[c.x][c.y].floor.symbol, map.contents[c.x][c.y].floor.color);
+//                        else
+//                            creature.appearance.shown = creature.symbol;
+                        creatures.alterAt(i, step);
+                        creature.location = step;
+                        map.contents[step.x][step.y].add(creature);
+                        mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
+                        //mapSLayers.put(c.x, c.y, map.contents[c.x][c.y].floor.symbol, map.contents[c.x][c.y].floor.color);
                     }
                 }
             }
@@ -383,6 +378,7 @@ public class Epigon extends Game {
 
     private void calcFOV(int checkX, int checkY) {
         FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {
@@ -391,6 +387,9 @@ public class Epigon extends Game {
                     } else {
                         map.remembered[x][y].remake(map.contents[x][y]);
                     }
+                    if((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance == null)
+                        creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
+
                 }
             }
         }
@@ -430,6 +429,7 @@ public class Epigon extends Game {
 
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
+        Coord newPos = Coord.get(newX, newY);
         if (!map.inBounds(newX, newY)) {
             return; // can't move, should probably be error or something
         }
@@ -459,7 +459,7 @@ public class Epigon extends Game {
                 runTurn();
             });
 //            mixFOV(newX, newY);
-            player.location = Coord.get(newX, newY);
+            player.location = newPos;
             sound.playFootstep();
 
 //            mapSLayers.addAction(new TemporalAction(0.145f) {
@@ -487,19 +487,22 @@ public class Epigon extends Game {
 //                }
 //            });
         } else {
-            Physical creature = map.contents[newX][newY].getCreature();
-            if (creature != null) {
+            Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
+            if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                mapSLayers.glyphs.remove(creature.appearance);
-                creatures.remove(creature);
-                map.contents[newX][newY].remove(creature);
-                message("Killed the " + creature.name);
-
-                calcFOV(newX, newY);
+                mapSLayers.removeGlyph(thing.appearance);
+                creatures.remove(thing.location);
+                map.contents[newX][newY].remove(thing);
+                message("Killed the " + thing.name);
+                calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
-            } else {
-                message("Ran into " + map.contents[newX][newY].getLargeNonCreature().name);
+            } else if((thing = map.contents[newX][newY].getLargeNonCreature()) != null){
+                message("Ran into " + thing.name);
+                runTurn();
+            }
+            else
+            {
                 runTurn();
             }
         }
@@ -519,7 +522,10 @@ public class Epigon extends Game {
                 }
                 else if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
-                    mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
+                    if(creatures.containsKey(Coord.get(x, y)))
+                        mapSLayers.clear(x, y, 0);
+                    else
+                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                             tile.getBackgroundColor() // this can be null to use no background (transparent)
                     );
                 } else {

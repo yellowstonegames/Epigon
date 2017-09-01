@@ -48,8 +48,8 @@ public class EpiTile {
         Physical temp;
         //check in order of preference
         if ((temp = getCreature()) != null) {
-            rep = temp.symbol;
-        } else if ((temp = getLargeObject()) != null) {
+            rep = floor.symbol;
+        } else if ((temp = getLargeNonCreature()) != null) {
             rep = temp.symbol;
         } else if (!contents.isEmpty()){
             rep = contents.get(0).symbol; // arbitrarily get first thing in list
@@ -101,7 +101,7 @@ public class EpiTile {
 
         //check in order of preference
         if (getCreature() != null) {
-            fore = getCreature().color;
+            fore = floor.color;//getCreature().color;
         } else if (getLargeObject() != null) {
             fore = getLargeObject().color;
         } else if (!contents.isEmpty()){
