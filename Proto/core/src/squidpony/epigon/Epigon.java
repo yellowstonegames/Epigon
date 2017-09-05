@@ -50,11 +50,11 @@ public class Epigon extends Game {
     public static final PanelSize messageSize;
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
-
+    public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
-    public static final LightRNG lightRNG = new LightRNG(seed);
-    public static final StatefulRNG rng = new StatefulRNG(lightRNG);
+    // this is separated from the StatefulRNG so you can still call ThrustRNG-specific methods, mainly skip()
+    public static final ThrustRNG thrustRNG = new ThrustRNG(seed);
+    public static final StatefulRNG rng = new StatefulRNG(thrustRNG);
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
 
@@ -75,6 +75,8 @@ public class Epigon extends Game {
     private Color bgColor;
     private List<Coord> toCursor;
     private TextCellFactory font;
+    private String[] messages;
+    private int messageIndex;
 
     // World
     private WorldGenerator worldGenerator;
@@ -108,11 +110,12 @@ public class Epigon extends Game {
         int smallH = 22;
         int cellW = 12;
         int cellH = 24;
-        int bottomH = 3;
+        int bottomH = 6;
         mapSize = new PanelSize(bigW, bigH, cellW, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
         infoSize = new PanelSize(smallW, smallH * 3 / 2, 8, 16);
         contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 8, 16);
+        messageCount = bottomH - 2;
     }
 
     @Override
@@ -148,6 +151,8 @@ public class Epigon extends Game {
         font = DefaultResources.getStretchableLeanFont();
         TextCellFactory smallFont = font.copy();
         // Set up the text display portions
+        messages = new String[messageCount];
+        messageIndex = messageCount;
         messageSLayers = new SquidLayers(
             messageSize.gridWidth,
             messageSize.gridHeight,
@@ -373,7 +378,10 @@ public class Epigon extends Game {
 
     private void message(String text) {
         clearAndBorder(messageSLayers, SColor.APRICOT, bgColor);
-        messageSLayers.putString(1, 1, text, SColor.APRICOT); // TODO - make this do the scroll things
+        messages[messageIndex++ % messageCount] = text;
+        for (int i = messageIndex % messageCount, c = 0; c < messageCount; i = (i + 1) % messageCount, c++) {
+            messageSLayers.putString(1, 1 + c, messages[i], SColor.APRICOT);
+        }
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -806,7 +814,7 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
-            message("TOUCH_UP: " + screenX + ", " + screenY);
+            //message("TOUCH_UP: " + screenX + ", " + screenY);
             if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height){ // Only process if it's in the map view area
                 return false;
             }
@@ -858,7 +866,7 @@ public class Epigon extends Game {
             }
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
-            message(screenX + ", " + screenY + "; player x=" + player.location.x + ", player y="  + player.location.y);
+            //message(screenX + ", " + screenY + "; player x=" + player.location.x + ", player y="  + player.location.y);
             //int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
             if ((screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height) || (cursor.x == screenX && cursor.y == screenY)
                     || fovResult[screenX][screenY] <= 0.0) {
