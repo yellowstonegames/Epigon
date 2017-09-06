@@ -1,7 +1,6 @@
 package squidpony.epigon.data.generic;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,22 +24,27 @@ public class Ability extends EpiData {
     //range
     //vs creatures / items / open space
     //
-
-    public boolean appliesToAllInTile;
-    public boolean appliesToAllInArea;
+    public boolean appliesToAllInTile; // All objects in a target tile are affected
+    public boolean appliesToAllTilesInArea;
     public boolean randomChoiceInRange;
     public boolean requiresConfirmation;
+    public int maxTargets = Integer.MAX_VALUE;
 
-    public OrderedMap<Skill, Rating> mustHaveSkillRatings;
+    public OrderedMap<Skill, Rating> mustHaveSkillRatings = new OrderedMap<>();
     public List<String> effectsString = new ArrayList<>();
     public List<Effect> effects = new ArrayList<>();
 
-    //preconditions that must be satisfied
-//    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> mustPossess = new EnumMap<>(ActionParticipantType.class);
-//    public EnumMap<ActionParticipantType, List<Physical>> mustHaveEquipped = new EnumMap<>(ActionParticipantType.class);
-//    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> consumes = new EnumMap<>(ActionParticipantType.class);
-//    public EnumMap<ActionParticipantType, List<Map<Physical, Integer>>> consumesEquipped = new EnumMap<>(ActionParticipantType.class);
-//    public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustHaveCondition = new EnumMap<>(ActionParticipantType.class);
-//    public EnumMap<ActionParticipantType, List<ConditionBlueprint>> mustNotHaveCondition = new EnumMap<>(ActionParticipantType.class);
+    // Preconditions for user of ability
+    public List<Map<Physical, Integer>> mustPossess = new ArrayList<>();
+    public List<Physical> mustHaveEquipped = new ArrayList<>();
+    public List<Map<Physical, Integer>> consumes = new ArrayList<>();
+    public List<Map<Physical, Integer>> consumesEquipped = new ArrayList<>();
+    public List<ConditionBlueprint> mustHaveCondition = new ArrayList<>();
+    public List<ConditionBlueprint> mustNotHaveCondition = new ArrayList<>();
+
+    public List<Map<Physical, Integer>> targetMustPossess = new ArrayList<>();
+    public List<Physical> targetMustHaveEquipped = new ArrayList<>();
+    public List<ConditionBlueprint> targetMustHaveCondition = new ArrayList<>();
+    public List<ConditionBlueprint> targetMustNotHaveCondition = new ArrayList<>();
 
 }

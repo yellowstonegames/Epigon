@@ -8,4 +8,5 @@ import squidpony.epigon.data.EpiData;
  * @author Eben Howard - http://squidpony.com
  */
 public class Skill extends EpiData {
+    public Skill parent;
 }
