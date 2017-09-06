@@ -1,5 +1,10 @@
 package squidpony.epigon.playground;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import squidpony.Maker;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Formula;
@@ -14,9 +19,6 @@ import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
@@ -46,10 +48,13 @@ public class HandBuilt {
 
     public Physical nan = new Physical();//trade currency (dust that's used for enchanting things and casting spells)
 
+    public List<Skill> skills = new ArrayList<>();
+    
     public HandBuilt() {
         basePhysical.generic = true;
         basePhysical.unique = true;
 
+        initSkills();
         initPlayer();
         initDoors();
         initItems();
@@ -61,6 +66,87 @@ public class HandBuilt {
         makeWall.symbol = '#';
         makeWall.large = true;
         makeWall.attached = true;
+    }
+
+    private void initSkills(){
+
+        // Cooking skills
+        Skill cooking = new Skill();
+        cooking.name = "cooking";
+        skills.add(cooking);
+        Skill baking = new Skill();
+        baking.name = "baking";
+        baking.parent = cooking;
+        skills.add(baking);
+        Skill frying  = new Skill();
+        frying.name = "frying";
+        frying.parent = cooking;
+        skills.add(frying);
+        Skill boiling = new Skill();
+        boiling.name = "boiling";
+        boiling.parent = cooking;
+        skills.add(boiling);
+        Skill foodPrep = new Skill();
+        foodPrep.name = "food prep";
+        foodPrep.parent = cooking;
+        skills.add(foodPrep);
+        Skill foodChopping = new Skill();
+        foodChopping.name = "food chopping";
+        foodChopping.parent = foodPrep;
+        skills.add(foodChopping);
+        Skill foodMixing = new Skill();
+        foodMixing.name = "food mixing";
+        foodMixing.parent = foodPrep;
+        skills.add(foodMixing);
+        Skill canning = new Skill();
+        canning.name = "canning";
+        canning.parent = cooking;
+        skills.add(canning);
+        Skill foodDrying = new Skill();
+        foodDrying.name = "food drying";
+        foodDrying.parent = cooking;
+        skills.add(foodDrying);
+
+        // Gathering skills
+        Skill gathering = new Skill();
+        gathering.name = "gathering";
+        skills.add(gathering);
+        Skill butchering = new Skill();
+        butchering.name = "butchering";
+        butchering.parent = gathering;
+        skills.add(butchering);
+        Skill farming = new Skill();
+        farming.name = "farming";
+        farming.parent = gathering;
+        skills.add(farming);
+        Skill fishing = new Skill();
+        fishing.name = "fishing";
+        fishing.parent = gathering;
+        skills.add(fishing);
+        Skill herbalism  = new Skill();
+        herbalism.name = "herbalism";
+        herbalism.parent = gathering;
+        skills.add(herbalism);
+        Skill hunting = new Skill();
+        hunting.name = "hunting";
+        hunting.parent = gathering;
+        skills.add(hunting);
+        Skill mining = new Skill();
+        mining.name = "mining";
+        mining.parent = gathering;
+        skills.add(mining);
+        Skill woodcutting = new Skill();
+        woodcutting.name = "woodc utting";
+        woodcutting.parent = gathering;
+        skills.add(woodcutting);
+        Skill treeFellingAx = new Skill();
+        treeFellingAx.name = "tree felling (ax)";
+        treeFellingAx.parent = woodcutting;
+        skills.add(treeFellingAx);
+        Skill treeFellingSaw = new Skill();
+        treeFellingSaw.name = "tree felling (saw)";
+        treeFellingSaw.parent = woodcutting;
+        skills.add(treeFellingSaw);
     }
 
     private void initPlayer() {
