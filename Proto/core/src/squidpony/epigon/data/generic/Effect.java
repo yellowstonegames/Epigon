@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class Effect {
 
-    public Formula successFormula;
+    // TODO - formalize math to determine success vs failure
 
     public List<Modification> sourceModifications;
     public List<Modification> targetModifications;
