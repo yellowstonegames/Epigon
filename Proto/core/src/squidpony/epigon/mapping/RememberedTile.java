@@ -1,6 +1,5 @@
 package squidpony.epigon.mapping;
 
-import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -13,9 +12,9 @@ import squidpony.squidgrid.gui.gdx.SColor;
 public class RememberedTile {
 
     public char symbol = ' ';
-    public Color front = SColor.TRANSPARENT;
-    public Color back = SColor.TRANSPARENT;
-    public Color miniMapColor = SColor.TRANSPARENT;
+    public float front = 0f;
+    public float back = 0f;
+    public float miniMapColor = 0f;
 
     public RememberedTile(EpiTile tile) {
         remake(tile);
@@ -23,24 +22,26 @@ public class RememberedTile {
 
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
-        front = tile.getForegroundColor() == null ? SColor.TRANSPARENT : tile.getForegroundColor().cpy().lerp(Color.BLACK, 0.65f);
-        back = tile.getBackgroundColor() == null ? SColor.TRANSPARENT : tile.getBackgroundColor().cpy().lerp(Color.BLACK, 0.65f);
+        front = tile.getForegroundColor();
+        front = front == 0f ? 0x1.fffffep-126f : SColor.lerpFloatColors(front, SColor.FLOAT_BLACK, 0.65f);
+        back = tile.getBackgroundColor();
+        back = back == 0f ? 0x1.fffffep-126f : SColor.lerpFloatColors(back, SColor.FLOAT_BLACK, 0.65f);
         if (tile.getCreature() != null){
-            miniMapColor = SColor.SCARLET;
+            miniMapColor = SColor.SCARLET.toFloatBits();
         } else {
             Physical p = tile.getLargeNonCreature();
             if (p == null){
-                miniMapColor = SColor.DARK_INDIGO;
+                miniMapColor = SColor.DARK_INDIGO.toFloatBits();
             } else {
                 switch (p.symbol){
                     case '#':
-                        miniMapColor = SColor.SILVER_GREY;
+                        miniMapColor = SColor.SILVER_GREY.toFloatBits();
                         break;
                     case '+':
-                        miniMapColor = SColor.TAWNY;
+                        miniMapColor = SColor.TAWNY.toFloatBits();
                         break;
                     default:
-                        miniMapColor = SColor.FLAX;
+                        miniMapColor = SColor.FLAX.toFloatBits();
                         break;
                 }
             }

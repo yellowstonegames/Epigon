@@ -1,22 +1,21 @@
 package squidpony.epigon.playground;
 
+import com.badlogic.gdx.utils.JsonWriter;
+import squidpony.DataConverter;
+import squidpony.epigon.data.DataMaster;
+import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.generic.Formula;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.Stat;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.badlogic.gdx.utils.JsonWriter;
-
-import squidpony.DataConverter;
-import static squidpony.epigon.Epigon.handBuilt;
-import static squidpony.epigon.Epigon.mixer;
-import squidpony.epigon.data.blueprint.Stone;
-import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.data.DataMaster;
-import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.data.generic.Formula;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
+import static squidpony.epigon.Epigon.*;
 
 /**
  * A class for doing various tests and utilities work.
@@ -81,7 +80,7 @@ public class Kickball {
     private Physical makePhysicalFromStone(Stone stone) {
         Physical pb = new Physical();
         pb.name = stone.toString();
-        pb.color = stone.front;
+        pb.color = stone.front.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
 
         return pb;
     }

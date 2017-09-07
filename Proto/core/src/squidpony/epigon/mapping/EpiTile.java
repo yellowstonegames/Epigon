@@ -8,6 +8,9 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static squidpony.epigon.Epigon.srng;
+import static squidpony.squidgrid.gui.gdx.SColor.*;
+
 /**
  * This class holds the objects in a single grid square.
  *
@@ -91,23 +94,57 @@ public class EpiTile {
      *
      * @return
      */
-    public SColor getBackgroundColor() {
-        return SColor.TRANSPARENT;
+    public float getBackgroundColor() {
+        return 0x1.fffffep-126f; // fully transparent, but not equal to 0 (0 is used to leave the current background)
                 //floor != null && floor.terrainData != null ? floor.terrainData.background : SColor.TRANSPARENT ;
     }
 
-    public SColor getForegroundColor() {
-        SColor fore = null;//indicates that no particular color is used
+    public static final float[] dbColors = {
+            DB_BLACK.toFloatBits(),
+            DB_INK.toFloatBits(),
+            DB_SEAL_BROWN.toFloatBits(),
+            DB_CHESTNUT.toFloatBits(),
+            DB_CAPPUCCINO.toFloatBits(),
+            DB_PUMPKIN.toFloatBits(),
+            DB_FAWN.toFloatBits(),
+            DB_NUDE.toFloatBits(),
+            DB_DAFFODIL.toFloatBits(),
+            DB_KEY_LIME.toFloatBits(),
+            DB_SHAMROCK.toFloatBits(),
+            DB_JUNGLE.toFloatBits(),
+            DB_OLIVE.toFloatBits(),
+            DB_MUD.toFloatBits(),
+            DB_SHADOW.toFloatBits(),
+            DB_COBALT.toFloatBits(),
+            DB_CERULEAN.toFloatBits(),
+            DB_DENIM.toFloatBits(),
+            DB_SKY_BLUE.toFloatBits(),
+            DB_SEAFOAM.toFloatBits(),
+            DB_PLATINUM.toFloatBits(),
+            DB_WHITE.toFloatBits(),
+            DB_STORM_CLOUD.toFloatBits(),
+            DB_ELEPHANT.toFloatBits(),
+            DB_GRAPHITE.toFloatBits(),
+            DB_SOOT.toFloatBits(),
+            DB_EGGPLANT.toFloatBits(),
+            DB_BLOOD.toFloatBits(),
+            DB_CORAL.toFloatBits(),
+            DB_LAVENDER.toFloatBits(),
+            DB_ARMY_GREEN.toFloatBits(),
+            DB_COMPOST.toFloatBits()
+    };
 
+    public float getForegroundColor() {
+        float fore = 0f;//indicates that no particular color is used
         //check in order of preference
         if (getCreature() != null) {
-            fore = floor.color;//getCreature().color;
+            fore = SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);//getCreature().color;
         } else if (getLargeObject() != null) {
-            fore = getLargeObject().color;
+            fore = SColor.lerpFloatColors(getLargeObject().color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
         } else if (!contents.isEmpty()){
             fore = contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            fore = floor.color;
+            fore = SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
         }
 
         return fore;

@@ -66,7 +66,7 @@ public class Modification extends EpiData {
 
     public Boolean large;
 
-    public SColor lightEmitted;
+    public float lightEmitted;
     public LiveValueModification lightEmittedStrenghtChange;
 
     public List<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used

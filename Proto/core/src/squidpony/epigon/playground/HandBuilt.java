@@ -1,10 +1,5 @@
 package squidpony.epigon.playground;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import squidpony.Maker;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Formula;
@@ -19,6 +14,11 @@ import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
@@ -155,7 +155,7 @@ public class HandBuilt {
         playerBlueprint.description = "It's you!";
         playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
-        playerBlueprint.color = SColor.BRIGHT_PINK;
+        playerBlueprint.color = SColor.BRIGHT_PINK.toFloatBits();
         playerBlueprint.large = true;
         playerBlueprint.unique = true;
         playerBlueprint.attached = true;
@@ -228,7 +228,7 @@ public class HandBuilt {
 
         doorBlueprint = new Physical();
         doorBlueprint.name = "door";
-        doorBlueprint.color = SColor.WALNUT;
+        doorBlueprint.color = SColor.WALNUT.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         doorBlueprint.generic = true;
         doorBlueprint.attached = true;
         mixer.applyModification(doorBlueprint, closeDoor);
@@ -244,7 +244,7 @@ public class HandBuilt {
     private void initItems() {
         swordBlueprint = new Physical();
         swordBlueprint.name = "sword";
-        swordBlueprint.color = SColor.SILVER;
+        swordBlueprint.color = SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f);
         swordBlueprint.symbol = '(';
 
         RecipeBlueprint swordRecipeBlueprint = new RecipeBlueprint();
