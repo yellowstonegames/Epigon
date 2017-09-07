@@ -59,37 +59,34 @@ public class HandBuilt {
     public Skill foodMixing = new Skill("food mixing", foodPrep);
     public Skill canning = new Skill("canning", cooking);
     public Skill foodDrying = new Skill("food drying", cooking);
-    
+
     // Gathering skills
-        Skill gathering = new Skill("gathering");
-        Skill butchering = new Skill("butchering", gathering);
-        Skill farming = new Skill();
-        farming.name = "farming";
-        farming.parent = gathering;
-        skills.add(farming);
-        Skill fishing = new Skill();
-        fishing.name = "fishing";
-        fishing.parent = gathering;
-        skills.add(fishing);
-        Skill herbalism = new Skill();
-        herbalism.name = "herbalism";
-        herbalism.parent = gathering;
-        skills.add(herbalism);
-        Skill hunting = new Skill();
-        hunting.name = "hunting";
-        hunting.parent = gathering;
-        Skill mining = new Skill();
-        mining.name = "mining";
-        mining.parent = gathering;
-        Skill woodcutting = new Skill();
-        woodcutting.name = "woodc utting";
-        woodcutting.parent = gathering;
-        Skill treeFellingAx = new Skill();
-        treeFellingAx.name = "tree felling (ax)";
-        treeFellingAx.parent = woodcutting;
-        Skill treeFellingSaw = new Skill();
-        treeFellingSaw.name = "tree felling (saw)";
-        treeFellingSaw.parent = woodcutting;
+    Skill gathering = new Skill("gathering");
+    Skill butchering = new Skill("butchering", gathering);
+    Skill farming = new Skill("farming", gathering);
+    Skill fishing = new Skill("fishing", gathering);
+    Skill herbalism = new Skill("herbalism", gathering);
+    Skill hunting = new Skill("hunting", gathering);
+    Skill mining = new Skill("mining", gathering);
+    Skill woodcutting = new Skill("wood cutting", gathering);
+    Skill treeFellingAx = new Skill("tree felling (ax)", gathering);
+    Skill treeFellingSaw = new Skill("tree felling (saw)", gathering);
+
+    // Base combat skills - NOTE: when shown, combat skills should indicate that they are combat oriented (so "fan" is clear that it's fighting with fans)
+    Skill combat = new Skill("combat");
+    Skill armedCombat = new Skill("armed combat", combat);
+    Skill unarmedCombat = new Skill("unarmed combat", combat);
+    Skill combatDefense = new Skill("combat defense", combat);
+
+    // Armed combat skills
+    Skill ax = new Skill("ax", armedCombat);
+    Skill smallAx = new Skill("ax (small)", ax);
+    Skill largeAx = new Skill("ax (large)", ax);
+    Skill fistWeapon = new Skill("fast weapon fighting", armedCombat);
+    Skill fan = new Skill ("fan fighting", fistWeapon);
+    Skill glove = new Skill("glove fighting", fistWeapon);
+    Skill knuckle = new Skill ("knuckle fighting", fistWeapon); // TODO - this might just be punch (why did I have them both on the design doc?)
+    Skill punchBlade = new Skill("punch blade", fistWeapon);
 
     public Ability cookSteak;
 
@@ -170,12 +167,7 @@ public class HandBuilt {
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
         cb.skills = new OrderedMap<>();
-        Skill skill = new Skill();
-        skill.name = "kendo";
-        cb.skills.put(skill, Rating.HIGH);
-        skill = new Skill();
-        skill.name = "akido";
-        cb.skills.put(skill, Rating.SLIGHT);
+        cb.skills.put(unarmedCombat, Rating.HIGH);
     }
 
     private void initDoors() {
