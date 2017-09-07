@@ -93,7 +93,7 @@ public class RecipeMixer {
         }
 
         blueprint = new Physical();
-        blueprint.color = stone.front;
+        blueprint.color = stone.front.toFloatBits();//.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
         blueprint.symbol = '.';
@@ -123,7 +123,7 @@ public class RecipeMixer {
 
     public Physical buildPhysical(Inclusion inclusion) {
         Physical blueprint = new Physical();
-        blueprint.color = inclusion.front;
+        blueprint.color = inclusion.front.toFloatBits();//toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         blueprint.name = inclusion.toString();
         blueprint.baseValue = inclusion.value;
         blueprint.symbol = '.';
@@ -185,7 +185,7 @@ public class RecipeMixer {
         physical.buildingBlock = blueprint.buildingBlock;
 
         physical.symbol = blueprint.symbol;
-        physical.color = blueprint.color == null ? SColor.GRAY : blueprint.color;
+        physical.color = blueprint.color == 0f ? SColor.GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f) : blueprint.color;
         physical.baseValue = blueprint.baseValue;
         physical.large = blueprint.large;
 
@@ -339,7 +339,7 @@ public class RecipeMixer {
         }
 
         if (modification.color != null) {
-            physical.color = modification.color;
+            physical.color = modification.color.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         }
 
         if (modification.baseValue != null) {
@@ -354,7 +354,7 @@ public class RecipeMixer {
             physical.large = modification.large;
         }
 
-        if (modification.lightEmitted != null) {
+        if (modification.lightEmitted != 0f) {
             physical.lightEmitted = modification.lightEmitted;
         }
 

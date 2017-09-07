@@ -55,6 +55,8 @@ public class Epigon extends Game {
     // this is separated from the StatefulRNG so you can still call ThrustRNG-specific methods, mainly skip()
     public static final ThrustRNG thrustRNG = new ThrustRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(thrustRNG);
+    // used for certain calculations where the state changes per-tile
+    public static final StatefulRNG srng = new StatefulRNG(new ThrustRNG(seed ^ seed >>> 1));
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
 
@@ -390,6 +392,7 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {
+                    srng.setState((x * map.height + y) * 0xDE4DL);
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
                     } else {
@@ -524,15 +527,16 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 double sightAmount = fovResult[x][y];
-                if(sightAmount >= 1.0) // only true for player currently; may need changing if light sources are added
-                {
-                    mapSLayers.put(x, y, ' ', SColor.TRANSPARENT, map.contents[x][y].getBackgroundColor());
-                }
-                else if (sightAmount > 0) {
+                if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
-                    if(creatures.containsKey(Coord.get(x, y)))
+                    // sightAmount should only be 1.0 if the player is standing in that cell, currently
+                    if(sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y)))
+                    {
+                        mapSLayers.put(x, y, ' ', 0f, map.contents[x][y].getBackgroundColor());
                         mapSLayers.clear(x, y, 0);
+                    }
                     else
+                        srng.setState((x * map.height + y) * 0xDE4DL);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                             tile.getBackgroundColor() // this can be null to use no background (transparent)
                     );

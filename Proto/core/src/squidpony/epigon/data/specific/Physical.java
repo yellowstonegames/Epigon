@@ -10,7 +10,6 @@ import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.OrderedMap;
@@ -52,11 +51,11 @@ public class Physical extends EpiData {
     public boolean buildingBlock; // can be used as a building block
 
     public char symbol;
-    public SColor color;
+    public float color;
     public double baseValue;
     public boolean large;
 
-    public SColor lightEmitted;
+    public float lightEmitted;
     public LiveValue lightEmittedStrength;
 
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
