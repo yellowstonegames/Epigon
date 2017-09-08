@@ -19,11 +19,6 @@ import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
 
@@ -86,9 +81,9 @@ public class HandBuilt {
     Skill smallAx = new Skill("ax (small)", ax);
     Skill largeAx = new Skill("ax (large)", ax);
     Skill fist = new Skill("fist", armedCombat);
-    Skill fan = new Skill ("fan", fist);
+    Skill fan = new Skill("fan", fist);
     Skill glove = new Skill("glove", fist);
-    Skill knuckle = new Skill ("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
+    Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
     Skill punchBlade = new Skill("punch blade", fist);
     Skill flexible = new Skill("flexible", armedCombat);
     Skill whip = new Skill("whip", flexible);

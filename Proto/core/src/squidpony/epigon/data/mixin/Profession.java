@@ -7,7 +7,6 @@ import squidpony.squidmath.OrderedMap;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.Rating;
 
@@ -22,7 +21,7 @@ import squidpony.epigon.universe.Rating;
  */
 public class Profession extends EpiData {
 
-    public EnumMap<Stat, LiveValue> initialStatRequirements = new EnumMap<>(Stat.class);
+    public EnumMap<Stat, Double> initialStatRequirements = new EnumMap<>(Stat.class); // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
     public OrderedMap<Skill, Rating> initialSkillRequirements;
 
     /**
