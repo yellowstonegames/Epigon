@@ -1,5 +1,8 @@
 package squidpony.epigon.playground;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import squidpony.Maker;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
@@ -82,11 +85,15 @@ public class HandBuilt {
     Skill ax = new Skill("ax", armedCombat);
     Skill smallAx = new Skill("ax (small)", ax);
     Skill largeAx = new Skill("ax (large)", ax);
-    Skill fistWeapon = new Skill("fast weapon fighting", armedCombat);
-    Skill fan = new Skill ("fan fighting", fistWeapon);
-    Skill glove = new Skill("glove fighting", fistWeapon);
-    Skill knuckle = new Skill ("knuckle fighting", fistWeapon); // TODO - this might just be punch (why did I have them both on the design doc?)
-    Skill punchBlade = new Skill("punch blade", fistWeapon);
+    Skill fist = new Skill("fist", armedCombat);
+    Skill fan = new Skill ("fan", fist);
+    Skill glove = new Skill("glove", fist);
+    Skill knuckle = new Skill ("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
+    Skill punchBlade = new Skill("punch blade", fist);
+    Skill flexible = new Skill("flexible", armedCombat);
+    Skill whip = new Skill("whip", flexible);
+    Skill hammer = new Skill("hammer", armedCombat);
+    Skill smallClub = new Skill("club (small)", hammer);
 
     public Ability cookSteak;
 
