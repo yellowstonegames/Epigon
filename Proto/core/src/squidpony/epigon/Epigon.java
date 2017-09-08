@@ -536,10 +536,11 @@ public class Epigon extends Game {
                         mapSLayers.clear(x, y, 0);
                     }
                     else
-                        srng.setState((x * map.height + y) * 0xDE4DL);
+                    {   srng.setState((x * map.height + y) * 0xDE4DL);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                             tile.getBackgroundColor() // this can be null to use no background (transparent)
-                    );
+                        );
+                    }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
