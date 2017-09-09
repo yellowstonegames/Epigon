@@ -44,7 +44,7 @@ public class Formula {
         switch (rating) {
             case NONE:
                 base = 0;
-                multiplier = 1.27; // just for consistency with the other values
+                multiplier = 0;
                 break;
             case SLIGHT:
                 base = 2;
@@ -73,6 +73,94 @@ public class Formula {
             case ULTIMATE:
                 base = 29;
                 multiplier = 1.20;
+                break;
+            default:
+                base = 0;
+                multiplier = 0;
+        }
+
+        return (int) Math.floor(base + base * Math.pow(multiplier, level - 1));
+    }
+
+    public static int needForLevel(int level, Rating rating) {
+        int base;
+        double multiplier;
+        switch (rating) {
+            case NONE:
+                base = 0;
+                multiplier = 0;
+                break;
+            case SLIGHT:
+                base = 100;
+                multiplier = 1.026;
+                break;
+            case TYPICAL:
+                base = 200;
+                multiplier = 1.025;
+                break;
+            case GOOD:
+                base = 450;
+                multiplier = 1.024;
+                break;
+            case HIGH:
+                base = 700;
+                multiplier = 1.023;
+                break;
+            case SUPERB:
+                base = 1200;
+                multiplier = 1.022;
+                break;
+            case AMAZING:
+                base = 2100;
+                multiplier = 1.021;
+                break;
+            case ULTIMATE:
+                base = 3200;
+                multiplier = 1.020;
+                break;
+            default:
+                base = 0;
+                multiplier = 0;
+        }
+
+        return (int) Math.floor(base + base * Math.pow(multiplier, level - 1));
+    }
+
+    public static int senseForLevel(int level, Rating rating) {
+        int base;
+        double multiplier;
+        switch (rating) {
+            case NONE:
+                base = 0;
+                multiplier = 0;
+                break;
+            case SLIGHT:
+                base = 1;
+                multiplier = 1.5;
+                break;
+            case TYPICAL:
+                base = 2;
+                multiplier = 1.049;
+                break;
+            case GOOD:
+                base = 4;
+                multiplier = 1.048;
+                break;
+            case HIGH:
+                base = 7;
+                multiplier = 1.047;
+                break;
+            case SUPERB:
+                base = 11;
+                multiplier = 1.046;
+                break;
+            case AMAZING:
+                base = 23;
+                multiplier = 1.045;
+                break;
+            case ULTIMATE:
+                base = 37;
+                multiplier = 1.044;
                 break;
             default:
                 base = 0;
