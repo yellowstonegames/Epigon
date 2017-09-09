@@ -126,45 +126,37 @@ public class HandBuilt {
         playerBlueprint.unique = true;
         playerBlueprint.attached = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
+
+        Rating[] ratingChoices = new Rating[]{Rating.SLIGHT, Rating.TYPICAL, Rating.GOOD, Rating.HIGH};
         for (Stat s : Stat.bases) {
-            Rating rating = rng.getRandomElement(Rating.values());
-            if (rating == Rating.NONE) {
-                rating = Rating.SLIGHT;
-            }
+            Rating rating = rng.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel());
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
         for (Stat s : Stat.healths) {
-            Rating rating = rng.getRandomElement(Rating.values());
-            if (rating == Rating.NONE) {
-                rating = Rating.SLIGHT;
-            }
+            Rating rating = rng.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
         for (Stat s : Stat.needs) {
-            Rating rating = rng.getRandomElement(Rating.values());
-            if (rating == Rating.NONE) {
-                rating = Rating.SLIGHT;
-            }
-            LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
+            Rating rating = rng.getRandomElement(ratingChoices);
+            LiveValue lv = new LiveValue(Formula.needForLevel(1, rating));
+            playerBlueprint.stats.put(s, lv);
+            playerBlueprint.statProgression.put(s, rating);
+        }
+        for (Stat s : Stat.senses) {
+            Rating rating = Rating.GOOD;
+            LiveValue lv = new LiveValue(Formula.senseForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
         for (Stat s : Stat.utilities) {
-            Rating rating = rng.getRandomElement(Rating.values());
-            if (rating == Rating.NONE) {
-                rating = Rating.SLIGHT;
-            }
-            LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
-            playerBlueprint.stats.put(s, lv);
+            Rating rating = rng.getRandomElement(ratingChoices);
+            playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerBlueprint.stats.put(Stat.SIGHT, new LiveValue(8));
-        playerBlueprint.stats.put(Stat.HEARING, new LiveValue(12));
-        playerBlueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
