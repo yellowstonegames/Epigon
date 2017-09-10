@@ -98,7 +98,6 @@ public class Physical extends EpiData {
     public EnumMap<Rating, List<Modification>> rarityModifications = new EnumMap<>(Rating.class);
 
     public Creature creatureData;
-    public Set<Profession> professions = new HashSet<>();
 
     public Ammunition ammunitionData;
     public Container containerData;

@@ -1,6 +1,12 @@
 package squidpony.epigon.display;
 
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import com.badlogic.gdx.graphics.Color;
+
 import squidpony.ArrayTools;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Stat;
@@ -10,16 +16,14 @@ import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.stream.Collectors;
-
-import static squidpony.epigon.Epigon.infoSize;
-import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.EquippedData;
 import squidpony.epigon.universe.ClothingSlot;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
+
+import static squidpony.epigon.Epigon.infoSize;
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -29,7 +33,7 @@ import squidpony.epigon.universe.Rating;
 public class InfoHandler {
 
     public enum InfoMode {
-        FULL_STATS, HEALTH_AND_ARMOR, TARGET_FULL_STATS, TARGET_HEALTH_AND_ARMOR;
+        FULL_STATS, HEALTH_AND_ARMOR, SKILLS, TARGET_FULL_STATS, TARGET_HEALTH_AND_ARMOR;
 
         private final String name;
 
@@ -190,6 +194,11 @@ public class InfoHandler {
         infoHealthAndArmor(player);
     }
 
+    public void showPlayerSkills() {
+        infoMode = InfoMode.SKILLS;
+        infoSkills(player);
+    }
+
     public void updateDisplay() {
         switch (infoMode) {
             case FULL_STATS:
@@ -197,6 +206,9 @@ public class InfoHandler {
                 break;
             case HEALTH_AND_ARMOR:
                 infoHealthAndArmor(player);
+                break;
+            case SKILLS:
+                infoSkills(player);
                 break;
             case TARGET_FULL_STATS:
                 infoFullStats(target);
@@ -284,6 +296,15 @@ public class InfoHandler {
         }
     }
 
+    private void infoSkills(Physical physical) {
+        clear();
+        if (physical == null) {
+            return;
+        }
+        int offset = 1;
+        showSkills(offset, physical);
+    }
+
     private Color percentColor(double actual, double base) {
         double filling = actual / base;
         if (filling <= 1) {
@@ -326,5 +347,31 @@ public class InfoHandler {
             blockText += eighthBlocks[(int) Math.ceil(remainder)];
             put(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
         }
+    }
+
+    private void showSkills(int offset, Physical physical) {
+        int widestSkillSize = physical.creatureData.skills.keySet().stream()
+            .mapToInt(s -> s.name.length())
+            .max()
+            .getAsInt();
+        int y = 0;
+        for (Entry<Skill, Rating> entry : physical.creatureData.skills.entrySet()) {
+            Color color = entry.getValue().color();
+            put(1, y + offset, caps(entry.getKey().name));
+
+            put(widestSkillSize + 2, y + offset, caps(entry.getValue().toString()), color);
+
+            y++;
+        }
+    }
+
+    private String caps(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        return Arrays.stream(input.split(" "))
+            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
+            .collect(Collectors.joining(" "));
     }
 }

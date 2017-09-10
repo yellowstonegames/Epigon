@@ -3,8 +3,8 @@ package squidpony.epigon.universe;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
- * This enum represents a rating of none to high, in order, for use in skills
- * and any other relative values such as monster level and item worth.
+ * This enum represents a rating of none to high, in order, for use in skills and any other relative
+ * values such as monster level and item worth.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -35,7 +35,7 @@ public enum Rating {
         }
     }
 
-    public SColor color(){
+    public SColor color() {
         switch (this) {
             case NONE:
                 return SColor.SLATE_GRAY; // Dark grey
@@ -61,7 +61,7 @@ public enum Rating {
     /**
      * Returns the next lowest Rating or itself if it is the lowest already.
      */
-    public Rating decrease(){
+    public Rating decrease() {
         switch (this) {
             case NONE:
                 return NONE;
@@ -87,7 +87,7 @@ public enum Rating {
     /**
      * Returns the next highest Rating or itself if it is the highest already.
      */
-    public Rating increase(){
+    public Rating increase() {
         switch (this) {
             case NONE:
                 return SLIGHT;
@@ -108,6 +108,46 @@ public enum Rating {
             default:
                 return NONE;
         }
+    }
+
+    public Rating applyRatingValueModification(RatingValueModification rvm) {
+        if (rvm.overwrite != null) {
+            return rvm.overwrite;
+        }
+
+        if (rvm.overwriteDecrease != null){
+            return rvm.overwriteDecrease.lessThan(this) ? rvm.overwriteDecrease : this;
+        }
+
+        if (rvm.overwriteIncrease != null){
+            return rvm.overwriteIncrease.greaterThan(this) ? rvm.overwriteIncrease : this;
+        }
+
+        Rating rating = this;
+        if (rvm.deltaLevel != null) {
+            int changes = 0;
+            if (rvm.deltaLevel > 0) {
+                while (rating.lessThan(rvm.deltaMax) && changes < rvm.deltaLevel) {
+                    rating = rating.increase();
+                    changes++;
+                }
+            } else if (rvm.deltaLevel < 0) {
+
+                while (rating.greaterThan(rvm.deltaMin) && changes < rvm.deltaLevel * -1) {
+                    rating = rating.decrease();
+                    changes++;
+                }
+            }
+        }
+        return rating;
+    }
+
+    public boolean greaterThan(Rating other) {
+        return this.ordinal() > other.ordinal();
+    }
+
+    public boolean lessThan(Rating other) {
+        return this.ordinal() < other.ordinal();
     }
 
     @Override

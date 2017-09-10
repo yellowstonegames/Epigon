@@ -2,22 +2,25 @@ package squidpony.epigon.playground;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map.Entry;
 
 import squidpony.Maker;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.RatingValueModification;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
@@ -59,44 +62,47 @@ public class HandBuilt {
     public Skill foodDrying = new Skill("food drying", cooking);
 
     // Gathering skills
-    Skill gathering = new Skill("gathering");
-    Skill butchering = new Skill("butchering", gathering);
-    Skill farming = new Skill("farming", gathering);
-    Skill fishing = new Skill("fishing", gathering);
-    Skill herbalism = new Skill("herbalism", gathering);
-    Skill hunting = new Skill("hunting", gathering);
-    Skill mining = new Skill("mining", gathering);
-    Skill woodcutting = new Skill("wood cutting", gathering);
-    Skill treeFellingAx = new Skill("tree felling (ax)", gathering);
-    Skill treeFellingSaw = new Skill("tree felling (saw)", gathering);
+    public Skill gathering = new Skill("gathering");
+    public Skill butchering = new Skill("butchering", gathering);
+    public Skill farming = new Skill("farming", gathering);
+    public Skill fishing = new Skill("fishing", gathering);
+    public Skill herbalism = new Skill("herbalism", gathering);
+    public Skill hunting = new Skill("hunting", gathering);
+    public Skill mining = new Skill("mining", gathering);
+    public Skill woodcutting = new Skill("wood cutting", gathering);
+    public Skill treeFellingAx = new Skill("tree felling (ax)", gathering);
+    public Skill treeFellingSaw = new Skill("tree felling (saw)", gathering);
 
     // Base combat skills - NOTE: when shown, combat skills should indicate that they are combat oriented (so "fan" is clear that it's fighting with fans)
-    Skill combat = new Skill("combat");
-    Skill armedCombat = new Skill("armed combat", combat);
-    Skill unarmedCombat = new Skill("unarmed combat", combat);
-    Skill combatDefense = new Skill("combat defense", combat);
+    public Skill combat = new Skill("combat");
+    public Skill armedCombat = new Skill("armed combat", combat);
+    public Skill unarmedCombat = new Skill("unarmed combat", combat);
+    public Skill combatDefense = new Skill("combat defense", combat);
 
     // Armed combat skills
-    Skill ax = new Skill("ax", armedCombat);
-    Skill smallAx = new Skill("ax (small)", ax);
-    Skill largeAx = new Skill("ax (large)", ax);
-    Skill fist = new Skill("fist", armedCombat);
-    Skill fan = new Skill("fan", fist);
-    Skill glove = new Skill("glove", fist);
-    Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
-    Skill punchBlade = new Skill("punch blade", fist);
-    Skill flexible = new Skill("flexible", armedCombat);
-    Skill whip = new Skill("whip", flexible);
-    Skill hammer = new Skill("hammer", armedCombat);
-    Skill smallClub = new Skill("club (small)", hammer);
+    public Skill ax = new Skill("ax", armedCombat);
+    public Skill smallAx = new Skill("ax (small)", ax);
+    public Skill largeAx = new Skill("ax (large)", ax);
+    public Skill fist = new Skill("fist", armedCombat);
+    public Skill fan = new Skill("fan", fist);
+    public Skill glove = new Skill("glove", fist);
+    public Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
+    public Skill punchBlade = new Skill("punch blade", fist);
+    public Skill flexible = new Skill("flexible", armedCombat);
+    public Skill whip = new Skill("whip", flexible);
+    public Skill hammer = new Skill("hammer", armedCombat);
+    public Skill smallClub = new Skill("club (small)", hammer);
 
     public Ability cookSteak;
+
+    public Profession chef;
 
     public HandBuilt() {
         basePhysical.generic = true;
         basePhysical.unique = true;
 
         initAbilities();
+        initProfessions();
         initPlayer();
         initDoors();
         initItems();
@@ -113,6 +119,59 @@ public class HandBuilt {
     private void initAbilities() {
         cookSteak = new Ability();
         cookSteak.name = "cook steak";
+    }
+
+    private void initProfessions() {
+        chef = new Profession();
+        chef.name = "chef";
+        chef.titlePrefix = "Chef";
+        chef.initialStatRequirements.put(Stat.AIM, 1.0);
+        chef.initialStatRequirements.put(Stat.CREATIVITY, 2.0);
+        chef.initialStatRequirements.put(Stat.IMPACT, 1.0);
+        chef.initialSkillRequirements.put(cooking, Rating.SLIGHT);
+
+        Modification mod = new Modification();
+        RatingValueModification rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.GOOD;
+        mod.skillChanges.put(cooking, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(baking, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(frying, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(boiling, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(foodPrep, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(foodChopping, rvm);
+        rvm = new RatingValueModification();
+        rvm.overwriteIncrease = Rating.SLIGHT;
+        mod.skillChanges.put(foodMixing, rvm);
+
+        mod.name = "chef slight";
+        chef.improvements.put(Rating.SLIGHT, mod);
+
+        mod = new Modification();
+        rvm = new RatingValueModification();
+        rvm.deltaLevel = 1;
+        rvm.deltaMax = Rating.HIGH;
+        mod.skillChanges.put(baking, rvm);
+        rvm = new RatingValueModification();
+        rvm.deltaLevel = 1;
+        rvm.deltaMax = Rating.SUPERB;
+        mod.skillChanges.put(foodChopping, rvm);
+        rvm = new RatingValueModification();
+        rvm.deltaLevel = 1;
+        rvm.deltaMax = Rating.HIGH;
+        mod.skillChanges.put(foodMixing, rvm);
+
+        mod.name = "chef typical";
+        chef.improvements.put(Rating.TYPICAL, mod);
     }
 
     private void initPlayer() {
@@ -162,6 +221,22 @@ public class HandBuilt {
         playerBlueprint.creatureData = cb;
         cb.skills = new OrderedMap<>();
         cb.skills.put(unarmedCombat, Rating.HIGH);
+
+        // make sure the player has prereqs for chef
+        for (Entry<Stat, Double> entry : chef.initialStatRequirements.entrySet()) {
+            if (playerBlueprint.stats.get(entry.getKey()).base() < entry.getValue()) {
+                playerBlueprint.stats.get(entry.getKey()).base(entry.getValue());
+            }
+        }
+        for (Entry<Skill, Rating> entry : chef.initialSkillRequirements.entrySet()) {
+            Rating current = cb.skills.get(entry.getKey());
+            if (current == null || current.lessThan(entry.getValue())) {
+                cb.skills.replace(entry.getKey(), entry.getValue());
+            }
+        }
+
+        cb.skills.put(cooking, Rating.TYPICAL);
+        mixer.addProfession(chef, playerBlueprint);
     }
 
     private void initDoors() {

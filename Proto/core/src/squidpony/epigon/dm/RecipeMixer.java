@@ -24,6 +24,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.mixin.Profession;
+import squidpony.epigon.universe.RatingValueModification;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -220,7 +222,6 @@ public class RecipeMixer {
         physical.terrainData = blueprint.terrainData;
 
         // TODO - add rest of mixins
-
         // finally work any modifications
         for (Modification m : blueprint.requiredModifications) {
             applyModification(physical, m);
@@ -318,7 +319,7 @@ public class RecipeMixer {
             }
         }
 
-        if (modification.attached != null){
+        if (modification.attached != null) {
             physical.attached = modification.attached;
         }
 
@@ -378,8 +379,56 @@ public class RecipeMixer {
             physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);
         }
 
-        if (modification.creatureOverwrite != null){
+        if (modification.creatureOverwrite != null) {
             physical.creatureData = createCreature(modification.creatureOverwrite);
+        }
+
+        if (physical.creatureData != null) {
+            modification.skillChanges.entrySet()
+                .stream()
+                .forEach(e -> {
+                    Rating rating = physical.creatureData.skills.getOrDefault(e.getKey(), Rating.NONE);
+                    rating = rating.applyRatingValueModification(e.getValue());
+                    physical.creatureData.skills.put(e.getKey(), rating);
+                });
+
+            modification.skillProgressionChagnes.entrySet()
+                .stream()
+                .forEach(e -> {
+                    Rating rating = physical.creatureData.skillProgression.getOrDefault(e.getKey(), Rating.NONE);
+                    rating = rating.applyRatingValueModification(e.getValue());
+                    physical.creatureData.skillProgression.put(e.getKey(), rating);
+                });
+        }
+    }
+
+    public void addProfession(Profession profession, Physical physical) {
+        if (physical.creatureData == null) {
+            System.err.println("Tried to add profession " + profession.name + " with no creature data to " + physical.name);
+            return;
+        }
+
+        if (physical.creatureData.professions.keySet().contains(profession)) {
+            System.err.println("Tried to duplicate add profession " + profession.name + " on " + physical.name);
+            return;
+        }
+
+        if (profession.initialStatRequirements.entrySet().stream().anyMatch(e -> physical.stats.getOrDefault(e.getKey(), LiveValue.ZERO).base() < e.getValue())) {
+            System.err.println("Physical " + physical.name + " does not have required stats for " + profession.name);
+            return;
+        }
+
+        if (profession.initialSkillRequirements.entrySet().stream().anyMatch(e -> physical.creatureData.skills.getOrDefault(e.getKey(), Rating.NONE).lessThan(e.getValue()))) {
+            System.err.println("Physical " + physical.name + " does not have required skills for " + profession.name);
+            return;
+        }
+
+        System.out.println("Adding profession " + profession.name + " to " + physical.name + " at rating " + Rating.SLIGHT.toString());
+        physical.creatureData.professions.put(profession, Rating.SLIGHT);
+        Modification mod = profession.improvements.get(Rating.SLIGHT);
+        if (mod != null) {
+            System.out.println("Profession applying modification " + mod.name + " to " + physical.name);
+            applyModification(physical, mod);
         }
     }
 }
