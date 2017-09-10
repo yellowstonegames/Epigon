@@ -19,4 +19,14 @@ public class Skill extends EpiData {
         this.name = name;
         this.parent = parent;
     }
+
+    public boolean hasParent(Skill check){
+        if (this == check){
+            return true;
+        }
+        if (parent == null){
+            return false;
+        }
+        return parent.hasParent(check);
+    }
 }

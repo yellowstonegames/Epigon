@@ -16,9 +16,13 @@ public class Creature {
 
     public Creature parent;
     public OrderedMap<Skill, Rating> skills = new OrderedMap<>();
+    public OrderedMap<Skill, Rating> skillProgression = new OrderedMap<>();
     public Set<Ability> abilities = new HashSet<>();
     public EquippedData equippedData;
 
+    public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
+
+    // Runtime values
     public boolean aware;//has noticed the player
 
     /*
