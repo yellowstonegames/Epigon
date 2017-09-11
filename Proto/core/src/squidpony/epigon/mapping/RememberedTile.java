@@ -23,9 +23,9 @@ public class RememberedTile {
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
         front = tile.getForegroundColor();
-        front = front == 0f ? 0x1.fffffep-126f : SColor.lerpFloatColors(front, SColor.FLOAT_BLACK, 0.65f);
+        front = front == 0f ? 0f : SColor.lerpFloatColors(front, SColor.FLOAT_BLACK, 0.8f);
         back = tile.getBackgroundColor();
-        back = back == 0f ? 0x1.fffffep-126f : SColor.lerpFloatColors(back, SColor.FLOAT_BLACK, 0.65f);
+        back = back == 0f ? 0f : SColor.lerpFloatColors(back, SColor.FLOAT_BLACK, 0.8f); //0x1.fffffep-126f
         if (tile.getCreature() != null){
             miniMapColor = SColor.SCARLET.toFloatBits();
         } else {

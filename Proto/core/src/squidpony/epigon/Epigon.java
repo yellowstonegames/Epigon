@@ -227,8 +227,9 @@ public class Epigon extends Game {
     private void startGame() {
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
-        mapSLayers.addLayer();//first added panel adds at level 1
-        fxHandler = new FxHandler(mapSLayers, 1, colorCenter, fovResult);
+        mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
+        mapSLayers.addLayer();//next adds at level 2, used for effects
+        fxHandler = new FxHandler(mapSLayers, 2, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
         map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
@@ -529,6 +530,7 @@ public class Epigon extends Game {
                 double sightAmount = fovResult[x][y];
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
+                    mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if(sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y)))
                     {
@@ -544,7 +546,9 @@ public class Epigon extends Game {
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
-                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back);
+                        mapSLayers.clear(x, y);
+                        mapSLayers.put(x, y, '\0', rt.back, 0f, 0);
+                        mapSLayers.put(x, y, rt.symbol, rt.front, 0f, 1);
                     }
                 }
             }
