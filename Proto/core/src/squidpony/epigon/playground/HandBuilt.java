@@ -1,12 +1,6 @@
 package squidpony.epigon.playground;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map.Entry;
-
 import squidpony.Maker;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Formula;
@@ -16,11 +10,13 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.LiveValueModification;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.RatingValueModification;
-import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.*;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
@@ -121,6 +117,21 @@ public class HandBuilt {
         cookSteak.name = "cook steak";
     }
 
+    private static RatingValueModification rvmSkill(Rating rating)
+    {
+        RatingValueModification rvm = new RatingValueModification();
+        rvm.overwriteIncrease = rating;
+        return rvm;
+    }
+
+    private static RatingValueModification rvmSkill(Integer deltaLevel, Rating deltaMax)
+    {
+        RatingValueModification rvm = new RatingValueModification();
+        rvm.deltaLevel = deltaLevel;
+        rvm.deltaMax = deltaMax;
+        return rvm;
+    }
+
     private void initProfessions() {
         chef = new Profession();
         chef.name = "chef";
@@ -131,44 +142,21 @@ public class HandBuilt {
         chef.initialSkillRequirements.put(cooking, Rating.SLIGHT);
 
         Modification mod = new Modification();
-        RatingValueModification rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.GOOD;
-        mod.skillChanges.put(cooking, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(baking, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(frying, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(boiling, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(foodPrep, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(foodChopping, rvm);
-        rvm = new RatingValueModification();
-        rvm.overwriteIncrease = Rating.SLIGHT;
-        mod.skillChanges.put(foodMixing, rvm);
+        mod.skillChanges.put(cooking, rvmSkill(Rating.GOOD));
+        mod.skillChanges.put(baking, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(frying, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(boiling, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(foodPrep, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(foodChopping, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(foodMixing, rvmSkill(Rating.SLIGHT));
 
         mod.name = "chef slight";
         chef.improvements.put(Rating.SLIGHT, mod);
 
         mod = new Modification();
-        rvm = new RatingValueModification();
-        rvm.deltaLevel = 1;
-        rvm.deltaMax = Rating.HIGH;
-        mod.skillChanges.put(baking, rvm);
-        rvm = new RatingValueModification();
-        rvm.deltaLevel = 1;
-        rvm.deltaMax = Rating.SUPERB;
-        mod.skillChanges.put(foodChopping, rvm);
-        rvm = new RatingValueModification();
-        rvm.deltaLevel = 1;
-        rvm.deltaMax = Rating.HIGH;
-        mod.skillChanges.put(foodMixing, rvm);
+        mod.skillChanges.put(baking, rvmSkill(1, Rating.HIGH));
+        mod.skillChanges.put(foodChopping, rvmSkill(1, Rating.SUPERB));
+        mod.skillChanges.put(foodMixing, rvmSkill(1, Rating.HIGH));
 
         mod.name = "chef typical";
         chef.improvements.put(Rating.TYPICAL, mod);
