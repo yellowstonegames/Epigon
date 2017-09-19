@@ -1,36 +1,51 @@
 package squidpony.epigon.input;
 
-import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.Maker;
 import squidpony.squidmath.OrderedMap;
+
+import static squidpony.squidgrid.gui.gdx.SquidInput.*;
 
 /**
  * The set of keyboard inputs.
  */
 public class ControlMapping {
 
-    public static final OrderedMap<Character, Verb> defaultMapping;
+    private static final int CAPS = 0x40000, CTRL = 0x20000;
+    public static final OrderedMap<Integer, Verb> defaultMapping =
+            Maker.<Integer, Verb>makeOM( // ah yes, ugly syntax to ensure the type is right.
+                'A'|CAPS, Verb.ATTEMPT,
+                'c', Verb.CONSUME,
+                'c'|CTRL, Verb.CONSUME_DIFFERENTLY, // ctrl-c to eat the delicious soap
+                'e', Verb.EQUIP,
+                'f', Verb.FIRE,
+                'g', Verb.GET,
+                'G'|CAPS, Verb.GATHER,
+                'h', Verb.HELP,
+                '?'|CAPS, Verb.HELP,
+                F1, Verb.HELP,
+                'i', Verb.INTERACT,
+                'I'|CAPS, Verb.INVENTORY,
+                'r', Verb.REST,
+                'u', Verb.USE_ABILITY,
+                'v', Verb.VIEW,
+                'x', Verb.EXAMINE,
 
-    static {
-        defaultMapping = new OrderedMap<>();
-        defaultMapping.put('a', Verb.ANOINT);
-        defaultMapping.put('c', Verb.CLOSE);
-        defaultMapping.put('C', Verb.CONSUME);
-        defaultMapping.put('x', Verb.EXAMINE);
-        defaultMapping.put('f', Verb.FIRE);
-        defaultMapping.put('g', Verb.GET);
-        defaultMapping.put('G', Verb.GET_AOE);
-        defaultMapping.put('h', Verb.HELP);
-        defaultMapping.put('?', Verb.HELP);
-        defaultMapping.put(SquidInput.F1, Verb.HELP);
-        defaultMapping.put('i', Verb.INTERACT);
-        defaultMapping.put('I', Verb.INVENTORY);
-        defaultMapping.put('l', Verb.LOOK);
-        defaultMapping.put(SquidInput.DOWN_ARROW, Verb.MOVE_DOWN);
-        defaultMapping.put(SquidInput.DOWN_LEFT_ARROW, Verb.MOVE_DOWN_LEFT);
-        defaultMapping.put(SquidInput.DOWN_RIGHT_ARROW, Verb.MOVE_DOWN_RIGHT);
-        defaultMapping.put('>', Verb.MOVE_HIGHER);
-        defaultMapping.put('w', Verb.WEAR);
-        defaultMapping.put('W', Verb.WIELD);
-    }
-
+                UP_ARROW, Verb.MOVE_UP,
+                DOWN_ARROW, Verb.MOVE_DOWN,
+                LEFT_ARROW, Verb.MOVE_LEFT,
+                RIGHT_ARROW, Verb.MOVE_RIGHT,
+                UP_LEFT_ARROW, Verb.MOVE_UP_LEFT,
+                UP_RIGHT_ARROW, Verb.MOVE_RIGHT,
+                DOWN_LEFT_ARROW, Verb.MOVE_DOWN_LEFT,
+                DOWN_RIGHT_ARROW, Verb.MOVE_DOWN_RIGHT,
+                'w', Verb.WAIT,
+                '>'|CAPS, Verb.MOVE_LOWER,
+                '<'|CAPS, Verb.MOVE_HIGHER,
+                'o', Verb.OPEN,
+                's', Verb.SHUT,
+                'S'|CAPS, Verb.SAVE,
+                'Q'|CAPS, Verb.QUIT,
+                'q'|CTRL, Verb.QUIT,
+                ESCAPE, Verb.QUIT
+        );
 }
