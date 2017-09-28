@@ -1,5 +1,5 @@
 sourceCompatibility = 1.8
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = [ "src/main/java" ]
 sourceSets.main.resources.srcDirs += ["../core/assets"]
 
 project.ext.mainClassName = "squidpony.epigon.desktop.DesktopLauncher"
@@ -14,18 +14,20 @@ task run(dependsOn: classes, type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
-    ignoreExitValue = true
+    setIgnoreExitValue(true)
 }
 
 task dist(type: Jar) {
-    from files(sourceSets.main.output.classesDir)
-    from files(sourceSets.main.output.resourcesDir)
-    from {configurations.compile.collect {zipTree(it)}}
+    from files(sourceSets.main.getOutput().classesDirs)
+    from files(sourceSets.main.getOutput().resourcesDir)
+    from { configurations.compile.collect { zipTree(it) } }
     from files(project.assetsDir);
- 
+    archiveName "Epigon-${version}.jar"
+    from { configurations.compile.collect { zipTree(it) } }
     manifest {
         attributes 'Main-Class': project.mainClassName
     }
+
 }
 
 dist.dependsOn classes
