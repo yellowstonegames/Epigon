@@ -239,7 +239,7 @@ public class Epigon extends Game {
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.HUNGER).delta(-1);
         player.stats.get(Stat.HUNGER).min(0);
-        player.stats.get(Stat.CONVICTION).actual(player.stats.get(Stat.CONVICTION).base() * 1.7);
+        player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
         player.location = floors.singleRandom(rng);
@@ -325,8 +325,8 @@ public class Epigon extends Game {
         }
 
         infoHandler.updateDisplay();
-        if (player.stats.get(Stat.LIFE_FORCE).actual() <= 0) {
-            message("You are now dead with Life Force: " + player.stats.get(Stat.LIFE_FORCE).actual());
+        if (player.stats.get(Stat.VIGOR).actual() <= 0) {
+            message("You are now dead with Vigor: " + player.stats.get(Stat.VIGOR).actual());
         }
 
         if (autoplayTurns > 0) {

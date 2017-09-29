@@ -231,7 +231,7 @@ public class Formula {
             return 0.0;
         }
         double val = lv.actual();
-        lv = source.stats.get(Stat.LIFE_FORCE);
+        lv = source.stats.get(Stat.VIGOR);
         if (lv == null) {
             return val;
         }
