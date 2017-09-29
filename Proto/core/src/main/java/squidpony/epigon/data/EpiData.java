@@ -2,8 +2,6 @@ package squidpony.epigon.data;
 
 import squidpony.squidmath.SquidID;
 
-import java.util.Objects;
-
 /**
  * Data class for information shared by all data objects.
  */

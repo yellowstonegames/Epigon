@@ -1,5 +1,7 @@
 package squidpony.epigon.universe;
 
+import squidpony.epigon.Utilities;
+
 /**
  * Represents all of the possible base stats.
  *
@@ -22,30 +24,31 @@ public enum Stat {
     // Magical
     POTENCY("PO", "Controls how much damage or how big the effect is for spiritual abilities."),
     ATTUNEMENT("AT", "Controls damage resistance to spiritual attacks."),
-    DOMINION("DO", "Controls chance to cause critical damage or effects with spiritual attacks."),
+    //DOMINION("DO", "Controls chance to cause critical damage or effects with spiritual attacks."), // should be skill
 
     // Intellect
-    IQ("IQ", "Controls rate at which some skills can be learned."),
-    CREATIVITY("CR", "Controls the rate at which som skills can be learned."),
-    KNOWLEDGE("KN", "Controls chance to get critical success when using skills."),
+    // IQ("IQ", "Controls rate at which some skills can be learned."), // this seems unnecessary
+    CREATIVITY("CR", "Controls chance to get critical success when using skills."),
+    KNOWLEDGE("KN", "Controls the rate at which skills are learned."),
 
     // Social
-    APPEARANCE("AP", "Controls reactions from some NPCs"),
-    CONVICTION("CO", "Controls reactions from some NPCs."),
-    AUTHORITY("AU", "Controls reactions from some NPCs."),
+    APPEARANCE("AP", "Controls reactions from some NPCs who care how you look."),
+    DEVOTION("DE", "Controls reactions from some NPCs with significant religious beliefs."),
+    AUTHORITY("AU", "Controls reactions from some NPCs who are either for or against the government."),
+    //These last 3 stats affect the true pillars of society: church, state, and strip-club.
 
     // Health
-    LIFE_FORCE("LI", "Ammount of physical endurance."),
-    VITALITY("VI", "Amount of physical energy."),
-    SPIRIT("SP", "Amount of spirit energy."),
-    INTELLECT("IN", "Amount of mental energy"),
-    CHARM("CH", "Amount of social energy"),
-    SANITY("SA", "How sane one is. When this is reduced too far, actions are no longer under direct control."),
+    VIGOR("VI", "Amount of physical injury you can sustain; includes pain tolerance and general health."),
+    ENDURANCE("EN", "Amount of physical energy you have; used to survive combats before injuries are received."), // I think this is like exhaustion/stamina?
+    SPIRIT("SP", "Amount of spirit energy; used to power magic spells and items, as well as resist some magic."),
+    INTELLECT("IN", "Amount of mental energy; used when performing certain difficult skills."),
+    CHARM("CH", "Amount of social energy; used when engaging in social interactions."),
+    SANITY("SA", "How sane one is; used to resist fear and horror."),
     
     // Needs
     HUNGER("HU", "How full of nutrition."),
     THIRST("TH", "How full of liquids."),
-    REST("RE", "How well rested, needed for intellectual and social healing."),
+    REST("RE", "How well rested, needed for mental and social healing."),
     SLEEP("SL", "How much sleep, needed for physical and magic healing."),
 
     // Senses
@@ -61,15 +64,15 @@ public enum Stat {
 
     public static final Stat[] physicals = {AIM, IMPACT, DODGE, TOUGHNESS};
 
-    public static final Stat[] magicals = {POTENCY, ATTUNEMENT, DOMINION};
+    public static final Stat[] magicals = {POTENCY, ATTUNEMENT};
 
-    public static final Stat[] intellects = {IQ, CREATIVITY, KNOWLEDGE};
+    public static final Stat[] intellects = {CREATIVITY, KNOWLEDGE};
 
-    public static final Stat[] socials = {APPEARANCE, CONVICTION, AUTHORITY};
+    public static final Stat[] socials = {APPEARANCE, DEVOTION, AUTHORITY};
 
-    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, DOMINION, IQ, CREATIVITY, KNOWLEDGE, APPEARANCE, CONVICTION, AUTHORITY};
+    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, CREATIVITY, KNOWLEDGE, APPEARANCE, DEVOTION, AUTHORITY};
 
-    public static final Stat[] healths = {LIFE_FORCE, VITALITY, SPIRIT, INTELLECT, CHARM, SANITY};
+    public static final Stat[] healths = {VIGOR, ENDURANCE, SPIRIT, INTELLECT, CHARM, SANITY};
 
     public static final Stat[] needs = {HUNGER, THIRST, REST, SLEEP};
 
@@ -77,14 +80,16 @@ public enum Stat {
 
     public static final Stat[] utilities = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
 
-    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, CHARM, INTELLECT, SPIRIT, VITALITY};
+    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, CHARM, INTELLECT, SPIRIT, ENDURANCE};
 
     private final String nick;
     private final String description;
+    private final String prettyName;
 
     private Stat(String nick, String description) {
         this.nick = nick;
         this.description = description;
+        prettyName = Utilities.capitalize(name());
     }
     
     public String nick(){
@@ -103,20 +108,20 @@ public enum Stat {
      */
     public Stat getRollover() {
         switch (this) {
-            case LIFE_FORCE:
+            case VIGOR:
                 return null;//creature is dead if no life force remains
-            case VITALITY:
-                return LIFE_FORCE;
+            case ENDURANCE:
+                return VIGOR;
             case SPIRIT:
-                return VITALITY;
+                return ENDURANCE;
             case INTELLECT:
                 return SPIRIT;
             case CHARM:
-                return VITALITY;
+                return INTELLECT;
             case HUNGER:
-                return VITALITY;
+                return ENDURANCE;
             case THIRST:
-                return VITALITY;
+                return ENDURANCE;
             case REST:
                 return INTELLECT;
             case SLEEP:
@@ -130,6 +135,7 @@ public enum Stat {
 
     @Override
     public String toString() {
-        return name().substring(0, 1) + name().substring(1).toLowerCase().replace('_', ' ');
+        return prettyName;
+        //return name().substring(0, 1) + name().substring(1).toLowerCase().replace('_', ' ');
     }
 }

@@ -123,7 +123,6 @@ public class ContextHandler {
     }
 
     private void put(String[] text, boolean cache) {
-        clear();
         for (int y = 0; y < text.length && y < height - 2; y++) {
             put(1, y + 1, text[y], cache);
         }
@@ -176,12 +175,10 @@ public class ContextHandler {
     public void contextStatDetails(Stat stat, LiveValue lv) {
         contextMode = ContextMode.STAT_DETAILS;
         clear();
-        put(new String[]{
-            stat.toString() + " (" + stat.nick() + ")",
-            "Base:  " + lv.base(),
-            "Max:   " + lv.max(),
-            "Delta: " + lv.delta()
-        }, true);
+        put(1, 1, stat.toString() + " (" + stat.nick() + ")", true);
+        put(1, 1, "Base:  " + lv.base(),true);
+        put(1, 1, "Max:   " + lv.max(),true);
+        put(1, 1, "Delta: " + lv.delta(),true);
     }
 
     public void contextMiniMap() {
@@ -213,11 +210,13 @@ public class ContextHandler {
                 .map(p -> p.name)
                 .collect(Collectors.joining("\n", tileDescription + "\n", ""));
         }
+        clear();
         put(tileDescription.split("\n"), true);
     }
 
     public void message(String[] text) {
         contextMode = ContextMode.MESSAGE;
+        clear();
         put(text, true);
     }
 
