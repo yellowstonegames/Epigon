@@ -10,10 +10,10 @@ import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.EnumOrderedMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,7 +65,7 @@ public class ContextHandler {
     private int height;
     private TextCellFactory miniMapFont;
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
-    private EnumMap<ContextMode, char[][]> cachedTexts = new EnumMap<>(ContextMode.class);
+    private EnumOrderedMap<ContextMode, char[][]> cachedTexts = new EnumOrderedMap<>(ContextMode.class);
 
     public Coord arrowLeft;
     public Coord arrowRight;

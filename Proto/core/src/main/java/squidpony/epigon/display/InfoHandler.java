@@ -1,26 +1,24 @@
 package squidpony.epigon.display;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import com.badlogic.gdx.graphics.Color;
-
 import squidpony.ArrayTools;
+import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.mixin.EquippedData;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.ClothingSlot;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.EnumOrderedMap;
 
-import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.mixin.EquippedData;
-import squidpony.epigon.universe.ClothingSlot;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Rating;
+import java.util.Arrays;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.infoSize;
 import static squidpony.epigon.Epigon.rng;
@@ -251,7 +249,7 @@ public class InfoHandler {
              */
             offset += Stat.healths.length + 1;
             EquippedData ed = physical.creatureData.equippedData;
-            EnumMap<ClothingSlot, Physical> armor = ed == null ? new EnumMap<>(ClothingSlot.class) : ed.getArmor();
+            EnumOrderedMap<ClothingSlot, Physical> armor = ed == null ? new EnumOrderedMap<>(ClothingSlot.class) : ed.getArmor();
             // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
             double actual = 0;
             double base = 0;

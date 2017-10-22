@@ -4,11 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import squidpony.Maker;
+import squidpony.squidmath.OrderedSet;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import static squidpony.epigon.Epigon.rng;
 
 /**
@@ -26,7 +27,7 @@ public class SoundManager {
     private final Map<String, Sound> soundMap = new TreeMap<>();
     private final Map<String, Music> musicMap = new TreeMap<>();
     private Music nowPlaying;
-    private final List<String> readableFileTypes = Arrays.asList(new String[]{"wav", "mp3", "ogg"});
+    private final OrderedSet<String> readableFileTypes = Maker.makeOS("wav", "mp3", "ogg");
 
     public SoundManager() {
         if (Prefs.isSoundfxOn()) {

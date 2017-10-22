@@ -1,11 +1,11 @@
 package squidpony.epigon.data.mixin;
 
-import java.util.EnumMap;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.ClothingSlot;
 import squidpony.epigon.universe.JewelrySlot;
 import squidpony.epigon.universe.OverArmorSlot;
 import squidpony.epigon.universe.WieldSlot;
+import squidpony.squidmath.EnumOrderedMap;
 
 /**
  *
@@ -13,9 +13,9 @@ import squidpony.epigon.universe.WieldSlot;
  */
 public interface EquippedData {
 
-    public EnumMap<JewelrySlot, Physical> getJewelry();
-    public EnumMap<ClothingSlot, Physical> getClothing();
-    public EnumMap<ClothingSlot, Physical> getArmor();
-    public EnumMap<OverArmorSlot, Physical> getOverArmor();
-    public EnumMap<WieldSlot, Physical> getEquipment();
+    public EnumOrderedMap<JewelrySlot, Physical> getJewelry();
+    public EnumOrderedMap<ClothingSlot, Physical> getClothing();
+    public EnumOrderedMap<ClothingSlot, Physical> getArmor();
+    public EnumOrderedMap<OverArmorSlot, Physical> getOverArmor();
+    public EnumOrderedMap<WieldSlot, Physical> getEquipment();
 }

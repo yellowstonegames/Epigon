@@ -74,7 +74,8 @@ public class Epigon extends Game {
     private SquidInput mapInput;
     private SquidInput contextInput;
     private SquidInput infoInput;
-    private Color bgColor;
+    private Color bgColor, unseenColor;
+    private float bgColorFloat, unseenColorFloat;
     private List<Coord> toCursor;
     private TextCellFactory font;
     private String[] messages;
@@ -132,8 +133,10 @@ public class Epigon extends Game {
         map = new EpiMap(100, 50);
         Coord.expandPoolTo(map.width, map.height);
 
-        bgColor = SColor.BLACK_DYE;
-
+        bgColor = SColor.CW_DARK_GRAY;
+        unseenColor = SColor.BLACK_DYE;
+        bgColorFloat = bgColor.toFloatBits();
+        unseenColorFloat = unseenColor.toFloatBits();
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
         batch = new SpriteBatch();
 
@@ -186,7 +189,7 @@ public class Epigon extends Game {
             mapSize.cellWidth,
             mapSize.cellHeight,
             font);
-        ArrayTools.fill(mapSLayers.getBackgrounds(), bgColor.toFloatBits());
+        ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
@@ -534,21 +537,23 @@ public class Epigon extends Game {
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if(sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y)))
                     {
-                        mapSLayers.put(x, y, ' ', 0f, map.contents[x][y].getBackgroundColor());
+                        mapSLayers.put(x, y, ' ', 0f, bgColorFloat);
                         mapSLayers.clear(x, y, 0);
                     }
                     else
                     {   srng.setState((x * map.height + y) * 0xDE4DL);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
-                            tile.getBackgroundColor() // this can be null to use no background (transparent)
+                                bgColorFloat // this can be null to use no background (transparent)
                         );
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
                         mapSLayers.clear(x, y);
-                        mapSLayers.put(x, y, '\0', rt.back, 0f, 0);
-                        mapSLayers.put(x, y, rt.symbol, rt.front, 0f, 1);
+                        mapSLayers.put(x, y, ' ', 0f, unseenColorFloat, 0);
+                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 1);
+                        //mapSLayers.put(x, y, '\0', rt.back, SColor.FLOAT_BLACK, 0);
+                        //mapSLayers.put(x, y, rt.symbol, rt.front, SColor.FLOAT_BLACK, 1);
                     }
                 }
             }
@@ -569,7 +574,7 @@ public class Epigon extends Game {
         super.render();
 
         // standard clear the background routine for libGDX
-        Gdx.gl.glClearColor(bgColor.r / 255.0f, bgColor.g / 255.0f, bgColor.b / 255.0f, 1.0f);
+        Gdx.gl.glClearColor(unseenColor.r, unseenColor.g, unseenColor.b, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         mapStage.getCamera().position.x = playerEntity.getX();
