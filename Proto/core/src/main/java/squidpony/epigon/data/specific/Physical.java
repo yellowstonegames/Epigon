@@ -12,10 +12,14 @@ import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -67,8 +71,8 @@ public class Physical extends EpiData {
 
     public List<Condition> conditions = new ArrayList<>();
 
-    public EnumMap<Stat, LiveValue> stats = new EnumMap<>(Stat.class); // initial stats on instantiation come from required modification
-    public EnumMap<Stat, Rating> statProgression = new EnumMap<>(Stat.class);
+    public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
+    public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
 
     public List<Physical> inventory = new ArrayList<>();
 
@@ -95,7 +99,7 @@ public class Physical extends EpiData {
      * the compounded application of all rarity levels up to and including that level's
      * modification.
      */
-    public EnumMap<Rating, List<Modification>> rarityModifications = new EnumMap<>(Rating.class);
+    public EnumOrderedMap<Rating, List<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class);
 
     public Creature creatureData;
 

@@ -1,8 +1,8 @@
 squidpony.epigon.data.Role															
 name:str	prereqs:str[;]	signature:str	talents:str[;]	description:str	aim:double	impact:double	dodge:double	toughness:double	potency:double	attunement:double	creativity:double	knowledge:double	appearance:double	devotion:double	authority:double
 Brute		Frenzy		High-offense physical fighter; excels at fighting groups.											
-Guardian		Stand Firm		Defensive warrior who rarely pursues foes.											
+Guardian		Punish		Defensive warrior who has a hefty counterattack.											
 Hunter		Seek	Predate;Slay;Squish;Murder;Sabotage;Exorcise;Defoliate	Stealthy scout with specialized ways of hunting foes.											
 Mystic		Meditate		Magician with limited access to great power.											
-Rogue		Fight Dirty		Scoundrel who tricks enemies into showing weakness.											
-Sage		Study		Scholar who steadily learns how to defeat his enemies.											
+Rogue		Feint		Scoundrel who tricks enemies into showing weakness.											
+Sage		Study	Negotiate;Tame;Improvise;Ceremony;Medicine;Poisoning;Disrupt	Scholar who steadily learns how to defeat his enemies.											

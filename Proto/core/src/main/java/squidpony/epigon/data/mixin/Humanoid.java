@@ -1,45 +1,45 @@
 package squidpony.epigon.data.mixin;
 
-import java.util.EnumMap;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.ClothingSlot;
-import squidpony.epigon.universe.WieldSlot;
 import squidpony.epigon.universe.JewelrySlot;
 import squidpony.epigon.universe.OverArmorSlot;
+import squidpony.epigon.universe.WieldSlot;
+import squidpony.squidmath.EnumOrderedMap;
 
 /**
  * A humanoid creature which can wear and wield things.
  */
 public class Humanoid implements EquippedData {
 
-    public EnumMap<JewelrySlot, Physical> jewelry = new EnumMap<>(JewelrySlot.class);
-    public EnumMap<ClothingSlot, Physical> clothing = new EnumMap<>(ClothingSlot.class);
-    public EnumMap<ClothingSlot, Physical> armor = new EnumMap<>(ClothingSlot.class);
-    public EnumMap<OverArmorSlot, Physical> overArmor = new EnumMap<>(OverArmorSlot.class);
-    public EnumMap<WieldSlot, Physical> equipment = new EnumMap<>(WieldSlot.class);
+    public EnumOrderedMap<JewelrySlot, Physical> jewelry = new EnumOrderedMap<>(JewelrySlot.class);
+    public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);
+    public EnumOrderedMap<ClothingSlot, Physical> armor = new EnumOrderedMap<>(ClothingSlot.class);
+    public EnumOrderedMap<OverArmorSlot, Physical> overArmor = new EnumOrderedMap<>(OverArmorSlot.class);
+    public EnumOrderedMap<WieldSlot, Physical> equipment = new EnumOrderedMap<>(WieldSlot.class);
 
     @Override
-    public EnumMap<JewelrySlot, Physical> getJewelry() {
+    public EnumOrderedMap<JewelrySlot, Physical> getJewelry() {
         return jewelry;
     }
 
     @Override
-    public EnumMap<ClothingSlot, Physical> getClothing() {
+    public EnumOrderedMap<ClothingSlot, Physical> getClothing() {
         return clothing;
     }
 
     @Override
-    public EnumMap<ClothingSlot, Physical> getArmor() {
+    public EnumOrderedMap<ClothingSlot, Physical> getArmor() {
         return armor;
     }
 
     @Override
-    public EnumMap<OverArmorSlot, Physical> getOverArmor() {
+    public EnumOrderedMap<OverArmorSlot, Physical> getOverArmor() {
         return overArmor;
     }
 
     @Override
-    public EnumMap<WieldSlot, Physical> getEquipment() {
+    public EnumOrderedMap<WieldSlot, Physical> getEquipment() {
         return equipment;
     }
 

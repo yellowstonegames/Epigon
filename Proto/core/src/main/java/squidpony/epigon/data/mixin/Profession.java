@@ -1,14 +1,12 @@
 package squidpony.epigon.data.mixin;
 
-import java.util.EnumMap;
-
-import squidpony.squidmath.OrderedMap;
-
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.Stat;
+import squidpony.squidmath.EnumOrderedMap;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * A grouping of starting skills and stats plus an aptitude towards increasing them, starting
@@ -27,7 +25,7 @@ public class Profession extends EpiData {
     public String titlePrefix;
     public String titlePostfix;
 
-    public EnumMap<Stat, Double> initialStatRequirements = new EnumMap<>(Stat.class); // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
+    public EnumOrderedMap<Stat, Double> initialStatRequirements = new EnumOrderedMap<>(Stat.class); // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
     public OrderedMap<Skill, Rating> initialSkillRequirements = new OrderedMap<>();
 
     /**
@@ -38,7 +36,7 @@ public class Profession extends EpiData {
      * When gaining a profession for the first time, modifications from Rating.SLIGHT are applied as that
      * is the starting rating for any Profession.
      */
-    public EnumMap<Rating, Modification> improvements = new EnumMap<>(Rating.class);
+    public EnumOrderedMap<Rating, Modification> improvements = new EnumOrderedMap<>(Rating.class);
 
     // Starting parts only for when generating a creature with this profession
     public Modification startingModification;
