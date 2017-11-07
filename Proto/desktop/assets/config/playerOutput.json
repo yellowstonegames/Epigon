@@ -1,0 +1,77 @@
+{
+    "name": "Player",
+    "description": "The main player's character.",
+    "notes": "Voted most likely to die.",
+    "parent": null,
+    "sound": null,
+    "symbol": "@",
+    "color": {
+        "r": 0.59607846,
+        "g": 0.3372549,
+        "b": 0.16078432,
+        "a": 1,
+        "name": "Fox"
+    },
+    "possibleAliases": ["Mario", "Link", "Sam"],
+    "possibleModifications": null,
+    "modifications": null,
+    "whenUsedAsMaterial": null,
+    "passthroughResistances": null,
+    "possibleConditions": null,
+    "conditions": null,
+    "baseStats": {
+        "e": {
+            "class": "squidpony.epigon.universe.Stat",
+            "value": "OPACITY"
+        },
+        "v": 100,
+        "r": []
+    },
+    "commonInventory": null,
+    "physicalDrops": null,
+    "becomes": null,
+    "identification": null,
+    "generic": false,
+    "unique": false,
+    "rarity": null,
+    "baseValue": 0,
+    "large": false,
+    "ammunitionData": null,
+    "containerData": null,
+    "creatureData": {
+        "class": "squidpony.epigon.data.mixin.Humanoid",
+        "parent": null,
+        "profession": null,
+        "skills": {
+            "f": 0.75,
+            "k": {
+                "name": "kendo",
+                "description": null,
+                "notes": null
+            },
+            "v": "HIGH",
+            "r": [{
+                "class": "squidpony.epigon.data.generic.Skill",
+                "name": "akido",
+                "description": null,
+                "notes": null
+            }, {
+                "class": "squidpony.epigon.universe.Rating",
+                "value": "SLIGHT"
+            }]
+        },
+        "abilities": null,
+        "aware": false,
+        "jewelry": {},
+        "clothing": {},
+        "armor": {},
+        "overArmor": {},
+        "equipment": {}
+    },
+    "interactableData": null,
+    "liquidData": null,
+    "readableData": null,
+    "wearableData": null,
+    "wieldableData": null,
+    "zappableData": null
+}

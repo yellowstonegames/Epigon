@@ -1,9 +1,9 @@
 sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = [ "src/main/java" ]
-sourceSets.main.resources.srcDirs += ["../core/assets"]
+sourceSets.main.resources.srcDirs += ["src/main/resources"]
 
 project.ext.mainClassName = "squidpony.epigon.desktop.DesktopLauncher"
-project.ext.assetsDir = new File("../core/assets");
+project.ext.assetsDir = new File("assets");
 
 if (!hasProperty('mainClass')) {
     ext.mainClass = 'squidpony.epigon.desktop.DesktopLauncher'
