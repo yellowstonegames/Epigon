@@ -1,0 +1,45 @@
+{
+  "name": "Great Hero",
+  "description": "Your handsome (for some values of handsome) self.",
+  "notes": "The player character.",
+  "symbol": "@",
+  "color": {
+    "r": 0.7529412,
+    "g": 0.7529412,
+    "b": 0.7529412,
+    "name": "Silver"
+  },
+  "unique": true,
+  "creatureData": {
+    "opacity": 1.0,
+    "skills": [
+      {
+        "skill": {
+          "internalName": "kendo",
+          "name": {
+            "name": "kendo"
+          }
+        },
+        "rating": "typical"
+      }
+    ],
+    "maxStats": {
+      "aim": 100,
+      "attack_power": 100,
+      "precision": 100,
+      "agility": 100,
+      "deflection": 100,
+      "toughness": 100,
+      "spirit_power": 100,
+      "spirit_connectivity": 100,
+      "spirit_control": 100,
+      "iq": 100,
+      "creativity": 100,
+      "knowledge": 100,
+      "appearance": 100,
+      "conviction": 100
+    },
+    "visionRange": 12,
+    "hearingRange": 32
+  }
+}

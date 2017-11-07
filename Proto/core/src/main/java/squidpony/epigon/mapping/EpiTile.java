@@ -32,12 +32,20 @@ public class EpiTile {
         double resistance = 0f;
         LiveValue lv = new LiveValue(resistance);
         Stat key = Stat.OPACITY;
+        Physical temp;
+        if ((temp = getCreature()) != null) {
+            contents.remove(temp);
+        }
         if (getLargeObject() != null) {
             resistance += getLargeObject().stats.getOrDefault(key, lv).actual();
         }
+        /*
         if (getCreature() != null) {
             resistance += getCreature().stats.getOrDefault(key, lv).actual();
-        }
+        }*/
+        if(temp != null)
+            contents.add(temp);
+
         return Math.min(resistance, 1.0);
     }
 
@@ -83,7 +91,7 @@ public class EpiTile {
             rep = floor.symbol;
         }
         if(temp != null)
-            contents.add(0, temp);
+            contents.add(temp);
 
         return rep;
     }

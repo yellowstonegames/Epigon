@@ -52,9 +52,9 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call ThrustRNG-specific methods, mainly skip()
-    public static final ThrustRNG thrustRNG = new ThrustRNG(seed);
-    public static final StatefulRNG rng = new StatefulRNG(thrustRNG);
+    // this is separated from the StatefulRNG so you can still call ThrustAltRNG-specific methods, mainly skip()
+    public static final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
+    public static final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
     // used for certain calculations where the state changes per-tile
     public static final StatefulRNG srng = new StatefulRNG(new ThrustRNG(seed ^ seed >>> 1));
     public static final RecipeMixer mixer = new RecipeMixer();
@@ -246,6 +246,7 @@ public class Epigon extends Game {
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
         player.location = floors.singleRandom(rng);
+        floors.remove(player.location);
 
 //        Arrays.stream(Direction.OUTWARDS)
 //            .map(d -> player.location.translate(d))
