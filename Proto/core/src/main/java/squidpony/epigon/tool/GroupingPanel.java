@@ -28,7 +28,7 @@ public class GroupingPanel extends javax.swing.JPanel {
             // Mute issue, change value to 0
         }
         switch (event.getActionCommand()) {
-            case "plussOne":
+            case "plusOne":
                 current += 1;
                 break;
             case "plusTen":

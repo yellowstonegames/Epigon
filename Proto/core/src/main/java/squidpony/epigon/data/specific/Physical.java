@@ -51,7 +51,7 @@ public class Physical extends EpiData {
     public Set<Physical> countsAs = new HashSet<>();
     public Set<Physical> createdFrom = new HashSet<>();//only important items should track this since it will cause object lifetimes to extend
     public boolean generic; // should not be directly used, only available as a building block object
-    public boolean unique; // should only have one in existance of exactly this type
+    public boolean unique; // should only have one in existence of exactly this type
     public boolean buildingBlock; // can be used as a building block
 
     public char symbol;
@@ -63,7 +63,7 @@ public class Physical extends EpiData {
     public LiveValue lightEmittedStrength;
 
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
-    public List<Modification> modifications = new ArrayList<>(); // modifications applied both during instantation and through later effects
+    public List<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
     public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
     public List<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
 
@@ -159,7 +159,7 @@ public class Physical extends EpiData {
      */
     public boolean immune(ConditionBlueprint condition) {
         for (Condition c : conditions) {
-            if (c.suppresedBys.isEmpty() && c.parent != null) {//only active conditions can provide immunity //TODO -- ensure that when they become unsuppresed they remove things they provide immunity against
+            if (c.suppressedBys.isEmpty() && c.parent != null) {//only active conditions can provide immunity //TODO -- ensure that when they become unsuppressed they remove things they provide immunity against
                 for (ConditionBlueprint cb : c.parent.immunizes) {
                     if (cb.hasParent(condition)) {
                         return true;//found an immunity
