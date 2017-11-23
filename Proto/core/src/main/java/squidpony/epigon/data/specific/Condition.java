@@ -1,8 +1,9 @@
 package squidpony.epigon.data.specific;
 
-import java.util.List;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
+
+import java.util.List;
 
 /**
  * Represents a specific Condition attached to a single physical object.
@@ -13,7 +14,7 @@ public class Condition extends EpiData {
 
     public ConditionBlueprint parent;
     public int currentTick;
-    public List<Condition> suppresedBys;//lists the specific conditions that are currently suppressing this one
+    public List<Condition> suppressedBys;//lists the specific conditions that are currently suppressing this one
     public Physical attachedTo;
 
     /**

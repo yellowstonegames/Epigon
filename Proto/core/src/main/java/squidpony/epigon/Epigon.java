@@ -793,7 +793,7 @@ public class Epigon extends Game {
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
-                case 'g': // Pick everythin nearby up
+                case 'g': // Pick everything nearby up
                     message("Picking up all nearby small things");
                     Arrays.stream(Direction.values())
                         .map(d -> player.location.translate(d))
@@ -839,7 +839,7 @@ public class Epigon extends Game {
                     if (awaitedMoves.isEmpty()) {
                         if (toCursor.isEmpty()) {
                             cursor = Coord.get(screenX, screenY);
-                            //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+                            //This uses DijkstraMap.findPathPreScanned() to get a path as a List of Coord from the current
                             // player position to the position the user clicked on. The "PreScanned" part is an optimization
                             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
                             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
@@ -889,7 +889,7 @@ public class Epigon extends Game {
             }
             cursor = Coord.get(screenX, screenY);
 
-            //This uses DijkstraMap.findPathPreScannned() to get a path as a List of Coord from the current
+            //This uses DijkstraMap.findPathPreScanned() to get a path as a List of Coord from the current
             // player position to the position the user clicked on. The "PreScanned" part is an optimization
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player

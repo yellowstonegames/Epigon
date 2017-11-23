@@ -1,11 +1,12 @@
 package squidpony.epigon.data.mixin;
 
-import java.util.HashSet;
-import java.util.Set;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A specific creature in the world.
@@ -29,7 +30,7 @@ public class Creature {
      * Properties Creatures Need to model real life
      * 
      * taxonomy
-     * habitation areas (with frequency / likelyhood)
+     * habitation areas (with frequency / likelihood)
      * behavior
      * size of territory
      * breeding method

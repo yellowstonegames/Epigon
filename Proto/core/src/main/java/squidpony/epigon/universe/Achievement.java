@@ -10,7 +10,7 @@ public class Achievement {
     /**
      * Represents the possible types of achievements.
      */
-    public enum AchievementType {//TODO -- consider making this three classes that implement an Achievement interaface
+    public enum AchievementType {//TODO -- consider making this three classes that implement an Achievement interface
 
         META, WORLD, CHARACTER
     };

@@ -38,7 +38,7 @@ public class Modification extends EpiData {
     public List<String> possibleAliases;
     public List<String> possibleAliasesAdd = new ArrayList<>();
     
-    // Modification might change the effective heirarchy
+    // Modification might change the effective hierarchy
     public Physical parent;
     public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
     public Boolean retainPreviousParent; // When true the previous parent gets added to the countsAs list
@@ -61,17 +61,17 @@ public class Modification extends EpiData {
     public Boolean large;
 
     public float lightEmitted;
-    public LiveValueModification lightEmittedStrenghtChange;
+    public LiveValueModification lightEmittedStrengthChange;
 
     public List<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used
-    public List<Modification> whenUsedAsMaterialAdditiive; // In addition to the recipe's result
+    public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
 
     public List<Modification> requiredModifications;
     public List<Modification> requiredModificationsAdditive;
     public List<Modification> requiredModificationsSubtractive;
 
     public List<Modification> optionalModifications;
-    public List<Modification> optionamModificationsAdditive;
+    public List<Modification> optionalModificationsAdditive;
     public List<Modification> optionalModificationsSubtractive;
 
 //    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>(); // TODO - this needs to be different than Element probably
@@ -95,7 +95,7 @@ public class Modification extends EpiData {
     public List<Physical> inventorySubtractive; // TODO - priority on loss? exact match? what if it's not there?
     public List<Physical> optionalInventory;
     public List<Physical> optionalInventoryAdditive;
-    public List<Physical> optionalInvntorySubtractive;
+    public List<Physical> optionalInventorySubtractive;
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
     public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDropsOverwrite;
@@ -110,7 +110,7 @@ public class Modification extends EpiData {
     // Creature changes
     public Creature creatureOverwrite; // Become a new creature (or become one for the first time)
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
-    public OrderedMap<Skill, RatingValueModification> skillProgressionChagnes = new OrderedMap<>();
+    public OrderedMap<Skill, RatingValueModification> skillProgressionChanges = new OrderedMap<>();
 
     public OrderedMap<Element, LiveValueModification> elementDamageMultiplierChanges = new OrderedMap<>();
 

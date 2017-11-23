@@ -32,7 +32,7 @@ public class DungeonMaster {
     private void detachCondition(Physical thing, Condition condition, boolean cancelled) {
         thing.conditions.remove(condition);
         for (Condition c : thing.conditions) {
-            c.suppresedBys.remove(condition);//remove it from the list of suppressing conditions if it's there
+            c.suppressedBys.remove(condition);//remove it from the list of suppressing conditions if it's there
         }
         if (cancelled) {
             applyActions(condition.parent.canceledActions);

@@ -6,7 +6,7 @@ import squidpony.epigon.data.EpiData;
 
 /**
  * A specific in-game recipe which the player (or other creatures, including the Dungeon Master) may
- * aquire and use to create items.
+ * acquire and use to create items.
  *
  * A specific recipe will always produce a specific result when successfully used, although the
  * quality of that result may be dependant on the skill level of the creator.

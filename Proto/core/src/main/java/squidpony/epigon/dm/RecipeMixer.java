@@ -6,6 +6,7 @@ import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
@@ -24,8 +25,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.universe.RatingValueModification;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -167,7 +166,7 @@ public class RecipeMixer {
         Physical physical = new Physical();
 
         physical.description = blueprint.description;
-        physical.notes = blueprint.notes; // TODO - probably don't need these transfered
+        physical.notes = blueprint.notes; // TODO - probably don't need these transferred
         physical.parent = blueprint;
 
         physical.attached = blueprint.attached;
@@ -359,8 +358,8 @@ public class RecipeMixer {
             physical.lightEmitted = modification.lightEmitted;
         }
 
-        if (modification.lightEmittedStrenghtChange != null) {
-            physical.lightEmittedStrength.modify(modification.lightEmittedStrenghtChange);
+        if (modification.lightEmittedStrengthChange != null) {
+            physical.lightEmittedStrength.modify(modification.lightEmittedStrengthChange);
         }
 
         physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
@@ -392,7 +391,7 @@ public class RecipeMixer {
                     physical.creatureData.skills.put(e.getKey(), rating);
                 });
 
-            modification.skillProgressionChagnes.entrySet()
+            modification.skillProgressionChanges.entrySet()
                 .stream()
                 .forEach(e -> {
                     Rating rating = physical.creatureData.skillProgression.getOrDefault(e.getKey(), Rating.NONE);
