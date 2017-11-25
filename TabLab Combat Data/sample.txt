@@ -1,0 +1,4 @@
+com.github.tommyettinger.tablab.generated.Job
+name:str	description	offense:int	defense:int	talents:str[;;]	skills:str{,}int
+Abjurer	A defensive mage.	1	9	Haze;;Warding Tome	Mist Shackles,1,Barricade,2,Stony Shield,3,Body of Iron,1
+Ninja	A nimble assassin.	9	1	Poison;;Martial Arts	Vanish,2,Smoke Bomb,1,Shadow Dagger,2
