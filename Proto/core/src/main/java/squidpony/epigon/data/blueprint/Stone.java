@@ -134,11 +134,11 @@ public enum Stone {
     public int hardness;//average hardness
     public boolean metamorphic, sedimentary, intrusive, extrusive;
 
-    private Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
+    Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
         this(front, back, metamorphic, sedimentary, intrusive, extrusive, 100, 1000);
     }
 
-    private Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
+    Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
         this.front = front;
         this.back = back;
         this.metamorphic = metamorphic;

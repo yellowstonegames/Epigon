@@ -1,5 +1,6 @@
 package squidpony.epigon.data.specific;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
@@ -36,6 +37,11 @@ import java.util.Set;
  * @author Eben Howard - http://squidpony.com
  */
 public class Physical extends EpiData {
+    public static final Physical basePhysical = new Physical();
+    static {
+        basePhysical.generic = true;
+        basePhysical.unique = true;
+    }
     // operational bits for live objects
     public Coord location;
     public boolean attached; // cannot be removed for it's location (or inventory pile) without special means
@@ -119,6 +125,19 @@ public class Physical extends EpiData {
     public Physical() {
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
+    }
+    public static Physical makeBasic(String name, char symbol, Color color)
+    {
+        return makeBasic(name, symbol, color.toFloatBits());
+    }
+
+    public static Physical makeBasic(String name, char symbol, float color)
+    {
+        Physical p = new Physical();
+        p.name = name;
+        p.symbol = symbol;
+        p.color = color;
+        return p;
     }
 
     public boolean countsAs(Physical blueprint) {

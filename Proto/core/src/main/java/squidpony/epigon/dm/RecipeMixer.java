@@ -422,11 +422,11 @@ public class RecipeMixer {
             return;
         }
 
-        System.out.println("Adding profession " + profession.name + " to " + physical.name + " at rating " + Rating.SLIGHT.toString());
+        //System.out.println("Adding profession " + profession.name + " to " + physical.name + " at rating " + Rating.SLIGHT.toString());
         physical.creatureData.professions.put(profession, Rating.SLIGHT);
         Modification mod = profession.improvements.get(Rating.SLIGHT);
         if (mod != null) {
-            System.out.println("Profession applying modification " + mod.name + " to " + physical.name);
+            //System.out.println("Profession applying modification " + mod.name + " to " + physical.name);
             applyModification(physical, mod);
         }
     }
