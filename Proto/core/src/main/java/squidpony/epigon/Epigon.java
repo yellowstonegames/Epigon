@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.display.ContextHandler;
 import squidpony.epigon.display.FxHandler;
 import squidpony.epigon.display.InfoHandler;
@@ -33,10 +34,7 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -248,12 +246,11 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
 
-//        Arrays.stream(Direction.OUTWARDS)
-//            .map(d -> player.location.translate(d))
-//            .filter(c -> map.inBounds(c))
-//            .filter(c -> rng.nextBoolean())
-//            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(handBuilt.swordRecipe, Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))), Collections.emptyList())));
-
+        Arrays.stream(Direction.OUTWARDS)
+            .map(d -> player.location.translate(d))
+            .filter(c -> map.inBounds(c))
+            .filter(c -> rng.nextBoolean())
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(Weapon.meleeWeapons.randomValue(rng).recipe, Collections.emptyList(), Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))))));
 
         infoHandler.setPlayer(player);
 

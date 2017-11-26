@@ -20,14 +20,12 @@ import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.mixer;
 import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
  * Contains objects to use to test out connections.
  */
 public class HandBuilt {
-
-    public Physical basePhysical = new Physical();
-
     public Physical doorBlueprint;
     public Physical baseOpenDoor = new Physical();
     public Physical baseClosedDoor = new Physical();
@@ -94,9 +92,6 @@ public class HandBuilt {
     public Profession chef;
 
     public HandBuilt() {
-        basePhysical.generic = true;
-        basePhysical.unique = true;
-
         initAbilities();
         initProfessions();
         initPlayer();
@@ -251,7 +246,7 @@ public class HandBuilt {
 
         RecipeBlueprint doorRecipeBlueprint;
         doorRecipeBlueprint = new RecipeBlueprint();
-        doorRecipeBlueprint.requiredConsumed.put(basePhysical, 1);
+        doorRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
         doorRecipeBlueprint.result.put(doorBlueprint, 1);
 
         doorRecipe = mixer.createRecipe(doorRecipeBlueprint);
@@ -264,7 +259,7 @@ public class HandBuilt {
         swordBlueprint.symbol = '(';
 
         RecipeBlueprint swordRecipeBlueprint = new RecipeBlueprint();
-        swordRecipeBlueprint.requiredConsumed.put(basePhysical, 1);
+        swordRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
         swordRecipeBlueprint.result.put(swordBlueprint, 1);
 
         swordRecipe = mixer.createRecipe(swordRecipeBlueprint);

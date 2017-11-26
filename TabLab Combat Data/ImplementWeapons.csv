@@ -1,12 +1,12 @@
-squidpony.epigon.data.raw.ImplementWeapons	name
-name	description		kind	usage	hands:i	type1	type2	shape	path	status1	status2
-Channeling Orb	A small round crystal that a Mystic wielder can use to disrupt the energy flow of an enemy, or supplant a friend's.		Implement	Mystic	1	Shadow	Fate	Targeted	Through	Confound	Energize
-Mystic Deck	A deck of many fortune-telling cards, each decorated with cryptic imagery; an interpretation can be used as a Mystic curse.		Implement	Mystic	2	Fate	Light	Multi	Straight	Curse	Favor
-Fossil Fang	A gift of the land to those who protect it, this massive stony tooth carries Primal power over rock and soil.		Implement	Primal	1	Earth	Piercing	Targeted	Through	Trip	Impale
-Green Wreath	A garland of leaves that lives without soil or water thanks to a Primal blessing; it can grow thorny vines to attack.		Implement	Primal	0	Piercing	Pure	Multi	Arc	Disable	Regenerate
-Holy Symbol	When carried by a Blessed wielder, this sacred icon can issue shining judgment even when simply worn or carried.		Implement	Blessed	0	Divine	Light	Multi	Straight	Judge	Regenerate
-Sacred Book	A ritually-purified holy text that serves to channel Blessed faith into waves of divine wrath against transgressors.		Implement	Blessed	2	Pure	Divine	Wave	Straight	Awe	Judge
-Vile Grimoire	An Occult wielder's best (or only) friend, this black book, bound in some kind of skin, can obliterate nearby enemies.		Implement	Occult	2	Storm	Death	Wave	Straight	Linger	Wither
-Black Lantern	A rusted antique, this appears to be an ordinary lantern until lit with Occult magic, which makes it project a death ray.		Implement	Occult	1	Death	Shadow	Beam	Straight	Curse	Wither
-Scholarly Tome	A thick Arcane encyclopedia, laden with enchantments that can drive off enemies who come too close.		Implement	Arcane	2	Earth	Fire	Wave	Straight	Confound	Linger
-Magus Scepter	A strong effort by Arcane wielders to one-up firearms, this staff with various gems and sigils on it can fire energy blasts.		Implement	Arcane	1	Fire	Storm	Beam	Straight	Awe	Energize
+squidpony.epigon.data.raw.ImplementWeapon	name																					
+name	description	glyph:c	kind	usage	hands:i	type1	type2	shape	path	status1	status2	precision:i	damage:i	influence:i	evasion:i	defense:i	luck:i	stealth:i	range:i	prepare:i		materials:s[,]
+channeling orb	A small round crystal that a Mystic wielder can use to disrupt the energy flow of an enemy, or supplant a friend's.	●	Implement	Mystic	1	Shadow	Fate	Targeted	Through	Confound	Energize	6	1	6	1	0	1	1	4	0	20	Inclusion
+mystic deck	A deck of many fortune-telling cards, each decorated with cryptic imagery; an interpretation can be used as a Mystic curse.	⍰	Implement	Mystic	2	Fate	Light	Multi	Straight	Curse	Favor	2	1	1	0	0	6	2	5	3	20	Paper
+fossil fang	A gift of the land to those who protect it, this massive stony tooth carries Primal power over rock and soil.	ɿ	Implement	Primal	1	Earth	Piercing	Targeted	Through	Trip	Impale	2	5	1	0	3	4	0	3	2	20	Stone
+green wreath	A garland of leaves that lives without soil or water thanks to a Primal blessing; it can grow thorny vines to attack.	◌	Implement	Primal	0	Piercing	Pure	Multi	Arc	Disable	Regenerate	2	1	2	0	0	4	6	4	1	20	Wood
+holy symbol	When carried by a Blessed wielder, this sacred icon can issue shining judgment even when simply worn or carried.	ᵸ	Implement	Blessed	0	Divine	Light	Multi	Straight	Judge	Regenerate	4	2	4	0	0	5	0	3	2	20	Metal,Wood
+sacred book	A ritually-purified holy text that serves to channel Blessed faith into waves of divine wrath against transgressors.	⍐	Implement	Blessed	2	Pure	Divine	Wave	Straight	Awe	Judge	3	5	3	0	0	5	0	3	1	20	Paper,Metal
+vile grimoire	An Occult wielder's best (or only) friend, this black book, bound in some kind of skin, can obliterate nearby enemies.	⍌	Implement	Occult	2	Storm	Death	Wave	Straight	Linger	Wither	2	8	4	0	0	0	0	4	2	20	Paper,Leather
+black lantern	A rusted antique, this appears to be an ordinary lantern until lit with Occult magic, which makes it project a death ray.	⍎	Implement	Occult	1	Death	Shadow	Beam	Straight	Curse	Wither	6	7	1	0	0	0	0	6	0	20	Inclusion,Metal
+scholarly tome	A thick Arcane encyclopedia, laden with enchantments that can drive off enemies who come too close.	⌺	Implement	Arcane	2	Earth	Fire	Wave	Straight	Confound	Linger	5	3	4	0	2	0	1	5	0	20	Paper,Leather
+magus scepter	A strong effort by Arcane wielders to one-up firearms, this staff with various gems and sigils on it can fire energy blasts.	∤	Implement	Arcane	1	Fire	Storm	Beam	Straight	Awe	Energize	4	7	1	0	1	0	0	5	2	20	Inclusion,Wood
