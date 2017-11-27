@@ -1,0 +1,48 @@
+package squidpony.epigon.data.blueprint;
+
+import com.badlogic.gdx.graphics.Color;
+import squidpony.squidgrid.gui.gdx.SColor;
+
+/**
+ * Created by Tommy Ettinger on 11/26/2017.
+ */
+public enum Paper implements Material {
+    PAPYRUS(SColor.DB_DAFFODIL),
+    VELLUM(SColor.LEMON_CHIFFON),
+    PARCHMENT(SColor.COSMIC_LATTE),
+    SKIN(SColor.DB_NUDE),
+    EGGSHELL_PAPER(SColor.EGGSHELL_PAPER);
+
+    public Color front, back;
+    public int value; //base material is 100
+    public int hardness; //average hardness
+
+    Paper(Color front) {
+        this(front, front, 100, 10);
+    }
+
+    Paper(Color front, Color back) {
+        this(front, back, 100, 10);
+    }
+
+    Paper(Color front, Color back, int value) {
+        this(front, back, value, 10);
+    }
+
+    Paper(Color front, Color back, int value, int hardness) {
+        this.front = front;
+        this.back = back;
+        this.value = value;
+        this.hardness = hardness;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase().replace('_', ' ');
+    }
+
+    @Override
+    public Color getMaterialColor() {
+        return null;
+    }
+}
