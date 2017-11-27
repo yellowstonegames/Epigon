@@ -10,6 +10,7 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidgrid.gui.gdx.SColor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,7 +81,7 @@ public class Kickball {
     private Physical makePhysicalFromStone(Stone stone) {
         Physical pb = new Physical();
         pb.name = stone.toString();
-        pb.color = stone.front.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        pb.color = SColor.toRandomizedFloat(stone.front, rng, 0.05f, 0f, 0.15f);
 
         return pb;
     }

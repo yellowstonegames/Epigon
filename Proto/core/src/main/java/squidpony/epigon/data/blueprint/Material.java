@@ -7,4 +7,7 @@ import com.badlogic.gdx.graphics.Color;
  */
 public interface Material {
     Color getMaterialColor();
+    int getValue();
+    int getHardness();
+    char getGlyph();
 }

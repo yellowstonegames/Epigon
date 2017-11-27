@@ -32,6 +32,6 @@ trident	A fishing spear adapted for gladiatorial and maritime combat, the triden
 sickle	A lightweight, deeply-curved blade that can be used for severing plant roots, or a foe's limbs, as well as disarming.	ʕ	Melee	Repeat	1	Slashing	Slashing	Blade	Axe	Chop	Yank	3	4	7	0	1	3	2	0	0	Metal
 khopesh	A sword-like weapon with a heavy blade that goes straight and then curves; challenging to wield and to confront.	ʕ	Melee	Repeat	1	Slashing	Slashing	Blade	Axe	Heft	Yank	2	6	6	0	3	1	0	0	1	Metal
 scythe	A hook-bladed farming tool meant for slicing wide swaths of grain, adapted to slicing wide swaths in necks.	ʕ	Melee	Repeat	2	Slashing	Slashing	Blade	Axe	Chop	Sweep	1	6	9	0	0	0	0	0	2	Metal,Wood
-light shield	A shield that's meant for actively parrying and blocking enemy attacks, mixing in quick jabs with the edge of the shield.	⍟	Melee	Repeat	1	Blunt	Blunt	Bludgeon	Dueling	Parry	Blur	3	2	0	7	7	1	0	0	0	Wood|Metal|Hide
-heavy shield	A large shield that's effective at defending even while barely moving, but it's hard to precisely wield one.	⍟	Melee	Repeat	1	Blunt	Blunt	Bludgeon	Bludgeon	Parry	Heft	1	5	0	5	9	0	0	0	0	Wood|Metal
+light shield	A shield that's meant for actively parrying and blocking enemy attacks, mixing in quick jabs with the edge of the shield.	⍟	Melee	Repeat	1	Blunt	Blunt	Bludgeon	Dueling	Parry	Blur	3	2	0	7	7	1	0	0	0	Hide|Metal|Wood
+heavy shield	A large shield that's effective at defending even while barely moving, but it's hard to precisely wield one.	⍟	Melee	Repeat	1	Blunt	Blunt	Bludgeon	Bludgeon	Parry	Heft	1	5	0	5	9	0	0	0	0	Metal|Wood
 macahuitl	A heavy wooden shaft that's been augmented with razor-sharp stone blades along its edge; incredibly dangerous.	≢	Melee	Repeat	2	Slashing	Blunt	Blade	Bludgeon	Heft	Sweep	1	9	8	0	0	0	0	0	1	Wood,Stone

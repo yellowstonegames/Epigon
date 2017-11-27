@@ -1,9 +1,6 @@
 package squidpony.epigon.dm;
 
-import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
@@ -11,6 +8,7 @@ import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
+import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
@@ -25,6 +23,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.Epigon.srng;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -39,7 +38,7 @@ public class RecipeMixer {
 
     public List<RecipeBlueprint> recipes;
 
-    private Map<Stone, Physical> stones = new HashMap<>();
+    private Map<Material, Physical> materials = new HashMap<>();
 
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
@@ -87,8 +86,14 @@ public class RecipeMixer {
         return result;
     }
 
-    public Physical getPhysical(Stone stone) {
-        Physical blueprint = stones.get(stone);
+    public Physical buildWeapon(Weapon weapon)
+    {
+        Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(srng);
+        return mix(weapon.recipe, Collections.emptyList(), Collections.singletonList(buildMaterial(mat))).get(0);
+    }
+
+    public Physical buildPhysical(Stone stone) {
+        Physical blueprint = materials.get(stone);
         if (blueprint != null) {
             return blueprint;
         }
@@ -118,12 +123,17 @@ public class RecipeMixer {
         terrain.sedimentary = stone.sedimentary;
         blueprint.terrainData = terrain;
 
-        stones.put(stone, blueprint);
+        materials.put(stone, blueprint);
         return blueprint;
     }
 
     public Physical buildPhysical(Inclusion inclusion) {
-        Physical blueprint = new Physical();
+        Physical blueprint = materials.get(inclusion);
+        if (blueprint != null) {
+            return blueprint;
+        }
+
+        blueprint = new Physical();
         blueprint.color = inclusion.front.toFloatBits();//toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         blueprint.name = inclusion.toString();
         blueprint.baseValue = inclusion.value;
@@ -149,6 +159,32 @@ public class RecipeMixer {
 
         return blueprint;
     }
+
+    public Physical buildMaterial(Material material) {
+        Physical blueprint = materials.get(material);
+        if (blueprint != null) {
+            return blueprint;
+        }
+
+        blueprint = new Physical();
+        blueprint.color = material.getMaterialColor().toFloatBits();//toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        blueprint.name = material.toString();
+        blueprint.baseValue = material.getValue();
+        blueprint.symbol = material.getGlyph();
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness() * 0.01));
+
+        Modification inclusionMod = new Modification();
+        inclusionMod.baseValueMultiplier = material.getValue() * 0.01;
+        inclusionMod.color = material.getMaterialColor();
+        inclusionMod.possiblePrefix = Collections.singletonList(material.toString());
+        LiveValueModification lvm = new LiveValueModification();
+        lvm.baseOverwrite = material.getHardness() * 0.01;
+        inclusionMod.statChanges.put(Stat.STRUCTURE, lvm);
+        blueprint.whenUsedAsMaterial.add(inclusionMod);
+
+        return blueprint;
+    }
+
 
     public Physical buildPhysical(Physical blueprint) {
         return RecipeMixer.this.buildPhysical(blueprint, Rating.NONE);
@@ -339,7 +375,7 @@ public class RecipeMixer {
         }
 
         if (modification.color != null) {
-            physical.color = modification.color.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+            physical.color = SColor.toRandomizedFloat(modification.color, rng, 0.05f, 0f, 0.15f);
         }
 
         if (modification.baseValue != null) {

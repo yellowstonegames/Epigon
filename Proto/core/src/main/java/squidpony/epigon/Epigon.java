@@ -249,8 +249,8 @@ public class Epigon extends Game {
         Arrays.stream(Direction.OUTWARDS)
             .map(d -> player.location.translate(d))
             .filter(c -> map.inBounds(c))
-            .filter(c -> rng.nextBoolean())
-            .forEach(c -> map.contents[c.x][c.y].add(mixer.mix(Weapon.meleeWeapons.randomValue(rng).recipe, Collections.emptyList(), Collections.singletonList(mixer.buildPhysical(rng.getRandomElement(Inclusion.values()))))));
+            .filter(c -> rng.next(6) < 55)
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.meleeWeapons.randomValue(rng))));
 
         infoHandler.setPlayer(player);
 

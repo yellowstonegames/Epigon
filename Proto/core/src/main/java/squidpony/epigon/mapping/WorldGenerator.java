@@ -79,7 +79,7 @@ public class WorldGenerator {
                         break;
                     case '+':
                         Stone stone = tile.floor.terrainData.stone;
-                        adding = mixer.getPhysical(stone);
+                        adding = mixer.buildPhysical(stone);
                         List<Physical> adds = mixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
                         Physical door = adds.get(0);
                         mixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
@@ -104,7 +104,7 @@ public class WorldGenerator {
             return wall;
         }
 
-        wall = mixer.buildPhysical(mixer.getPhysical(stone));
+        wall = mixer.buildPhysical(mixer.buildPhysical(stone));
         mixer.applyModification(wall, handBuilt.makeWall);
         walls.put(stone, wall);
         return wall;
@@ -114,7 +114,7 @@ public class WorldGenerator {
      * Randomly places minerals in the provided map.
      */
     private void mineralPlacement() {
-        Physical floor = mixer.getPhysical(rng.getRandomElement(Stone.values()));
+        Physical floor = mixer.buildPhysical(rng.getRandomElement(Stone.values()));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -139,7 +139,7 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    Physical p = mixer.buildPhysical(mixer.getPhysical(tile.floor.terrainData.stone));
+                    Physical p = mixer.buildPhysical(mixer.buildPhysical(tile.floor.terrainData.stone));
                     mixer.applyModification(p, handBuilt.makeWall);
                     tile.add(p);
                 }
@@ -167,7 +167,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = mixer.getPhysical(rng.getRandomElement(Stone.values()));
+                    blueprint = mixer.buildPhysical(rng.getRandomElement(Stone.values()));
                 }
             }
 
@@ -276,7 +276,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = mixer.buildPhysical(mixer.getPhysical(intruder)); // TODO - get from cache
+                        world[z].contents[x][y].floor = mixer.buildPhysical(mixer.buildPhysical(intruder)); // TODO - get from cache
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -322,7 +322,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = mixer.buildPhysical(mixer.getPhysical(extruder)); // TODO - cache
+                                world[z].contents[x][y].floor = mixer.buildPhysical(mixer.buildPhysical(extruder)); // TODO - cache
                             }
                         }
                     }
@@ -382,7 +382,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.getPhysical(changer)); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.buildPhysical(changer)); // TODO - cache
                             }
                         }
                     }
@@ -432,7 +432,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.getPhysical(changer)); // TODO - cache
+                                world[j].contents[i][k].floor = mixer.buildPhysical(mixer.buildPhysical(changer)); // TODO - cache
                             }
                         }
                     }
