@@ -1,5 +1,6 @@
 package squidpony.epigon.data.blueprint;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -7,7 +8,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
  *
  * @author Eben Howard - http(//squidpony.com
  */
-public enum Inclusion {
+public enum Inclusion implements Material {
 
     ABELSONITE(SColor.PURPLE_TAUPE, SColor.RUSSET, false, false, false, false),
     ABERNATHYITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false),
@@ -52,7 +53,7 @@ public enum Inclusion {
     CITRINE(SColor.SCHOOL_BUS_YELLOW, SColor.PUMPKIN, true, true, false, true, 1100),
     COBALT_SPINEL(SColor.CW_DARK_BLUE, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
     DEMANTOID(SColor.YELLOW_GREEN, SColor.DARK_GREEN, true, false, true, true, 9000),
-    DIAMOND(SColor.ALICE_BLUE, SColor.WHITE, true, false, false, false, 7000),
+    DIAMOND(SColor.ALICE_BLUE, SColor.WHITE, true, false, false, false, 7000, 100000),
     DIOPSIDE(SColor.DARK_GREEN, SColor.FOREST_GREEN, false, false, false, true, 650),
     EMERALD(SColor.EMERALD, SColor.DARK_GREEN, false, true, false, false, 4500),
     EUDIALYTE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
@@ -102,20 +103,20 @@ public enum Inclusion {
     UVAROVITE(SColor.GREEN, SColor.DARK_GREEN, true, false, false, false, 820),
     ZIRCON(SColor.LIGHT_BLUE, SColor.BURNT_SIENNA, true, false, true, false, 910);
 
-    public SColor front, back;
-    public int value;//base material is 100
-    public int hardness;//average hardness
+    public Color front, back;
+    public int value; //base material is 100
+    public int hardness; //average hardness
     public boolean metamorphic, sedimentary, intrusive, extrusive;
 
-    private Inclusion(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
+    Inclusion(Color front, Color back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
         this(front, back, metamorphic, sedimentary, intrusive, extrusive, 100, 1000);
     }
 
-    private Inclusion(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value) {
+    Inclusion(Color front, Color back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value) {
         this(front, back, metamorphic, sedimentary, intrusive, extrusive, value, 1000);
     }
 
-    private Inclusion(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
+    Inclusion(Color front, Color back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
         this.front = front;
         this.back = back;
         this.metamorphic = metamorphic;
@@ -124,6 +125,11 @@ public enum Inclusion {
         this.extrusive = extrusive;
         this.value = value;
         this.hardness = hardness;
+    }
+
+    @Override
+    public Color getMaterialColor() {
+        return front;
     }
 
     @Override

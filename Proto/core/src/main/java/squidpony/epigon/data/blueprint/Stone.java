@@ -1,5 +1,6 @@
 package squidpony.epigon.data.blueprint;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -7,7 +8,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
  *
  * @author Eben Howard - http(//squidpony.com
  */
-public enum Stone {
+public enum Stone implements Material {
 
     AMPHIBOLITE(SColor.BROWN, SColor.GORYEO_STOREROOM, true, false, false, false),
     ANDESITE(SColor.DARK_GRAY, SColor.GORYEO_STOREROOM, false, false, true, true),
@@ -96,7 +97,7 @@ public enum Stone {
     PORPHYRY(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     PSAMMITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     PSEUDOTACHYLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 100),
-    PUMICE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    PUMICE(SColor.CW_ALMOST_WHITE, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     PYROXENITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     QUARTZITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     QUARTZ_DIORITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
@@ -112,8 +113,8 @@ public enum Stone {
     SHALE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     SILTSTONE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     SKARN(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    SLATE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    SOAPSTONE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    SLATE(SColor.SLATE_GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    SOAPSTONE(SColor.INDIGO_WHITE, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     SYENITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     TACHYLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     TACONITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
@@ -129,16 +130,16 @@ public enum Stone {
     VARIOLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     WACKESTONE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000);
 
-    public SColor front, back;
+    public Color front, back;
     public int value;//base material is 100
     public int hardness;//average hardness
     public boolean metamorphic, sedimentary, intrusive, extrusive;
 
-    Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
+    Stone(Color front, Color back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive) {
         this(front, back, metamorphic, sedimentary, intrusive, extrusive, 100, 1000);
     }
 
-    Stone(SColor front, SColor back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
+    Stone(Color front, Color back, boolean metamorphic, boolean sedimentary, boolean intrusive, boolean extrusive, int value, int hardness) {
         this.front = front;
         this.back = back;
         this.metamorphic = metamorphic;
@@ -147,6 +148,12 @@ public enum Stone {
         this.extrusive = extrusive;
         this.value = value;
         this.hardness = hardness;
+    }
+
+
+    @Override
+    public Color getMaterialColor() {
+        return front;
     }
 
     @Override
