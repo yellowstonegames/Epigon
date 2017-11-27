@@ -1,5 +1,6 @@
 package squidpony.epigon.universe;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -58,13 +59,13 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     public Element parent;
     public String name;
     public String description;
-    public SColor color;
+    public Color color;
 
     private Element() {
         this(SColor.WHITE);
     }
 
-    private Element(SColor color) {
+    private Element(Color color) {
         this(null, "", "", color);
     }
 
@@ -72,11 +73,11 @@ public enum Element { // TODO - make this a full EpiData class with external dat
         this(parent, "", "", parent == null ? SColor.WHITE : parent.color);
     }
 
-    private Element(Element parent, SColor color) {
+    private Element(Element parent, Color color) {
         this(parent, "", "", color);
     }
 
-    private Element(Element parent, String name, String description, SColor color) {
+    private Element(Element parent, String name, String description, Color color) {
         this.parent = parent;
         this.name = name == null || name.isEmpty() ? name().toLowerCase() : name;
         this.description = description;

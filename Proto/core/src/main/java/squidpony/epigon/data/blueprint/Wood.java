@@ -40,6 +40,23 @@ public enum Wood implements Material {
 
     @Override
     public Color getMaterialColor() {
-        return null;
+        return front;
     }
+
+    @Override
+    public int getValue() {
+        return value;
+    }
+
+    @Override
+    public int getHardness() {
+        return hardness;
+    }
+
+    @Override
+    public char getGlyph()
+    {
+        return '=';
+    }
+
 }

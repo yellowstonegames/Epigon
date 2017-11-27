@@ -1,5 +1,6 @@
 package squidpony.epigon.data.generic;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
@@ -9,7 +10,6 @@ import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.*;
-import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.ProbabilityTable;
@@ -53,7 +53,7 @@ public class Modification extends EpiData {
 
     public Character symbol;
 
-    public SColor color;
+    public Color color;
 
     public Double baseValue;
     public Double baseValueMultiplier;

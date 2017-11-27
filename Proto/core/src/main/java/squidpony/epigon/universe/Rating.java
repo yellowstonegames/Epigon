@@ -1,5 +1,6 @@
 package squidpony.epigon.universe;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -35,7 +36,7 @@ public enum Rating {
         }
     }
 
-    public SColor color() {
+    public Color color() {
         switch (this) {
             case NONE:
                 return SColor.SLATE_GRAY; // Dark grey

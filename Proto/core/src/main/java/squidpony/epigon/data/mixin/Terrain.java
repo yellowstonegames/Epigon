@@ -1,7 +1,6 @@
 package squidpony.epigon.data.mixin;
 
-import squidpony.squidgrid.gui.gdx.SColor;
-
+import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.blueprint.Stone;
 
@@ -15,7 +14,7 @@ import squidpony.epigon.data.blueprint.Stone;
  */
 public class Terrain {
 
-    public SColor background;
+    public Color background;
 
     public Stone stone;
     public Inclusion inclusion;

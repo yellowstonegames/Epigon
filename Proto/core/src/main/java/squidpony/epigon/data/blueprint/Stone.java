@@ -157,7 +157,23 @@ public enum Stone implements Material {
     }
 
     @Override
+    public int getValue() {
+        return value;
+    }
+
+    @Override
+    public int getHardness() {
+        return hardness;
+    }
+
+    @Override
     public String toString() {
         return name().toLowerCase().replace('_', ' ');
     }
+    @Override
+    public char getGlyph()
+    {
+        return '#';
+    }
+
 }
