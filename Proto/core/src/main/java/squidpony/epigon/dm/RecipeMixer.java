@@ -23,7 +23,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rng;
-import static squidpony.epigon.Epigon.srng;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -88,7 +87,7 @@ public class RecipeMixer {
 
     public Physical buildWeapon(Weapon weapon)
     {
-        Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(srng);
+        Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(rng);
         return mix(weapon.recipe, Collections.emptyList(), Collections.singletonList(buildMaterial(mat))).get(0);
     }
 

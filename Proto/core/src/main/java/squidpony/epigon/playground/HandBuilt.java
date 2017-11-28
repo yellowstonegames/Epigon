@@ -1,6 +1,7 @@
 package squidpony.epigon.playground;
 
 import squidpony.Maker;
+import squidpony.epigon.Epigon;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Formula;
@@ -268,7 +269,7 @@ public class HandBuilt {
     private void initAlive() {
         makeAlive = new Modification();
         makeAlive.possiblePrefix = Arrays.asList("living", "animated");
-        makeAlive.symbol = 's';
+        makeAlive.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         makeAlive.large = true;
         Arrays.stream(Stat.values()).forEach(s -> {
             LiveValueModification lvm = new LiveValueModification(rng.between(10, 20));

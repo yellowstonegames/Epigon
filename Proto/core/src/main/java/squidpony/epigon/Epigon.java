@@ -57,7 +57,7 @@ public class Epigon extends Game {
     public static final StatefulRNG srng = new StatefulRNG(new ThrustRNG(seed ^ seed >>> 1));
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
-
+    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     // Audio
     private SoundManager sound;
@@ -107,15 +107,15 @@ public class Epigon extends Game {
     static {
         int bigW = 70;
         int bigH = 31;
-        int smallW = 43;
+        int smallW = 50;
         int smallH = 22;
         int cellW = 12;
         int cellH = 24;
         int bottomH = 6;
         mapSize = new PanelSize(bigW, bigH, cellW, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 3 / 2, 8, 16);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 8, 16);
+        infoSize = new PanelSize(smallW, smallH * 3 / 2, 7, 16);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 7, 16);
         messageCount = bottomH - 2;
     }
 
@@ -151,7 +151,7 @@ public class Epigon extends Game {
         messageStage = new Stage(messageViewport, batch);
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
-        font = DefaultResources.getStretchableLeanFont();
+        font = DefaultResources.getLeanFamily();
         TextCellFactory smallFont = font.copy();
         // Set up the text display portions
         messages = new String[messageCount];
@@ -192,8 +192,8 @@ public class Epigon extends Game {
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
 
-        font.tweakWidth(mapSize.cellWidth * 1.1f).tweakHeight(mapSize.cellHeight * 1.1f).initBySize();
-        smallFont.tweakWidth(infoSize.cellWidth * 1.15f).tweakHeight(infoSize.cellHeight * 1.15f).initBySize();
+        font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.125f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
@@ -223,6 +223,10 @@ public class Epigon extends Game {
         contextStage.addActor(contextSLayers);
 
         startGame();
+    }
+    public static CharSequence style(CharSequence text)
+    {
+        return GDXMarkup.instance.styleString(text);
     }
 
     private void startGame() {
@@ -278,11 +282,12 @@ public class Epigon extends Game {
         calcDijkstra();
 
         clearAndBorder(contextSLayers, SColor.FLIRTATIOUS_INDIGO_TEA, SColor.COSMIC_LATTE);
-        contextHandler.message(new String[]{"Have fun!",
-            "The fate of the worlds is in your hands...",
-            "Bump into walls and stuff.",
+        contextHandler.message("Have fun!",
+            "The fates of countless worlds rest on you...",
+            style("Bump into statues ([*][/]s[,]) and stuff."),
+            style("Now [/]90% fancier[/]!"),
             "Use ? for help, or q to quit.",
-            "Use mouse, numpad, or arrow keys to move."});
+            "Use mouse, numpad, or arrow keys to move.");
         processingCommand = false; // let the player do input
         infoHandler.showPlayerHealthAndArmor();
         putMap();
