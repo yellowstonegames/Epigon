@@ -122,7 +122,7 @@ public class ContextHandler {
         put(arrowRight.x, arrowRight.y, '▶', true);
     }
 
-    private void put(String[] text, boolean cache) {
+    private void put(CharSequence[] text, boolean cache) {
         for (int y = 0; y < text.length && y < height - 2; y++) {
             put(1, y + 1, text[y], cache);
         }
@@ -137,7 +137,7 @@ public class ContextHandler {
         }
     }
 
-    private void put(int x, int y, String s, boolean cache) {
+    private void put(int x, int y, CharSequence s, boolean cache) {
         for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
             put(sx + x, y, s.charAt(sx), cache);
         }
@@ -214,7 +214,7 @@ public class ContextHandler {
         put(tileDescription.split("\n"), true);
     }
 
-    public void message(String[] text) {
+    public void message(CharSequence... text) {
         contextMode = ContextMode.MESSAGE;
         clear();
         put(text, true);
