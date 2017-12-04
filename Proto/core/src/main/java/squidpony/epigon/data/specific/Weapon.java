@@ -2,7 +2,7 @@ package squidpony.epigon.data.specific;
 
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.mixin.Wieldable;
-import squidpony.epigon.data.raw.MeleeWeapon;
+import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 
@@ -29,28 +29,28 @@ public class Weapon {
             "Metal|Stone", new OrderedSet<>(Metal.values()),
             "Hide|Metal|Wood", new OrderedSet<>(Hide.values())
     );
-    public static OrderedMap<String, Weapon> meleeWeapons = new OrderedMap<>(MeleeWeapon.ENTRIES.length);
+    public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
         makes.get("Metal|Stone").addAll(Stone.values());
         makes.get("Hide|Metal|Wood").addAll(makes.get("Metal|Wood"));
-        for(MeleeWeapon mw : MeleeWeapon.ENTRIES)
+        for(RawWeapon mw : RawWeapon.ENTRIES)
         {
-            meleeWeapons.put(mw.name, new Weapon(mw));
+            weapons.put(mw.name, new Weapon(mw));
         }
     }
     public Weapon()
     {
-        this(MeleeWeapon.ENTRIES[0]);
+        this(RawWeapon.ENTRIES[0]);
     }
 
-    public Weapon(MeleeWeapon raw)
+    public Weapon(RawWeapon raw)
     {
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
         blueprint.wieldableData = new Wieldable();
         blueprint.wieldableData.damage = raw.damage;
         blueprint.wieldableData.hitChance = 35 + 10 * raw.precision;
-        blueprint.wieldableData.reachDistance = raw.reach;
+        blueprint.wieldableData.reachDistance = raw.range;
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);

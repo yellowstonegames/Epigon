@@ -249,13 +249,13 @@ public class Epigon extends Game {
 
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
-
-        Arrays.stream(Direction.OUTWARDS)
-            .map(d -> player.location.translate(d))
-            .filter(c -> map.inBounds(c))
-            .filter(c -> rng.next(6) < 55)
-            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.meleeWeapons.randomValue(rng))));
-
+        floors.copy().randomScatter(rng, 4)
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng))));
+//        Arrays.stream(Direction.OUTWARDS)
+//            .map(d -> player.location.translate(d))
+//            .filter(c -> map.inBounds(c))
+//            //.filter(c -> rng.next(6) < 55)
+//            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng))));
         infoHandler.setPlayer(player);
 
         // NOTE - turn off creatures while testing other things
@@ -405,9 +405,18 @@ public class Epigon extends Game {
                     } else {
                         map.remembered[x][y].remake(map.contents[x][y]);
                     }
-                    if((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance == null)
-                        creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
-
+                    if ((creature = creatures.get(Coord.get(x, y))) != null) {
+                        if (creature.appearance == null)
+                            creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
+                        else if(!mapSLayers.glyphs.contains(creature.appearance))
+                        {
+                            mapSLayers.glyphs.add(creature.appearance);
+                        }
+                    }
+                }
+                else if((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null)
+                {
+                    mapSLayers.removeGlyph(creature.appearance);
                 }
             }
         }

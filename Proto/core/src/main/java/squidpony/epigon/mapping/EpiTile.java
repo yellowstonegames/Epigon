@@ -83,8 +83,8 @@ public class EpiTile {
         if ((temp = getCreature()) != null) {
             contents.remove(temp);
         }
-        if (getLargeObject() != null) {
-            rep = getLargeObject().symbol;
+        if (getLargeNonCreature() != null) {
+            rep = getLargeNonCreature().symbol;
         } else if (!contents.isEmpty()){
             rep = contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
