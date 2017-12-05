@@ -3,6 +3,7 @@ package squidpony.epigon.input;
 import squidpony.Maker;
 import squidpony.squidmath.OrderedMap;
 
+import static squidpony.epigon.input.Verb.*;
 import static squidpony.squidgrid.gui.gdx.SquidInput.*;
 
 /**
@@ -12,40 +13,52 @@ public class ControlMapping {
 
     private static final int CAPS = 0x40000, CTRL = 0x20000;
     public static final OrderedMap<Integer, Verb> defaultMapping =
-            Maker.<Integer, Verb>makeOM( // ah yes, ugly syntax to ensure the type is right.
-                'A'|CAPS, Verb.ATTEMPT,
-                'c', Verb.CONSUME,
-                'c'|CTRL, Verb.CONSUME_DIFFERENTLY, // ctrl-c to eat the delicious soap
-                'e', Verb.EQUIP,
-                'f', Verb.FIRE,
-                'g', Verb.GET,
-                'G'|CAPS, Verb.GATHER,
-                'h', Verb.HELP,
-                '?'|CAPS, Verb.HELP,
-                F1, Verb.HELP,
-                'i', Verb.INTERACT,
-                'I'|CAPS, Verb.INVENTORY,
-                'r', Verb.REST,
-                'u', Verb.USE_ABILITY,
-                'v', Verb.VIEW,
-                'x', Verb.EXAMINE,
-
-                UP_ARROW, Verb.MOVE_UP,
-                DOWN_ARROW, Verb.MOVE_DOWN,
-                LEFT_ARROW, Verb.MOVE_LEFT,
-                RIGHT_ARROW, Verb.MOVE_RIGHT,
-                UP_LEFT_ARROW, Verb.MOVE_UP_LEFT,
-                UP_RIGHT_ARROW, Verb.MOVE_RIGHT,
-                DOWN_LEFT_ARROW, Verb.MOVE_DOWN_LEFT,
-                DOWN_RIGHT_ARROW, Verb.MOVE_DOWN_RIGHT,
-                'w', Verb.WAIT,
-                '>'|CAPS, Verb.MOVE_LOWER,
-                '<'|CAPS, Verb.MOVE_HIGHER,
-                'o', Verb.OPEN,
-                's', Verb.SHUT,
-                'S'|CAPS, Verb.SAVE,
-                'Q'|CAPS, Verb.QUIT,
-                'q'|CTRL, Verb.QUIT,
-                ESCAPE, Verb.QUIT
+            Maker.<Integer, Verb>makeOM(
+                    (int)'A'|CAPS, ATTEMPT,
+                    (int)'c', CONSUME,
+                (int)'c'|CTRL, CONSUME_DIFFERENTLY, // ctrl-c to eat the delicious soap
+                (int)'e', EQUIP,
+                (int)'f', FIRE,
+                (int)'g', GET,
+                (int)'G'|CAPS, GATHER,
+                (int)'?'|CAPS, HELP,
+                (int)F1, HELP,
+                (int)'i', INTERACT,
+                (int)'I'|CAPS, INVENTORY,
+                (int)'r', REST,
+                (int)'1', USE_ABILITY,
+                (int)'v', VIEW,
+                (int)'x', EXAMINE,
+                (int)UP_ARROW, MOVE_UP,
+                (int)DOWN_ARROW, MOVE_DOWN,
+                (int)LEFT_ARROW, MOVE_LEFT,
+                (int)RIGHT_ARROW, MOVE_RIGHT,
+                (int)UP_LEFT_ARROW, MOVE_UP_LEFT,
+                (int)UP_RIGHT_ARROW, MOVE_UP_RIGHT,
+                (int)DOWN_LEFT_ARROW, MOVE_DOWN_LEFT,
+                (int)DOWN_RIGHT_ARROW, MOVE_DOWN_RIGHT,
+                (int)'h', MOVE_LEFT,
+                (int)'j', MOVE_DOWN,
+                (int)'k', MOVE_UP,
+                (int)'l', MOVE_RIGHT,
+                (int)'y', MOVE_UP_LEFT,
+                (int)'u', MOVE_UP_RIGHT,
+                (int)'b', MOVE_DOWN_LEFT,
+                (int)'n', MOVE_DOWN_RIGHT,
+                (int)'w', WAIT,
+                (int)'.', WAIT,
+                (int)'<'|CAPS, MOVE_HIGHER,
+                (int)'>'|CAPS, MOVE_LOWER,
+                (int)'[', CONTEXT_PRIOR,
+                (int)']', CONTEXT_NEXT,
+                (int)'{'|CAPS, INFO_PRIOR,
+                (int)'}'|CAPS, INFO_NEXT,
+                (int)'o', OPEN,
+                (int)'s', SHUT,
+                (int)'S'|CAPS, SAVE,
+                (int)'S'|CTRL, SAVE,
+                (int)'Q'|CAPS, QUIT,
+                (int)'q'|CTRL, QUIT,
+                (int)ESCAPE, QUIT
         );
 }

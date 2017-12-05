@@ -12,18 +12,22 @@ public enum Verb {
     CONSUME, // eat, drink, snort
     CONSUME_DIFFERENTLY, // for items that may have different effects on different parts of the body; this probably should be an option for
                          // powders/gels, with CONSUME being normal rubbing-on-skin, if you want to eat the body butter like it's actual butter
+    CONTEXT_PRIOR,
+    CONTEXT_NEXT,
     EQUIP, // for picking up an object and immediately wielding/using it, instead of putting it in your inventory to use from there
     EXAMINE, // all five senses used to pay particular attention to an area; may trigger traps if you don't find them, unlike LOOK
     FIRE, // Using an equipped weapon with ammo
     GATHER, // Get from all near tiles
     GET, // Get from tile currently occupied
     HELP, // manual, key bindings, hints and tips
+    INFO_PRIOR,
+    INFO_NEXT,
     INTERACT, // Generic interaction with world environment, catch-all for anything not covered by specific verb basically
     INVENTORY, // open a screen to see your items and equip or use them
     MOVE_DOWN,
     MOVE_DOWN_LEFT,
     MOVE_DOWN_RIGHT,
-    MOVE_HIGHER, // Up in 3D space, but "up" is "north" so "higher"; head-wards
+    MOVE_HIGHER, // Up in 3D space, head-wards; "higher" instead of "up" because up is the key to go north
     MOVE_LEFT,
     MOVE_RIGHT,
     MOVE_UP,

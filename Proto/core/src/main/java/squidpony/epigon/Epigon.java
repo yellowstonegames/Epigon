@@ -18,12 +18,13 @@ import squidpony.epigon.display.FxHandler;
 import squidpony.epigon.display.InfoHandler;
 import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.dm.RecipeMixer;
+import squidpony.epigon.input.ControlMapping;
+import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
-import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidai.DijkstraMap;
@@ -157,36 +158,36 @@ public class Epigon extends Game {
         messages = new String[messageCount];
         messageIndex = messageCount;
         messageSLayers = new SquidLayers(
-            messageSize.gridWidth,
-            messageSize.gridHeight,
-            messageSize.cellWidth,
-            messageSize.cellHeight,
-            font);
+                messageSize.gridWidth,
+                messageSize.gridHeight,
+                messageSize.cellWidth,
+                messageSize.cellHeight,
+                font);
 
         infoSLayers = new SquidLayers(
-            infoSize.gridWidth,
-            infoSize.gridHeight,
-            infoSize.cellWidth,
-            infoSize.cellHeight,
-            smallFont);
+                infoSize.gridWidth,
+                infoSize.gridHeight,
+                infoSize.cellWidth,
+                infoSize.cellHeight,
+                smallFont);
         infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SquidLayers(
-            contextSize.gridWidth,
-            contextSize.gridHeight,
-            contextSize.cellWidth,
-            contextSize.cellHeight,
-            smallFont);
+                contextSize.gridWidth,
+                contextSize.gridHeight,
+                contextSize.cellWidth,
+                contextSize.cellHeight,
+                smallFont);
         contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.COSMIC_LATTE);
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.FLIRTATIOUS_INDIGO_TEA);
 
         mapSLayers = new SparseLayers(
-            map.width,
-            map.height,
-            mapSize.cellWidth,
-            mapSize.cellHeight,
-            font);
+                map.width,
+                map.height,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                font);
         ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
@@ -224,8 +225,8 @@ public class Epigon extends Game {
 
         startGame();
     }
-    public static CharSequence style(CharSequence text)
-    {
+
+    public static CharSequence style(CharSequence text) {
         return GDXMarkup.instance.styleString(text);
     }
 
@@ -283,11 +284,11 @@ public class Epigon extends Game {
 
         clearAndBorder(contextSLayers, SColor.FLIRTATIOUS_INDIGO_TEA, SColor.COSMIC_LATTE);
         contextHandler.message("Have fun!",
-            "The fates of countless worlds rest on you...",
-            style("Bump into statues ([*][/]s[,]) and stuff."),
-            style("Now [/]90% fancier[/]!"),
-            "Use ? for help, or q to quit.",
-            "Use mouse, numpad, or arrow keys to move.");
+                "The fates of countless worlds rest on you...",
+                style("Bump into statues ([*][/]s[,]) and stuff."),
+                style("Now [/]90% fancier[/]!"),
+                "Use ? for help, or q to quit.",
+                "Use mouse, numpad, or arrow keys to move.");
         processingCommand = false; // let the player do input
         infoHandler.showPlayerHealthAndArmor();
         putMap();
@@ -306,7 +307,7 @@ public class Epigon extends Game {
                             && !(player.location.x == step.x && player.location.y == step.y)
                             && !creatures.containsKey(step)) {
                         map.contents[c.x][c.y].remove(creature);
-                        if(creature.appearance == null)
+                        if (creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
 //                        else
 //                            creature.appearance.shown = creature.symbol;
@@ -341,8 +342,8 @@ public class Epigon extends Game {
                 @Override
                 public void run() {
                     move(rng.getRandomElement(Arrays.stream(Direction.OUTWARDS)
-                        .filter(d -> map.contents[player.location.x + d.deltaX][player.location.y + d.deltaY].getLargeNonCreature() == null)
-                        .collect(Collectors.toList())
+                            .filter(d -> map.contents[player.location.x + d.deltaX][player.location.y + d.deltaY].getLargeNonCreature() == null)
+                            .collect(Collectors.toList())
                     ));
                 }
             }, 0.2f);
@@ -408,14 +409,11 @@ public class Epigon extends Game {
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         if (creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
-                        else if(!mapSLayers.glyphs.contains(creature.appearance))
-                        {
+                        else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
                         }
                     }
-                }
-                else if((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null)
-                {
+                } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
                 }
             }
@@ -444,9 +442,14 @@ public class Epigon extends Game {
         toPlayerDijkstra.scan(blocked); //(int)(player.stats.get(Stat.SIGHT).actual * 1.45),
     }
 
-    private Color calcFadeoutColor(Color color, double amount){
+    private Color calcFadeoutColor(Color color, double amount) {
         double d = Double.max(amount, 0.3);
         return colorCenter.lerp(SColor.BLACK, color, d);
+    }
+
+    private void scheduleMove(Direction dir)
+    {
+        awaitedMoves.add(player.location.translate(dir));
     }
 
     /**
@@ -524,12 +527,10 @@ public class Epigon extends Game {
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
-            } else if((thing = map.contents[newX][newY].getLargeNonCreature()) != null){
+            } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
                 message("Ran into " + thing.name);
                 runTurn();
-            }
-            else
-            {
+            } else {
                 runTurn();
             }
         }
@@ -547,13 +548,11 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
-                    if(sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y)))
-                    {
+                    if (sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y))) {
                         mapSLayers.put(x, y, ' ', 0f, bgColorFloat);
                         mapSLayers.clear(x, y, 0);
-                    }
-                    else
-                    {   srng.setState((x * map.height + y) * 0xDE4DL);
+                    } else {
+                        srng.setState((x * map.height + y) * 0xDE4DL);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                                 bgColorFloat // this can be null to use no background (transparent)
                         );
@@ -596,10 +595,11 @@ public class Epigon extends Game {
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!mapSLayers.hasActiveAnimations()) {
-                    Coord m = awaitedMoves.remove(0);
+                Coord m = awaitedMoves.remove(0);
+                if(!toCursor.isEmpty())
                     toCursor.remove(0);
-                    move(Direction.toGoTo(player.location, m));
-                    infoHandler.updateDisplay();
+                move(Direction.toGoTo(player.location, m));
+                infoHandler.updateDisplay();
             }
         } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
             mapInput.next();
@@ -607,8 +607,9 @@ public class Epigon extends Game {
         } else if (contextInput.hasNext()) {
             contextInput.next();
             infoHandler.updateDisplay();
-        } else if (infoInput.hasNext()){
-            infoInput.next();;
+        } else if (infoInput.hasNext()) {
+            infoInput.next();
+            ;
             infoHandler.updateDisplay();
         }
 
@@ -673,12 +674,12 @@ public class Epigon extends Game {
                 (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
                 (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
         contextInput.getMouse().reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
-            contextSize.gridWidth, contextSize.gridHeight,
-            -(int) (messageSLayers.getRight()),
-            -(int) (infoSLayers.getTop() + 8f));
+                contextSize.gridWidth, contextSize.gridHeight,
+                -(int) (messageSLayers.getRight()),
+                -(int) (infoSLayers.getTop() + 8f));
         infoInput.getMouse().reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
-            infoSize.gridWidth, infoSize.gridHeight,
-            -(int) (messageSLayers.getRight()), 0);
+                infoSize.gridWidth, infoSize.gridHeight,
+                -(int) (messageSLayers.getRight()), 0);
 
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
@@ -726,112 +727,208 @@ public class Epigon extends Game {
     private final KeyHandler keys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            switch (key) {
-                case 'x':
-                    fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
+            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            Verb verb = ControlMapping.defaultMapping.getOrDefault(combined, Verb.WAIT);
+            switch (verb) {
+                case MOVE_DOWN:
+                    scheduleMove(Direction.DOWN);
                     break;
-                case 'X':
-                    Element e = rng.getRandomElement(Element.values());
-                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
+                case MOVE_UP:
+                    scheduleMove(Direction.UP);
                     break;
-                case 'z':
-                    fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
+                case MOVE_LEFT:
+                    scheduleMove(Direction.LEFT);
                     break;
-                case 'Z':
-                    for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
-                        fxHandler.twinkle(c, Element.LIGHT);
-                    }
+                case MOVE_RIGHT:
+                    scheduleMove(Direction.RIGHT);
                     break;
-                case '=':
-                    fxHandler.layeredSparkle(player.location,4, Radius.CIRCLE);
+                case MOVE_DOWN_LEFT:
+                    scheduleMove(Direction.DOWN_LEFT);
                     break;
-                case '+':
-                    fxHandler.layeredSparkle(player.location,8, Radius.CIRCLE);
+                case MOVE_DOWN_RIGHT:
+                    scheduleMove(Direction.DOWN_RIGHT);
                     break;
-                case '[':
-                    contextHandler.prior();
+                case MOVE_UP_LEFT:
+                    scheduleMove(Direction.UP_LEFT);
                     break;
-                case ']':
-                    contextHandler.next();
+                case MOVE_UP_RIGHT:
+                    scheduleMove(Direction.UP_RIGHT);
                     break;
-                case '{':
-                    infoHandler.prior();;
-                    break;
-                case '}':
-                    infoHandler.next();;
-                    break;
-                case SquidInput.UP_ARROW:
-                case 'w':
-                    move(Direction.UP);
-                    break;
-                case SquidInput.DOWN_ARROW:
-                case 's':
-                    move(Direction.DOWN);
-                    break;
-                case SquidInput.LEFT_ARROW:
-                case 'a':
-                    move(Direction.LEFT);
-                    break;
-                case SquidInput.RIGHT_ARROW:
-                case 'd':
-                    move(Direction.RIGHT);
-                    break;
-                case '.':
-                    message("Waiting...");
-                    runTurn();
-                    break;
-                case 'o': // Open all the doors nearby
+                case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
-                        .map(d -> player.location.translate(d))
-                        .filter(c -> map.inBounds(c))
-                        .filter(c -> fovResult[c.x][c.y] > 0)
-                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                        .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-                        .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
+                            .map(d -> player.location.translate(d))
+                            .filter(c -> map.inBounds(c))
+                            .filter(c -> fovResult[c.x][c.y] > 0)
+                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                            .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
+                            .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
-                case 'c': // Close all the doors nearby
+                case SHUT: // Close all the doors nearby
                     message("Closing nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
-                        .map(d -> player.location.translate(d))
-                        .filter(c -> map.inBounds(c))
-                        .filter(c -> fovResult[c.x][c.y] > 0)
-                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                        .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-                        .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
+                            .map(d -> player.location.translate(d))
+                            .filter(c -> map.inBounds(c))
+                            .filter(c -> fovResult[c.x][c.y] > 0)
+                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+                            .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
-                case 'g': // Pick everything nearby up
+
+                case GATHER: // Pick everything nearby up
                     message("Picking up all nearby small things");
-                    Arrays.stream(Direction.values())
-                        .map(d -> player.location.translate(d))
-                        .filter(c -> map.inBounds(c))
-                        .filter(c -> fovResult[c.x][c.y] > 0)
-                        .map(c -> map.contents[c.x][c.y])
-                        .forEach(tile -> {
-                            Set<Physical> removing = tile.contents
-                                .stream()
-                                .filter(p -> !p.attached)
-                                .collect(Collectors.toSet());
-                            tile.contents.removeAll(removing);
-                            player.inventory.addAll(removing);
-                        });
+                    for (int i = 0; i < 8; i++) {
+                        Coord c = player.location.translate(Direction.OUTWARDS[i]);
+                        if(map.inBounds(c) && fovResult[c.x][c.y] > 0)
+                        {
+                            EpiTile tile = map.contents[c.x][c.y];
+                            ListIterator<Physical> it = tile.contents.listIterator();
+                            Physical p;
+                            while (it.hasNext())
+                            {
+                                p = it.next();
+                                if(p.attached || p.creatureData != null) continue;
+                                player.inventory.add(p);
+                                it.remove();
+                            }
+                        }
+                    }
                     break;
-                case 'i': // List out inventory
+                case INVENTORY:
                     message(player.inventory.stream()
-                        .map(i -> i.name)
-                        .collect(Collectors.joining(", ", "Carrying: ", "")));
+                            .map(i -> i.name)
+                            .collect(Collectors.joining(", ", "Carrying: ", "")));
                     break;
-                case SquidInput.ESCAPE: {
+
+                case CONTEXT_PRIOR:
+                    contextHandler.prior();
+                    break;
+                case CONTEXT_NEXT:
+                    contextHandler.next();
+                    break;
+                case INFO_PRIOR:
+                    infoHandler.prior();
+                    break;
+                case INFO_NEXT:
+                    infoHandler.next();
+                    break;
+                case QUIT:
                     Gdx.app.exit();
                     break;
-                }
+                default:
+                    scheduleMove(Direction.NONE);
             }
         }
     };
+
+//    switch (key) {
+//        case 'x':
+//            fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
+//            break;
+//        case 'X':
+//            Element e = rng.getRandomElement(Element.values());
+//            fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
+//            break;
+//        case 'z':
+//            fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
+//            break;
+//        case 'Z':
+//            for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
+//                fxHandler.twinkle(c, Element.LIGHT);
+//            }
+//            break;
+//        case '=':
+//            fxHandler.layeredSparkle(player.location,4, Radius.CIRCLE);
+//            break;
+//        case '+':
+//            fxHandler.layeredSparkle(player.location,8, Radius.CIRCLE);
+//            break;
+//        case '[':
+//            contextHandler.prior();
+//            break;
+//        case ']':
+//            contextHandler.next();
+//            break;
+//        case '{':
+//            infoHandler.prior();
+//            break;
+//        case '}':
+//            infoHandler.next();
+//            break;
+//        case SquidInput.UP_ARROW:
+//        case 'w':
+//            move(Direction.UP);
+//            break;
+//        case SquidInput.DOWN_ARROW:
+//        case 's':
+//            move(Direction.DOWN);
+//            break;
+//        case SquidInput.LEFT_ARROW:
+//        case 'a':
+//            move(Direction.LEFT);
+//            break;
+//        case SquidInput.RIGHT_ARROW:
+//        case 'd':
+//            move(Direction.RIGHT);
+//            break;
+//        case '.':
+//            message("Waiting...");
+//            runTurn();
+//            break;
+//        case 'o': // Open all the doors nearby
+//            message("Opening nearby doors");
+//            Arrays.stream(Direction.OUTWARDS)
+//                    .map(d -> player.location.translate(d))
+//                    .filter(c -> map.inBounds(c))
+//                    .filter(c -> fovResult[c.x][c.y] > 0)
+//                    .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+//                    .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
+//                    .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
+//            calcFOV(player.location.x, player.location.y);
+//            calcDijkstra();
+//            break;
+//        case 'c': // Close all the doors nearby
+//            message("Closing nearby doors");
+//            Arrays.stream(Direction.OUTWARDS)
+//                    .map(d -> player.location.translate(d))
+//                    .filter(c -> map.inBounds(c))
+//                    .filter(c -> fovResult[c.x][c.y] > 0)
+//                    .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+//                    .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+//                    .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
+//            calcFOV(player.location.x, player.location.y);
+//            calcDijkstra();
+//            break;
+//        case 'g': // Pick everything nearby up
+//            message("Picking up all nearby small things");
+//            Arrays.stream(Direction.values())
+//                    .map(d -> player.location.translate(d))
+//                    .filter(c -> map.inBounds(c))
+//                    .filter(c -> fovResult[c.x][c.y] > 0)
+//                    .map(c -> map.contents[c.x][c.y])
+//                    .forEach(tile -> {
+//                        Set<Physical> removing = tile.contents
+//                                .stream()
+//                                .filter(p -> !p.attached)
+//                                .collect(Collectors.toSet());
+//                        tile.contents.removeAll(removing);
+//                        player.inventory.addAll(removing);
+//                    });
+//            break;
+//        case 'i': // List out inventory
+//            message(player.inventory.stream()
+//                    .map(i -> i.name)
+//                    .collect(Collectors.joining(", ", "Carrying: ", "")));
+//            break;
+//        case SquidInput.ESCAPE: {
+//            Gdx.app.exit();
+//            break;
+//        }
+//    }
 
     private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
@@ -841,7 +938,7 @@ public class Epigon extends Game {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
             //message("TOUCH_UP: " + screenX + ", " + screenY);
-            if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height){ // Only process if it's in the map view area
+            if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height) { // Only process if it's in the map view area
                 return false;
             }
 //            int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
@@ -924,14 +1021,14 @@ public class Epigon extends Game {
             mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (screenX < 0 || screenX >= infoSize.gridWidth || screenY < 0 || screenY >= infoSize.gridHeight){
+            if (screenX < 0 || screenX >= infoSize.gridWidth || screenY < 0 || screenY >= infoSize.gridHeight) {
                 return false;
             }
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (screenX == contextHandler.arrowLeft.x && screenY == contextHandler.arrowLeft.y){
+                    if (screenX == contextHandler.arrowLeft.x && screenY == contextHandler.arrowLeft.y) {
                         contextHandler.prior();
-                    } else if (screenX == contextHandler.arrowRight.x && screenY == contextHandler.arrowRight.y){
+                    } else if (screenX == contextHandler.arrowRight.x && screenY == contextHandler.arrowRight.y) {
                         contextHandler.next();
                     }
                     return true;
@@ -960,9 +1057,9 @@ public class Epigon extends Game {
             System.out.println("info: " + screenX + ", " + screenY);
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (screenX == infoHandler.arrowLeft.x && screenY == infoHandler.arrowLeft.y){
+                    if (screenX == infoHandler.arrowLeft.x && screenY == infoHandler.arrowLeft.y) {
                         infoHandler.prior();
-                    } else if (screenX == infoHandler.arrowRight.x && screenY == infoHandler.arrowRight.y){
+                    } else if (screenX == infoHandler.arrowRight.x && screenY == infoHandler.arrowRight.y) {
                         infoHandler.next();
                     }
                     return true;
