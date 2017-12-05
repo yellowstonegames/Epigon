@@ -13,9 +13,9 @@ import squidpony.squidmath.EnumOrderedMap;
  */
 public interface EquippedData {
 
-    public EnumOrderedMap<JewelrySlot, Physical> getJewelry();
-    public EnumOrderedMap<ClothingSlot, Physical> getClothing();
-    public EnumOrderedMap<ClothingSlot, Physical> getArmor();
-    public EnumOrderedMap<OverArmorSlot, Physical> getOverArmor();
-    public EnumOrderedMap<WieldSlot, Physical> getEquipment();
+    EnumOrderedMap<JewelrySlot, Physical> getJewelry();
+    EnumOrderedMap<ClothingSlot, Physical> getClothing();
+    EnumOrderedMap<ClothingSlot, Physical> getArmor();
+    EnumOrderedMap<OverArmorSlot, Physical> getOverArmor();
+    EnumOrderedMap<WieldSlot, Physical> getEquipment();
 }
