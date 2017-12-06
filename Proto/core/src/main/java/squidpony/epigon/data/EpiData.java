@@ -25,6 +25,11 @@ public abstract class EpiData {
     }
 
     @Override
+    public String toString() {
+        return name == null ? "EpiData_" + id : name;
+    }
+
+    @Override
     public int hashCode() {
         return idHash;
     }

@@ -253,6 +253,8 @@ public class RecipeMixer {
 
         physical.creatureData = createCreature(blueprint.creatureData);
 
+        physical.wieldableData = blueprint.wieldableData;
+
         physical.terrainData = blueprint.terrainData;
 
         // TODO - add rest of mixins

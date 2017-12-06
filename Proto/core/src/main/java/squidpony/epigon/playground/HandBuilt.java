@@ -9,6 +9,7 @@ import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
+import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.universe.*;
@@ -220,6 +221,7 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
+        playerBlueprint.wieldableData = Wieldable.UNARMED;
         mixer.addProfession(chef, playerBlueprint);
     }
 

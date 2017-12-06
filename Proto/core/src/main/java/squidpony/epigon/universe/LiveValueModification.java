@@ -32,16 +32,16 @@ public class LiveValueModification {
     public LiveValueModification(){}
 
     /**
-     * Creates a live value modification with all values set to the provided value and no delta or
-     * inertia.
+     * Creates a live value modification with base, actual, and max values set to the provided value, min value set to
+     * 0, and no delta or inertia (also 0).
      *
-     * @param value desired new base, max, and min value
+     * @param value desired new actual, base, and max value
      */
     public LiveValueModification(double value) {
         baseOverwrite = value;
         actualOverwrite = value;
         maxOverwrite = value;
-        minOverwrite = value;
+        minOverwrite = 0.0;
         deltaOverwrite = 0.0;
         inertiaOverwrite = 0.0;
         stableOverwrite = true;

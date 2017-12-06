@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
+import squidpony.StringKit;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
@@ -520,10 +521,20 @@ public class Epigon extends Game {
             Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
             if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                mapSLayers.removeGlyph(thing.appearance);
-                creatures.remove(thing.location);
-                map.contents[newX][newY].remove(thing);
-                message("Killed the " + thing.name);
+                if (rng.nextIntHasty(100) < player.wieldableData.hitChance) {
+                    thing.stats.get(Stat.VIGOR).addActual(-player.wieldableData.damage);
+                    if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
+                        mapSLayers.removeGlyph(thing.appearance);
+                        creatures.remove(thing.location);
+                        map.contents[newX][newY].remove(thing);
+                        message("Killed the " + thing.name);
+                    } else {
+                        message("Dealt " + player.wieldableData.damage + " damage to the " + thing.name);
+                    }
+                } else
+                {
+                    message("Missed the " + thing.name);
+                }
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
@@ -799,11 +810,21 @@ public class Epigon extends Game {
                     }
                     break;
                 case INVENTORY:
-                    message(player.inventory.stream()
-                            .map(i -> i.name)
-                            .collect(Collectors.joining(", ", "Carrying: ", "")));
+                    for(String m : StringKit.wrap("Carrying: " +
+                            StringKit.join(", ", player.inventory), messageSize.gridWidth - 2))
+                        message(m);
                     break;
-
+                case EQUIP:
+                    if(player.inventory.isEmpty()) {
+                        message("Nothing in inventory! Try gathering items with Shift-G.");
+                    }
+                    else {
+                        rng.shuffle(player.inventory, player.inventory);
+                        message("Now wielding: " + player.inventory.get(0));
+                        player.wieldableData = player.inventory.get(0).wieldableData;
+                    }
+                    runTurn();
+                    break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();
                     break;

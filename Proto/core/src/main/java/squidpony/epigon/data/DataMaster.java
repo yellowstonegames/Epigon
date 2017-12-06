@@ -17,7 +17,7 @@ public class DataMaster {
     private final OrderedMap<EpiData, Set<EpiData>> children = new OrderedMap<>(); // All the known children of the provided object
 
     {
-        children.defaultReturnValue(Collections.EMPTY_SET);
+        children.defaultReturnValue(Collections.emptySet());
     }
 
     public void add(EpiData data) {
@@ -43,7 +43,7 @@ public class DataMaster {
         while (found != null && !found.isEmpty()) {
             found.removeAll(returning);
             returning.addAll(found);
-            found = found.stream().map(e -> children.get(e)).collect(HashSet::new, Set::addAll, Set::addAll);
+            found = found.stream().map(children::get).collect(HashSet::new, Set::addAll, Set::addAll);
         }
 
         return returning;
