@@ -32,7 +32,7 @@ public class LiveValue {
     private double actual;
     private double delta; // change per turn
     private double inertia; // change in delta per turn
-    private boolean stable; // when true inertia will not reverse the delta's sign whne it crosses zero
+    private boolean stable; // when true inertia will not reverse the delta's sign when it crosses zero
 
     public LiveValue() {
         this(1.0);
@@ -103,6 +103,16 @@ public class LiveValue {
         min = mod.minMultiply == null ? min : mod.minMultiply;
         delta = mod.deltaMultiply == null ? delta : mod.deltaMultiply;
         inertia = mod.inertiaMultiply == null ? inertia : mod.inertiaMultiply;
+    }
+
+    public void addActual(double change)
+    {
+        actual = Math.min(Math.max(actual + change, min), max);
+    }
+
+    public void multiplyActual(double change)
+    {
+        actual = Math.min(Math.max(actual * change, min), max);
     }
 
     public double base() {

@@ -80,7 +80,7 @@ public class Physical extends EpiData {
     public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
 
-    public List<Physical> inventory = new ArrayList<>();
+    public ArrayList<Physical> inventory = new ArrayList<>();
 
     /**
      * The list of physical objects it drops on destruction no matter what the source.
