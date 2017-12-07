@@ -159,10 +159,10 @@ public class Modification extends EpiData {
     public List<ConditionBlueprint> wieldableCausesOverwrite;
     public Set<ConditionBlueprint> wieldableCausesRemoved;
     public List<ConditionBlueprint> wieldableCausesAdded;
-    public Double wieldableHitChanceOverwrite;
-    public Double wieldableHitChanceDelta;
-    public Double wieldableDamageOverwrite;
-    public Double wieldableDamageDelta;
-    public Double wieldableDistanceOverwrite;
-    public Double wieldableDistanceDelta;
+    public Integer wieldableHitChanceOverwrite;
+    public Integer wieldableHitChanceDelta;
+    public Integer wieldableDamageOverwrite;
+    public Integer wieldableDamageDelta;
+    public Integer wieldableDistanceOverwrite;
+    public Integer wieldableDistanceDelta;
 }

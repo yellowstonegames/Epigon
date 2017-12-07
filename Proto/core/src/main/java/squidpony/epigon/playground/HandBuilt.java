@@ -12,6 +12,7 @@ import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
+import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
@@ -20,8 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map.Entry;
 
-import static squidpony.epigon.Epigon.mixer;
-import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.Epigon.*;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
@@ -222,6 +222,9 @@ public class HandBuilt {
 
         cb.skills.put(cooking, Rating.TYPICAL);
         playerBlueprint.wieldableData = Wieldable.UNARMED;
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
         mixer.addProfession(chef, playerBlueprint);
     }
 
@@ -274,11 +277,14 @@ public class HandBuilt {
         makeAlive.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         makeAlive.large = true;
         Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValueModification lvm = new LiveValueModification(rng.between(10, 20));
+            LiveValueModification lvm = new LiveValueModification(rng.between(5, 19));
             makeAlive.statChanges.put(s, lvm);
         });
         makeAlive.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         makeAlive.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         makeAlive.creatureOverwrite = new Creature();
+        makeAlive.wieldableDamageOverwrite = rng.between(1, 4);
+        makeAlive.wieldableHitChanceOverwrite = rng.betweenWeighted(20, 80, 3);
+        makeAlive.wieldableDistanceOverwrite = 0;
     }
 }

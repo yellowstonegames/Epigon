@@ -5,6 +5,7 @@ import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Terrain;
+import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
@@ -14,7 +15,6 @@ import squidpony.epigon.universe.LiveValueModification;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.OrderedMap;
 
 import java.util.*;
@@ -315,7 +315,6 @@ public class RecipeMixer {
      * Applies the provided modification to the provided physical in place.
      */
     public void applyModification(Physical physical, Modification modification) {
-        SquidColorCenter colorCenter = new SquidColorCenter();
         physical.modifications.add(modification);
 
         if (modification.possibleAliases != null) {
@@ -418,6 +417,60 @@ public class RecipeMixer {
         if (modification.creatureOverwrite != null) {
             physical.creatureData = createCreature(modification.creatureOverwrite);
         }
+        if(physical.wieldableData == null && (
+                modification.wieldableCausesAdded != null ||
+                modification.wieldableCausesOverwrite!= null ||
+                modification.wieldableCausesRemoved != null ||
+                modification.wieldableDamageDelta != null ||
+                modification.wieldableDamageOverwrite != null ||
+                modification.wieldableDistanceDelta != null ||
+                modification.wieldableDistanceOverwrite != null ||
+                modification.wieldableHitChanceDelta != null ||
+                modification.wieldableHitChanceOverwrite != null))
+        {
+            physical.wieldableData = new Wieldable();
+        }
+        if(modification.wieldableCausesOverwrite != null)
+        {
+            physical.wieldableData.causes = modification.wieldableCausesOverwrite;
+        }
+        if(modification.wieldableCausesAdded != null)
+        {
+            physical.wieldableData.causes.addAll(modification.wieldableCausesAdded);
+        }
+        if(modification.wieldableCausesRemoved != null)
+        {
+            physical.wieldableData.causes.removeAll(modification.wieldableCausesRemoved);
+        }
+
+        if(modification.wieldableDamageOverwrite != null)
+        {
+            physical.wieldableData.damage = modification.wieldableDamageOverwrite;
+        }
+        if(modification.wieldableDamageDelta != null)
+        {
+            physical.wieldableData.damage += modification.wieldableDamageDelta;
+        }
+
+        if(modification.wieldableHitChanceOverwrite != null)
+        {
+            physical.wieldableData.hitChance = modification.wieldableHitChanceOverwrite;
+        }
+        if(modification.wieldableHitChanceDelta != null)
+        {
+            physical.wieldableData.hitChance += modification.wieldableHitChanceDelta;
+        }
+
+        if(modification.wieldableDistanceOverwrite != null)
+        {
+            physical.wieldableData.reachDistance = modification.wieldableDistanceOverwrite;
+        }
+        if(modification.wieldableDistanceDelta != null)
+        {
+            physical.wieldableData.reachDistance += modification.wieldableDistanceDelta;
+        }
+
+
 
         if (physical.creatureData != null) {
             modification.skillChanges.entrySet()

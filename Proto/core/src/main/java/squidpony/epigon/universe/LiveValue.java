@@ -39,13 +39,7 @@ public class LiveValue {
     }
 
     public LiveValue(double base) {
-        this.base = base;
-        max = base;
-        min = 0;
-        actual = base;
-        delta = 0;
-        inertia = 0;
-        stable = true;
+        set(base);
     }
 
     public LiveValue(LiveValue other) {
@@ -56,6 +50,17 @@ public class LiveValue {
         delta = other.delta;
         inertia = other.inertia;
         stable = other.stable;
+    }
+
+    public void set(double base)
+    {
+        this.base = base;
+        max = base;
+        min = 0;
+        actual = base;
+        delta = 0;
+        inertia = 0;
+        stable = true;
     }
 
     /**

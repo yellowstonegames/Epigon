@@ -57,6 +57,8 @@ public class Epigon extends Game {
     public static final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
     // used for certain calculations where the state changes per-tile
     public static final StatefulRNG srng = new StatefulRNG(new ThrustRNG(seed ^ seed >>> 1));
+    //unseeded random number generator
+    public static final StatefulRNG chaos = new StatefulRNG(new ThrustRNG());
     public static final RecipeMixer mixer = new RecipeMixer();
     public static final HandBuilt handBuilt = new HandBuilt();
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
@@ -195,7 +197,7 @@ public class Epigon extends Game {
 
 
         font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
-        smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.125f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
@@ -244,7 +246,8 @@ public class Epigon extends Game {
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.HUNGER).delta(-1);
+        player.stats.get(Stat.VIGOR).set(99.0);
+        player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
@@ -279,7 +282,7 @@ public class Epigon extends Game {
         calcFOV(player.location.x, player.location.y);
 
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
-        toPlayerDijkstra.rng = DefaultResources.getGuiRandom();
+        toPlayerDijkstra.rng = chaos; // random seed, player won't make deterministic choices
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -304,8 +307,22 @@ public class Epigon extends Game {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
-                    if (map.contents[step.x][step.y].getLargeObject() == null
-                            && !(player.location.x == step.x && player.location.y == step.y)
+                    if(player.location.x == step.x && player.location.y == step.y)
+                    {
+                        mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
+                        if (rng.next(7) < creature.wieldableData.hitChance) { // out of 128
+                            player.stats.get(Stat.VIGOR).addActual(-creature.wieldableData.damage);
+                            if (player.stats.get(Stat.VIGOR).actual() <= 0) {
+                                message("You have been slain by the " + creature.name + "!");
+                            } else {
+                                message("The " + creature.name + " hits you for " + creature.wieldableData.damage + " damage!");
+                            }
+                        } else
+                        {
+                            message("The " + creature.name + " missed you.");
+                        }
+                    }
+                    else if (map.contents[step.x][step.y].getLargeObject() == null
                             && !creatures.containsKey(step)) {
                         map.contents[c.x][c.y].remove(creature);
                         if (creature.appearance == null)
@@ -521,7 +538,7 @@ public class Epigon extends Game {
             Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
             if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                if (rng.nextIntHasty(100) < player.wieldableData.hitChance) {
+                if (rng.next(7) < player.wieldableData.hitChance) { // out of 128
                     thing.stats.get(Stat.VIGOR).addActual(-player.wieldableData.damage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
@@ -819,7 +836,7 @@ public class Epigon extends Game {
                         message("Nothing in inventory! Try gathering items with Shift-G.");
                     }
                     else {
-                        rng.shuffle(player.inventory, player.inventory);
+                        rng.shuffleInPlace(player.inventory);
                         message("Now wielding: " + player.inventory.get(0));
                         player.wieldableData = player.inventory.get(0).wieldableData;
                     }
