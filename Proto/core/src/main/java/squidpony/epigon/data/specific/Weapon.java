@@ -49,7 +49,7 @@ public class Weapon {
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
         blueprint.wieldableData = new Wieldable();
         blueprint.wieldableData.damage = raw.damage;
-        blueprint.wieldableData.hitChance = 50 + 8 * raw.precision;
+        blueprint.wieldableData.hitChance = 70 + 9 * raw.precision;
         blueprint.wieldableData.reachDistance = raw.range;
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
