@@ -265,7 +265,7 @@ public class Epigon extends Game {
 
         // NOTE - turn off creatures while testing other things
         for (Coord coord : floors.quasiRandomSeparated(0.05)) {
-            if (map.contents[coord.x][coord.y].getLargeObject() == null) {
+            if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive);
                 p.location = coord;
@@ -322,7 +322,7 @@ public class Epigon extends Game {
                             message("The " + creature.name + " missed you.");
                         }
                     }
-                    else if (map.contents[step.x][step.y].getLargeObject() == null
+                    else if (map.contents[step.x][step.y].blockage == null
                             && !creatures.containsKey(step)) {
                         map.contents[c.x][c.y].remove(creature);
                         if (creature.appearance == null)
@@ -418,7 +418,7 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {
-                    srng.setState((x * map.height + y) * 0xDE4DL);
+                    srng.setState((x * 0x10000000FL + y));
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
                     } else {
@@ -482,7 +482,7 @@ public class Epigon extends Game {
             return; // can't move, should probably be error or something
         }
 
-        if (map.contents[newX][newY].getLargeObject() == null) {
+        if (map.contents[newX][newY].blockage == null) {
 //            final float midX = player.location.x + dir.deltaX * 0.5f;
 //            final float midY = player.location.y + dir.deltaY * 0.5f;
 //            final Vector3 pos = camera.position.cpy();
@@ -580,7 +580,7 @@ public class Epigon extends Game {
                         mapSLayers.put(x, y, ' ', 0f, bgColorFloat);
                         mapSLayers.clear(x, y, 0);
                     } else {
-                        srng.setState((x * map.height + y) * 0xDE4DL);
+                        srng.setState((x * 0x10000000FL + y));
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                                 bgColorFloat // this can be null to use no background (transparent)
                         );
@@ -826,12 +826,12 @@ public class Epigon extends Game {
                         }
                     }
                     break;
-                case INVENTORY:
+                case EQUIPMENT:
                     for(String m : StringKit.wrap("Carrying: " +
                             StringKit.join(", ", player.inventory), messageSize.gridWidth - 2))
                         message(m);
                     break;
-                case EQUIP:
+                case DRAW:
                     if(player.inventory.isEmpty()) {
                         message("Nothing in inventory! Try gathering items with Shift-G.");
                     }

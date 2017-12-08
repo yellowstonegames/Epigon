@@ -63,7 +63,7 @@ public class Physical extends EpiData {
     public char symbol;
     public float color;
     public double baseValue;
-    public boolean large;
+    public boolean blocking;
 
     public float lightEmitted;
     public LiveValue lightEmittedStrength;

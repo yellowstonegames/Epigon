@@ -67,9 +67,7 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 char c = simpleChars[x][y];
                 tile = world[0].contents[x][y];
-                if (tile.getLargeObject() != null) {
-                    tile.remove(tile.getLargeObject());
-                }
+                tile.blockage = null;
                 switch (c) {
                     case '.':
                         break;

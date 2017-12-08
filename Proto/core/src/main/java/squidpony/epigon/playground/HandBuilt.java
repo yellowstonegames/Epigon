@@ -166,7 +166,7 @@ public class HandBuilt {
         playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
         playerBlueprint.color = SColor.BRIGHT_PINK.toFloatBits();
-        playerBlueprint.large = true;
+        playerBlueprint.blocking = true;
         playerBlueprint.unique = true;
         playerBlueprint.attached = true;
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");

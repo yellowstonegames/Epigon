@@ -20,12 +20,14 @@ public class EpiMap {
     public int width, height;
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
+    public double[][] resistances;
 
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
+        resistances = new double[width][height];
     }
 
     public EpiMap() {
@@ -41,7 +43,6 @@ public class EpiMap {
     }
 
     public double[][] opacities() {
-        double[][] resistances = new double[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 resistances[x][y] = contents[x][y].opacity();

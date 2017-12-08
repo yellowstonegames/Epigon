@@ -23,52 +23,42 @@ public class EpiTile {
 
     public Physical floor;
     public List<Physical> contents = new ArrayList<>();
+    public Physical blockage;
 
     /**
      * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
      * fully transparent.
      */
     public double opacity() {
-        double resistance = 0f;
-        LiveValue lv = new LiveValue(resistance);
-        Stat key = Stat.OPACITY;
-        Physical temp;
-        if ((temp = getCreature()) != null) {
-            contents.remove(temp);
+        if (blockage != null) {
+            if (blockage.creatureData == null) {
+                LiveValue lv = blockage.stats.get(Stat.OPACITY);
+                if (lv != null)
+                    return Math.min(lv.actual(), 1.0);
+            }
         }
-        if (getLargeObject() != null) {
-            resistance += getLargeObject().stats.getOrDefault(key, lv).actual();
-        }
-        /*
-        if (getCreature() != null) {
-            resistance += getCreature().stats.getOrDefault(key, lv).actual();
-        }*/
-        if(temp != null)
-            contents.add(temp);
-
-        return Math.min(resistance, 1.0);
+        return 0.0;
     }
 
     /**
      * Returns the character representation of this tile.
      *
-     * @return
+     * @return a char representing the contents of the tile, with creatures not rendered (they render themselves)
      */
     public char getSymbol() {
-        char rep = ' ';//default to no representation
-        Physical temp;
         //check in order of preference
-        if ((temp = getCreature()) != null) {
-            rep = floor.symbol;
-        } else if ((temp = getLargeNonCreature()) != null) {
-            rep = temp.symbol;
+        if (blockage != null) {
+            if(blockage.creatureData != null)
+                return floor.symbol;
+            else
+                return blockage.symbol;
         } else if (!contents.isEmpty()){
-            rep = contents.get(0).symbol; // arbitrarily get first thing in list
+            return contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
-            rep = floor.symbol;
+            return floor.symbol;
         }
 
-        return rep;
+        return ' '; //default to no representation;
     }
 
     /**
@@ -77,23 +67,14 @@ public class EpiTile {
      * @return
      */
     public char getSymbolUninhabited() {
-        char rep = ' ';//default to no representation
-        Physical temp;
-        //check in order of preference
-        if ((temp = getCreature()) != null) {
-            contents.remove(temp);
-        }
-        if (getLargeNonCreature() != null) {
-            rep = getLargeNonCreature().symbol;
+        if (blockage != null && blockage.creatureData == null) {
+                return blockage.symbol;
         } else if (!contents.isEmpty()){
-            rep = contents.get(0).symbol; // arbitrarily get first thing in list
+            return contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
-            rep = floor.symbol;
+            return floor.symbol;
         }
-        if(temp != null)
-            contents.add(temp);
-
-        return rep;
+        return ' '; //default to no representation
     }
 
     /**
@@ -143,44 +124,65 @@ public class EpiTile {
     };
 
     public float getForegroundColor() {
-        float fore = 0f;//indicates that no particular color is used
         //check in order of preference
-        if (getCreature() != null) {
-            fore = SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);//getCreature().color;
-        } else if (getLargeObject() != null) {
-            fore = SColor.lerpFloatColors(getLargeObject().color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
+        if (blockage != null) {
+            if(blockage.creatureData != null)
+                return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);//getCreature().color;
+            else
+                return SColor.lerpFloatColors(blockage.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
         } else if (!contents.isEmpty()){
-            fore = contents.get(0).color; // arbitrarily get first thing in list
+            return contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            fore = SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
+            return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
         }
 
-        return fore;
+        return 0f;
     }
 
     public void remove(Physical phys) {
-        contents.remove(phys);
+        if(phys != null)
+        {
+            if(phys.blocking)
+            {
+                if(phys.equals(blockage))
+                    blockage = null;
+            }
+            else
+            {
+                contents.remove(phys);
+            }
+        }
     }
 
     public void add(Physical phys) {
-        // TODO - check that it can be added
-        contents.add(phys);
+        if(phys != null)
+        {
+            if(phys.blocking)
+            {
+                if(blockage == null)
+                    blockage = phys;
+            }
+            else
+            {
+                contents.add(phys);
+            }
+        }
     }
 
-    public void add(List<Physical> adding) {
+    public void add(Iterable<Physical> adding) {
         for (Physical p : adding) {
             add(p);
         }
     }
 
     public Physical getCreature() {
-        return contents.stream().filter(c -> c.creatureData != null).findAny().orElse(null);
+        return blockage != null && blockage.creatureData != null ? blockage : null;
     }
 
     public Physical getLargeObject() {
-        return contents.stream().filter(l -> l.large).findAny().orElse(null);
+        return blockage;
     }
     public Physical getLargeNonCreature() {
-        return contents.stream().filter(l -> l.large && l.creatureData == null).findAny().orElse(null);
+        return blockage != null && blockage.creatureData == null ? blockage : null;
     }
 }
