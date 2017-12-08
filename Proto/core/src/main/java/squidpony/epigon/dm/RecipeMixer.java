@@ -223,7 +223,7 @@ public class RecipeMixer {
         physical.symbol = blueprint.symbol;
         physical.color = blueprint.color == 0f ? SColor.GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f) : blueprint.color;
         physical.baseValue = blueprint.baseValue;
-        physical.large = blueprint.large;
+        physical.blocking = blueprint.blocking;
 
         physical.lightEmitted = blueprint.lightEmitted;
         physical.lightEmittedStrength = blueprint.lightEmittedStrength;
@@ -387,7 +387,7 @@ public class RecipeMixer {
         }
 
         if (modification.large != null) {
-            physical.large = modification.large;
+            physical.blocking = modification.large;
         }
 
         if (modification.lightEmitted != 0f) {

@@ -14,7 +14,7 @@ public enum Verb {
                          // powders/gels, with CONSUME being normal rubbing-on-skin, if you want to eat the body butter like it's actual butter
     CONTEXT_PRIOR,
     CONTEXT_NEXT,
-    EQUIP, // for picking up an object and immediately wielding/using it, instead of putting it in your inventory to use from there
+    DRAW, // for picking up an object and immediately wielding/using it, instead of putting it in your inventory to use from there
     EXAMINE, // all five senses used to pay particular attention to an area; may trigger traps if you don't find them, unlike LOOK
     FIRE, // Using an equipped weapon with ammo
     GATHER, // Get from all near tiles
@@ -23,7 +23,7 @@ public enum Verb {
     INFO_PRIOR,
     INFO_NEXT,
     INTERACT, // Generic interaction with world environment, catch-all for anything not covered by specific verb basically
-    INVENTORY, // open a screen to see your items and equip or use them
+    EQUIPMENT, // open a screen to see your items and equip or use them
     MOVE_DOWN,
     MOVE_DOWN_LEFT,
     MOVE_DOWN_RIGHT,
@@ -40,10 +40,10 @@ public enum Verb {
     SAVE,
     SHUT, // for doors, Interact should be for container manipulation
     THROW, // if you have an item equipped, throw it at a target, otherwise grab a specific item or creature and attempt to throw it at a target
-    USE_ABILITY,
+    USE_POWER,
     VIEW, // look at something without touching it; gives less info but is less risky and can be done at a distance
     WAIT, // stay in place and do nothing
-    // next two covered by either EQUIP or INVENTORY
+    // next two covered by either DRAW or EQUIPMENT
     //WEAR, // includes armor, clothing, and jewelry
     //WIELD // includes weapons, magic items that must be held to work, shields
 
