@@ -28,6 +28,7 @@ import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
@@ -80,7 +81,8 @@ public class Epigon extends Game {
     private float bgColorFloat, unseenColorFloat;
     private List<Coord> toCursor;
     private TextCellFactory font;
-    private String[] messages;
+    // Set up the text display portions
+    private List<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
 
     // World
@@ -121,6 +123,7 @@ public class Epigon extends Game {
         infoSize = new PanelSize(smallW, smallH * 3 / 2, 7, 16);
         contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 7, 16);
         messageCount = bottomH - 2;
+
     }
 
     @Override
@@ -157,8 +160,6 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
         font = DefaultResources.getLeanFamily();
         TextCellFactory smallFont = font.copy();
-        // Set up the text display portions
-        messages = new String[messageCount];
         messageIndex = messageCount;
         messageSLayers = new SquidLayers(
                 messageSize.gridWidth,
@@ -238,6 +239,10 @@ public class Epigon extends Game {
         priorFovResult = new double[map.width][map.height];
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for effects
+        IColoredString<Color> emptyICS = IColoredString.Impl.create();
+        for (int i = 0; i < messageCount; i++) {
+            messages.add(emptyICS);
+        }
         fxHandler = new FxHandler(mapSLayers, 2, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
@@ -282,7 +287,7 @@ public class Epigon extends Game {
         calcFOV(player.location.x, player.location.y);
 
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
-        toPlayerDijkstra.rng = chaos; // random seed, player won't make deterministic choices
+        toPlayerDijkstra.rng = new RNG(new ThrustRNG()); // random seed, player won't make deterministic choices
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -315,7 +320,7 @@ public class Epigon extends Game {
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 message("You have been slain by the " + creature.name + "!");
                             } else {
-                                message("The " + creature.name + " hits you for " + creature.wieldableData.damage + " damage!");
+                                message("The " + creature.name + " hits you for " + creature.wieldableData.damage + ' ' + creature.wieldableData.rollElement().styledName + " damage!");
                             }
                         } else
                         {
@@ -406,9 +411,9 @@ public class Epigon extends Game {
 
     private void message(String text) {
         clearAndBorder(messageSLayers, SColor.APRICOT, bgColor);
-        messages[messageIndex++ % messageCount] = text;
+        messages.set(messageIndex++ % messageCount, GDXMarkup.instance.colorString("[]"+text));
         for (int i = messageIndex % messageCount, c = 0; c < messageCount; i = (i + 1) % messageCount, c++) {
-            messageSLayers.putString(1, 1 + c, messages[i], SColor.APRICOT);
+            messageSLayers.getForegroundLayer().put(1, 1 + c, messages.get(i));
         }
     }
 
@@ -546,7 +551,7 @@ public class Epigon extends Game {
                         map.contents[newX][newY].remove(thing);
                         message("Killed the " + thing.name);
                     } else {
-                        message("Dealt " + player.wieldableData.damage + " damage to the " + thing.name);
+                        message("Dealt " + player.wieldableData.damage + ' ' + player.wieldableData.rollElement().styledName + " damage to the " + thing.name);
                     }
                 } else
                 {

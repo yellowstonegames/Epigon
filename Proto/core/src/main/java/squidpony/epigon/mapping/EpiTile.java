@@ -127,13 +127,13 @@ public class EpiTile {
         //check in order of preference
         if (blockage != null) {
             if(blockage.creatureData != null)
-                return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);//getCreature().color;
+                return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));//getCreature().color;
             else
-                return SColor.lerpFloatColors(blockage.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
+                return SColor.lerpFloatColors(blockage.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));
         } else if (!contents.isEmpty()){
             return contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat() * 0.3f);
+            return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));
         }
 
         return 0f;
@@ -179,9 +179,6 @@ public class EpiTile {
         return blockage != null && blockage.creatureData != null ? blockage : null;
     }
 
-    public Physical getLargeObject() {
-        return blockage;
-    }
     public Physical getLargeNonCreature() {
         return blockage != null && blockage.creatureData == null ? blockage : null;
     }

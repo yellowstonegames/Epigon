@@ -3,6 +3,7 @@ package squidpony.epigon.data.specific;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.raw.RawWeapon;
+import squidpony.epigon.universe.Element;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 
@@ -29,6 +30,19 @@ public class Weapon {
             "Metal|Stone", new OrderedSet<>(Metal.values()),
             "Hide|Metal|Wood", new OrderedSet<>(Hide.values())
     );
+    public static final OrderedMap<String, Element> elementRename = OrderedMap.makeMap(
+            "Blunt", Element.BLUNT,
+            "Death", Element.DEATH,
+            "Divine", Element.DIVINE,
+            "Earth", Element.EARTH,
+            "Fate", Element.FATEFUL,
+            "Fire", Element.FIRE,
+            "Light", Element.SHINING,
+            "Piercing", Element.PIERCING,
+            "Pure", Element.PURE,
+            "Shadow", Element.SHADOW,
+            "Slashing", Element.SLASHING,
+            "Storm", Element.LIGHTNING);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
@@ -49,8 +63,13 @@ public class Weapon {
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
         blueprint.wieldableData = new Wieldable();
         blueprint.wieldableData.damage = raw.damage;
-        blueprint.wieldableData.hitChance = 70 + 9 * raw.precision;
+        blueprint.wieldableData.hitChance = 72 + 6 * raw.precision;
         blueprint.wieldableData.reachDistance = raw.range;
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT));
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT));
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);

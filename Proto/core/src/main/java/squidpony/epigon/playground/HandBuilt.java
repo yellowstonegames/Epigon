@@ -286,5 +286,7 @@ public class HandBuilt {
         makeAlive.wieldableDamageOverwrite = rng.between(1, 4);
         makeAlive.wieldableHitChanceOverwrite = rng.betweenWeighted(20, 80, 3);
         makeAlive.wieldableDistanceOverwrite = 0;
+        makeAlive.wieldableElementsOverwrite = Arrays.asList(Element.BLUNT, Element.BLUNT, Element.BLUNT,
+                Weapon.elementRename.randomValue(rng), Weapon.elementRename.randomValue(rng));
     }
 }

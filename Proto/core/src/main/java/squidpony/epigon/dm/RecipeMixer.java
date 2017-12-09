@@ -419,8 +419,11 @@ public class RecipeMixer {
         }
         if(physical.wieldableData == null && (
                 modification.wieldableCausesAdded != null ||
-                modification.wieldableCausesOverwrite!= null ||
+                modification.wieldableCausesOverwrite != null ||
                 modification.wieldableCausesRemoved != null ||
+                modification.wieldableElementsAdded != null ||
+                modification.wieldableElementsOverwrite != null ||
+                modification.wieldableElementsRemoved != null ||
                 modification.wieldableDamageDelta != null ||
                 modification.wieldableDamageOverwrite != null ||
                 modification.wieldableDistanceDelta != null ||
@@ -441,6 +444,18 @@ public class RecipeMixer {
         if(modification.wieldableCausesRemoved != null)
         {
             physical.wieldableData.causes.removeAll(modification.wieldableCausesRemoved);
+        }
+        if(modification.wieldableElementsOverwrite != null)
+        {
+            physical.wieldableData.elements = modification.wieldableElementsOverwrite;
+        }
+        if(modification.wieldableElementsAdded != null)
+        {
+            physical.wieldableData.elements.addAll(modification.wieldableElementsAdded);
+        }
+        if(modification.wieldableElementsRemoved != null)
+        {
+            physical.wieldableData.elements.removeAll(modification.wieldableElementsRemoved);
         }
 
         if(modification.wieldableDamageOverwrite != null)
