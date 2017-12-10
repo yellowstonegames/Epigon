@@ -10,10 +10,7 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.LiveValueModification;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 
@@ -426,8 +423,8 @@ public class RecipeMixer {
                 modification.wieldableElementsRemoved != null ||
                 modification.wieldableDamageDelta != null ||
                 modification.wieldableDamageOverwrite != null ||
-                modification.wieldableDistanceDelta != null ||
-                modification.wieldableDistanceOverwrite != null ||
+                modification.wieldableRangeDelta != null ||
+                modification.wieldableRangeOverwrite != null ||
                 modification.wieldableHitChanceDelta != null ||
                 modification.wieldableHitChanceOverwrite != null))
         {
@@ -451,11 +448,29 @@ public class RecipeMixer {
         }
         if(modification.wieldableElementsAdded != null)
         {
-            physical.wieldableData.elements.addAll(modification.wieldableElementsAdded);
+            for (int i = 0; i < modification.wieldableElementsAdded.size(); i++) {
+                Element e = modification.wieldableElementsAdded.keyAt(i);
+                int idx;
+                if((idx = physical.wieldableData.elements.table.getInt(e)) >= 0)
+                    physical.wieldableData.elements.weights.incr(idx, modification.wieldableElementsAdded.getAt(i));
+                else
+                    physical.wieldableData.elements.add(e, modification.wieldableElementsAdded.getAt(i));
+            }
         }
         if(modification.wieldableElementsRemoved != null)
         {
-            physical.wieldableData.elements.removeAll(modification.wieldableElementsRemoved);
+            for (int i = 0; i < modification.wieldableElementsRemoved.size(); i++) {
+                Element e = modification.wieldableElementsRemoved.keyAt(i);
+                Integer amt = modification.wieldableElementsRemoved.getAt(i);
+                if(physical.wieldableData.elements.table.containsKey(e)) {
+                    int idx = modification.wieldableElementsRemoved.indexOf(e);
+                    physical.wieldableData.elements.weights.incr(idx, -amt);
+                    if (physical.wieldableData.elements.weights.get(idx) <= 0) {
+                        physical.wieldableData.elements.table.removeAt(idx);
+                        physical.wieldableData.elements.weights.removeIndex(idx);
+                    }
+                }
+            }
         }
 
         if(modification.wieldableDamageOverwrite != null)
@@ -476,13 +491,13 @@ public class RecipeMixer {
             physical.wieldableData.hitChance += modification.wieldableHitChanceDelta;
         }
 
-        if(modification.wieldableDistanceOverwrite != null)
+        if(modification.wieldableRangeOverwrite != null)
         {
-            physical.wieldableData.reachDistance = modification.wieldableDistanceOverwrite;
+            physical.wieldableData.range = modification.wieldableRangeOverwrite;
         }
-        if(modification.wieldableDistanceDelta != null)
+        if(modification.wieldableRangeDelta != null)
         {
-            physical.wieldableData.reachDistance += modification.wieldableDistanceDelta;
+            physical.wieldableData.range += modification.wieldableRangeDelta;
         }
 
 
