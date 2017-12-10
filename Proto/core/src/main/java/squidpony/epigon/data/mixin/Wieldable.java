@@ -3,6 +3,7 @@ package squidpony.epigon.data.mixin;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.Element;
+import squidpony.squidmath.ProbabilityTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +22,19 @@ public class Wieldable {
 
     public List<Modification> changes = new ArrayList<>();
 
-    public int hitChance;
+    public double hitChance;
     public int damage;
-    public int reachDistance;
-    public List<Element> elements = new ArrayList<>();
+    public int range;
+    public ProbabilityTable<Element> elements = new ProbabilityTable<>(chaos);
     public static final Wieldable UNARMED = new Wieldable();
     static {
-        UNARMED.reachDistance = 0;
-        UNARMED.hitChance = 95;
+        UNARMED.range = 0;
+        UNARMED.hitChance = 0.7;
         UNARMED.damage = 1;
-        UNARMED.elements.add(Element.BLUNT);
+        UNARMED.elements.add(Element.BLUNT, 1);
     }
     public Element rollElement()
     {
-        int r = chaos.nextIntHasty(elements.size());
-        return elements.get(r);
+        return elements.random();
     }
 }

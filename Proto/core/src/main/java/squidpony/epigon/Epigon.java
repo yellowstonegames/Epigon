@@ -315,7 +315,7 @@ public class Epigon extends Game {
                     if(player.location.x == step.x && player.location.y == step.y)
                     {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
-                        if (rng.next(7) < creature.wieldableData.hitChance) { // out of 128
+                        if (rng.nextDouble() < creature.wieldableData.hitChance) {
                             player.stats.get(Stat.VIGOR).addActual(-creature.wieldableData.damage);
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 message("You have been slain by the " + creature.name + "!");
@@ -543,7 +543,7 @@ public class Epigon extends Game {
             Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
             if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                if (rng.next(7) < player.wieldableData.hitChance) { // out of 128
+                if (rng.nextDouble() < player.wieldableData.hitChance) {
                     thing.stats.get(Stat.VIGOR).addActual(-player.wieldableData.damage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);

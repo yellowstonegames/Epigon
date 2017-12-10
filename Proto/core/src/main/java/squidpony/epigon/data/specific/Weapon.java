@@ -62,14 +62,11 @@ public class Weapon {
     {
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
         blueprint.wieldableData = new Wieldable();
-        blueprint.wieldableData.damage = raw.damage;
-        blueprint.wieldableData.hitChance = 72 + 6 * raw.precision;
-        blueprint.wieldableData.reachDistance = raw.range;
-        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
-        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
-        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT));
-        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT));
-        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT));
+        blueprint.wieldableData.damage = raw.damage + 1;
+        blueprint.wieldableData.hitChance = (72 + 6 * raw.precision) * 0x1p-7;
+        blueprint.wieldableData.range = raw.range;
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT), 3);
+        blueprint.wieldableData.elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT), 2);
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
