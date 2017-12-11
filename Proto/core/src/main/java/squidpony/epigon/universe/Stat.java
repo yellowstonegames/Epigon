@@ -12,18 +12,18 @@ import squidpony.epigon.Utilities;
  */
 public enum Stat {
     // Physical Offense
-    AIM("AI", "Controls chance of hitting targets with physical attacks."),
-    IMPACT("IM", "Controls how much damage is dealt with physical attacks."),
+    AIM("AI", "Controls chance of hitting targets with attacks."),
+    IMPACT("IM", "Controls how much damage is dealt with attacks."),
     //PRECISION("PR", "Controls chance of critical damage with physical attacks"), // turned into skill
 
     // Physical Defense
-    DODGE("DO", "Controls chance to completely avoid enemy physical attacks."),
+    DODGE("DO", "Controls chance to completely avoid enemy attacks."),
     //DEFLECTION("DE", "Controls chance to reduce the base damage dealt by enemy physical attacks."), // turned into skill
-    TOUGHNESS("TO", "Controls chance to reduce the critical damage dealt by enemy physical attacks."),
+    TOUGHNESS("TO", "Controls damage resistance against attacks."),
 
     // Magical
-    POTENCY("PO", "Controls how much damage or how big the effect is for spiritual abilities."),
-    ATTUNEMENT("AT", "Controls damage resistance to spiritual attacks."),
+    POTENCY("PO", "Controls the effectiveness of inflicting ailments."),
+    ATTUNEMENT("AT", "Controls resilience against ailments."),
     //DOMINION("DO", "Controls chance to cause critical damage or effects with spiritual attacks."), // should be skill
 
     // Intellect
@@ -86,7 +86,7 @@ public enum Stat {
     private final String description;
     private final String prettyName;
 
-    private Stat(String nick, String description) {
+    Stat(String nick, String description) {
         this.nick = nick;
         this.description = description;
         prettyName = Utilities.capitalize(name());

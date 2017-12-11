@@ -7,10 +7,7 @@ import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.*;
-import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
@@ -79,7 +76,7 @@ public class Physical extends EpiData {
 
     public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
-
+    public EnumOrderedMap<CalcStat, LiveValue> calcStats = new EnumOrderedMap<>(CalcStat.class);
     public List<Physical> inventory = new ArrayList<>();
 
     /**
@@ -116,7 +113,7 @@ public class Physical extends EpiData {
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
-    public Wieldable wieldableData;
+    public Weapon weaponData;
     public Zappable zappableData;
 
     // Non-action mixins

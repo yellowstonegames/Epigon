@@ -3,8 +3,8 @@ package squidpony.epigon.desktop;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import squidpony.epigon.Prefs;
 import squidpony.epigon.Epigon;
+import squidpony.epigon.Prefs;
 
 public class DesktopLauncher {
 
@@ -43,7 +43,6 @@ public class DesktopLauncher {
         config.height = Prefs.getScreenHeight();
         config.title = Prefs.getGameTitle();
         //config.vSyncEnabled = true; // true by default
-
         config.addIcon("images/icons/logo128.png", Files.FileType.Internal);
         config.addIcon("images/icons/logo32.png", Files.FileType.Internal);
         config.addIcon("images/icons/logo16.png", Files.FileType.Internal);

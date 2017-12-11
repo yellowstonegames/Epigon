@@ -5,7 +5,6 @@ import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.mixin.Terrain;
-import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
@@ -250,7 +249,7 @@ public class RecipeMixer {
 
         physical.creatureData = createCreature(blueprint.creatureData);
 
-        physical.wieldableData = blueprint.wieldableData;
+        physical.weaponData = blueprint.weaponData;
 
         physical.terrainData = blueprint.terrainData;
 
@@ -398,7 +397,7 @@ public class RecipeMixer {
         physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
 
         physical.stats.putAll(modification.stats);
-
+        physical.calcStats.putAll(modification.calcStats);
         modification.statChanges.entrySet()
             .stream()
             .forEach(e -> {
@@ -414,92 +413,68 @@ public class RecipeMixer {
         if (modification.creatureOverwrite != null) {
             physical.creatureData = createCreature(modification.creatureOverwrite);
         }
-        if(physical.wieldableData == null && (
-                modification.wieldableCausesAdded != null ||
-                modification.wieldableCausesOverwrite != null ||
-                modification.wieldableCausesRemoved != null ||
-                modification.wieldableElementsAdded != null ||
-                modification.wieldableElementsOverwrite != null ||
-                modification.wieldableElementsRemoved != null ||
-                modification.wieldableDamageDelta != null ||
-                modification.wieldableDamageOverwrite != null ||
-                modification.wieldableRangeDelta != null ||
-                modification.wieldableRangeOverwrite != null ||
-                modification.wieldableHitChanceDelta != null ||
-                modification.wieldableHitChanceOverwrite != null))
+        if(modification.weaponOverwrite != null)
         {
-            physical.wieldableData = new Wieldable();
+            physical.weaponData = modification.weaponOverwrite;
         }
-        if(modification.wieldableCausesOverwrite != null)
-        {
-            physical.wieldableData.causes = modification.wieldableCausesOverwrite;
-        }
-        if(modification.wieldableCausesAdded != null)
-        {
-            physical.wieldableData.causes.addAll(modification.wieldableCausesAdded);
-        }
-        if(modification.wieldableCausesRemoved != null)
-        {
-            physical.wieldableData.causes.removeAll(modification.wieldableCausesRemoved);
-        }
-        if(modification.wieldableElementsOverwrite != null)
-        {
-            physical.wieldableData.elements = modification.wieldableElementsOverwrite;
-        }
-        if(modification.wieldableElementsAdded != null)
-        {
-            for (int i = 0; i < modification.wieldableElementsAdded.size(); i++) {
-                Element e = modification.wieldableElementsAdded.keyAt(i);
-                int idx;
-                if((idx = physical.wieldableData.elements.table.getInt(e)) >= 0)
-                    physical.wieldableData.elements.weights.incr(idx, modification.wieldableElementsAdded.getAt(i));
-                else
-                    physical.wieldableData.elements.add(e, modification.wieldableElementsAdded.getAt(i));
+        else {
+            if (physical.weaponData == null && (
+                    modification.weaponCalcDelta != null ||
+                            modification.weaponStatusesAdded != null ||
+                            modification.weaponStatusesRemoved != null ||
+                            modification.weaponManeuversAdded != null ||
+                            modification.weaponManeuversRemoved != null ||
+                            modification.weaponElementsAdded != null ||
+                            modification.weaponElementsOverwrite != null ||
+                            modification.weaponElementsRemoved != null)) {
+                physical.weaponData = new Weapon();
             }
-        }
-        if(modification.wieldableElementsRemoved != null)
-        {
-            for (int i = 0; i < modification.wieldableElementsRemoved.size(); i++) {
-                Element e = modification.wieldableElementsRemoved.keyAt(i);
-                Integer amt = modification.wieldableElementsRemoved.getAt(i);
-                if(physical.wieldableData.elements.table.containsKey(e)) {
-                    int idx = modification.wieldableElementsRemoved.indexOf(e);
-                    physical.wieldableData.elements.weights.incr(idx, -amt);
-                    if (physical.wieldableData.elements.weights.get(idx) <= 0) {
-                        physical.wieldableData.elements.table.removeAt(idx);
-                        physical.wieldableData.elements.weights.removeIndex(idx);
+            if (modification.weaponStatusesAdded != null) {
+                physical.weaponData.statuses.addAll(modification.weaponStatusesAdded);
+            }
+            if (modification.weaponStatusesRemoved != null) {
+                physical.weaponData.statuses.removeAll(modification.weaponStatusesRemoved);
+            }
+            if (modification.weaponManeuversAdded != null) {
+                physical.weaponData.maneuvers.addAll(modification.weaponManeuversAdded);
+            }
+            if (modification.weaponManeuversRemoved != null) {
+                physical.weaponData.maneuvers.addAll(modification.weaponManeuversRemoved);
+            }
+            if (modification.weaponElementsOverwrite != null) {
+                physical.weaponData.elements = modification.weaponElementsOverwrite;
+            }
+            if (modification.weaponElementsAdded != null) {
+                for (int i = 0; i < modification.weaponElementsAdded.size(); i++) {
+                    Element e = modification.weaponElementsAdded.keyAt(i);
+                    int idx;
+                    if ((idx = physical.weaponData.elements.table.getInt(e)) >= 0)
+                        physical.weaponData.elements.weights.incr(idx, modification.weaponElementsAdded.getAt(i));
+                    else
+                        physical.weaponData.elements.add(e, modification.weaponElementsAdded.getAt(i));
+                }
+            }
+            if (modification.weaponElementsRemoved != null) {
+                for (int i = 0; i < modification.weaponElementsRemoved.size(); i++) {
+                    Element e = modification.weaponElementsRemoved.keyAt(i);
+                    Integer amt = modification.weaponElementsRemoved.getAt(i);
+                    if (physical.weaponData.elements.table.containsKey(e)) {
+                        int idx = modification.weaponElementsRemoved.indexOf(e);
+                        physical.weaponData.elements.weights.incr(idx, -amt);
+                        if (physical.weaponData.elements.weights.get(idx) <= 0) {
+                            physical.weaponData.elements.table.removeAt(idx);
+                            physical.weaponData.elements.weights.removeIndex(idx);
+                        }
                     }
                 }
             }
-        }
 
-        if(modification.wieldableDamageOverwrite != null)
-        {
-            physical.wieldableData.damage = modification.wieldableDamageOverwrite;
+            if (modification.weaponCalcDelta != null) {
+                for (int i = 0; i < 12; i++) {
+                    physical.weaponData.calcStats[i] += modification.weaponCalcDelta[i];
+                }
+            }
         }
-        if(modification.wieldableDamageDelta != null)
-        {
-            physical.wieldableData.damage += modification.wieldableDamageDelta;
-        }
-
-        if(modification.wieldableHitChanceOverwrite != null)
-        {
-            physical.wieldableData.hitChance = modification.wieldableHitChanceOverwrite;
-        }
-        if(modification.wieldableHitChanceDelta != null)
-        {
-            physical.wieldableData.hitChance += modification.wieldableHitChanceDelta;
-        }
-
-        if(modification.wieldableRangeOverwrite != null)
-        {
-            physical.wieldableData.range = modification.wieldableRangeOverwrite;
-        }
-        if(modification.wieldableRangeDelta != null)
-        {
-            physical.wieldableData.range += modification.wieldableRangeDelta;
-        }
-
 
 
         if (physical.creatureData != null) {

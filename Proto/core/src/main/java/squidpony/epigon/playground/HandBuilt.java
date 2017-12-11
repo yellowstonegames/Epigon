@@ -9,7 +9,6 @@ import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.data.mixin.Wieldable;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
@@ -221,7 +220,7 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
-        playerBlueprint.wieldableData = Wieldable.UNARMED;
+        playerBlueprint.weaponData = Weapon.UNARMED;
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
@@ -283,9 +282,7 @@ public class HandBuilt {
         makeAlive.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         makeAlive.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         makeAlive.creatureOverwrite = new Creature();
-        makeAlive.wieldableDamageOverwrite = rng.between(1, 4);
-        makeAlive.wieldableHitChanceOverwrite = rng.betweenWeighted(20, 80, 3);
-        makeAlive.wieldableRangeOverwrite = 0;
-        makeAlive.wieldableElementsAdded = OrderedMap.makeMap(Element.BLUNT, 3, Weapon.elementRename.randomValue(rng), 2);
+        makeAlive.weaponOverwrite = Weapon.weapons.randomValue(chaos);
+        makeAlive.weaponElementsAdded = OrderedMap.makeMap(Weapon.elementRename.randomValue(chaos), 1, Weapon.elementRename.randomValue(chaos), 2);
     }
 }
