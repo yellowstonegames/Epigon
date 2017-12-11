@@ -41,8 +41,6 @@ public class HandBuilt {
 
     public Modification makeWall;
 
-    public Modification makeAlive;
-
     public Physical nan = new Physical();//trade currency (dust that's used for enchanting things and casting spells)
 
     // Cooking skills
@@ -98,7 +96,6 @@ public class HandBuilt {
         initPlayer();
         initDoors();
         initItems();
-        initAlive();
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
@@ -270,19 +267,20 @@ public class HandBuilt {
         swordRecipe = mixer.createRecipe(swordRecipeBlueprint);
     }
 
-    private void initAlive() {
-        makeAlive = new Modification();
-        makeAlive.possiblePrefix = Arrays.asList("living", "animated");
-        makeAlive.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
-        makeAlive.large = true;
+    public Modification makeAlive() {
+        Modification liven = new Modification();
+        liven.possiblePrefix = Arrays.asList("living", "animated");
+        liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
+        liven.large = true;
         Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValueModification lvm = new LiveValueModification(rng.between(5, 19));
-            makeAlive.statChanges.put(s, lvm);
+            LiveValueModification lvm = new LiveValueModification(chaos.between(5, 19));
+            liven.statChanges.put(s, lvm);
         });
-        makeAlive.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
-        makeAlive.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
-        makeAlive.creatureOverwrite = new Creature();
-        makeAlive.weaponOverwrite = Weapon.weapons.randomValue(chaos);
-        makeAlive.weaponElementsAdded = OrderedMap.makeMap(Weapon.elementRename.randomValue(chaos), 1, Weapon.elementRename.randomValue(chaos), 2);
+        liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
+        liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
+        liven.creatureOverwrite = new Creature();
+        liven.weaponOverwrite = Weapon.weapons.randomValue(chaos);
+        liven.weaponElementsAdded = OrderedMap.makeMap(Weapon.elementRename.randomValue(chaos), 1, Weapon.elementRename.randomValue(chaos), 2);
+        return liven;
     }
 }
