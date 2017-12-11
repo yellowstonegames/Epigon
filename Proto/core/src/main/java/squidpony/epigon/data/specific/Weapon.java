@@ -1,5 +1,6 @@
 package squidpony.epigon.data.specific;
 
+import com.badlogic.gdx.math.MathUtils;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
@@ -122,7 +123,9 @@ public class Weapon {
         return (72 + 6 * calcStats[PRECISION]) > chaos.next(7);
     }
 
-    public void damageRoll(Physical thing) {
-        thing.stats.get(Stat.VIGOR).addActual(chaos.nextIntHasty(-3) - calcStats[DAMAGE]);
+    public int damageRoll(Physical thing) {
+        int amt = MathUtils.floor(chaos.nextFloat(-1.25f) * calcStats[DAMAGE]);
+        thing.stats.get(Stat.VIGOR).addActual(amt);
+        return -amt;
     }
 }

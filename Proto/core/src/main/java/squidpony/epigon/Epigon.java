@@ -272,7 +272,7 @@ public class Epigon extends Game {
         for (Coord coord : floors.quasiRandomSeparated(0.05)) {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
-                mixer.applyModification(p, handBuilt.makeAlive);
+                mixer.applyModification(p, handBuilt.makeAlive());
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
                 creatures.put(coord, p);
@@ -316,11 +316,11 @@ public class Epigon extends Game {
                     {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
                         if (creature.weaponData.hitRoll(player)) {
-                            creature.weaponData.damageRoll(player);
+                            int amt = creature.weaponData.damageRoll(player);
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 message("You have been slain by the " + creature.name + "!");
                             } else {
-                                message("The " + creature.name + " hits you for " + creature.weaponData.calcStats[Weapon.DAMAGE] + ' ' + creature.weaponData.elements.random().styledName + " damage!");
+                                message("The " + creature.name + " hits you for " + amt + ' ' + creature.weaponData.elements.random().styledName + " damage!");
                             }
                         } else
                         {
@@ -544,14 +544,14 @@ public class Epigon extends Game {
             if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
                 if (player.weaponData.hitRoll(thing)) {
-                    player.weaponData.damageRoll(thing);
+                    int amt = player.weaponData.damageRoll(thing);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         message("Killed the " + thing.name);
                     } else {
-                        message("Dealt " + player.weaponData.calcStats[Weapon.DAMAGE] + ' ' + player.weaponData.elements.random().styledName + " damage to the " + thing.name);
+                        message("Dealt " + amt + ' ' + player.weaponData.elements.random().styledName + " damage to the " + thing.name);
                     }
                 } else
                 {
