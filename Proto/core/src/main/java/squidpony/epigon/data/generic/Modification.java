@@ -9,6 +9,7 @@ import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
@@ -86,7 +87,9 @@ public class Modification extends EpiData {
     public List<Condition> optionalConditionsSubtractive;
 
     public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class);
+    public EnumOrderedMap<CalcStat, LiveValue> calcStats = new EnumOrderedMap<>(CalcStat.class);
     public EnumOrderedMap<Stat, LiveValueModification> statChanges = new EnumOrderedMap<>(Stat.class);
+    public EnumOrderedMap<CalcStat, LiveValueModification> calcStatChanges = new EnumOrderedMap<>(CalcStat.class);
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
     public EnumOrderedMap<Stat, RatingValueModification> statProgressionChanges = new EnumOrderedMap<>(Stat.class);
 
@@ -156,16 +159,19 @@ public class Modification extends EpiData {
     public Boolean wornOverwrite;
 
     // Wieldable changes
-    public List<ConditionBlueprint> wieldableCausesOverwrite;
-    public Set<ConditionBlueprint> wieldableCausesRemoved;
-    public List<ConditionBlueprint> wieldableCausesAdded;
-    public ProbabilityTable<Element> wieldableElementsOverwrite;
-    public OrderedMap<Element, Integer> wieldableElementsRemoved;
-    public OrderedMap<Element, Integer> wieldableElementsAdded;
-    public Integer wieldableHitChanceOverwrite;
-    public Integer wieldableHitChanceDelta;
-    public Integer wieldableDamageOverwrite;
-    public Integer wieldableDamageDelta;
-    public Integer wieldableRangeOverwrite;
-    public Integer wieldableRangeDelta;
+//    public List<ConditionBlueprint> wieldableCausesOverwrite;
+//    public Set<ConditionBlueprint> wieldableCausesRemoved;
+//    public List<ConditionBlueprint> wieldableCausesAdded;
+    public ProbabilityTable<Element> weaponElementsOverwrite;
+    public OrderedMap<Element, Integer> weaponElementsRemoved;
+    public OrderedMap<Element, Integer> weaponElementsAdded;
+//    public Double wieldableHitChanceOverwrite;
+//    public Double wieldableHitChanceDelta;
+//    public Integer wieldableDamageOverwrite;
+//    public Integer wieldableDamageDelta;
+//    public Integer wieldableRangeOverwrite;
+//    public Integer wieldableRangeDelta;
+    public Weapon weaponOverwrite;
+    public int[] weaponCalcDelta;
+    public List<String> weaponStatusesAdded, weaponStatusesRemoved, weaponManeuversAdded, weaponManeuversRemoved;
 }

@@ -315,12 +315,12 @@ public class Epigon extends Game {
                     if(player.location.x == step.x && player.location.y == step.y)
                     {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
-                        if (rng.nextDouble() < creature.wieldableData.hitChance) {
-                            player.stats.get(Stat.VIGOR).addActual(-creature.wieldableData.damage);
+                        if (creature.weaponData.hitRoll(player)) {
+                            creature.weaponData.damageRoll(player);
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 message("You have been slain by the " + creature.name + "!");
                             } else {
-                                message("The " + creature.name + " hits you for " + creature.wieldableData.damage + ' ' + creature.wieldableData.rollElement().styledName + " damage!");
+                                message("The " + creature.name + " hits you for " + creature.weaponData.calcStats[Weapon.DAMAGE] + ' ' + creature.weaponData.elements.random().styledName + " damage!");
                             }
                         } else
                         {
@@ -543,15 +543,15 @@ public class Epigon extends Game {
             Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
             if (thing != null) {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                if (rng.nextDouble() < player.wieldableData.hitChance) {
-                    thing.stats.get(Stat.VIGOR).addActual(-player.wieldableData.damage);
+                if (player.weaponData.hitRoll(thing)) {
+                    player.weaponData.damageRoll(thing);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         message("Killed the " + thing.name);
                     } else {
-                        message("Dealt " + player.wieldableData.damage + ' ' + player.wieldableData.rollElement().styledName + " damage to the " + thing.name);
+                        message("Dealt " + player.weaponData.calcStats[Weapon.DAMAGE] + ' ' + player.weaponData.elements.random().styledName + " damage to the " + thing.name);
                     }
                 } else
                 {
@@ -843,7 +843,7 @@ public class Epigon extends Game {
                     else {
                         rng.shuffleInPlace(player.inventory);
                         message("Now wielding: " + player.inventory.get(0));
-                        player.wieldableData = player.inventory.get(0).wieldableData;
+                        player.weaponData = player.inventory.get(0).weaponData;
                     }
                     runTurn();
                     break;
