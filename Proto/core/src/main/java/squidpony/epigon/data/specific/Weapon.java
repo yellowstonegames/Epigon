@@ -1,10 +1,8 @@
 package squidpony.epigon.data.specific;
 
-import com.badlogic.gdx.math.MathUtils;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.Stat;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
@@ -14,19 +12,19 @@ import java.util.List;
 
 import static squidpony.epigon.Epigon.chaos;
 import static squidpony.epigon.Epigon.mixer;
-import static squidpony.epigon.data.specific.Physical.basePhysical;
+import static squidpony.epigon.data.specific.Physical.*;
 
 /**
  * Created by Tommy Ettinger on 11/25/2017.
  */
 public class Weapon {
-    public static final int HANDS = 0, PRECISION = 1, DAMAGE = 2, CRIT = 3, INFLUENCE = 4, EVASION = 5, DEFENSE = 6, LUCK = 7, STEALTH = 8, RANGE = 9, AREA= 10, PREPARE = 11;
+    public static final int HANDS = 11;
     public static final int KIND = 0, USAGE = 1, SHAPE = 2, PATH = 3;
-
+    public int hands = 1;
     public Physical blueprint;
     public RecipeBlueprint recipeBlueprint;
     public Recipe recipe;
-    public int[] calcStats = new int[12];
+    public int[] calcStats = new int[11];
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
     public String[] qualities = new String[4];
     public String[] materialTypes;
@@ -75,7 +73,6 @@ public class Weapon {
     public Weapon(RawWeapon raw)
     {
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
-        calcStats[HANDS] = raw.hands;
         calcStats[PRECISION] = raw.precision;
         calcStats[DAMAGE] = raw.damage;
         calcStats[CRIT] = raw.crit;
@@ -91,6 +88,7 @@ public class Weapon {
         qualities[USAGE] = raw.usage;
         qualities[SHAPE] = raw.shape;
         qualities[PATH] = raw.path;
+        hands = raw.hands;
         groups.add(raw.group1);
         groups.add(raw.group2);
         maneuvers.add(raw.maneuver1);
@@ -109,23 +107,10 @@ public class Weapon {
 
     public static double calculateHitChance(int raw)
     {
-        return (72 + 6 * raw) * 0x1p-7;
+        return (67 + 5 * raw) * 0x1p-7;
     }
     public static int calculateDamage(int raw)
     {
         return raw + 1;
-    }
-
-    public boolean hitRoll(Physical thing) {
-        if(thing.creatureData == null)
-            return true;
-
-        return (72 + 6 * calcStats[PRECISION]) > chaos.next(7);
-    }
-
-    public int damageRoll(Physical thing) {
-        int amt = MathUtils.floor(chaos.nextFloat(-1.25f) * calcStats[DAMAGE]);
-        thing.stats.get(Stat.VIGOR).addActual(amt);
-        return -amt;
     }
 }

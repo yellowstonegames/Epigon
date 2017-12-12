@@ -76,6 +76,7 @@ public class RecipeMixer {
                     .map(m -> m.whenUsedAsMaterial)
                     .flatMap(Collection::stream)
                     .forEach(modification -> applyModification(physical, modification));
+                physical.calculateStats();
                 result.add(physical);
             }));
         return result;
@@ -238,6 +239,8 @@ public class RecipeMixer {
 
         physical.statProgression.putAll(blueprint.statProgression);
 
+        physical.calculateStats();
+
         blueprint.inventory.stream().forEach(i -> {
             physical.inventory.add(RecipeMixer.this.buildPhysical(i));
         });
@@ -260,14 +263,9 @@ public class RecipeMixer {
         }
 
         int count = rng.nextInt(blueprint.optionalModifications.size());
-        Set<Integer> ints = new HashSet<>();
+        int[] ints = rng.randomOrdering(count);
         for (int i = 0; i < count; i++) {
-            int n;
-            do {
-                n = rng.nextInt(count);
-            } while (ints.contains(n));
-            ints.add(n);
-            applyModification(physical, blueprint.optionalModifications.get(n));
+            applyModification(physical, blueprint.optionalModifications.get(ints[i]));
         }
 
         for (Rating rating : Rating.values()) {
@@ -397,7 +395,6 @@ public class RecipeMixer {
         physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
 
         physical.stats.putAll(modification.stats);
-        physical.calcStats.putAll(modification.calcStats);
         modification.statChanges.entrySet()
                 .stream()
                 .forEach(e -> {
@@ -405,6 +402,15 @@ public class RecipeMixer {
                     lv.modify(e.getValue());
                     physical.stats.put(e.getKey(), lv);
                 });
+        if(modification.calcStats != null && modification.calcStats.length == 11)
+            System.arraycopy(modification.calcStats, 0, physical.calcStats, 0, 11);
+        else
+            physical.calculateStats();
+        if(modification.calcStatChanges != null && !modification.calcStatChanges.isEmpty()) {
+            for (int i = 0; i < modification.calcStatChanges.size(); i++) {
+                physical.calcStats[modification.calcStatChanges.keyAt(i).ordinal()] += modification.calcStatChanges.getAt(i);
+            }
+        }
 
         if (modification.whenUsedAsMaterial != null) {
             physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);

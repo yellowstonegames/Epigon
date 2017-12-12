@@ -273,7 +273,7 @@ public class HandBuilt {
         liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         liven.large = true;
         Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValueModification lvm = new LiveValueModification(chaos.between(5, 19));
+            LiveValueModification lvm = new LiveValueModification(chaos.minDoubleOf(9.9, 3));
             liven.statChanges.put(s, lvm);
         });
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
