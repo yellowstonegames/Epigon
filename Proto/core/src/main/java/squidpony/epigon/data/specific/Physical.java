@@ -1,23 +1,23 @@
 package squidpony.epigon.data.specific;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.*;
-import squidpony.epigon.universe.*;
+import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.EnumOrderedMap;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.ProbabilityTable;
+import squidpony.squidmath.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static squidpony.epigon.Epigon.chaos;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -39,6 +39,9 @@ public class Physical extends EpiData {
         basePhysical.generic = true;
         basePhysical.unique = true;
     }
+    public static final int PRECISION = 0, DAMAGE = 1, CRIT = 2, INFLUENCE = 3,
+            EVASION = 4, DEFENSE = 5, STEALTH = 6, LUCK = 7, RANGE = 8, AREA= 9, PREPARE = 10;
+
     // operational bits for live objects
     public Coord location;
     public boolean attached; // cannot be removed for it's location (or inventory pile) without special means
@@ -76,7 +79,7 @@ public class Physical extends EpiData {
 
     public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
-    public EnumOrderedMap<CalcStat, LiveValue> calcStats = new EnumOrderedMap<>(CalcStat.class);
+    public int[] calcStats = new int[11];
     public List<Physical> inventory = new ArrayList<>();
 
     /**
@@ -214,4 +217,53 @@ public class Physical extends EpiData {
 
         return false;//can't be applied
     }
+    public void calculateStats() {
+        LiveValue lv;
+        int current;
+        Arrays.fill(calcStats, 0);
+        if ((lv = stats.get(Stat.AIM)) != null) {
+            current = (int) lv.actual();
+            calcStats[PRECISION] += current;
+            calcStats[CRIT] += current >> 1;
+        }
+        if ((lv = stats.get(Stat.IMPACT)) != null) {
+            current = (int) lv.actual();
+            calcStats[DAMAGE] += current;
+            calcStats[CRIT] += current >> 1;
+        }
+        if ((lv = stats.get(Stat.DODGE)) != null) {
+            current = (int) lv.actual();
+            calcStats[EVASION] += current;
+            calcStats[STEALTH] += current >> 1;
+        }
+        if ((lv = stats.get(Stat.TOUGHNESS)) != null) {
+            current = (int) lv.actual();
+            calcStats[DEFENSE] += current;
+            calcStats[DAMAGE] += current >> 1;
+        }
+        if ((lv = stats.get(Stat.POTENCY)) != null) {
+            current = (int) lv.actual();
+            calcStats[INFLUENCE] += current;
+            calcStats[PRECISION] += current >> 1;
+        }
+        if ((lv = stats.get(Stat.ATTUNEMENT)) != null) {
+            current = (int) lv.actual();
+            calcStats[LUCK] += current;
+            calcStats[STEALTH] += current >> 1;
+        }
+    }
+    public boolean hitRoll(Physical thing) {
+        if(thing.creatureData == null)
+            return true;
+
+        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - thing.calcStats[EVASION] - thing.weaponData.calcStats[EVASION])) >= chaos.next(7);
+    }
+
+    public int damageRoll(Physical thing) {
+        int amt = Math.min(0, MathUtils.floor((NumberTools.formCurvedFloat(chaos.nextLong()) * 0.6f - 0.65f) * (calcStats[DAMAGE] + weaponData.calcStats[DAMAGE]) +
+                (chaos.nextFloat() + 0.55f) * (thing.calcStats[DEFENSE] + thing.weaponData.calcStats[DEFENSE])));
+        thing.stats.get(Stat.VIGOR).addActual(amt);
+        return -amt;
+    }
+
 }

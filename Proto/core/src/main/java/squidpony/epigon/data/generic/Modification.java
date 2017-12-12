@@ -87,9 +87,9 @@ public class Modification extends EpiData {
     public List<Condition> optionalConditionsSubtractive;
 
     public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class);
-    public EnumOrderedMap<CalcStat, LiveValue> calcStats = new EnumOrderedMap<>(CalcStat.class);
+    public int[] calcStats;
     public EnumOrderedMap<Stat, LiveValueModification> statChanges = new EnumOrderedMap<>(Stat.class);
-    public EnumOrderedMap<CalcStat, LiveValueModification> calcStatChanges = new EnumOrderedMap<>(CalcStat.class);
+    public EnumOrderedMap<CalcStat, Integer> calcStatChanges = new EnumOrderedMap<>(CalcStat.class);
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
     public EnumOrderedMap<Stat, RatingValueModification> statProgressionChanges = new EnumOrderedMap<>(Stat.class);
 

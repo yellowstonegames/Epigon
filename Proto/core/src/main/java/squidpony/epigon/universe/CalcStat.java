@@ -6,9 +6,10 @@ import squidpony.epigon.Utilities;
  * Created by Tommy Ettinger on 12/10/2017.
  */
 public enum CalcStat {
-    HANDS("HANDS", ""), PRECISION("PRECISION", ""), DAMAGE("DAMAGE", ""), CRIT("CRIT", ""), INFLUENCE("INFLUENCE", ""),
-    EVASION("EVASION", ""), DEFENSE("DEFENSE", ""), LUCK("LUCK", ""), STEALTH("STEALTH", ""), RANGE("RANGE", ""),
-    AREA("AREA", ""), PREPARE("PREPARE", "");
+    PRECISION("PRECISION", ""), DAMAGE("DAMAGE", ""), CRIT("CRIT", ""), INFLUENCE("INFLUENCE", ""),
+    EVASION("EVASION", ""), DEFENSE("DEFENSE", ""), STEALTH("STEALTH", ""), LUCK("LUCK", ""),
+    RANGE("RANGE", ""), AREA("AREA", ""), PREPARE("PREPARE", "");
+
     private final String nick;
     private final String description;
     private final String prettyName;
