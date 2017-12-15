@@ -252,17 +252,22 @@ public class Physical extends EpiData {
             calcStats[STEALTH] += current >> 1;
         }
     }
-    public boolean hitRoll(Physical thing) {
-        if(thing.creatureData == null)
+    public boolean hitRoll(Physical target) {
+        if(target.creatureData == null)
             return true;
 
-        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - thing.calcStats[EVASION] - thing.weaponData.calcStats[EVASION])) >= chaos.next(7);
+        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) >= chaos.next(7);
+    }
+    public double hitProbability(Physical target)
+    {
+        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) * 0x1p-7;
     }
 
-    public int damageRoll(Physical thing) {
-        int amt = Math.min(0, MathUtils.floor((NumberTools.formCurvedFloat(chaos.nextLong()) * 0.6f - 0.65f) * (calcStats[DAMAGE] + weaponData.calcStats[DAMAGE]) +
-                (chaos.nextFloat() + 0.55f) * (thing.calcStats[DEFENSE] + thing.weaponData.calcStats[DEFENSE])));
-        thing.stats.get(Stat.VIGOR).addActual(amt);
+    public int damageRoll(Physical target) {
+        long r = chaos.nextLong();
+        int amt = Math.min(0, MathUtils.floor((NumberTools.randomFloatCurved(r) * 0.4f - 0.45f) * (calcStats[DAMAGE] + weaponData.calcStats[DAMAGE]) +
+                (NumberTools.randomFloatCurved(r + 1) * 0.3f + 0.35f) * (target.calcStats[DEFENSE] + target.weaponData.calcStats[DEFENSE])));
+        target.stats.get(Stat.VIGOR).addActual(amt);
         return -amt;
     }
 

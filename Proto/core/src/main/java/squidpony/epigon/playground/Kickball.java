@@ -34,6 +34,7 @@ public class Kickball {
     }
 
     private void testFormulas() {
+        HandBuilt handBuilt = new HandBuilt();
         Physical source = mixer.buildPhysical(handBuilt.playerBlueprint);
         Physical target = mixer.buildPhysical(Inclusion.ANDALUSITE);
         source.stats.put(Stat.AIM, new LiveValue(52.5));
