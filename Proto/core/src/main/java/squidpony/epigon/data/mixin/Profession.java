@@ -23,7 +23,7 @@ public class Profession extends EpiData {
 
     // What someone with this profession should be called
     public String titlePrefix;
-    public String titlePostfix;
+    public String titleSuffix;
 
     public EnumOrderedMap<Stat, Double> initialStatRequirements = new EnumOrderedMap<>(Stat.class); // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
     public OrderedMap<Skill, Rating> initialSkillRequirements = new OrderedMap<>();

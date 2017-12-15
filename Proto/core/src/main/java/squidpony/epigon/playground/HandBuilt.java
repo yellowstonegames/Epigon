@@ -14,6 +14,7 @@ import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 
 import java.util.Arrays;
@@ -99,7 +100,7 @@ public class HandBuilt {
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
-        makeWall.possiblePostfix.add("wall");
+        makeWall.possibleSuffix.add("wall");
         makeWall.symbol = '#';
         makeWall.large = true;
         makeWall.attached = true;
@@ -217,10 +218,10 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
-        playerBlueprint.weaponData = Weapon.UNARMED;
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos)));
+        playerBlueprint.weaponData = Weapon.UNARMED.copy();
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
         mixer.addProfession(chef, playerBlueprint);
     }
 
@@ -272,10 +273,15 @@ public class HandBuilt {
         liven.possiblePrefix = Arrays.asList("living", "animated");
         liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         liven.large = true;
-        Arrays.stream(Stat.values()).forEach(s -> {
-            LiveValueModification lvm = new LiveValueModification(chaos.minDoubleOf(9.9, 3));
+        for(Stat s : Stat.bases) {
+            LiveValueModification lvm = new LiveValueModification((rng.minIntOf(28, 4) >> 2) + 1);
             liven.statChanges.put(s, lvm);
-        });
+        }
+        for(Stat s : Stat.healths) {
+            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 8);
+            liven.statChanges.put(s, lvm);
+        }
+
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creatureOverwrite = new Creature();

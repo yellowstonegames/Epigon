@@ -33,9 +33,9 @@ import java.util.Set;
  */
 public class Modification extends EpiData {
 
-    // Only one string out of the set of prefixes and postfixes should be used
+    // Only one string out of the set of prefixes and suffixes should be used
     public List<String> possiblePrefix = new ArrayList<>();
-    public List<String> possiblePostfix = new ArrayList<>();
+    public List<String> possibleSuffix = new ArrayList<>();
     public List<String> possibleAliases;
     public List<String> possibleAliasesAdd = new ArrayList<>();
     

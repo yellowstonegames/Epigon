@@ -9,9 +9,13 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
-import squidpony.epigon.universe.*;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.LiveValueModification;
+import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -66,7 +70,12 @@ public class RecipeMixer {
     }
 
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
+        return mix(recipe, consumed, catalyst, rng);
+    }
+    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, StatefulRNG otherRng) {
         List<Physical> result = new ArrayList<>();
+        long prevState = rng.getState();
+        rng.setState(otherRng.getState());
         recipe.result.entrySet().stream()
             .forEach(e -> IntStream.range(0, e.getValue())
             .forEach(i -> {
@@ -79,13 +88,15 @@ public class RecipeMixer {
                 physical.calculateStats();
                 result.add(physical);
             }));
+        otherRng.setState(rng.getState());
+        rng.setState(prevState);
         return result;
     }
 
-    public Physical buildWeapon(Weapon weapon)
+    public Physical buildWeapon(Weapon weapon, StatefulRNG rng)
     {
         Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(rng);
-        return mix(weapon.recipe, Collections.emptyList(), Collections.singletonList(buildMaterial(mat))).get(0);
+        return mix(weapon.recipe, Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), rng).get(0);
     }
 
     public Physical buildPhysical(Stone stone) {
@@ -317,14 +328,14 @@ public class RecipeMixer {
 
         physical.possibleAliases.addAll(modification.possibleAliasesAdd);
 
-        int count = modification.possiblePrefix.size() + modification.possiblePostfix.size();
+        int count = modification.possiblePrefix.size() + modification.possibleSuffix.size();
         if (count > 0) {
             int i = rng.nextInt(count);
             if (i < modification.possiblePrefix.size()) {
                 physical.name = modification.possiblePrefix.get(i) + " " + physical.name;
             } else {
                 i -= modification.possiblePrefix.size();
-                physical.name += " " + modification.possiblePostfix.get(i);
+                physical.name += " " + modification.possibleSuffix.get(i);
             }
         }
 
@@ -420,7 +431,7 @@ public class RecipeMixer {
             physical.creatureData = createCreature(modification.creatureOverwrite);
         }
         if (modification.weaponOverwrite != null) {
-            physical.weaponData = modification.weaponOverwrite;
+            physical.weaponData = modification.weaponOverwrite.copy();
         } else if (physical.weaponData == null && (
                 modification.weaponCalcDelta != null ||
                         modification.weaponStatusesAdded != null ||
@@ -448,33 +459,23 @@ public class RecipeMixer {
             physical.weaponData.elements = modification.weaponElementsOverwrite;
         }
         if (modification.weaponElementsAdded != null) {
-            for (int i = 0; i < modification.weaponElementsAdded.size(); i++) {
-                Element e = modification.weaponElementsAdded.keyAt(i);
-                int idx;
-                if ((idx = physical.weaponData.elements.table.getInt(e)) >= 0)
-                    physical.weaponData.elements.weights.incr(idx, modification.weaponElementsAdded.getAt(i));
-                else
-                    physical.weaponData.elements.add(e, modification.weaponElementsAdded.getAt(i));
-            }
+            physical.weaponData.elements.addAll(modification.weaponElementsAdded);
+//            for (int i = 0; i < modification.weaponElementsAdded.size(); i++) {
+//                Element e = modification.weaponElementsAdded.keyAt(i);
+//                int idx;
+//                if ((idx = physical.weaponData.elements.table.getInt(e)) >= 0)
+//                    physical.weaponData.elements.weights.incr(idx, modification.weaponElementsAdded.getAt(i));
+//                else
+//                    physical.weaponData.elements.add(e, modification.weaponElementsAdded.getAt(i));
+//            }
         }
         if (modification.weaponElementsRemoved != null) {
-            for (int i = 0; i < modification.weaponElementsRemoved.size(); i++) {
-                Element e = modification.weaponElementsRemoved.keyAt(i);
-                Integer amt = modification.weaponElementsRemoved.getAt(i);
-                if (physical.weaponData.elements.table.containsKey(e)) {
-                    int idx = modification.weaponElementsRemoved.indexOf(e);
-                    physical.weaponData.elements.weights.incr(idx, -amt);
-                    if (physical.weaponData.elements.weights.get(idx) <= 0) {
-                        physical.weaponData.elements.table.removeAt(idx);
-                        physical.weaponData.elements.weights.removeIndex(idx);
-                    }
-                }
-            }
+            physical.weaponData.elements.removeAll(modification.weaponElementsRemoved);
         }
 
         if (modification.weaponCalcDelta != null) {
             for (int i = 0; i < 12; i++) {
-                physical.weaponData.calcStats[i] += modification.weaponCalcDelta[i];
+                physical.weaponData.calcStats[i] = Math.max(0, physical.weaponData.calcStats[i] + modification.weaponCalcDelta[i]);
             }
         }
 

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
+import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
@@ -26,6 +27,7 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.panel.IColoredString;
@@ -61,7 +63,7 @@ public class Epigon extends Game {
     //unseeded random number generator
     public static final StatefulRNG chaos = new StatefulRNG(new ThrustRNG());
     public static final RecipeMixer mixer = new RecipeMixer();
-    public static final HandBuilt handBuilt = new HandBuilt();
+    public final HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     // Audio
@@ -126,6 +128,11 @@ public class Epigon extends Game {
 
     }
 
+    public Epigon()
+    {
+        handBuilt = new HandBuilt();
+    }
+
     @Override
     public void create() {
         System.out.println("Working in folder: " + System.getProperty("user.dir"));
@@ -136,6 +143,8 @@ public class Epigon extends Game {
 
         // Set the map size early so things can reference it
         map = new EpiMap(100, 50);
+        System.out.println(rng.getState());
+
         Coord.expandPoolTo(map.width, map.height);
 
         bgColor = SColor.CW_DARK_GRAY;
@@ -246,7 +255,7 @@ public class Epigon extends Game {
         fxHandler = new FxHandler(mapSLayers, 2, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
-        map = worldGenerator.buildWorld(map.width, map.height, 1)[0];
+        map = worldGenerator.buildWorld(map.width, map.height, 1, handBuilt)[0];
 
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
 
@@ -260,7 +269,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng))));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng), chaos)));
 //        Arrays.stream(Direction.OUTWARDS)
 //            .map(d -> player.location.translate(d))
 //            .filter(c -> map.inBounds(c))
@@ -317,10 +326,15 @@ public class Epigon extends Game {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
                         if (creature.hitRoll(player)) {
                             int amt = creature.damageRoll(player);
+                            Element element = creature.weaponData.elements.random();
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
-                                message("You have been slain by the " + creature.name + "!");
+                                message(Messaging.transform("The " + creature.name + " slay$ you with " +
+                                        amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                //message("You have been slain by the " + creature.name + "!");
                             } else {
-                                message("The " + creature.name + " hits you for " + amt + ' ' + creature.weaponData.elements.random().styledName + " damage!");
+                                message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
+                                        amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                //message("The " + creature.name + " hits you for " + amt + ' ' + element.styledName + " damage!");
                             }
                         } else
                         {
@@ -545,13 +559,17 @@ public class Epigon extends Game {
                 mapSLayers.bump(playerEntity, dir, 0.145f);
                 if (player.hitRoll(thing)) {
                     int amt = player.damageRoll(thing);
+                    Element element = player.weaponData.elements.random();
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
-                        message("Killed the " + thing.name);
+                        message("You defeat the " + thing.name + " with " + amt + " " + element.styledName + " damage!");
+                        //message("Killed the " + thing.name + " with " + amt + ' ' + element.styledName + " damage");
                     } else {
-                        message("Dealt " + amt + ' ' + player.weaponData.elements.random().styledName + " damage to the " + thing.name);
+                        message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
+                                amt + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        //message("Dealt " + amt + ' ' + element.styledName + " damage to the " + thing.name);
                     }
                 } else
                 {

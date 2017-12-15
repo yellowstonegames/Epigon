@@ -3,6 +3,7 @@ package squidpony.epigon.mapping;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.mapping.FlowingCaveGenerator;
 
 import java.util.*;
@@ -19,14 +20,14 @@ public class WorldGenerator {
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
-
+    private HandBuilt handBuilt;
     private Map<Stone, Physical> walls = new HashMap<>();
 
-    public EpiMap[] buildWorld(int width, int height, int depth) {
+    public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
         this.width = width;
         this.height = height;
         this.depth = depth;
-
+        this.handBuilt = handBuilt;
         world = new EpiMap[depth];
         for (int d = 0; d < depth; d++) {
             world[d] = new EpiMap(width, height);
