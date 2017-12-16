@@ -219,9 +219,9 @@ public class HandBuilt {
 
         cb.skills.put(cooking, Rating.TYPICAL);
         playerBlueprint.weaponData = Weapon.UNARMED.copy();
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
         mixer.addProfession(chef, playerBlueprint);
     }
 

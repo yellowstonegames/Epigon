@@ -2,7 +2,9 @@ package squidpony.epigon.universe;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.StringKit;
+import squidpony.epigon.data.generic.Modification;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * Elements are keys to know when certain resistances and such apply.
@@ -94,5 +96,26 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     }
     public String toStyledString() {
         return styledName;
+    }
+    public Modification weaponModification()
+    {
+        Modification mod = new Modification();
+        LiveValue lv = mod.elementalDamageMultiplier.get(this);
+        if(lv != null)
+            lv.addActual(0.5); // increases damage by extra 50%
+        else
+        {
+            mod.elementalDamageMultiplier.put(this, new LiveValue(1.5));
+        }
+        if(mod.weaponElementsAdded != null)
+            mod.weaponElementsAdded.put(this, 5);
+        else
+            mod.weaponElementsAdded = OrderedMap.makeMap(this, 5);
+        mod.possiblePrefix.add(name);
+        if(mod.color != null)
+            mod.color = mod.color.cpy().lerp(color, 0.5f);
+        else
+            mod.color = color;
+        return mod;
     }
 }

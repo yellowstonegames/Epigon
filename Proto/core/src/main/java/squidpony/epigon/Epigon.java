@@ -269,7 +269,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng), chaos)));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
 //        Arrays.stream(Direction.OUTWARDS)
 //            .map(d -> player.location.translate(d))
 //            .filter(c -> map.inBounds(c))
