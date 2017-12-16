@@ -319,7 +319,7 @@ public class RecipeMixer {
     /**
      * Applies the provided modification to the provided physical in place.
      */
-    public void applyModification(Physical physical, Modification modification) {
+    public Physical applyModification(Physical physical, Modification modification) {
         physical.modifications.add(modification);
 
         if (modification.possibleAliases != null) {
@@ -456,7 +456,7 @@ public class RecipeMixer {
             physical.weaponData.maneuvers.addAll(modification.weaponManeuversRemoved);
         }
         if (modification.weaponElementsOverwrite != null) {
-            physical.weaponData.elements = modification.weaponElementsOverwrite;
+            physical.weaponData.elements = modification.weaponElementsOverwrite.copy();
         }
         if (modification.weaponElementsAdded != null) {
             physical.weaponData.elements.addAll(modification.weaponElementsAdded);
@@ -497,6 +497,7 @@ public class RecipeMixer {
                         physical.creatureData.skillProgression.put(e.getKey(), rating);
                     });
         }
+        return physical;
     }
 
     public void addProfession(Profession profession, Physical physical) {

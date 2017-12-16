@@ -121,6 +121,7 @@ public class Weapon {
         maneuvers.addAll(toCopy.maneuvers);
         statuses.addAll(toCopy.statuses);
         elements = toCopy.elements.copy();
+        rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
