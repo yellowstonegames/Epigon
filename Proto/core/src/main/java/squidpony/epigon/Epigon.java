@@ -567,9 +567,12 @@ public class Epigon extends Game {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
+                        mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, bgColorFloat, 1);
                         message("You defeat the " + thing.name + " with " + amt + " " + element.styledName + " damage!");
                         //message("Killed the " + thing.name + " with " + amt + ' ' + element.styledName + " damage");
                     } else {
+                        // TODO - summon actual damage in elemental color
+                        mapSLayers.summon(newX, newY, newX + 1, newY - 1, '!', element.color.toFloatBits(), bgColorFloat, 1.3f);
                         message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
                                 amt + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         //message("Dealt " + amt + ' ' + element.styledName + " damage to the " + thing.name);
@@ -790,28 +793,28 @@ public class Epigon extends Game {
             switch (verb) {
                 case MOVE_DOWN:
                     scheduleMove(Direction.DOWN);
-                    break;
+                    return;
                 case MOVE_UP:
                     scheduleMove(Direction.UP);
-                    break;
+                    return;
                 case MOVE_LEFT:
                     scheduleMove(Direction.LEFT);
-                    break;
+                    return;
                 case MOVE_RIGHT:
                     scheduleMove(Direction.RIGHT);
-                    break;
+                    return;
                 case MOVE_DOWN_LEFT:
                     scheduleMove(Direction.DOWN_LEFT);
-                    break;
+                    return;
                 case MOVE_DOWN_RIGHT:
                     scheduleMove(Direction.DOWN_RIGHT);
-                    break;
+                    return;
                 case MOVE_UP_LEFT:
                     scheduleMove(Direction.UP_LEFT);
-                    break;
+                    return;
                 case MOVE_UP_RIGHT:
                     scheduleMove(Direction.UP_RIGHT);
-                    break;
+                    return;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
@@ -836,7 +839,6 @@ public class Epigon extends Game {
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
-
                 case GATHER: // Pick everything nearby up
                     message("Picking up all nearby small things");
                     for (int i = 0; i < 8; i++) {
@@ -864,13 +866,13 @@ public class Epigon extends Game {
                 case DRAW:
                     if(player.inventory.isEmpty()) {
                         message("Nothing in inventory! Try gathering items with Shift-G.");
+                        return;
                     }
                     else {
                         rng.shuffleInPlace(player.inventory);
                         message("Now wielding: " + player.inventory.get(0));
                         player.weaponData = player.inventory.get(0).weaponData;
                     }
-                    runTurn();
                     break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();
@@ -886,9 +888,18 @@ public class Epigon extends Game {
                     break;
                 case QUIT:
                     Gdx.app.exit();
-                    break;
-                default:
+                    return;
+                case WAIT:
                     scheduleMove(Direction.NONE);
+                    return;
+                default:
+                    message("Can't " + verb.name + " right now");
+                    return;
+            }
+
+            // check if the turn clock needs to run
+            if (verb.isAction()){
+                runTurn();
             }
         }
     };

@@ -66,4 +66,20 @@ public enum Verb {
         this.name = name;
         this.description = description;
     }
+
+    /**
+     * Returns true if this verb is an action that should cause the turn clock to advance when it is taken.
+     * @return
+     */
+    public boolean isAction(){
+
+        switch(this){
+            case SHUT:
+            case OPEN:
+            case THROW:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
