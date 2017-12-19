@@ -57,13 +57,23 @@ public class Weapon {
             "Slashing", Element.SLASHING,
             "Storm", Element.LIGHTNING);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
+    public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
         makes.get("Metal|Stone").addAll(Stone.values());
         makes.get("Hide|Metal|Wood").addAll(makes.get("Metal|Wood"));
+        List<Weapon> cat;
+        Weapon wpn;
         for(RawWeapon mw : RawWeapon.ENTRIES)
         {
-            weapons.put(mw.name, new Weapon(mw));
+            weapons.put(mw.name, (wpn = new Weapon(mw)));
+            for(String training : mw.training)
+            {
+                if((cat = categories.get(training)) != null)
+                    cat.add(wpn);
+                else
+                    categories.put(training, Arrays.asList(wpn));
+            }
         }
     }
     public static final Weapon UNARMED = weapons.getAt(0);
@@ -132,14 +142,5 @@ public class Weapon {
     public Weapon copy()
     {
         return new Weapon(this);
-    }
-
-    public static double calculateHitChance(int raw)
-    {
-        return (67 + 5 * raw) * 0x1p-7;
-    }
-    public static int calculateDamage(int raw)
-    {
-        return raw + 1;
     }
 }
