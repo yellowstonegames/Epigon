@@ -1,5 +1,6 @@
 package squidpony.epigon.data.specific;
 
+import squidpony.Maker;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
@@ -72,7 +73,7 @@ public class Weapon {
                 if((cat = categories.get(training)) != null)
                     cat.add(wpn);
                 else
-                    categories.put(training, Arrays.asList(wpn));
+                    categories.put(training, Maker.makeList(wpn));
             }
         }
     }
