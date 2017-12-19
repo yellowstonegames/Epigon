@@ -83,9 +83,12 @@ public class Epigon extends Game {
     private float bgColorFloat, unseenColorFloat;
     private List<Coord> toCursor;
     private TextCellFactory font;
+
     // Set up the text display portions
     private List<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
+
+    private ControlMapping currentMapping;
 
     // World
     private WorldGenerator worldGenerator;
@@ -779,7 +782,11 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.defaultMapping.getOrDefault(combined, Verb.WAIT);
+            Verb verb = ControlMapping.defaultMapViewMapping.get(combined);
+            if (verb == null){
+                message("Unknown input: " + key);
+                return;
+            }
             switch (verb) {
                 case MOVE_DOWN:
                     scheduleMove(Direction.DOWN);

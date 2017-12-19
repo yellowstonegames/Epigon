@@ -1,5 +1,7 @@
 package squidpony.epigon.input;
 
+import java.util.Arrays;
+
 /**
  * An enum that represents a class of actions that can be taken in the world.
  *
@@ -23,6 +25,7 @@ public enum Verb {
     INFO_PRIOR,
     INFO_NEXT,
     INTERACT, // Generic interaction with world environment, catch-all for anything not covered by specific verb basically
+    EQUIP, // from inside the inventory view
     EQUIPMENT, // open a screen to see your items and equip or use them
     MOVE_DOWN,
     MOVE_DOWN_LEFT,
@@ -47,5 +50,20 @@ public enum Verb {
     //WEAR, // includes armor, clothing, and jewelry
     //WIELD // includes weapons, magic items that must be held to work, shields
 
-    // TODO - submenu interactions
+    UI_NEXT_PAGE,
+    UI_PREVIOUS_PAGE,
+    UI_CLOSE_WINDOW;
+
+    public String name;
+    public String description;
+
+    private Verb() {
+        name = name().toLowerCase().replace('_', ' ');
+        description = " ... ";
+    }
+
+    private Verb(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }
