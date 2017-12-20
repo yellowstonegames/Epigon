@@ -13,10 +13,9 @@ public class ControlMapping {
 
     private static final int CAPS = 0x40000, CTRL = 0x20000;
     public static final OrderedMap<Integer, Verb> defaultMapViewMapping =
-            Maker.<Integer, Verb>makeOM(
-                (int)'A'|CAPS, ATTEMPT,
+            Maker.<Integer, Verb>makeOM((int)'A'|CAPS, ATTEMPT,
                 (int)'c', CONSUME,
-                (int)'c'|CTRL, CONSUME_DIFFERENTLY, // ctrl-c to eat the delicious soap
+                (int)'c'|CTRL, CONSUME_WEIRDLY, // ctrl-c to eat the delicious soap
                 (int)'e', EQUIPMENT,
                 (int)'f', FIRE,
                 (int)'G'|CAPS, GET,
@@ -62,10 +61,9 @@ public class ControlMapping {
                 (int)ESCAPE, QUIT
         );
         public static final OrderedMap<Integer, Verb> defaultEquipmentViewMapping =
-            Maker.<Integer, Verb>makeOM(
-                (int)'A'|CAPS, ATTEMPT,
+            Maker.<Integer, Verb>makeOM((int)'A'|CAPS, ATTEMPT,
                 (int)'c', CONSUME,
-                (int)'c'|CTRL, CONSUME_DIFFERENTLY, // ctrl-c to eat the delicious soap
+                (int)'c'|CTRL, CONSUME_WEIRDLY, // ctrl-c to eat the delicious soap
                 (int)'e', EQUIP,
                 (int)'f', FIRE,
 //                (int)'G'|CAPS, GET,
