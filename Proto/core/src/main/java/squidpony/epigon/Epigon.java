@@ -630,10 +630,21 @@ public class Epigon extends Game {
         // Clear the tile the player is on
         //mapSLayers.clear(player.location.x, player.location.y, 0);
 
-        // NOTE - turned off while testing things
-        for (Coord pt : toCursor) {
-            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-            mapSLayers.backgrounds[pt.x][pt.y] = SColor.lerpFloatColors(mapSLayers.backgrounds[pt.x][pt.y], SColor.COSMIC_LATTE.toFloatBits(), 0.7f);
+//        for (Coord pt : toCursor) {
+//            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
+//            mapSLayers.backgrounds[pt.x][pt.y] = SColor.lerpFloatColors(mapSLayers.backgrounds[pt.x][pt.y], SColor.COSMIC_LATTE.toFloatBits(), 0.7f);
+//        }
+        for (int i = 0; i < toCursor.size(); i++) {
+            Coord c = toCursor.get(i);
+            Direction dir;
+            if (i == 0) {
+                dir = Direction.toGoTo(player.location, c);
+            } else if (i == toCursor.size() - 1){
+                dir = Direction.NONE; // last spot shouldn't have arrow
+            } else {
+                dir = Direction.toGoTo(toCursor.get(i - 1), c);
+            }
+            mapSLayers.put(c.x, c.y, FxHandler.arrowsFor(dir).charAt(0), SColor.TAN);
         }
     }
 
@@ -666,7 +677,6 @@ public class Epigon extends Game {
             infoHandler.updateDisplay();
         } else if (infoInput.hasNext()) {
             infoInput.next();
-            ;
             infoHandler.updateDisplay();
         }
 
@@ -926,88 +936,6 @@ public class Epigon extends Game {
 //        case '+':
 //            fxHandler.layeredSparkle(player.location,8, Radius.CIRCLE);
 //            break;
-//        case '[':
-//            contextHandler.prior();
-//            break;
-//        case ']':
-//            contextHandler.next();
-//            break;
-//        case '{':
-//            infoHandler.prior();
-//            break;
-//        case '}':
-//            infoHandler.next();
-//            break;
-//        case SquidInput.UP_ARROW:
-//        case 'w':
-//            move(Direction.UP);
-//            break;
-//        case SquidInput.DOWN_ARROW:
-//        case 's':
-//            move(Direction.DOWN);
-//            break;
-//        case SquidInput.LEFT_ARROW:
-//        case 'a':
-//            move(Direction.LEFT);
-//            break;
-//        case SquidInput.RIGHT_ARROW:
-//        case 'd':
-//            move(Direction.RIGHT);
-//            break;
-//        case '.':
-//            message("Waiting...");
-//            runTurn();
-//            break;
-//        case 'o': // Open all the doors nearby
-//            message("Opening nearby doors");
-//            Arrays.stream(Direction.OUTWARDS)
-//                    .map(d -> player.location.translate(d))
-//                    .filter(c -> map.inBounds(c))
-//                    .filter(c -> fovResult[c.x][c.y] > 0)
-//                    .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-//                    .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-//                    .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
-//            calcFOV(player.location.x, player.location.y);
-//            calcDijkstra();
-//            break;
-//        case 'c': // Close all the doors nearby
-//            message("Closing nearby doors");
-//            Arrays.stream(Direction.OUTWARDS)
-//                    .map(d -> player.location.translate(d))
-//                    .filter(c -> map.inBounds(c))
-//                    .filter(c -> fovResult[c.x][c.y] > 0)
-//                    .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-//                    .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-//                    .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
-//            calcFOV(player.location.x, player.location.y);
-//            calcDijkstra();
-//            break;
-//        case 'g': // Pick everything nearby up
-//            message("Picking up all nearby small things");
-//            Arrays.stream(Direction.values())
-//                    .map(d -> player.location.translate(d))
-//                    .filter(c -> map.inBounds(c))
-//                    .filter(c -> fovResult[c.x][c.y] > 0)
-//                    .map(c -> map.contents[c.x][c.y])
-//                    .forEach(tile -> {
-//                        Set<Physical> removing = tile.contents
-//                                .stream()
-//                                .filter(p -> !p.attached)
-//                                .collect(Collectors.toSet());
-//                        tile.contents.removeAll(removing);
-//                        player.inventory.addAll(removing);
-//                    });
-//            break;
-//        case 'i': // List out inventory
-//            message(player.inventory.stream()
-//                    .map(i -> i.name)
-//                    .collect(Collectors.joining(", ", "Carrying: ", "")));
-//            break;
-//        case SquidInput.ESCAPE: {
-//            Gdx.app.exit();
-//            break;
-//        }
-//    }
 
     private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
