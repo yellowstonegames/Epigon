@@ -253,7 +253,7 @@ public class Physical extends EpiData {
         }
     }
     public boolean hitRoll(Physical target) {
-        if(target.creatureData == null)
+        if(target == null || target.creatureData == null)
             return true;
 
         return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) >= chaos.next(7);

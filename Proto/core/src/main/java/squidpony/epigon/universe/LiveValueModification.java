@@ -15,25 +15,25 @@ public class LiveValueModification {
     public Double inertiaOverwrite;
     public Boolean stableOverwrite;
 
-    public Double baseAdditive;
-    public Double actualAdditive;
-    public Double maxAdditive;
-    public Double minAdditive;
-    public Double deltaAdditive;
-    public Double inertiaAdditive;
+    public double baseAdd = 0;
+    public double actualAdd = 0;
+    public double maxAdd = 0;
+    public double minAdd = 0;
+    public double deltaAdd = 0;
+    public double inertiaAdd = 0;
 
-    public Double baseMultiply;
-    public Double actualMultiply;
-    public Double maxMultiply;
-    public Double minMultiply;
-    public Double deltaMultiply;
-    public Double inertiaMultiply;
+    public double baseMultiply    = 1;
+    public double actualMultiply  = 1;
+    public double maxMultiply     = 1;
+    public double minMultiply     = 1;
+    public double deltaMultiply   = 1;
+    public double inertiaMultiply = 1;
 
     public LiveValueModification(){}
 
     /**
-     * Creates a live value modification with base, actual, and max values set to the provided value, min value set to
-     * 0, and no delta or inertia (also 0).
+     * Creates a live value modification that overwrites a LiveValue's base, actual, and max values to the provided
+     * value, overwrites its min value to 0, and overwrites its delta and inertia to 0 as well
      *
      * @param value desired new actual, base, and max value
      */
@@ -46,4 +46,18 @@ public class LiveValueModification {
         inertiaOverwrite = 0.0;
         stableOverwrite = true;
     }
+    public static LiveValueModification add(double change)
+    {
+        LiveValueModification lvm = new LiveValueModification();
+        lvm.actualAdd = change;
+        return lvm;
+    }
+
+    public static LiveValueModification multiply(double change)
+    {
+        LiveValueModification lvm = new LiveValueModification();
+        lvm.actualMultiply = change;
+        return lvm;
+    }
+
 }
