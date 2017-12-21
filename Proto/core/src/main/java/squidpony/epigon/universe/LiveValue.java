@@ -17,14 +17,14 @@ package squidpony.epigon.universe;
 public class LiveValue {
 
     /**
-     * All values set to 0 and cannot be changed.
+     * All values set to 0; can technically be changed but never should be.
      */
-    public static final LiveValue ZERO = new UnModifiableLiveValue(0.0);
+    public static final LiveValue ZERO = new LiveValue(0.0);
 
     /**
-     * All values set to 1 and cannot be changed.
+     * All values set to 1; can technically be changed but never should be.
      */
-    public static final LiveValue ONE = new UnModifiableLiveValue(1.0);
+    public static final LiveValue ONE = new LiveValue(1.0);
 
     private double base;
     private double max;
@@ -87,6 +87,7 @@ public class LiveValue {
      * Modifies this value in place by the values in the provided object.
      */
     public void modify(LiveValueModification mod) {
+        // these default to null, so we need to check before overwriting
         base = mod.baseOverwrite == null ? base : mod.baseOverwrite;
         actual = mod.actualOverwrite == null ? actual : mod.actualOverwrite;
         max = mod.maxOverwrite == null ? max : mod.maxOverwrite;
@@ -95,19 +96,21 @@ public class LiveValue {
         inertia = mod.inertiaOverwrite == null ? inertia : mod.inertiaOverwrite;
         stable = mod.stableOverwrite == null ? stable : mod.stableOverwrite;
 
-        base = mod.baseAdditive == null ? base : mod.baseAdditive;
-        actual = mod.actualAdditive == null ? actual : mod.actualAdditive;
-        max = mod.maxAdditive == null ? max : mod.maxAdditive;
-        min = mod.minAdditive == null ? min : mod.minAdditive;
-        delta = mod.deltaAdditive == null ? delta : mod.deltaAdditive;
-        inertia = mod.inertiaAdditive == null ? inertia : mod.inertiaAdditive;
+        // these default to 1 if unassigned, so nothing changes if they are the default
+        base *=    mod.baseMultiply;
+        actual *=  mod.actualMultiply;
+        max *=     mod.maxMultiply;
+        min *=     mod.minMultiply;
+        delta *=   mod.deltaMultiply;
+        inertia *= mod.inertiaMultiply;
 
-        base = mod.baseMultiply == null ? base : mod.baseMultiply;
-        actual = mod.actualMultiply == null ? actual : mod.actualMultiply;
-        max = mod.maxMultiply == null ? max : mod.maxMultiply;
-        min = mod.minMultiply == null ? min : mod.minMultiply;
-        delta = mod.deltaMultiply == null ? delta : mod.deltaMultiply;
-        inertia = mod.inertiaMultiply == null ? inertia : mod.inertiaMultiply;
+        // these default to 0 if unassigned, so this is similar to the above case
+        base +=    mod.baseAdd;
+        actual +=  mod.actualAdd;
+        max +=     mod.maxAdd;
+        min +=     mod.minAdd;
+        delta +=   mod.deltaAdd;
+        inertia += mod.inertiaAdd;
     }
 
     public void addActual(double change)
@@ -148,8 +151,12 @@ public class LiveValue {
         return actual;
     }
 
+    /**
+     * Sets the actual value, within the existing min and max bounds; set min and max before calling this
+     * @param actual the double to set as the "actual" value; will be clamped to be within min and max
+     */
     public void actual(double actual) {
-        this.actual = actual;
+        this.actual = Math.min(Math.max(actual, min), max);
     }
 
     public double delta() {
@@ -175,57 +182,4 @@ public class LiveValue {
     public void stable(boolean stable) {
         this.stable = stable;
     }
-
-    private static class UnModifiableLiveValue extends LiveValue {
-
-        private UnModifiableLiveValue(double d) {
-            super(d);
-        }
-
-        @Override
-        public void tick() {
-            // noop
-        }
-
-        @Override
-        public void modify(LiveValueModification mod) {
-            // noop
-        }
-
-        @Override
-        public void base(double base) {
-            // noop
-        }
-
-        @Override
-        public void max(double max) {
-            // noop
-        }
-
-        @Override
-        public void min(double min) {
-            // noop
-        }
-
-        @Override
-        public void actual(double actual) {
-            // noop
-        }
-
-        @Override
-        public void delta(double delta) {
-            // noop
-        }
-
-        @Override
-        public void inertia(double inertia) {
-            // noop
-        }
-
-        @Override
-        public void stable(boolean stable) {
-            // noop
-        }
-    }
-
 }
