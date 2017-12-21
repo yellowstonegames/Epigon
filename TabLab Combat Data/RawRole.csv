@@ -1,0 +1,12 @@
+squidpony.epigon.data.raw.RawRole	name	
+name	description	training
+Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination
+Brawler	A disciplined fighter who trains in both hand-to-hand combat and with various weapons.	Martial Arts
+Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality
+Dervish	A deadly dancer in battle who sprints between skirmishes with an unpredictable weapon.	Whirling Death
+Duelist	A nimble noble who is courteous to a fault, unless dishonored… then a duel is called for.	Elegance
+Guardian	A cautious defender who prefers to use polearms and shields to keep foes at bay.	Foresight
+Hunter	A tireless tracker who stalks prey through the wild before striking with a so-called "primitive" weapon.	Naturalism
+Jester	A cackling comedian who gauges his foes at a distance before hurling an arsenal of thrown weapons.	Hurling
+Marksman	A quiet, calm sniper who is skilled with all forms of projectile weaponry, and uses it to great effect.	Marksmanship
+Swordsman	A humble warrior who seeks a balanced approach to mastering the blade.	Swordplay
