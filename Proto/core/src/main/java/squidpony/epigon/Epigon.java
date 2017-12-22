@@ -41,12 +41,18 @@ import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import squidpony.epigon.display.PrimaryHandler;
+import squidpony.epigon.display.PrimaryHandler.PrimaryMode;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
  * Doesn't use any platform-specific code.
  */
 public class Epigon extends Game {
+
+    private enum InputMode {
+        MAP, HELP, EQUIPMENT, CRAFTING;
+    }
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
     public static final PanelSize mapSize;
@@ -73,6 +79,7 @@ public class Epigon extends Game {
     SpriteBatch batch;
     private SquidColorCenter colorCenter;
     private SparseLayers mapSLayers;
+    private SquidLayers primarySLayers;
     private SquidLayers infoSLayers;
     private SquidLayers contextSLayers;
     private SquidLayers messageSLayers;
@@ -89,11 +96,13 @@ public class Epigon extends Game {
     private int messageIndex;
 
     private ControlMapping currentMapping;
+    private InputMode inputMode = InputMode.MAP;
 
     // World
     private WorldGenerator worldGenerator;
     private EpiMap map;
     private FxHandler fxHandler;
+    private PrimaryHandler primaryHandler;
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
     private GreasedRegion blocked;
@@ -109,8 +118,8 @@ public class Epigon extends Game {
     private boolean processingCommand = true;
 
     // WIP stuff, needs large sample map
-    private Stage mapStage, messageStage, infoStage, contextStage;
-    private Viewport mapViewport, messageViewport, infoViewport, contextViewport;
+    private Stage mapStage, messageStage, infoStage, contextStage, primaryStage;
+    private Viewport mapViewport, messageViewport, infoViewport, contextViewport, primaryViewport;
     //private Camera camera;
     private TextCellFactory.Glyph playerEntity;
 
@@ -162,6 +171,7 @@ public class Epigon extends Game {
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
         infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
+        primaryViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
 
         //camera = mapViewport.getCamera();
 
@@ -170,6 +180,7 @@ public class Epigon extends Game {
         messageStage = new Stage(messageViewport, batch);
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
+        primaryStage = new Stage(primaryViewport, batch);
         font = DefaultResources.getLeanFamily();
         TextCellFactory smallFont = font.copy();
         messageIndex = messageCount;
@@ -208,6 +219,15 @@ public class Epigon extends Game {
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
+        primarySLayers = new SquidLayers(
+                mapSize.gridWidth,
+                mapSize.gridHeight,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                font);
+        primarySLayers.getBackgroundLayer().setDefaultForeground(SColor.SILK_CREPE_BROWN);
+        primarySLayers.getForegroundLayer().setDefaultForeground(SColor.BRIGHT_GOLDEN_YELLOW);
+        primaryHandler = new PrimaryHandler(primarySLayers, colorCenter);
 
         font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
         smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
@@ -218,10 +238,12 @@ public class Epigon extends Game {
         messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
         contextSLayers.setBounds(0, 0, contextSize.pixelWidth(), contextSize.pixelHeight());
+        primarySLayers.setBounds(0, 0, mapSize.pixelWidth(), mapSize.pixelWidth());
         mapSLayers.setPosition(0, 0);
         mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
         infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport.setScreenBounds(mapSize.pixelWidth(), 0, contextSize.pixelWidth(), contextSize.pixelHeight());
+        primaryViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
 
         cursor = Coord.get(-1, -1);
 
@@ -229,12 +251,13 @@ public class Epigon extends Game {
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
 
-        mapInput = new SquidInput(keys, mapMouse);
+        mapInput = new SquidInput(mapKeys, mapMouse);
         contextInput = new SquidInput(contextMouse);
         infoInput = new SquidInput(infoMouse);
         Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput, infoInput));
 
         mapStage.addActor(mapSLayers);
+        primaryStage.addActor(primarySLayers);
         messageStage.addActor(messageSLayers);
         infoStage.addActor(infoSLayers);
         contextStage.addActor(contextSLayers);
@@ -272,15 +295,11 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
-//        Arrays.stream(Direction.OUTWARDS)
-//            .map(d -> player.location.translate(d))
-//            .filter(c -> map.inBounds(c))
-//            //.filter(c -> rng.next(6) < 55)
-//            .forEach(c -> map.contents[c.x][c.y].add(mixer.buildWeapon(Weapon.weapons.randomValue(rng))));
-        infoHandler.setPlayer(player);
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
 
-        // NOTE - turn off creatures while testing other things
+        infoHandler.setPlayer(player);
+        primaryHandler.setPlayer(player);
+
         for (Coord coord : floors.quasiRandomSeparated(0.05)) {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
@@ -292,9 +311,6 @@ public class Epigon extends Game {
         }
 
         playerEntity = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
-
-//        mapSLayers.setGridOffsetX(player.location.x - (mapSize.gridWidth >> 1));
-//        mapSLayers.setGridOffsetY(player.location.y - (mapSize.gridHeight >> 1));
 
         calcFOV(player.location.x, player.location.y);
 
@@ -683,24 +699,15 @@ public class Epigon extends Game {
         // the order here matters. We apply multiple viewports at different times to clip different areas.
         contextViewport.apply(false);
         contextStage.act();
-        // the next line is similar to the next two but handles starting and ending the batch
         contextStage.draw();
-        //batch.setProjectionMatrix(contextStage.getCamera().combined);
-        //contextStage.getRoot().draw(batch, 1f);
 
         infoViewport.apply(false);
         infoStage.act();
-        // the next line is similar to the next two but handles starting and ending the batch
         infoStage.draw();
-        //batch.setProjectionMatrix(infoStage.getCamera().combined);
-        //infoStage.getRoot().draw(batch, 1f);
 
         messageViewport.apply(false);
         messageStage.act();
-        // the next line is similar to the next two but handles starting and ending the batch
         messageStage.draw();
-        //batch.setProjectionMatrix(messageViewport.getCamera().combined);
-        //messageStage.getRoot().draw(batch, 1f);
 
         //here we apply the other viewport, which clips a different area while leaving the message area intact.
         mapViewport.apply(false);
@@ -714,6 +721,10 @@ public class Epigon extends Game {
         playerEntity.draw(batch, 1.0f);
         //we still need to end
         batch.end();
+
+        primaryStage.act();
+        primaryStage.draw();
+
         //uncomment the upcoming line if you want to see how fast this can run at top speed...
         //for me, tommyettinger, on a laptop with recent integrated graphics, I get about 500 FPS.
         //this needs vsync set to false in DesktopLauncher.
@@ -791,13 +802,13 @@ public class Epigon extends Game {
         return mapSize.pixelHeight() + messageSize.pixelHeight();
     }
 
-    private final KeyHandler keys = new KeyHandler() {
+    private final KeyHandler mapKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultMapViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input: " + key);
+                message("Unknown input for map mode: " + key);
                 return;
             }
             switch (verb) {
@@ -869,14 +880,91 @@ public class Epigon extends Game {
                     }
                     break;
                 case EQUIPMENT:
-                    for(String m : StringKit.wrap("Carrying: " +
-                            StringKit.join(", ", player.inventory), messageSize.gridWidth - 2))
+                    for (String m : StringKit.wrap("Carrying: " + StringKit.join(", ", player.inventory), messageSize.gridWidth - 2)) {
                         message(m);
+                    }
+                    primaryHandler.setMode(PrimaryMode.EQUIPMENT);
+                    mapInput.setKeyHandler(equipmentKeys);
+                    break;
+                case DRAW:
+                    if (player.inventory.isEmpty()) {
+                        message("Nothing in inventory! Try gathering items with Shift-G.");
+                        return;
+                    } else {
+                        rng.shuffleInPlace(player.inventory);
+                        message("Now wielding: " + player.inventory.get(0));
+                        player.weaponData = player.inventory.get(0).weaponData;
+                    }
+                    break;
+                case CONTEXT_PRIOR:
+                    contextHandler.prior();
+                    break;
+                case CONTEXT_NEXT:
+                    contextHandler.next();
+                    break;
+                case INFO_PRIOR:
+                    infoHandler.prior();
+                    break;
+                case INFO_NEXT:
+                    infoHandler.next();
+                    break;
+                case QUIT:
+                    // TODO - confirmation
+                    Gdx.app.exit();
+                    return;
+                case WAIT:
+                    scheduleMove(Direction.NONE);
+                    return;
+                default:
+                    message("Can't " + verb.name + " from main view.");
+                    return;
+            }
+
+            // check if the turn clock needs to run
+            if (verb.isAction()){
+                runTurn();
+            }
+        }
+    };
+
+    private final KeyHandler equipmentKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            Verb verb = ControlMapping.defaultEquipmentViewMapping.get(combined);
+            if (verb == null){
+                message("Unknown input for map mode: " + key);
+                return;
+            }
+            switch (verb) {
+                case MOVE_DOWN:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_RIGHT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_DOWN_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_DOWN_RIGHT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP_RIGHT:
+                    // TODO - keyboard controls in equipment screen
                     break;
                 case DRAW:
                     if(player.inventory.isEmpty()) {
                         message("Nothing in inventory! Try gathering items with Shift-G.");
-                        return;
+                        break;
                     }
                     else {
                         rng.shuffleInPlace(player.inventory);
@@ -896,46 +984,47 @@ public class Epigon extends Game {
                 case INFO_NEXT:
                     infoHandler.next();
                     break;
-                case QUIT:
-                    Gdx.app.exit();
-                    return;
-                case WAIT:
-                    scheduleMove(Direction.NONE);
-                    return;
+                case UI_CLOSE_WINDOW:
+                    inputMode = InputMode.MAP;
+                    mapInput.setKeyHandler(mapKeys);
+                    primaryHandler.hide();
+                    break;
                 default:
-                    message("Can't " + verb.name + " right now");
-                    return;
-            }
-
-            // check if the turn clock needs to run
-            if (verb.isAction()){
-                runTurn();
+                    message("Can't " + verb.name + " from equipment view.");
+                    break;
             }
         }
     };
 
-//    switch (key) {
-//        case 'x':
-//            fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
-//            break;
-//        case 'X':
-//            Element e = rng.getRandomElement(Element.values());
-//            fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
-//            break;
-//        case 'z':
-//            fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
-//            break;
-//        case 'Z':
-//            for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
-//                fxHandler.twinkle(c, Element.LIGHT);
-//            }
-//            break;
-//        case '=':
-//            fxHandler.layeredSparkle(player.location,4, Radius.CIRCLE);
-//            break;
-//        case '+':
-//            fxHandler.layeredSparkle(player.location,8, Radius.CIRCLE);
-//            break;
+    private final KeyHandler debugKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            switch (key) {
+                case 'x':
+                    fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
+                    break;
+                case 'X':
+                    Element e = rng.getRandomElement(Element.values());
+                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
+                    break;
+                case 'z':
+                    fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
+                    break;
+                case 'Z':
+                    for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
+                        fxHandler.twinkle(c, Element.LIGHT);
+                    }
+                    break;
+                case '=':
+                    fxHandler.layeredSparkle(player.location, 4, Radius.CIRCLE);
+                    break;
+                case '+':
+                    fxHandler.layeredSparkle(player.location, 8, Radius.CIRCLE);
+                    break;
+
+            }
+        }
+    };
 
     private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
