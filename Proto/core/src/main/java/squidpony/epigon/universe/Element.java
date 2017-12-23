@@ -65,7 +65,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     public String name, styledName;
     public String verb;
     public Color color;
-
+    public float floatColor;
 //    private Element() {
 //        this(SColor.WHITE);
 //    }
@@ -88,6 +88,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
         this.styledName = "[#"+ StringKit.hex(Color.rgba8888(color)) + "]" + this.name + "[White]";
         this.verb = verb;
         this.color = color;
+        this.floatColor = color.toFloatBits();
     }
 
     @Override
