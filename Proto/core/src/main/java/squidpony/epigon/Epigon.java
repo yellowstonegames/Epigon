@@ -272,7 +272,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
 //        Arrays.stream(Direction.OUTWARDS)
 //            .map(d -> player.location.translate(d))
 //            .filter(c -> map.inBounds(c))
@@ -634,17 +634,18 @@ public class Epigon extends Game {
 //            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
 //            mapSLayers.backgrounds[pt.x][pt.y] = SColor.lerpFloatColors(mapSLayers.backgrounds[pt.x][pt.y], SColor.COSMIC_LATTE.toFloatBits(), 0.7f);
 //        }
+        mapSLayers.clear(2);
         for (int i = 0; i < toCursor.size(); i++) {
             Coord c = toCursor.get(i);
             Direction dir;
-            if (i == 0) {
-                dir = Direction.toGoTo(player.location, c);
-            } else if (i == toCursor.size() - 1){
+            if (i == toCursor.size() - 1){
                 dir = Direction.NONE; // last spot shouldn't have arrow
-            } else {
+            } else if (i == 0) {
+                dir = Direction.toGoTo(player.location, c);
+            }else {
                 dir = Direction.toGoTo(toCursor.get(i - 1), c);
             }
-            mapSLayers.put(c.x, c.y, FxHandler.arrowsFor(dir).charAt(0), SColor.TAN);
+            mapSLayers.put(c.x, c.y, FxHandler.arrowsFor(dir).charAt(0), SColor.CW_BRIGHT_GREEN, null, 2);
         }
     }
 
@@ -731,7 +732,7 @@ public class Epigon extends Game {
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
 
-// SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
+        // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
         // (gridWidth & 1) is 1 if gridWidth is odd or 0 if it is even; it's good to know and faster than using % , plus
         // in some other cases it has useful traits (x % 2 can be 0, 1, or -1 depending on whether x is negative, while
