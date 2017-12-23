@@ -278,7 +278,7 @@ public class HandBuilt {
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {
-            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 8);
+            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 18);
             liven.statChanges.put(s, lvm);
         }
 
