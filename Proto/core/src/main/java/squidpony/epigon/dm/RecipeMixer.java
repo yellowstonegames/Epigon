@@ -279,6 +279,7 @@ public class RecipeMixer {
             applyModification(physical, blueprint.optionalModifications.get(ints[i]));
         }
 
+        physical.rarity = rarity;
         for (Rating rating : Rating.values()) {
             List<Modification> mods = blueprint.rarityModifications.get(rating);
             if (mods != null) {
@@ -311,7 +312,7 @@ public class RecipeMixer {
         creature.parent = other.parent;
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
-        creature.equippedData = other.equippedData; // TODO - copy into new equippedData
+        // TODO - copy equipments from other creature (clone all the physicals)
 
         return creature;
     }

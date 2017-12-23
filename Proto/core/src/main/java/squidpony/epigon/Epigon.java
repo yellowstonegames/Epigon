@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
+import squidpony.epigon.universe.WieldSlot;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -224,8 +225,8 @@ public class Epigon extends Game {
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
-        primarySLayers.getBackgroundLayer().setDefaultForeground(SColor.SILK_CREPE_BROWN);
-        primarySLayers.getForegroundLayer().setDefaultForeground(SColor.BRIGHT_GOLDEN_YELLOW);
+        primarySLayers.getBackgroundLayer().setDefaultForeground(colorCenter.desaturate(SColor.DARK_GRAY, 0.8));
+        primarySLayers.getForegroundLayer().setDefaultForeground(SColor.LIME);
         primaryHandler = new PrimaryHandler(primarySLayers, colorCenter);
 
         font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
@@ -499,6 +500,28 @@ public class Epigon extends Game {
     private Color calcFadeoutColor(Color color, double amount) {
         double d = Double.max(amount, 0.3);
         return colorCenter.lerp(SColor.BLACK, color, d);
+    }
+
+    private void equipItem() {
+        if (player.inventory.isEmpty()) {
+            message("Nothing equippable found.");
+            return;
+        } else {
+            rng.shuffleInPlace(player.inventory);
+            Physical chosen = player.inventory.get(0);
+            equipItem(chosen);
+        }
+    }
+
+    private void equipItem(Physical item) {
+        player.weaponData = item.weaponData;
+        List<WieldSlot> slots = new ArrayList<>();
+        slots.add(WieldSlot.RIGHT_HAND);
+        if (item.weaponData.hands > 1){
+            slots.add(WieldSlot.LEFT_HAND);
+        }
+        player.equip(item, slots);
+        message("Now wielding: " + item);
     }
 
     private void scheduleMove(Direction dir)
@@ -890,14 +913,7 @@ public class Epigon extends Game {
                     mapInput.setMouse(equipmentMouse);
                     break;
                 case DRAW:
-                    if (player.inventory.isEmpty()) {
-                        message("Nothing in inventory! Try gathering items with Shift-G.");
-                        return;
-                    } else {
-                        rng.shuffleInPlace(player.inventory);
-                        message("Now wielding: " + player.inventory.get(0));
-                        player.weaponData = player.inventory.get(0).weaponData;
-                    }
+                    equipItem();
                     break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();
@@ -965,15 +981,7 @@ public class Epigon extends Game {
                     // TODO - keyboard controls in equipment screen
                     break;
                 case DRAW:
-                    if(player.inventory.isEmpty()) {
-                        message("Nothing in inventory! Try gathering items with Shift-G.");
-                        break;
-                    }
-                    else {
-                        rng.shuffleInPlace(player.inventory);
-                        message("Now wielding: " + player.inventory.get(0));
-                        player.weaponData = player.inventory.get(0).weaponData;
-                    }
+                    equipItem();
                     break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();

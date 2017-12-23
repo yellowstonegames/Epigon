@@ -2,7 +2,13 @@ package squidpony.epigon.data.mixin;
 
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.ClothingSlot;
+import squidpony.epigon.universe.JewelrySlot;
+import squidpony.epigon.universe.OverArmorSlot;
 import squidpony.epigon.universe.Rating;
+import squidpony.epigon.universe.WieldSlot;
+import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
 
 import java.util.HashSet;
@@ -19,7 +25,14 @@ public class Creature {
     public OrderedMap<Skill, Rating> skills = new OrderedMap<>();
     public OrderedMap<Skill, Rating> skillProgression = new OrderedMap<>();
     public Set<Ability> abilities = new HashSet<>();
-    public EquippedData equippedData;
+
+    // TODO - add validity list for slots on a per-creature type (Humanoid, Quadreped) basis
+    public EnumOrderedMap<JewelrySlot, Physical> jewelry = new EnumOrderedMap<>(JewelrySlot.class);
+    public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);
+    public EnumOrderedMap<ClothingSlot, Physical> armor = new EnumOrderedMap<>(ClothingSlot.class);
+    public EnumOrderedMap<OverArmorSlot, Physical> overArmor = new EnumOrderedMap<>(OverArmorSlot.class);
+    public EnumOrderedMap<WieldSlot, Physical> equipment = new EnumOrderedMap<>(WieldSlot.class);
+
 
     public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
 

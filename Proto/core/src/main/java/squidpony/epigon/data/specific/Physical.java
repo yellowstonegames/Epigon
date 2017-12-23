@@ -18,6 +18,7 @@ import squidpony.squidmath.*;
 import java.util.*;
 
 import static squidpony.epigon.Epigon.chaos;
+import squidpony.epigon.universe.WieldSlot;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -98,6 +99,11 @@ public class Physical extends EpiData {
      * The description will be used if no matching skill is available.
      */
     public OrderedMap<Skill, OrderedMap<Rating, String>> identification = new OrderedMap<>();
+
+    /*
+    * The rarity level applied.
+    */
+    public Rating rarity;
 
     /**
      * The changes to this object (if any) that happen as its rarity is increased. As rarity
@@ -217,6 +223,44 @@ public class Physical extends EpiData {
 
         return false;//can't be applied
     }
+
+    /**
+     * Takes the item out of inventory and places it into equipped areas. Anything already equipped in
+     * the areas goes back into inventory.
+     *
+     * @param item The item to equip
+     * @param slots All the slots that will be filled when the item is equipped
+     */
+    public void equip(Physical item, List<WieldSlot> slots) {
+        if (creatureData == null) {
+            System.err.println("Can't equip " + item.name + " on " + name);
+            return;
+        }
+
+        if (!inventory.contains(item)) {
+            System.err.println(name + " does not have " + item.name);
+            return;
+        }
+
+        Set<Physical> removing = new HashSet<>();
+        for (WieldSlot ws : slots) {
+            Physical p = creatureData.equipment.get(ws);
+            if (p != null) {
+                removing.add(p);
+            }
+            creatureData.equipment.put(ws, item);
+        }
+
+        for (Physical p : removing) {
+            inventory.add(p);
+            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out mult-handed unequips
+                if (p.equals(creatureData.equipment.get(subSlot))) {
+                    creatureData.equipment.remove(subSlot);
+                }
+            }
+        }
+    }
+
     public void calculateStats() {
         LiveValue lv;
         int current;
