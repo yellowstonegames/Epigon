@@ -219,9 +219,9 @@ public class HandBuilt {
 
         cb.skills.put(cooking, Rating.TYPICAL);
         playerBlueprint.weaponData = Weapon.UNARMED.copy();
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.weapons.randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
         mixer.addProfession(chef, playerBlueprint);
     }
 
@@ -286,7 +286,7 @@ public class HandBuilt {
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creatureOverwrite = new Creature();
         liven.weaponOverwrite = Weapon.weapons.randomValue(chaos);
-        liven.weaponElementsAdded = OrderedMap.makeMap(Weapon.elementRename.randomValue(chaos), 1, Weapon.elementRename.randomValue(chaos), 2);
+        liven.weaponElementsAdded = OrderedMap.makeMap(chaos.getRandomElement(Element.values()), 1, chaos.getRandomElement(Element.values()), 2);
         return liven;
     }
 }

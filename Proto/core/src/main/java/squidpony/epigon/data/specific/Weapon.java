@@ -57,7 +57,8 @@ public class Weapon {
             "Shadow", Element.SHADOW,
             "Slashing", Element.SLASHING,
             "Storm", Element.LIGHTNING);
-    public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
+    public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
+            physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
@@ -65,10 +66,12 @@ public class Weapon {
         makes.get("Hide|Metal|Wood").addAll(makes.get("Metal|Wood"));
         List<Weapon> cat;
         Weapon wpn;
-        for(RawWeapon mw : RawWeapon.ENTRIES)
+        for(RawWeapon rw : RawWeapon.ENTRIES)
         {
-            weapons.put(mw.name, (wpn = new Weapon(mw)));
-            for(String training : mw.training)
+            weapons.put(rw.name, (wpn = new Weapon(rw)));
+            if(rw.materials.length > 0)
+                physicalWeapons.put(rw.name, wpn);
+            for(String training : rw.training)
             {
                 if((cat = categories.get(training)) != null)
                     cat.add(wpn);
