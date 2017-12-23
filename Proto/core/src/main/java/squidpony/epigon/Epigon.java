@@ -887,6 +887,7 @@ public class Epigon extends Game {
                     }
                     primaryHandler.setMode(PrimaryMode.EQUIPMENT);
                     mapInput.setKeyHandler(equipmentKeys);
+                    mapInput.setMouse(equipmentMouse);
                     break;
                 case DRAW:
                     if (player.inventory.isEmpty()) {
@@ -989,6 +990,7 @@ public class Epigon extends Game {
                 case UI_CLOSE_WINDOW:
                     inputMode = InputMode.MAP;
                     mapInput.setKeyHandler(mapKeys);
+                    mapInput.setMouse(mapMouse);
                     primaryHandler.hide();
                     break;
                 default:
@@ -1027,6 +1029,14 @@ public class Epigon extends Game {
             }
         }
     };
+
+    private final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            return false; // No-op for now
+        }
+    });
 
     private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
