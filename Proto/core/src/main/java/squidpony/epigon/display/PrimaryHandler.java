@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.CalcStat;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
@@ -136,6 +137,10 @@ public class PrimaryHandler {
         front.put(x, y, c, color);
     }
 
+    private void put(int x, int y, char c, float color) {
+        front.put(x, y, c, color);
+    }
+
     public void next() {
         front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
             SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
@@ -157,7 +162,18 @@ public class PrimaryHandler {
     private void showEquipment(){
         int y = 2;
         for (Physical p : player.inventory){
-            put (1, y, p.name);
+            int x = 1;
+            put(x, y, "-");
+            x+=2;
+            put (x, y, p.symbol, p.color);
+            x+=2;
+            String descr = p.name;
+            if (p.weaponData != null){
+                descr += " - Hands: " + p.weaponData.hands;
+                descr += " Damage: " + p.weaponData.calcStats[Physical.DAMAGE];
+                descr = descr.substring(0, 1).toUpperCase() + descr.substring(1);
+            }
+            put (x, y, descr);
             y++;
         }
     }

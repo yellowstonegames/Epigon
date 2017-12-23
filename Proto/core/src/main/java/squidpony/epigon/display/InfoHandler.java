@@ -3,18 +3,18 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.generic.Skill;
-import squidpony.epigon.data.mixin.EquippedData;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.ClothingSlot;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.WieldSlot;
+
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
-import squidpony.squidmath.EnumOrderedMap;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -248,12 +248,10 @@ public class InfoHandler {
            ┙ ┕
              */
             offset += Stat.healths.length + 1;
-            EquippedData ed = physical.creatureData.equippedData;
-            EnumOrderedMap<ClothingSlot, Physical> armor = ed == null ? new EnumOrderedMap<>(ClothingSlot.class) : ed.getArmor();
             // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
             double actual = 0;
             double base = 0;
-            Physical p = armor.get(ClothingSlot.HEAD);
+            Physical p = physical.creatureData.armor.get(ClothingSlot.HEAD);
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
                 if (lv != null) {
@@ -261,7 +259,7 @@ public class InfoHandler {
                     base += lv.base();
                 }
             }
-            p = armor.get(ClothingSlot.FACE);
+            p = physical.creatureData.armor.get(ClothingSlot.FACE);
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
                 if (lv != null) {
@@ -291,6 +289,24 @@ public class InfoHandler {
             put(7, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // right arm
             put(7, offset + 3, '╽', rng.getRandomElement(Rating.values()).color()); // right arm/hand
             put(3, offset + 6, "Armor");
+
+            // Equipped items
+            Physical equipped;
+            put(10, offset + 0, "RH:");
+            equipped = physical.creatureData.equipment.get(WieldSlot.RIGHT_HAND);
+            if (equipped != null) {
+                put(15, offset + 0, equipped.name, equipped.rarity.color());
+            } else {
+                put(15, offset + 0, "empty", Rating.NONE.color());
+            }
+
+            put(10, offset + 1, "LH:");
+            equipped = physical.creatureData.equipment.get(WieldSlot.LEFT_HAND);
+            if (equipped != null) {
+                put(15, offset + 1, equipped.name, equipped.rarity.color());
+            } else {
+                put(15, offset + 1, "empty", Rating.NONE.color());
+            }
         }
     }
 
