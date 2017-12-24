@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.infoSize;
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.data.mixin.Creature;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -231,83 +232,88 @@ public class InfoHandler {
         if (physical == null) {
             return;
         }
-        int offset = 1;
-        showStats(offset, Stat.healths, physical);
+        int yOffset = 1;
+        showStats(yOffset, Stat.healths, physical);
 
-        offset += Stat.healths.length + 1;
-        showStats(offset, Stat.needs, physical);
+        yOffset += Stat.healths.length + 1;
+        showStats(yOffset, Stat.needs, physical);
+
+        yOffset += Stat.needs.length + 1;
 
         if (physical.creatureData != null) {
+            drawFigure(physical.creatureData, yOffset );
 
-            /*
-            Ω
-          ╭┬╨┬╮
-          ││#││
-          ╽╞═╡╽
-           │ │
-           ┙ ┕
-             */
-            offset += Stat.healths.length + 1;
-            // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
-            double actual = 0;
-            double base = 0;
-            Physical p = physical.creatureData.armor.get(ClothingSlot.HEAD);
-            if (p != null) {
-                LiveValue lv = p.stats.get(Stat.STRUCTURE);
-                if (lv != null) {
-                    actual += lv.actual();
-                    base += lv.base();
-                }
-            }
-            p = physical.creatureData.armor.get(ClothingSlot.FACE);
-            if (p != null) {
-                LiveValue lv = p.stats.get(Stat.STRUCTURE);
-                if (lv != null) {
-                    actual += lv.actual();
-                    base += lv.base();
-                }
-            }
-
-            put(5, offset + 0, 'Ω', base <= 0 ? Rating.NONE.color() : percentColor(actual, base)); // head
-            put(4, offset + 1, '┬', rng.getRandomElement(Rating.values()).color()); // left shoulder
-            put(5, offset + 1, '╨', rng.getRandomElement(Rating.values()).color()); // neck
-            put(6, offset + 1, '┬', rng.getRandomElement(Rating.values()).color()); // right shoulder
-            put(4, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // chest
-            put(5, offset + 2, '#', rng.getRandomElement(Rating.values()).color()); // chest
-            put(6, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // chest
-            put(4, offset + 3, '╞', rng.getRandomElement(Rating.values()).color()); // left hip, part of waist
-            put(5, offset + 3, '═', rng.getRandomElement(Rating.values()).color()); // waist/groin
-            put(6, offset + 3, '╡', rng.getRandomElement(Rating.values()).color()); // right hip, part of waist
-            put(4, offset + 4, '│', rng.getRandomElement(Rating.values()).color()); // left leg
-            put(6, offset + 4, '│', rng.getRandomElement(Rating.values()).color()); // right leg
-            put(4, offset + 5, '┙', rng.getRandomElement(Rating.values()).color()); // left foot
-            put(6, offset + 5, '┕', rng.getRandomElement(Rating.values()).color()); // right foot
-            put(3, offset + 1, '╭', rng.getRandomElement(Rating.values()).color()); // left arm
-            put(3, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // left arm
-            put(3, offset + 3, '╽', rng.getRandomElement(Rating.values()).color()); // left arm/hand
-            put(7, offset + 1, '╮', rng.getRandomElement(Rating.values()).color()); // right arm
-            put(7, offset + 2, '│', rng.getRandomElement(Rating.values()).color()); // right arm
-            put(7, offset + 3, '╽', rng.getRandomElement(Rating.values()).color()); // right arm/hand
-            put(3, offset + 6, "Armor");
+            yOffset += ClothingSlot.height + 4;
 
             // Equipped items
             Physical equipped;
-            put(10, offset + 0, "RH:");
+            put(3, yOffset + 0, "RH:");
             equipped = physical.creatureData.equipment.get(WieldSlot.RIGHT_HAND);
             if (equipped != null) {
-                put(15, offset + 0, equipped.name, equipped.rarity.color());
+                put(8, yOffset + 0, equipped.name, equipped.rarity.color());
             } else {
-                put(15, offset + 0, "empty", Rating.NONE.color());
+                put(8, yOffset + 0, "empty", Rating.NONE.color());
             }
 
-            put(10, offset + 1, "LH:");
+            put(3, yOffset + 1, "LH:");
             equipped = physical.creatureData.equipment.get(WieldSlot.LEFT_HAND);
             if (equipped != null) {
-                put(15, offset + 1, equipped.name, equipped.rarity.color());
+                put(8, yOffset + 1, equipped.name, equipped.rarity.color());
             } else {
-                put(15, offset + 1, "empty", Rating.NONE.color());
+                put(8, yOffset + 1, "empty", Rating.NONE.color());
             }
         }
+    }
+    
+    private void drawFigure(Creature data, int startY){
+        // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
+        int yOffset = startY;
+
+        int x = 3;
+        for (ClothingSlot cs : ClothingSlot.values()) {
+            Physical p = data.armor.get(cs);
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
+        }
+        put(x, yOffset + 6, "Armor");
+        put(x, yOffset + 7, "Rarity");
+
+        x += ClothingSlot.width + 4;
+        for (ClothingSlot cs : ClothingSlot.values()) {
+            Physical p = data.armor.get(cs);
+            Color color = Rating.NONE.color();
+            if (p != null) {
+                LiveValue lv = p.stats.get(Stat.STRUCTURE);
+                if (lv != null) {
+                    color = percentColor(lv.actual(), lv.base());
+                }
+            }
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
+        }
+        put(x, yOffset + 6, "Armor");
+        put(x, yOffset + 7, "Health");
+
+        x += ClothingSlot.width + 4;
+        for (ClothingSlot cs : ClothingSlot.values()) {
+            Physical p = data.clothing.get(cs);
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
+        }
+        put(x, yOffset + 6, "Clothes");
+        put(x, yOffset + 7, "Rarity");
+
+        x += ClothingSlot.width + 4;
+        for (ClothingSlot cs : ClothingSlot.values()) {
+            Physical p = data.clothing.get(cs);
+            Color color = Rating.NONE.color();
+            if (p != null) {
+                LiveValue lv = p.stats.get(Stat.STRUCTURE);
+                if (lv != null) {
+                    color = percentColor(lv.actual(), lv.base());
+                }
+            }
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
+        }
+        put(x, yOffset + 6, "Clothes");
+        put(x, yOffset + 7, "Health");
     }
 
     private void infoSkills(Physical physical) {

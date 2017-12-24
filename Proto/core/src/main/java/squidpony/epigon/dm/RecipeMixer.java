@@ -9,10 +9,14 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
+import squidpony.epigon.universe.ClothingSlot;
+import squidpony.epigon.universe.JewelrySlot;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.LiveValueModification;
+import squidpony.epigon.universe.OverArmorSlot;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.WieldSlot;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.StatefulRNG;
@@ -27,6 +31,9 @@ import static squidpony.epigon.Epigon.rng;
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
  * various categories.
+ *
+ * There is some danger in using the construction bits as having an object A that creates B that create a new A will cause an infinite loop.
+ * TODO - figure out a way to check for and prevent that loop...
  *
  * Results may be based on using a specific recipe with specific items, or by looking for a result
  * in a recipe and then building it with that recipe.
@@ -72,6 +79,7 @@ public class RecipeMixer {
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
         return mix(recipe, consumed, catalyst, rng);
     }
+
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, StatefulRNG otherRng) {
         List<Physical> result = new ArrayList<>();
         long prevState = rng.getState();
@@ -106,7 +114,7 @@ public class RecipeMixer {
         }
 
         blueprint = new Physical();
-        blueprint.color = stone.front.toFloatBits();//.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        blueprint.color = stone.front.toFloatBits();
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
         blueprint.symbol = '.';
@@ -174,7 +182,7 @@ public class RecipeMixer {
         }
 
         blueprint = new Physical();
-        blueprint.color = material.getMaterialColor().toFloatBits();//toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        blueprint.color = material.getMaterialColor().toFloatBits();
         blueprint.name = material.toString();
         blueprint.baseValue = material.getValue();
         blueprint.symbol = material.getGlyph();
@@ -193,11 +201,38 @@ public class RecipeMixer {
     }
 
 
+    /**
+     * Builds a new Physical based on the passed in one as exactly as possible.
+     *
+     * @param blueprint
+     * @return
+     */
     public Physical buildPhysical(Physical blueprint) {
-        return RecipeMixer.this.buildPhysical(blueprint, Rating.NONE);
+        return buildPhysical(blueprint, blueprint.rarity == null ? Rating.NONE : blueprint.rarity, false);
     }
 
+    /**
+     * Builds a new Physical based on the passed in one and applies the given rarity. Applies all rarity
+     * modifications up to the provided rarity.
+     *
+     * @param blueprint
+     * @param rarity
+     * @return
+     */
     public Physical buildPhysical(Physical blueprint, Rating rarity) {
+        return buildPhysical(blueprint, rarity, true);
+    }
+
+    /**
+     * Builds a new Physical based on the passed in one and applies the given rarity only if the
+     * boolean passed in is true.
+     * 
+     * @param blueprint
+     * @param rarity
+     * @param applyRatingModifications
+     * @return
+     */
+    public Physical buildPhysical(Physical blueprint, Rating rarity, boolean applyRatingModifications){
         if (blueprint.generic) {
             // TODO - figure out how to allow sub instances of generics to be used without using generics
         }
@@ -209,7 +244,6 @@ public class RecipeMixer {
         Physical physical = new Physical();
 
         physical.description = blueprint.description;
-        physical.notes = blueprint.notes; // TODO - probably don't need these transferred
         physical.parent = blueprint;
 
         physical.attached = blueprint.attached;
@@ -268,6 +302,7 @@ public class RecipeMixer {
         physical.terrainData = blueprint.terrainData;
 
         // TODO - add rest of mixins
+
         // finally work any modifications
         for (Modification m : blueprint.requiredModifications) {
             applyModification(physical, m);
@@ -312,7 +347,36 @@ public class RecipeMixer {
         creature.parent = other.parent;
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
-        // TODO - copy equipments from other creature (clone all the physicals)
+
+        for (Entry<ClothingSlot, Physical> entry : other.armor.entrySet()){
+            if (entry.getValue() != null){
+                creature.armor.put(entry.getKey(), buildPhysical(entry.getValue()));
+            }
+        }
+
+        for (Entry<ClothingSlot, Physical> entry : other.clothing.entrySet()){
+            if (entry.getValue() != null){
+                creature.clothing.put(entry.getKey(), buildPhysical(entry.getValue()));
+            }
+        }
+
+        for (Entry<WieldSlot, Physical> entry : other.equipment.entrySet()){
+            if (entry.getValue() != null){
+                creature.equipment.put(entry.getKey(), buildPhysical(entry.getValue()));
+            }
+        }
+
+        for (Entry<JewelrySlot, Physical> entry : other.jewelry.entrySet()){
+            if (entry.getValue() != null){
+                creature.jewelry.put(entry.getKey(), buildPhysical(entry.getValue()));
+            }
+        }
+
+        for (Entry<OverArmorSlot, Physical> entry : other.overArmor.entrySet()){
+            if (entry.getValue() != null){
+                creature.overArmor.put(entry.getKey(), buildPhysical(entry.getValue()));
+            }
+        }
 
         return creature;
     }
@@ -479,7 +543,6 @@ public class RecipeMixer {
                 physical.weaponData.calcStats[i] = Math.max(0, physical.weaponData.calcStats[i] + modification.weaponCalcDelta[i]);
             }
         }
-
 
         if (physical.creatureData != null) {
             modification.skillChanges.entrySet()
