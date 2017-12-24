@@ -9,16 +9,16 @@ public abstract class EpiData {
 
     public String name;
     public String description;
-    public String notes;
+    public String notes; // NOTE - don't need to copy this into created objects
 
     private final String id;
     private final int idHash;
-    // You may want to uncomment these lines if you want IDs to be deterministic in the order they are generated.
-//    static {
-//        SquidID.stabilize();
-//    }
-    public EpiData(){
-        // it's fine to use UUID for desktop-only apps; if we want to target other platforms than SquidID is better
+
+    static {
+        SquidID.stabilize();
+    }
+
+    public EpiData() {
         final SquidID sid = SquidID.randomUUID();
         id = sid.toString();
         idHash = sid.hashCode();
