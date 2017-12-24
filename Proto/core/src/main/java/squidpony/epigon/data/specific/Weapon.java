@@ -45,18 +45,28 @@ public class Weapon {
             "Hide|Metal|Wood", new OrderedSet<>(Hide.values())
     );
     public static final OrderedMap<String, Element> elementRename = OrderedMap.makeMap(
+            "Acid", Element.ACID,
+            "Air", Element.AIR,
             "Blunt", Element.BLUNT,
+            "Contract", Element.CONTRACTUAL,
+            "Crystal", Element.CRYSTAL,
             "Death", Element.DEATH,
             "Divine", Element.DIVINE,
             "Earth", Element.EARTH,
             "Fate", Element.FATEFUL,
             "Fire", Element.FIRE,
+            "Ice", Element.ICE,
             "Light", Element.SHINING,
             "Piercing", Element.PIERCING,
+            "Poison", Element.POISON,
             "Pure", Element.PURE,
+            "Radiation", Element.RADIATION,
             "Shadow", Element.SHADOW,
+            "Sinister", Element.SINISTER,
             "Slashing", Element.SLASHING,
-            "Storm", Element.LIGHTNING);
+            "Storm", Element.LIGHTNING,
+            "Time", Element.CHRONOMANCY,
+            "Water", Element.WATER);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2);

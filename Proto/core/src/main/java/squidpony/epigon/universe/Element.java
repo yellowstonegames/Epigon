@@ -38,7 +38,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     SHINING(MAGIC, "shining", "blind$", SColor.WHITE), // light that burns! especially dungeon-dwelling monsters!
     SHADOW(MAGIC, "shadowy", "dim$", new Color(0x111111BB)), // darkness doesn't really do damage normally, so this is magic
     GEOMANCY(MAGIC, "worldly", "trap$", SColor.DISTANT_RIVER_BROWN), // Is this ley line location magic, feng-shui-like sacred geometry, or just dirt magic? Answer: just dirt
-    CHRONOMANCY(MAGIC, "temporal", "shift$", SColor.DB_EGGSHELL), // wibbly-wobbly timey-wimey bits
+    CHRONOMANCY(MAGIC, "temporal", "wobble$", SColor.DB_EGGSHELL), // wibbly-wobbly timey-wimey bits
     FATEFUL(MAGIC, "fateful", "curse$", SColor.VEGAS_GOLD), // luck, fortune and destined damage
     PURE(MAGIC, "pure", "purif$$$", new Color(0xCCEEFF88)), // negatively affects horrible things (undead, demons), does some damage to despoilers of this world
     // transforming (polymorph) attacks work well as an element that, instead of killing, changes the target's shape

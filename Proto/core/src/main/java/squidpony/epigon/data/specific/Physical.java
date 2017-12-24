@@ -8,17 +8,13 @@ import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.*;
-import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.util.*;
 
 import static squidpony.epigon.Epigon.chaos;
-import squidpony.epigon.universe.WieldSlot;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -237,7 +233,7 @@ public class Physical extends EpiData {
             return;
         }
 
-        if (!inventory.contains(item)) {
+        if (!inventory.remove(item)) {
             System.err.println(name + " does not have " + item.name);
             return;
         }
