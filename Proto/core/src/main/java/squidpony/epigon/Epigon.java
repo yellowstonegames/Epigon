@@ -28,6 +28,7 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
+import squidpony.epigon.universe.WieldSlot;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -42,7 +43,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
-import squidpony.epigon.universe.WieldSlot;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
