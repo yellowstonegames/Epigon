@@ -268,14 +268,15 @@ public class InfoHandler {
     private void drawFigure(Creature data, int startY){
         // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
         int yOffset = startY;
+        int titleOffset = startY + ClothingSlot.height + 1;
 
         int x = 3;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.armor.get(cs);
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
         }
-        put(x, yOffset + 6, "Armor");
-        put(x, yOffset + 7, "Rarity");
+        put(x, titleOffset, "Armor");
+        put(x, titleOffset + 1, "Rarity");
 
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
@@ -289,16 +290,16 @@ public class InfoHandler {
             }
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
         }
-        put(x, yOffset + 6, "Armor");
-        put(x, yOffset + 7, "Health");
+        put(x, titleOffset, "Armor");
+        put(x, titleOffset + 1, "Health");
 
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.clothing.get(cs);
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
         }
-        put(x, yOffset + 6, "Clothes");
-        put(x, yOffset + 7, "Rarity");
+        put(x, titleOffset, "Clothes");
+        put(x, titleOffset + 1, "Rarity");
 
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
@@ -312,8 +313,8 @@ public class InfoHandler {
             }
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
         }
-        put(x, yOffset + 6, "Clothes");
-        put(x, yOffset + 7, "Health");
+        put(x, titleOffset, "Clothes");
+        put(x, titleOffset + 1, "Health");
     }
 
     private void infoSkills(Physical physical) {

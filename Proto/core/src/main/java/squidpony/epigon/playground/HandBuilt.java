@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.*;
+import squidpony.epigon.data.blueprint.Cloth;
+import squidpony.epigon.data.blueprint.Inclusion;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
@@ -32,13 +34,17 @@ public class HandBuilt {
     public Physical baseOpenDoor = new Physical();
     public Physical baseClosedDoor = new Physical();
 
-    public Physical playerBlueprint;
-    public Physical swordBlueprint;
-    public Recipe swordRecipe;
-
     public Recipe doorRecipe;
     public Modification openDoor;
     public Modification closeDoor;
+
+    public Physical playerBlueprint;
+
+    public Recipe hatRecipe;
+    public Recipe shirtRecipe;
+    public Recipe pantsRecipe;
+
+    public Recipe swordRecipe;
 
     public Modification makeWall;
 
@@ -94,9 +100,9 @@ public class HandBuilt {
     public HandBuilt() {
         initAbilities();
         initProfessions();
+        initItems();
         initPlayer();
         initDoors();
-        initItems();
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
@@ -201,6 +207,24 @@ public class HandBuilt {
 
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
+
+        // Put on some clothes
+        Physical hat = mixer.mix(hatRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LINEN)), Collections.emptyList()).get(0);
+        hat.rarity = Rating.SUPERB;
+        cb.clothing.put(ClothingSlot.HEAD, hat);
+        Physical shirt = mixer.mix(shirtRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.VELVET)), Collections.emptyList()).get(0);
+        shirt.rarity = Rating.TYPICAL;
+        cb.clothing.put(ClothingSlot.TORSO, shirt);
+        cb.clothing.put(ClothingSlot.LEFT_SHOULDER, shirt);
+        cb.clothing.put(ClothingSlot.RIGHT_SHOULDER, shirt);
+        cb.clothing.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
+        cb.clothing.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
+        Physical pants = mixer.mix(pantsRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LEATHER)), Collections.emptyList()).get(0);
+        hat.rarity = Rating.SUPERB;
+        cb.clothing.put(ClothingSlot.WAIST, pants);
+        cb.clothing.put(ClothingSlot.LEFT_UPPER_LEG, pants);
+        cb.clothing.put(ClothingSlot.RIGHT_UPPER_LEG, pants);
+
         cb.skills = new OrderedMap<>();
         cb.skills.put(unarmedCombat, Rating.HIGH);
 
@@ -256,16 +280,22 @@ public class HandBuilt {
     }
 
     private void initItems() {
-        swordBlueprint = new Physical();
-        swordBlueprint.name = "sword";
-        swordBlueprint.color = SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f);
-        swordBlueprint.symbol = '(';
+        swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '(');
+        hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), '^');
+        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), ')');
+        pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), ')');
+    }
 
-        RecipeBlueprint swordRecipeBlueprint = new RecipeBlueprint();
-        swordRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
-        swordRecipeBlueprint.result.put(swordBlueprint, 1);
+    private Recipe createSimpleRecipe(String name, float color, char symbol){
+        Physical blueprint = new Physical();
+        blueprint.name = name;
+        blueprint.color = color;
+        blueprint.symbol = symbol;
 
-        swordRecipe = mixer.createRecipe(swordRecipeBlueprint);
+        RecipeBlueprint recipeBLueprint = new RecipeBlueprint();
+        recipeBLueprint.requiredConsumed.put(basePhysical, 1);
+        recipeBLueprint.result.put(blueprint, 1);
+        return mixer.createRecipe(recipeBLueprint);
     }
 
     public Modification makeAlive() {
