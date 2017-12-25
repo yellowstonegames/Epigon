@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
 import squidpony.Messaging;
-import squidpony.StringKit;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
