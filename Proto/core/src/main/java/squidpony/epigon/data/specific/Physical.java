@@ -311,4 +311,62 @@ public class Physical extends EpiData {
         return -amt;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + (this.generic ? 1 : 0);
+        hash = 59 * hash + (this.unique ? 1 : 0);
+        hash = 59 * hash + (this.buildingBlock ? 1 : 0);
+        hash = 59 * hash + this.symbol;
+        hash = 59 * hash + Float.floatToIntBits(this.color);
+        hash = 59 * hash + (int) (Double.doubleToLongBits(this.baseValue) ^ (Double.doubleToLongBits(this.baseValue) >>> 32));
+        hash = 59 * hash + (this.blocking ? 1 : 0);
+        hash = 59 * hash + Float.floatToIntBits(this.lightEmitted);
+        hash = 59 * hash + Objects.hashCode(this.rarity);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Physical other = (Physical) obj;
+        if (this.generic != other.generic) {
+            return false;
+        }
+        if (this.unique != other.unique) {
+            return false;
+        }
+        if (this.buildingBlock != other.buildingBlock) {
+            return false;
+        }
+        if (this.symbol != other.symbol) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.color) != Float.floatToIntBits(other.color)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.baseValue) != Double.doubleToLongBits(other.baseValue)) {
+            return false;
+        }
+        if (this.blocking != other.blocking) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.lightEmitted) != Float.floatToIntBits(other.lightEmitted)) {
+            return false;
+        }
+        if (this.rarity != other.rarity) {
+            return false;
+        }
+        return true;
+    }
+
+    
 }

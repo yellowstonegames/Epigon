@@ -211,16 +211,19 @@ public class HandBuilt {
         // Put on some clothes
         Physical hat = mixer.mix(hatRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LINEN)), Collections.emptyList()).get(0);
         hat.rarity = Rating.SUPERB;
+        hat.color = SColor.FOREST_GREEN.toFloatBits();
         cb.clothing.put(ClothingSlot.HEAD, hat);
         Physical shirt = mixer.mix(shirtRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.VELVET)), Collections.emptyList()).get(0);
         shirt.rarity = Rating.TYPICAL;
+        shirt.color = SColor.CW_PALE_JADE.toFloatBits();
         cb.clothing.put(ClothingSlot.TORSO, shirt);
         cb.clothing.put(ClothingSlot.LEFT_SHOULDER, shirt);
         cb.clothing.put(ClothingSlot.RIGHT_SHOULDER, shirt);
         cb.clothing.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
         Physical pants = mixer.mix(pantsRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LEATHER)), Collections.emptyList()).get(0);
-        hat.rarity = Rating.SUPERB;
+        pants.rarity = Rating.SUPERB;
+        pants.color = SColor.WISTERIA.toFloatBits();
         cb.clothing.put(ClothingSlot.WAIST, pants);
         cb.clothing.put(ClothingSlot.LEFT_UPPER_LEG, pants);
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_LEG, pants);
@@ -282,7 +285,7 @@ public class HandBuilt {
     private void initItems() {
         swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '(');
         hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), '^');
-        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), ')');
+        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'ҭ');
         pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), ')');
     }
 
