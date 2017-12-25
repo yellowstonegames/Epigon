@@ -43,9 +43,15 @@ public class DesktopLauncher {
         config.height = Prefs.getScreenHeight();
         config.title = Prefs.getGameTitle();
         //config.vSyncEnabled = true; // true by default
-        config.addIcon("images/icons/logo128.png", Files.FileType.Internal);
-        config.addIcon("images/icons/logo32.png", Files.FileType.Internal);
-        config.addIcon("images/icons/logo16.png", Files.FileType.Internal);
+        // to get these files to load when launching this class as a main() method (and not as a gradle task),
+        // set the run configuration for "DesktopLauncher" to have a working directory that matches, on your machine,
+        // Z:\path\to\project\Epigon\Proto\desktop\assets
+        // This is in Run -> Edit Configurations in IntelliJ IDEA and probably also Android Studio. Expect issues if you
+        // use Android Studio though; there's a problem with Android and desktop modules co-existing in it.
+        config.addIcon("images/icons/libgdx16.png", Files.FileType.Internal);
+        config.addIcon("images/icons/libgdx32.png", Files.FileType.Internal);
+        config.addIcon("images/icons/libgdx64.png", Files.FileType.Internal);
+        config.addIcon("images/icons/libgdx128.png", Files.FileType.Internal);
 
         new LwjglApplication(new Epigon(), config);
 
