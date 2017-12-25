@@ -3,6 +3,7 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.ClothingSlot;
 import squidpony.epigon.universe.LiveValue;
@@ -21,8 +22,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.infoSize;
-import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.data.mixin.Creature;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -273,7 +272,7 @@ public class InfoHandler {
         int x = 3;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.armor.get(cs);
-            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? SColor.TRANSPARENT : p.rarity.color());
         }
         put(x, titleOffset, "Armor");
         put(x, titleOffset + 1, "Rarity");
@@ -281,7 +280,7 @@ public class InfoHandler {
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.armor.get(cs);
-            Color color = Rating.NONE.color();
+            Color color = SColor.TRANSPARENT;
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
                 if (lv != null) {
@@ -296,7 +295,7 @@ public class InfoHandler {
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.clothing.get(cs);
-            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? SColor.TRANSPARENT : p.rarity.color());
         }
         put(x, titleOffset, "Clothes");
         put(x, titleOffset + 1, "Rarity");
@@ -304,7 +303,7 @@ public class InfoHandler {
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.values()) {
             Physical p = data.clothing.get(cs);
-            Color color = Rating.NONE.color();
+            Color color = SColor.TRANSPARENT;
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
                 if (lv != null) {

@@ -2,19 +2,14 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.stream.Collectors;
 import squidpony.ArrayTools;
-import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.universe.CalcStat;
-import squidpony.epigon.universe.Rating;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.*;
-
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -60,6 +55,7 @@ public class PrimaryHandler {
     private SquidPanel back;
     private SquidPanel front;
     private int width;
+    private int halfWidth;
     private int height;
     private PrimaryMode mode = PrimaryMode.EQUIPMENT;
     private SquidColorCenter colorCenter;
@@ -71,6 +67,7 @@ public class PrimaryHandler {
     public PrimaryHandler(SquidLayers layers, SquidColorCenter colorCenter) {
         this.colorCenter = colorCenter;
         width = layers.getGridWidth();
+        halfWidth = width / 2;
         height = layers.getGridHeight();
         back = layers.getBackgroundLayer();
         front = layers.getForegroundLayer();
@@ -155,30 +152,88 @@ public class PrimaryHandler {
         updateDisplay();
     }
 
-    private void showHelp(){
+    private void showHelp() {
 
     }
 
-    private void showEquipment(){
-        int y = 2;
-        for (Physical p : player.inventory){
+    private void showEquipment() {
+        // Create divider
+        for (int line = 1; line < height - 1; line++) {
+            put(halfWidth, line, '│');
+        }
+        put(halfWidth, height - 1, '┴');
+
+        // Left half
+        int y = 1;
+        put(1, y, "Inventory", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.inventory) {
             int x = 1;
-            put(x, y, "-");
-            x+=2;
-            put (x, y, p.symbol, p.color);
-            x+=2;
-            String descr = p.name;
-            if (p.weaponData != null){
-                descr += " - Hands: " + p.weaponData.hands;
-                descr += " Damage: " + p.weaponData.calcStats[Physical.DAMAGE];
-                descr = descr.substring(0, 1).toUpperCase() + descr.substring(1);
-            }
-            put (x, y, descr);
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
+            y++;
+        }
+
+        // Right half
+        y = 1;
+        int xOffset = halfWidth + 1;
+        put(xOffset, y, "Wielded Equipment", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.creatureData.equipment.values().stream().distinct().collect(Collectors.toList())) {
+            int x = xOffset;
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
+            y++;
+        }
+
+        y++;
+        put(xOffset, y, "Worn Armor", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.creatureData.armor.values().stream().distinct().collect(Collectors.toList())) {
+            int x = xOffset;
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
+            y++;
+        }
+
+        y++;
+        put(xOffset, y, "Worn Over Armor", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.creatureData.overArmor.values().stream().distinct().collect(Collectors.toList())) {
+            int x = xOffset;
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
+            y++;
+        }
+
+        y++;
+        put(xOffset, y, "Worn Clothing", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.creatureData.clothing.values().stream().distinct().collect(Collectors.toList())) {
+            int x = xOffset;
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
+            y++;
+        }
+
+        y++;
+        put(xOffset, y, "Worn Jewelry", SColor.CW_BLUE);
+        y++;
+        for (Physical p : player.creatureData.jewelry.values().stream().distinct().collect(Collectors.toList())) {
+            int x = xOffset;
+            put(x, y, p.symbol, p.color);
+            x += 2;
+            put(x, y, p.name);
             y++;
         }
     }
 
-    private void showCrafting(){
+    private void showCrafting() {
 
     }
 
@@ -187,7 +242,7 @@ public class PrimaryHandler {
         front.setVisible(false);
     }
 
-    public PrimaryMode getMode(){
+    public PrimaryMode getMode() {
         return mode;
     }
 
@@ -196,7 +251,7 @@ public class PrimaryHandler {
         updateDisplay();
     }
 
-    public void setPlayer(Physical player){
+    public void setPlayer(Physical player) {
         this.player = player;
     }
 

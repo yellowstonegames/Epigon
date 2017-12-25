@@ -521,7 +521,6 @@ public class Epigon extends Game {
             slots.add(WieldSlot.LEFT_HAND);
         }
         player.equip(item, slots);
-        message("Now wielding: " + item);
     }
 
     private void scheduleMove(Direction dir)
@@ -876,12 +875,12 @@ public class Epigon extends Game {
                 case SHUT: // Close all the doors nearby
                     message("Closing nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
-                            .map(d -> player.location.translate(d))
-                            .filter(c -> map.inBounds(c))
-                            .filter(c -> fovResult[c.x][c.y] > 0)
-                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-                            .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
+                        .map(d -> player.location.translate(d))
+                        .filter(c -> map.inBounds(c))
+                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                        .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+                        .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
@@ -889,15 +888,15 @@ public class Epigon extends Game {
                     message("Picking up all nearby small things");
                     for (int i = 0; i < 8; i++) {
                         Coord c = player.location.translate(Direction.OUTWARDS[i]);
-                        if(map.inBounds(c) && fovResult[c.x][c.y] > 0)
-                        {
+                        if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
                             EpiTile tile = map.contents[c.x][c.y];
                             ListIterator<Physical> it = tile.contents.listIterator();
                             Physical p;
-                            while (it.hasNext())
-                            {
+                            while (it.hasNext()) {
                                 p = it.next();
-                                if(p.attached || p.creatureData != null) continue;
+                                if (p.attached || p.creatureData != null) {
+                                    continue;
+                                }
                                 player.inventory.add(p);
                                 it.remove();
                             }
@@ -905,9 +904,6 @@ public class Epigon extends Game {
                     }
                     break;
                 case EQUIPMENT:
-                    for (String m : StringKit.wrap("Carrying: " + StringKit.join(", ", player.inventory), messageSize.gridWidth - 2)) {
-                        message(m);
-                    }
                     primaryHandler.setMode(PrimaryMode.EQUIPMENT);
                     mapInput.setKeyHandler(equipmentKeys);
                     mapInput.setMouse(equipmentMouse);
@@ -982,6 +978,7 @@ public class Epigon extends Game {
                     break;
                 case DRAW:
                     equipItem();
+                    primaryHandler.updateDisplay();
                     break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();

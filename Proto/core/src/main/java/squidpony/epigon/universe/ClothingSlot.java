@@ -1,5 +1,8 @@
 package squidpony.epigon.universe;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import squidpony.squidmath.Coord;
 
 /**
@@ -48,5 +51,14 @@ public enum ClothingSlot {
     private ClothingSlot(String drawn, int x, int y) {
         this.drawn = drawn;
         location = Coord.get(x, y);
+    }
+
+    /**
+     * Returns the short code for the slot name.
+     */
+    public String shortCode(){
+        return Arrays.stream(name().split("_"))
+            .map(s -> s.substring(0, 1))
+            .collect(Collectors.joining());
     }
 }
