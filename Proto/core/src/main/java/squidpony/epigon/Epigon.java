@@ -19,10 +19,7 @@ import squidpony.epigon.display.PrimaryHandler.PrimaryMode;
 import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.RememberedTile;
-import squidpony.epigon.mapping.WorldGenerator;
+import squidpony.epigon.mapping.*;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
@@ -64,7 +61,8 @@ public class Epigon extends Game {
     public static final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
     public static final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
     // used for certain calculations where the state changes per-tile
-    public static final StatefulRNG srng = new StatefulRNG(new ThrustRNG(seed ^ seed >>> 1));
+    public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
+    public static final RNG prng = new RNG(posrng);
     //unseeded random number generator
     public static final StatefulRNG chaos = new StatefulRNG(new ThrustRNG());
     public static final RecipeMixer mixer = new RecipeMixer();
@@ -454,7 +452,7 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (fovResult[x][y] > 0) {
-                    srng.setState((x * 0x10000000FL + y));
+                    posrng.move(x, y);
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
                     } else {
@@ -647,7 +645,7 @@ public class Epigon extends Game {
                         mapSLayers.put(x, y, ' ', 0f, bgColorFloat);
                         mapSLayers.clear(x, y, 0);
                     } else {
-                        srng.setState((x * 0x10000000FL + y));
+                        posrng.move(x, y);
                         mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
                                 bgColorFloat // this can be null to use no background (transparent)
                         );
