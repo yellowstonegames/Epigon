@@ -87,12 +87,13 @@ public class RecipeMixer {
         recipe.result.entrySet().stream()
             .forEach(e -> IntStream.range(0, e.getValue())
             .forEach(i -> {
-                Physical physical = RecipeMixer.this.buildPhysical(e.getKey());
+                Physical physical = buildPhysical(e.getKey());
                 Stream.of(consumed.stream(), catalyst.stream())
                     .flatMap(m -> m)
                     .map(m -> m.whenUsedAsMaterial)
                     .flatMap(Collection::stream)
                     .forEach(modification -> applyModification(physical, modification));
+                physical.stats.values().forEach(lv -> lv.actual(lv.base()));// Make sure actual is set to base value on first creation
                 physical.calculateStats();
                 result.add(physical);
             }));
@@ -126,6 +127,7 @@ public class RecipeMixer {
         stoneMod.possiblePrefix = Collections.singletonList(stone.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = stone.hardness * 0.01;
+        lvm.actualOverwrite = stone.getHardness() * 0.01;
         stoneMod.statChanges.put(Stat.STRUCTURE, lvm);
         blueprint.whenUsedAsMaterial.add(stoneMod);
 
@@ -161,6 +163,7 @@ public class RecipeMixer {
         inclusionMod.possiblePrefix = Collections.singletonList(inclusion.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = inclusion.hardness * 0.01;
+        lvm.actualOverwrite = inclusion.getHardness() * 0.01;
         inclusionMod.statChanges.put(Stat.STRUCTURE, lvm);
         blueprint.whenUsedAsMaterial.add(inclusionMod);
 
@@ -194,6 +197,7 @@ public class RecipeMixer {
         inclusionMod.possiblePrefix = Collections.singletonList(material.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = material.getHardness() * 0.01;
+        lvm.actualOverwrite = material.getHardness() * 0.01;
         inclusionMod.statChanges.put(Stat.STRUCTURE, lvm);
         blueprint.whenUsedAsMaterial.add(inclusionMod);
 
@@ -287,7 +291,7 @@ public class RecipeMixer {
         physical.calculateStats();
 
         blueprint.inventory.stream().forEach(i -> {
-            physical.inventory.add(RecipeMixer.this.buildPhysical(i));
+            physical.inventory.add(buildPhysical(i));
         });
 
         physical.physicalDrops = blueprint.physicalDrops;
