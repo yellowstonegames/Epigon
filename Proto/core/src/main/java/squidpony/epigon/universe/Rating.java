@@ -38,10 +38,8 @@ public enum Rating {
 
     public Color color() {
         switch (this) {
-            case NONE:
-                return SColor.CHESTNUT_LEATHER_BROWN; // Dark grey
             case SLIGHT:
-                return SColor.CW_GRAY; // Medium grey
+                return SColor.CW_PALE_ORANGE; // Medium grey
             case TYPICAL:
                 return SColor.CW_PALE_JADE; // White
             case GOOD:
@@ -54,8 +52,9 @@ public enum Rating {
                 return SColor.PUMPKIN; // Orange
             case ULTIMATE:
                 return SColor.FUCSHIA_PINK;// Pink
+            case NONE:
             default:
-                return SColor.WHITE;
+                return SColor.CHESTNUT_LEATHER_BROWN; // Dark grey
         }
     }
 
