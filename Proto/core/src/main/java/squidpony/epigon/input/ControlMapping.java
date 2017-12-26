@@ -44,7 +44,6 @@ public class ControlMapping {
                 (int)'u', MOVE_UP_RIGHT,
                 (int)'b', MOVE_DOWN_LEFT,
                 (int)'n', MOVE_DOWN_RIGHT,
-                (int)'w', WAIT,
                 (int)'.', WAIT,
                 (int)'<'|CAPS, MOVE_HIGHER,
                 (int)'>'|CAPS, MOVE_LOWER,
@@ -88,11 +87,12 @@ public class ControlMapping {
                 (int)'n', MOVE_DOWN_RIGHT,
                 (int)'<'|CAPS, UI_PREVIOUS_PAGE,
                 (int)'>'|CAPS, UI_NEXT_PAGE,
+                (int)'[', CONTEXT_PRIOR,
+                (int)']', CONTEXT_NEXT,
                 (int)'{'|CAPS, INFO_PRIOR,
                 (int)'}'|CAPS, INFO_NEXT,
                 (int)'Q'|CAPS, UI_CLOSE_WINDOW,
                 (int)'q'|CTRL, UI_CLOSE_WINDOW,
-                (int)'e', UI_CLOSE_WINDOW,
                 (int)ESCAPE, UI_CLOSE_WINDOW
         );
         public static final OrderedMap<Integer, Verb> defaultHelpViewMapping =
@@ -113,6 +113,9 @@ public class ControlMapping {
                 (int)'u', MOVE_UP_RIGHT,
                 (int)'b', MOVE_DOWN_LEFT,
                 (int)'n', MOVE_DOWN_RIGHT,
+                (int)'{'|CAPS, INFO_PRIOR,
+                (int)'}'|CAPS, INFO_NEXT,
+                (int)'e', EQUIPMENT,
                 (int)'<'|CAPS, UI_PREVIOUS_PAGE,
                 (int)'>'|CAPS, UI_NEXT_PAGE,
                 (int)'Q'|CAPS, UI_CLOSE_WINDOW,

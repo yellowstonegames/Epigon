@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.Rating;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
@@ -51,6 +52,9 @@ public class PrimaryHandler {
             return name;
         }
     }
+
+    private SColor headingColor = SColor.CW_BLUE;
+    private SColor keyColor = SColor.FLORAL_LEAF;
 
     private SquidPanel back;
     private SquidPanel front;
@@ -153,7 +157,62 @@ public class PrimaryHandler {
     }
 
     private void showHelp() {
+        int y = 1;
 
+        put(1, y, "Game Overview", headingColor);
+        y++;
+        put(1, y, "Epigon is a roguelike. Probably gonna die and such.");
+        y += 2;
+
+        put(1, y, "Ratings & Rarities, worst to best", headingColor);
+        y++;
+        int x = 1;
+        for (Rating r : Rating.values()) {
+            String display = r.toString();
+            put(x, y, display, r.color());
+            x += display.length() + 1;
+        }
+        y += 2;
+
+        put(1, y, "Movement Keys (Numpad and Arrows also work)", headingColor);
+        y++;
+        int tempY = y;
+        x = 2;
+        put(x, y, " y k u", keyColor);
+        y++;
+        put(x, y, "  ↖↑↗ ", keyColor);
+        y++;
+        put(x, y, "h ←.→ l", keyColor);
+        y++;
+        put(x, y, "  ↙↓↘ ", keyColor);
+        y++;
+        put(x, y, " b j n", keyColor);
+        y = tempY;
+        x = 11;
+        put(x, y, "Bumping into enemies attacks with");
+        put(x, y + 1, "your default attack skill.");
+        put(x, y + 3, "Waiting '.' skips your turn.");
+        y += 6;
+
+        put(1, y, "Default Key Commands", headingColor);
+        y++;
+        x = 1;
+        int descX = x + 11;
+        put(x, y, "F1, ?", keyColor);
+        put(descX, y, "Opens this help screen");
+        y++;
+        put(x, y, "e", keyColor);
+        put(descX, y, "Opens the equipment inventory screen");
+        y++;
+        put(x, y, "f", keyColor);
+        put(descX, y, "Fires an equipped ranged weapon");
+        y++;
+        put(x, y, "c", keyColor);
+        put(descX, y, "Consume - use up an item, such as drinking or slathering");
+        y++;
+        put(x, y, "ctrl-c", keyColor);
+        put(descX, y, "Consume Weirdly - uses up an item in a non-standard way");
+        y += 2;
     }
 
     private void showEquipment() {
@@ -165,7 +224,7 @@ public class PrimaryHandler {
 
         // Left half
         int y = 1;
-        put(1, y, "Inventory", SColor.CW_BLUE);
+        put(1, y, "Inventory", headingColor);
         y++;
         for (Physical p : player.inventory) {
             int x = 1;
@@ -178,7 +237,7 @@ public class PrimaryHandler {
         // Right half
         y = 1;
         int xOffset = halfWidth + 1;
-        put(xOffset, y, "Wielded Equipment", SColor.CW_BLUE);
+        put(xOffset, y, "Wielded Equipment", headingColor);
         y++;
         for (Physical p : player.creatureData.equipment.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset;
@@ -189,7 +248,7 @@ public class PrimaryHandler {
         }
 
         y++;
-        put(xOffset, y, "Worn Armor", SColor.CW_BLUE);
+        put(xOffset, y, "Worn Armor", headingColor);
         y++;
         for (Physical p : player.creatureData.armor.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset;
@@ -200,7 +259,7 @@ public class PrimaryHandler {
         }
 
         y++;
-        put(xOffset, y, "Worn Over Armor", SColor.CW_BLUE);
+        put(xOffset, y, "Worn Over Armor", headingColor);
         y++;
         for (Physical p : player.creatureData.overArmor.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset;
@@ -211,7 +270,7 @@ public class PrimaryHandler {
         }
 
         y++;
-        put(xOffset, y, "Worn Clothing", SColor.CW_BLUE);
+        put(xOffset, y, "Worn Clothing", headingColor);
         y++;
         for (Physical p : player.creatureData.clothing.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset;
@@ -222,7 +281,7 @@ public class PrimaryHandler {
         }
 
         y++;
-        put(xOffset, y, "Worn Jewelry", SColor.CW_BLUE);
+        put(xOffset, y, "Worn Jewelry", headingColor);
         y++;
         for (Physical p : player.creatureData.jewelry.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset;
