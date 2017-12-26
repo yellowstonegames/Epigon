@@ -8,7 +8,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static squidpony.epigon.Epigon.srng;
+import static squidpony.epigon.Epigon.posrng;
 import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
@@ -127,13 +127,13 @@ public class EpiTile {
         //check in order of preference
         if (blockage != null) {
             if(blockage.creatureData != null)
-                return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));//getCreature().color;
+                return SColor.lerpFloatColors(floor.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));//getCreature().color;
             else
-                return SColor.lerpFloatColors(blockage.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));
+                return SColor.lerpFloatColors(blockage.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));
         } else if (!contents.isEmpty()){
             return contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            return SColor.lerpFloatColors(floor.color, dbColors[srng.next(5)], srng.nextFloat(0.3f));
+            return SColor.lerpFloatColors(floor.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));
         }
 
         return 0f;
