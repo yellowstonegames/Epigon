@@ -17,6 +17,15 @@ task run(dependsOn: classes, type: JavaExec) {
     setIgnoreExitValue(true)
 }
 
+task debug(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    debug = true
+    setIgnoreExitValue(true)
+}
+
 task dist(type: Jar) {
     from files(sourceSets.main.output.getClassesDir())
     from files(sourceSets.main.output.getResourcesDir())
