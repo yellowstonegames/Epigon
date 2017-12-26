@@ -223,7 +223,7 @@ public class Epigon extends Game {
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
-        primarySLayers.getBackgroundLayer().setDefaultForeground(colorCenter.desaturate(SColor.DARK_GRAY, 0.8));
+        primarySLayers.getBackgroundLayer().setDefaultForeground(colorCenter.desaturate(SColor.DB_INK, 0.8));
         primarySLayers.getForegroundLayer().setDefaultForeground(SColor.LIME);
         primaryHandler = new PrimaryHandler(primarySLayers, colorCenter);
 
@@ -924,6 +924,12 @@ public class Epigon extends Game {
                 case INFO_NEXT:
                     infoHandler.next();
                     break;
+                case HELP:
+                    primaryHandler.setMode(PrimaryMode.HELP);
+                    mapInput.setKeyHandler(helpKeys);
+                    toCursor.clear();
+                    mapInput.setMouse(helpMouse);
+                    break;
                 case QUIT:
                     // TODO - confirmation
                     Gdx.app.exit();
@@ -949,7 +955,7 @@ public class Epigon extends Game {
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultEquipmentViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input for map mode: " + key);
+                message("Unknown input for equipment mode: " + key);
                 return;
             }
             switch (verb) {
@@ -993,6 +999,11 @@ public class Epigon extends Game {
                 case INFO_NEXT:
                     infoHandler.next();
                     break;
+                case HELP:
+                    primaryHandler.setMode(PrimaryMode.HELP);
+                    mapInput.setKeyHandler(helpKeys);
+                    mapInput.setMouse(helpMouse);
+                    break;
                 case UI_CLOSE_WINDOW:
                     inputMode = InputMode.MAP;
                     mapInput.setKeyHandler(mapKeys);
@@ -1006,6 +1017,64 @@ public class Epigon extends Game {
         }
     };
 
+    private final KeyHandler helpKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            Verb verb = ControlMapping.defaultHelpViewMapping.get(combined);
+            if (verb == null){
+                message("Unknown input for help mode: " + key);
+                return;
+            }
+            switch (verb) {
+                case MOVE_DOWN:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_RIGHT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_DOWN_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_DOWN_RIGHT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP_LEFT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case MOVE_UP_RIGHT:
+                    // TODO - keyboard controls in equipment screen
+                    break;
+                case INFO_PRIOR:
+                    infoHandler.prior();
+                    break;
+                case INFO_NEXT:
+                    infoHandler.next();
+                    break;
+                case EQUIPMENT:
+                    primaryHandler.setMode(PrimaryMode.EQUIPMENT);
+                    inputMode = InputMode.HELP;
+                    mapInput.setKeyHandler(equipmentKeys);
+                    mapInput.setMouse(equipmentMouse);
+                    break;
+                case UI_CLOSE_WINDOW:
+                    inputMode = InputMode.MAP;
+                    mapInput.setKeyHandler(mapKeys);
+                    mapInput.setMouse(mapMouse);
+                    primaryHandler.hide();
+                    break;
+                default:
+                    message("Can't " + verb.name + " from equipment view.");
+                    break;
+            }
+        }
+    };
     private final KeyHandler debugKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
@@ -1037,6 +1106,14 @@ public class Epigon extends Game {
     };
 
     private final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            return false; // No-op for now
+        }
+    });
+
+    private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {

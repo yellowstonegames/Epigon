@@ -1,9 +1,9 @@
 package squidpony.epigon.universe;
 
+import squidpony.squidmath.Coord;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import squidpony.squidmath.Coord;
 
 /**
  * The areas where things can be worn.
