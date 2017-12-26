@@ -2,6 +2,7 @@ package squidpony.epigon.playground;
 
 import squidpony.Maker;
 import squidpony.epigon.Epigon;
+import squidpony.epigon.data.blueprint.Cloth;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
 import squidpony.epigon.data.generic.Formula;
@@ -22,8 +23,6 @@ import java.util.Collections;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.*;
-import squidpony.epigon.data.blueprint.Cloth;
-import squidpony.epigon.data.blueprint.Inclusion;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
@@ -222,7 +221,7 @@ public class HandBuilt {
         cb.clothing.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
         Physical pants = mixer.mix(pantsRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LEATHER)), Collections.emptyList()).get(0);
-        pants.rarity = Rating.SUPERB;
+        pants.rarity = Rating.SLIGHT;
         pants.color = SColor.WISTERIA.toFloatBits();
         cb.clothing.put(ClothingSlot.WAIST, pants);
         cb.clothing.put(ClothingSlot.LEFT_UPPER_LEG, pants);
