@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -768,33 +769,35 @@ public class Epigon extends Game {
         // (gridWidth & 1) is 1 if gridWidth is odd or 0 if it is even; it's good to know and faster than using % , plus
         // in some other cases it has useful traits (x % 2 can be 0, 1, or -1 depending on whether x is negative, while
         // x & 1 will always be 0 or 1).
-        mapInput.getMouse().reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-                mapSize.gridWidth, mapSize.gridHeight,
-                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
-                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
-        contextInput.getMouse().reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
-                contextSize.gridWidth, contextSize.gridHeight,
-                -(int) (messageSLayers.getRight()),
-                -(int) (infoSLayers.getTop() + 8f));
-        infoInput.getMouse().reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
-                infoSize.gridWidth, infoSize.gridHeight,
-                -(int) (messageSLayers.getRight()), 0);
+        Stream.of(mapMouse, equipmentMouse).forEach(mouse -> mouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
+            mapSize.gridWidth, mapSize.gridHeight,
+            (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+            (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f)));
+        contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
+            contextSize.gridWidth, contextSize.gridHeight,
+            -(int) (messageSLayers.getRight()),
+            -(int) (infoSLayers.getTop() + 8f));
+        infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
+            infoSize.gridWidth, infoSize.gridHeight,
+            -(int) (messageSLayers.getRight()), 0);
 
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
-                (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
+            (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
 
         infoViewport.update(width, height, false);
         infoViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()),
-                (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
+            (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
 
         messageViewport.update(width, height, false);
         messageViewport.setScreenBounds(0, 0,
-                (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
+            (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
 
-        mapViewport.update(width, height, false);
-        mapViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
+        Stream.of(mapViewport, primaryViewport).forEach(port -> {
+            port.update(width, height, false);
+            port.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+        });
     }
 
     @Override
@@ -903,6 +906,7 @@ public class Epigon extends Game {
                 case EQUIPMENT:
                     primaryHandler.setMode(PrimaryMode.EQUIPMENT);
                     mapInput.setKeyHandler(equipmentKeys);
+                    toCursor.clear();
                     mapInput.setMouse(equipmentMouse);
                     break;
                 case DRAW:
@@ -1099,10 +1103,15 @@ public class Epigon extends Game {
             }
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
+
+            // Check if the cursor didn't move in grid space
+            if (cursor.x == screenX && cursor.y == screenY){
+                return false;
+            }
+            
             //message(screenX + ", " + screenY + "; player x=" + player.location.x + ", player y="  + player.location.y);
-            //int sx = screenX + mapSLayers.getGridOffsetX(), sy = screenY + mapSLayers.getGridOffsetY();
-            if ((screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height) || (cursor.x == screenX && cursor.y == screenY)
-                    || fovResult[screenX][screenY] <= 0.0) {
+            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || fovResult[screenX][screenY] <= 0.0) {
+                toCursor.clear(); // don't show path when mouse moves out of range or view
                 return false;
             }
             cursor = Coord.get(screenX, screenY);
@@ -1112,7 +1121,6 @@ public class Epigon extends Game {
             // that's special to DijkstraMap; because the whole map has already been fully analyzed by the
             // DijkstraMap.scan() method at the start of the program, and re-calculated whenever the player
             // moves, we only need to do a fraction of the work to find the best path with that info.
-            //toPlayerDijkstra.partialScan((int)(player.stats.get(Stat.SIGHT).actual * 1.45), blocked);
             toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
 
             //findPathPreScanned includes the current cell (goal) by default, which is helpful when
