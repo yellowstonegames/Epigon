@@ -631,19 +631,26 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground, float background, float lightColor, float lightAmount, float noise) {
-        float front = SColor.lerpFloatColors(unseenColorFloat, foreground, lightAmount);
-        float back = SColor.lerpFloatColors(background, lightColor, (0xAAp-9f + (0xC8p-9f * lightAmount * (1f + 0.35f * noise))));
-        back = SColor.lerpFloatColors(unseenColorFloat, back, lightAmount);
-        mapSLayers.put(x, y, c, front, back);
+        mapSLayers.put(x, y, c, SColor.lerpFloatColors(unseenColorFloat, foreground, lightAmount),
+                SColor.lerpFloatColors(unseenColorFloat, SColor.lerpFloatColors(background, lightColor,
+                        (0xDDp-9f + (0xD0p-9f * lightAmount * (1f + 0.5f * noise)))), 0.45f + 0.55f * lightAmount));
     }
 
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
-        float lightColor = SColor.FLORAL_LEAF.toFloatBits();
-        float noise = (float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
-        noise = Math.max(noise, 0.2f);
+        final float lightColor = -0x1.219bfp126F; //SColor.CW_LIGHT_APRICOT.toFloatBits();
+                //-0x1.9d73fep125F;//SColor.FLORAL_LEAF.toFloatBits();
+
+        float time = (System.currentTimeMillis() & 0xffffffL) * 0.0025f;
+        long time0 = Noise.longFloor(time);
+        float noise = Math.max(
+                // this is a lot cheaper than 3D simplex noise and we don't need/want position to affect it.
+                Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0),
+                -0.1f);
+                //(float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
+        //noise = Math.max(noise, -0.1f);
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 double sightAmount = fovResult[x][y];
