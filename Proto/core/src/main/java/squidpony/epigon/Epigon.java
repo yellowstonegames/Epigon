@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -271,12 +270,13 @@ public class Epigon extends Game {
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
-        mapSLayers.addLayer();//next adds at level 2, used for effects
+        mapSLayers.addLayer();//next adds at level 2, used for the cursor line
+        mapSLayers.addLayer();//next adds at level 3, used for effects
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         for (int i = 0; i < messageCount; i++) {
             messages.add(emptyICS);
         }
-        fxHandler = new FxHandler(mapSLayers, 2, colorCenter, fovResult);
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, fovResult);
         message("Generating world.");
         worldGenerator = new WorldGenerator();
         map = worldGenerator.buildWorld(map.width, map.height, 1, handBuilt)[0];
@@ -601,14 +601,14 @@ public class Epigon extends Game {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
-                        mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, bgColorFloat, 1);
+                        mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                         message("You defeat the " + thing.name + " with " + amt + " " + element.styledName + " damage!");
                         //message("Killed the " + thing.name + " with " + amt + ' ' + element.styledName + " damage");
                     } else {
                         String amtText = String.valueOf(amt);
                         int startX = newX - (amtText.length() >> 1);
                         for (int i = 0; i < amtText.length(); i++, startX++) {
-                            mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, bgColorFloat, 1f);
+                            mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
                         }
                         message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
                                 amt + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
@@ -642,20 +642,20 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
-                    if (sightAmount >= 1.0 || creatures.containsKey(Coord.get(x, y))) {
-                        mapSLayers.put(x, y, ' ', 0f, bgColorFloat);
+                    if (creatures.containsKey(Coord.get(x, y))) {
+                        mapSLayers.putWithLight(x, y, ' ', 0f, bgColorFloat, /*COSMIC_LATTE*/-0x1.cff1fep126F, (float)sightAmount * 0.8f, null);
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
-                        mapSLayers.put(x, y, tile.getSymbol(), tile.getForegroundColor(),
-                                bgColorFloat // this can be null to use no background (transparent)
+                        mapSLayers.putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(),
+                                bgColorFloat, /*COSMIC_LATTE*/ -0x1.cff1fep126F, (float)sightAmount * 0.8f, null
                         );
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
                         mapSLayers.clear(x, y);
-                        mapSLayers.put(x, y, ' ', 0f, unseenColorFloat, 0);
+                        //mapSLayers.put(x, y, ' ', 0f, unseenColorFloat, 0);
                         mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 1);
                         //mapSLayers.put(x, y, '\0', rt.back, SColor.FLOAT_BLACK, 0);
                         //mapSLayers.put(x, y, rt.symbol, rt.front, SColor.FLOAT_BLACK, 1);
@@ -769,10 +769,14 @@ public class Epigon extends Game {
         // (gridWidth & 1) is 1 if gridWidth is odd or 0 if it is even; it's good to know and faster than using % , plus
         // in some other cases it has useful traits (x % 2 can be 0, 1, or -1 depending on whether x is negative, while
         // x & 1 will always be 0 or 1).
-        Stream.of(mapMouse, equipmentMouse).forEach(mouse -> mouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-            mapSize.gridWidth, mapSize.gridHeight,
-            (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
-            (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f)));
+        mapMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
+                mapSize.gridWidth, mapSize.gridHeight,
+                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
+        equipmentMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
+                mapSize.gridWidth, mapSize.gridHeight,
+                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
         contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
             contextSize.gridWidth, contextSize.gridHeight,
             -(int) (messageSLayers.getRight()),
@@ -793,11 +797,13 @@ public class Epigon extends Game {
         messageViewport.setScreenBounds(0, 0,
             (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
 
-        Stream.of(mapViewport, primaryViewport).forEach(port -> {
-            port.update(width, height, false);
-            port.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
+        mapViewport.update(width, height, false);
+        mapViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
-        });
+
+        primaryViewport.update(width, height, false);
+        primaryViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
+                width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
     }
 
     @Override
@@ -1004,6 +1010,7 @@ public class Epigon extends Game {
                     mapInput.setKeyHandler(helpKeys);
                     mapInput.setMouse(helpMouse);
                     break;
+                case EQUIPMENT: // e opens and then closes equipment menu
                 case UI_CLOSE_WINDOW:
                     inputMode = InputMode.MAP;
                     mapInput.setKeyHandler(mapKeys);
@@ -1028,28 +1035,28 @@ public class Epigon extends Game {
             }
             switch (verb) {
                 case MOVE_DOWN:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_UP:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_LEFT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_RIGHT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_DOWN_LEFT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_DOWN_RIGHT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_UP_LEFT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case MOVE_UP_RIGHT:
-                    // TODO - keyboard controls in equipment screen
+                    // TODO - keyboard controls in help screen
                     break;
                 case INFO_PRIOR:
                     infoHandler.prior();
@@ -1070,7 +1077,7 @@ public class Epigon extends Game {
                     primaryHandler.hide();
                     break;
                 default:
-                    message("Can't " + verb.name + " from equipment view.");
+                    message("Can't " + verb.name + " from help view.");
                     break;
             }
         }

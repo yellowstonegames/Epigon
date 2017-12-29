@@ -91,6 +91,7 @@ public class ControlMapping {
                 (int)']', CONTEXT_NEXT,
                 (int)'{'|CAPS, INFO_PRIOR,
                 (int)'}'|CAPS, INFO_NEXT,
+                (int)'e', EQUIPMENT, // acts the same as closing the window while open
                 (int)'Q'|CAPS, UI_CLOSE_WINDOW,
                 (int)'q'|CTRL, UI_CLOSE_WINDOW,
                 (int)ESCAPE, UI_CLOSE_WINDOW
