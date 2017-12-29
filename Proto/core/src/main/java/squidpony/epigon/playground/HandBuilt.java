@@ -244,7 +244,8 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
-        playerBlueprint.weaponData = Weapon.UNARMED.copy();
+        playerBlueprint.unarmedData = Weapon.unarmedWeapons.randomValue(chaos).copy();
+        playerBlueprint.weaponData = playerBlueprint.unarmedData.copy();
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));

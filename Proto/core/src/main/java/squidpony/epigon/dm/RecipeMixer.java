@@ -301,6 +301,7 @@ public class RecipeMixer {
 
         physical.creatureData = createCreature(blueprint.creatureData);
 
+        physical.unarmedData = blueprint.unarmedData;
         physical.weaponData = blueprint.weaponData;
 
         physical.terrainData = blueprint.terrainData;
