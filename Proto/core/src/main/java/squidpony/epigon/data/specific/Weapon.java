@@ -68,7 +68,8 @@ public class Weapon {
             "Time", Element.CHRONOMANCY,
             "Water", Element.WATER);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
-            physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
+            physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
+            unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
@@ -81,6 +82,8 @@ public class Weapon {
             weapons.put(rw.name, (wpn = new Weapon(rw)));
             if(rw.materials.length > 0)
                 physicalWeapons.put(rw.name, wpn);
+            else
+                unarmedWeapons.put(rw.name, wpn);
             for(String training : rw.training)
             {
                 if((cat = categories.get(training)) != null)
@@ -90,7 +93,7 @@ public class Weapon {
             }
         }
     }
-    public static final Weapon UNARMED = weapons.getAt(0);
+    //public static final Weapon UNARMED = weapons.getAt(0);
     public Weapon()
     {
         this(RawWeapon.ENTRIES[0]);

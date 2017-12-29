@@ -34,10 +34,7 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -510,15 +507,18 @@ public class Epigon extends Game {
             equipItem(chosen);
         }
     }
+    public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
+            LEFT = Collections.singletonList(WieldSlot.LEFT_HAND),
+            BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND);
 
     private void equipItem(Physical item) {
         player.weaponData = item.weaponData;
-        List<WieldSlot> slots = new ArrayList<>();
-        slots.add(WieldSlot.RIGHT_HAND);
-        if (item.weaponData.hands > 1){
-            slots.add(WieldSlot.LEFT_HAND);
+        switch (item.weaponData.hands)
+        {
+            case 2: player.equip(item, BOTH);
+            break;
+            default: player.equip(item, RIGHT);
         }
-        player.equip(item, slots);
     }
 
     private void scheduleMove(Direction dir)
@@ -917,6 +917,19 @@ public class Epigon extends Game {
                     break;
                 case DRAW:
                     equipItem();
+                    break;
+                case DROP: // Pick everything nearby up
+                    message("Dropping all held items");
+                    for(Physical dropped : player.unequip(BOTH))
+                    {
+                        for (int i = 0, offset = chaos.next(3); i < 8; i++) {
+                            Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
+                            if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
+                                map.contents[c.x][c.y].add(dropped);
+                                break;
+                            }
+                        }
+                    }
                     break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();

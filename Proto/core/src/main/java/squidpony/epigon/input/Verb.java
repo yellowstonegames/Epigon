@@ -13,6 +13,7 @@ public enum Verb {
     CONTEXT_PRIOR("Cycles the context area (lower right box on the Main View) one display state prior."),
     CONTEXT_NEXT("Cycles the context area (lower right box on the Main View) to the next display state."),
     DRAW("Picks up an object and immediately wields it. Randomly wields a weapon in inventory if there is not reachable nearby."),
+    DROP("Drops the items you currently hold in random adjacent squares."),
     EXAMINE("All five senses used to pay particular attention to an area; may trigger traps if you don't find them, which will not happen from just \"View\""), // If VIEW is changed this last bit needs to be changed as well
     FIRE("Using an equipped weapon with ammo."),
     GATHER("Get from all near tiles."),

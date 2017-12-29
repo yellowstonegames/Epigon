@@ -118,7 +118,7 @@ public class Physical extends EpiData {
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
-    public Weapon weaponData;
+    public Weapon weaponData, unarmedData;
     public Zappable zappableData;
 
     // Non-action mixins
@@ -255,6 +255,43 @@ public class Physical extends EpiData {
                 }
             }
         }
+    }
+
+    /**
+     * Takes the item out of inventory and places it into equipped areas. Anything already equipped in
+     * the areas goes back into inventory.
+     *
+     * @param slots All the slots that will be filled when the item is equipped
+     * @return a List of the items that were unequipped
+     */
+    public List<Physical> unequip(List<WieldSlot> slots) {
+        if (creatureData == null) {
+            System.err.println("Can't unequip from the Physical " + name + "; it is not a creature");
+            return Collections.emptyList();
+        }
+        List<Physical> removed = new ArrayList<>(slots.size());
+
+        Set<Physical> removing = new HashSet<>();
+        for (WieldSlot ws : slots) {
+            Physical p = creatureData.equipment.remove(ws);
+            if (p != null) {
+                removing.add(p);
+            }
+        }
+
+        for (Physical p : removing) {
+            removed.add(p);
+            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out mult-handed unequips
+                if (p.equals(creatureData.equipment.get(subSlot))) {
+                    creatureData.equipment.remove(subSlot);
+                }
+            }
+        }
+        if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
+        {
+            weaponData = unarmedData != null ? unarmedData.copy() : Weapon.unarmedWeapons.randomValue(chaos);
+        }
+        return removed;
     }
 
     public void calculateStats() {
