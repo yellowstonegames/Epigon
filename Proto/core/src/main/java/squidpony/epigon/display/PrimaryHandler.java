@@ -65,6 +65,9 @@ public class PrimaryHandler {
     private SquidColorCenter colorCenter;
     private Physical player;
 
+    private int scrollOffsetY;
+    private int helpHeight;
+
     public Coord arrowLeft;
     public Coord arrowRight;
 
@@ -88,6 +91,10 @@ public class PrimaryHandler {
         ArrayTools.fill(back.contents, '\0');
         ArrayTools.fill(front.contents, ' ');
 
+        doBorder();
+    }
+
+    private void doBorder() {
         int w = width;
         int h = height;
         // all box drawing chars we know we can use:
@@ -116,6 +123,22 @@ public class PrimaryHandler {
 
         put(arrowLeft.x, arrowLeft.y, '◀');
         put(arrowRight.x, arrowRight.y, '▶');
+    }
+
+    /**
+     * Draws some characters to indicate that the current view has more content above or below.
+     *
+     * @param startY
+     * @param contentHeight
+     */
+    private void doBorder(int y, int contentHeight) {
+        doBorder();
+        if (y < 1) {
+            put(width - 1, 1, '▲');
+        }
+        if (contentHeight + y >= height) {
+            put(width - 1, height - 2, '▼');
+        }
     }
 
     private void put(int x, int y, String s) {
@@ -156,8 +179,53 @@ public class PrimaryHandler {
         updateDisplay();
     }
 
+    public void moveUp() {
+        switch (mode) {
+            case CRAFTING:
+                showCrafting();
+                break;
+            case EQUIPMENT:
+                showEquipment();
+                break;
+            case HELP:
+                if (scrollOffsetY < 1) {
+                    scrollOffsetY++;
+                    clear();
+                    showHelp(scrollOffsetY);
+                } else {
+                    // TODO - visual cue that end of screen is reached
+                }
+                break;
+        }
+    }
+
+    public void moveDown() {
+        switch (mode) {
+            case CRAFTING:
+                showCrafting();
+                break;
+            case EQUIPMENT:
+                showEquipment();
+                break;
+            case HELP:
+                if (scrollOffsetY > -(helpHeight - height)) {
+                    scrollOffsetY--;
+                    clear();
+                    showHelp(scrollOffsetY);
+                } else {
+                    // TODO - visual cue that end of screen is reached
+                }
+                break;
+        }
+    }
+
     private void showHelp() {
-        int y = 1;
+        scrollOffsetY = 1;
+        showHelp(1);
+    }
+
+    private void showHelp(int startY) {
+        int y = startY;
 
         put(1, y, "Game Overview", headingColor);
         y++;
@@ -199,20 +267,59 @@ public class PrimaryHandler {
         x = 1;
         int descX = x + 11;
         put(x, y, "F1, ?", keyColor);
-        put(descX, y, "Opens this help screen");
+        put(descX, y, "Help - Opens this help screen");
         y++;
         put(x, y, "e", keyColor);
-        put(descX, y, "Opens the equipment inventory screen");
+        put(descX, y, "Equipment - Opens the equipment inventory screen");
+        y++;
+        put(x, y, "ctrl-s, S", keyColor);
+        put(descX, y, "Save - saves the game [N/A]");
+        y++;
+        put(x, y, "ctrl-q, Q, ESC", keyColor);
+        put(descX, y, "Quit - exits the game");
         y++;
         put(x, y, "f", keyColor);
-        put(descX, y, "Fires an equipped ranged weapon");
+        put(descX, y, "Fire - shoots an equipped ranged weapon");
+        y++;
+        put(x, y, "G", keyColor);
+        put(descX, y, "Get - picks up the items at yoru feet");
+        y++;
+        put(x, y, "g", keyColor);
+        put(descX, y, "Gather - pick up all items from surrounding tiles");
         y++;
         put(x, y, "c", keyColor);
         put(descX, y, "Consume - use up an item, such as drinking or slathering");
         y++;
         put(x, y, "ctrl-c", keyColor);
         put(descX, y, "Consume Weirdly - uses up an item in a non-standard way");
+        y++;
+        put(x, y, "i", keyColor);
+        put(descX, y, "Interact - manipulates an object in some way");
+        y++;
+        put(x, y, "d", keyColor);
+        put(descX, y, "Draw - draws a weapon from inventory randomly");
+        y++;
+        put(x, y, "r", keyColor);
+        put(descX, y, "Rest - skips turns until healed");
+        y++;
+        put(x, y, "p", keyColor);
+        put(descX, y, "Power - uses a power [N/A]");
+        y++;
+        put(x, y, "v", keyColor);
+        put(descX, y, "View - looks around using sight only");
+        y++;
+        put(x, y, "x", keyColor);
+        put(descX, y, "Examine - closely inspect with all senses");
+        y++;
+        put(x, y, "o", keyColor);
+        put(descX, y, "Open - opens all nearby doors");
+        y++;
+        put(x, y, "s", keyColor);
+        put(descX, y, "Shut - shuts all nearby doors");
         y += 2;
+
+        helpHeight = y;
+        doBorder(startY, helpHeight);
     }
 
     private void showEquipment() {
@@ -317,6 +424,7 @@ public class PrimaryHandler {
     public void updateDisplay() {
         back.setVisible(true);
         front.setVisible(true);
+        scrollOffsetY = 0;
         clear();
         switch (mode) {
             case CRAFTING:

@@ -1048,10 +1048,10 @@ public class Epigon extends Game {
             }
             switch (verb) {
                 case MOVE_DOWN:
-                    // TODO - keyboard controls in help screen
+                    primaryHandler.moveDown();
                     break;
                 case MOVE_UP:
-                    // TODO - keyboard controls in help screen
+                    primaryHandler.moveUp();
                     break;
                 case MOVE_LEFT:
                     // TODO - keyboard controls in help screen
