@@ -6,13 +6,13 @@ Brute	A muscular thug who recognizes that his physique is his greatest asset; he
 Dervish	A deadly dancer in battle who sprints between skirmishes with an unpredictable weapon.	Whirling Death	You are always in a Power Burst, but take double damage and suffer crits twice as often.
 Duelist	A nimble noble who is courteous to a fault, unless dishonored… then a duel is called for.	Elegance	The first time each enemy damages you, your next attack has a chance to be a Power Strike if made against that enemy.
 Guardian	A cautious defender who prefers to use polearms and shields to keep foes at bay.	Foresight	You preemptive-counter all enemy Power Strikes when the attacker is in your attack range.
-Hunter	A tireless tracker who stalks prey through the wild before striking with a so-called "primitive" weapon.	Naturalism	On even-numbered rounds, you can move twice (or take your normal action).
-Jester	A cackling comedian who gauges his foes at a distance before hurling an arsenal of thrown weapons.	Hurling	On odd-numbered rounds, you have a low chance to enter a Power Burst; attacks you make raise Zone Tension faster.
+Hunter	A tireless tracker who stalks prey through the wild before striking with a so-called "primitive" weapon.	Naturalism	On even-numbered rounds, your attacks cannot be countered; while Zone Tension is low, you are immune to hazards.
+Jester	A cackling comedian who gauges his foes at a distance before hurling an arsenal of thrown weapons.	Hurling	On odd-numbered rounds, you have a low chance to enter a Power Burst; this chance rises as Zone Tension rises.
 Marksman	A quiet, calm sniper who is skilled with all forms of projectile weaponry, and uses it to great effect.	Marksmanship	You have a moderate chance for any attack you make to be a Power Strike; this chance falls as Zone Tension rises.
 Swordsman	A humble warrior who seeks a balanced approach to mastering the blade.	Swordplay	As Zone Tension rises, your accuracy improves and you gain an increased chance to counter any attack.
 			
 			
 			
-			A Power Burst is a brief period where a character gets an extra action each turn and deals more damage; various class abilities grant them.
-			A Power Strike is a single attack with doubled accuracy, damage, crit, and influence; like a Power Burst, a class can grant them.
+			A Power Burst is a 2-turn period where every attack a character makes is repeated once against the same target.
+			A Power Strike is a single attack with doubled accuracy, damage, crit, and influence.
 			Each area has a Zone Tension score that rises with each attack an NPC makes; various abilities rely on this.
