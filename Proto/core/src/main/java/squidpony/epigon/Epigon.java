@@ -153,7 +153,7 @@ public class Epigon extends Game {
 
         Coord.expandPoolTo(map.width, map.height);
 
-        bgColor = SColor.CW_DARK_GRAY;
+        bgColor = colorCenter.dimmer(SColor.CW_DARK_GRAY);
         unseenColor = SColor.BLACK_DYE;
         bgColorFloat = bgColor.toFloatBits();
         unseenColorFloat = unseenColor.toFloatBits();
@@ -630,11 +630,20 @@ public class Epigon extends Game {
         }
     }
 
+    public void putWithLight(int x, int y, char c, float foreground, float background, float lightColor, float lightAmount, float noise) {
+        float front = SColor.lerpFloatColors(unseenColorFloat, foreground, lightAmount);
+        float back = SColor.lerpFloatColors(background, lightColor, (0xAAp-9f + (0xC8p-9f * lightAmount * (1f + 0.35f * noise))));
+        back = SColor.lerpFloatColors(unseenColorFloat, back, lightAmount);
+        mapSLayers.put(x, y, c, front, back);
+    }
+
     /**
-     * Draws the map, applies any highlighting for the path to the cursor, and then draws the
-     * player.
+     * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
+        float lightColor = SColor.FLORAL_LEAF.toFloatBits();
+        float noise = (float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
+        noise = Math.max(noise, 0.2f);
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 double sightAmount = fovResult[x][y];
@@ -642,14 +651,12 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
-                    if (creatures.containsKey(Coord.get(x, y))) {
-                        mapSLayers.putWithLight(x, y, ' ', 0f, bgColorFloat, /*COSMIC_LATTE*/-0x1.cff1fep126F, (float)sightAmount * 0.8f, null);
+                    if (creatures.containsKey(Coord.get(x, y))) { // TODO - adjust creature's color by light math as well
+                        putWithLight(x, y, ' ', 0f, bgColorFloat, lightColor, (float) sightAmount * 0.9f, noise);
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
-                        mapSLayers.putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(),
-                                bgColorFloat, /*COSMIC_LATTE*/ -0x1.cff1fep126F, (float)sightAmount * 0.8f, null
-                        );
+                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), bgColorFloat, lightColor, (float) sightAmount * 0.9f, noise);
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
@@ -667,10 +674,6 @@ public class Epigon extends Game {
         // Clear the tile the player is on
         //mapSLayers.clear(player.location.x, player.location.y, 0);
 
-//        for (Coord pt : toCursor) {
-//            // use a brighter light to trace the path to the cursor, from 170 max lightness to 0 min.
-//            mapSLayers.backgrounds[pt.x][pt.y] = SColor.lerpFloatColors(mapSLayers.backgrounds[pt.x][pt.y], SColor.COSMIC_LATTE.toFloatBits(), 0.7f);
-//        }
         mapSLayers.clear(2);
         for (int i = 0; i < toCursor.size(); i++) {
             Coord c = toCursor.get(i);
