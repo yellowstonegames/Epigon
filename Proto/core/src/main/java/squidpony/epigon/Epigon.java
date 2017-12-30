@@ -81,7 +81,7 @@ public class Epigon extends Game {
     private SquidInput contextInput;
     private SquidInput infoInput;
     private Color bgColor, unseenColor;
-    private float bgColorFloat, unseenColorFloat;
+    private float bgColorFloat, unseenColorFloat, unseenCreatureColorFloat;
     private List<Coord> toCursor;
     private TextCellFactory font;
 
@@ -155,6 +155,7 @@ public class Epigon extends Game {
 
         bgColor = colorCenter.dimmer(SColor.CW_DARK_GRAY);
         unseenColor = SColor.BLACK_DYE;
+        unseenCreatureColorFloat = -0x1.bebebep125F; // CW_DARK_GRAY without dimmer()
         bgColorFloat = bgColor.toFloatBits();
         unseenColorFloat = unseenColor.toFloatBits();
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
@@ -298,6 +299,12 @@ public class Epigon extends Game {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive());
+                if(SColor.saturationOfFloat(p.color) < 0.7f)
+                {
+                    p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
+                            0.7f,
+                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color));
+                }
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
                 creatures.put(coord, p);
@@ -631,35 +638,37 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground, float background, float lightColor, float lightAmount, float noise) {
-        mapSLayers.put(x, y, c, SColor.lerpFloatColors(unseenColorFloat, foreground, lightAmount),
-                SColor.lerpFloatColors(unseenColorFloat, SColor.lerpFloatColors(background, lightColor,
-                        (0xDDp-9f + (0xD0p-9f * lightAmount * (1f + 0.5f * noise)))), 0.45f + 0.55f * lightAmount));
+        mapSLayers.put(x, y, c, SColor.lerpFloatColors( SColor.CW_GRAY_BLACK.toFloatBits(), foreground, 0.5f + 0.35f * lightAmount),
+                SColor.lerpFloatColors(SColor.CW_GRAY_BLACK.toFloatBits(), SColor.lerpFloatColors(background, lightColor,
+                        (0x40p-9f + (0xDAp-9f * lightAmount * (0.8f + 0.75f * noise)))), 0.4f + 0.35f * lightAmount));
     }
 
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
-        final float lightColor = -0x1.219bfp126F; //SColor.CW_LIGHT_APRICOT.toFloatBits();
+        final float lightColor = -0x1.cff1fep126F; //SColor.COSMIC_LATTE.toFloatBits();
                 //-0x1.9d73fep125F;//SColor.FLORAL_LEAF.toFloatBits();
 
-        float time = (System.currentTimeMillis() & 0xffffffL) * 0.0025f;
+        float time = (System.currentTimeMillis() & 0xffffffL) * 0.005f;
         long time0 = Noise.longFloor(time);
-        float noise = Math.max(
+        float noise = Math.min(
                 // this is a lot cheaper than 3D simplex noise and we don't need/want position to affect it.
-                Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0),
-                -0.1f);
+                Noise.cerp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0),
+                0.1f);
                 //(float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
         //noise = Math.max(noise, -0.1f);
+        Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                double sightAmount = fovResult[x][y];
+                float sightAmount = (float) fovResult[x][y];
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
-                    if (creatures.containsKey(Coord.get(x, y))) { // TODO - adjust creature's color by light math as well
-                        putWithLight(x, y, ' ', 0f, bgColorFloat, lightColor, (float) sightAmount * 0.9f, noise);
+                    if ((creature = creatures.get(Coord.get(x, y))) != null ) {
+                        putWithLight(x, y, ' ', 0f, bgColorFloat, lightColor, sightAmount, noise);
+                        creature.appearance.color = SColor.lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
