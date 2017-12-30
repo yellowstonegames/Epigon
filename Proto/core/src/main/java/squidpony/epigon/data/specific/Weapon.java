@@ -14,7 +14,9 @@ import java.util.List;
 
 import static squidpony.epigon.Epigon.chaos;
 import static squidpony.epigon.Epigon.mixer;
+import static squidpony.epigon.Epigon.rng;
 import static squidpony.epigon.data.specific.Physical.*;
+import squidpony.epigon.universe.Rating;
 
 /**
  * Created by Tommy Ettinger on 11/25/2017.
@@ -131,6 +133,9 @@ public class Weapon {
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;
+        while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
+            blueprint.rarity = rng.getRandomElement(Rating.values());
+        }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
@@ -150,6 +155,9 @@ public class Weapon {
         elements = toCopy.elements.copy();
         rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
+        while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
+            blueprint.rarity = rng.getRandomElement(Rating.values());
+        }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
