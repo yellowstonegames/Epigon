@@ -291,7 +291,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.values()).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.allDamage).weaponModification())));
         infoHandler.setPlayer(player);
         primaryHandler.setPlayer(player);
 
@@ -1122,7 +1122,7 @@ public class Epigon extends Game {
                     fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
                     break;
                 case 'X':
-                    Element e = rng.getRandomElement(Element.values());
+                    Element e = rng.getRandomElement(Element.allDamage);
                     fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
                     break;
                 case 'z':

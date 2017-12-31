@@ -20,6 +20,7 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.*;
@@ -246,8 +247,12 @@ public class HandBuilt {
         cb.skills.put(cooking, Rating.TYPICAL);
         playerBlueprint.unarmedData = Weapon.unarmedWeapons.randomValue(chaos).copy();
         playerBlueprint.weaponData = playerBlueprint.unarmedData.copy();
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
+        String culture = chaos.getRandomElement(playerBlueprint.unarmedData.rawWeapon.culture);
+        List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
+        for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
+            playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), chaos));
+        }
+        // and one weapon from some other group
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos));
         mixer.addProfession(chef, playerBlueprint);
     }
@@ -319,7 +324,7 @@ public class HandBuilt {
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creatureOverwrite = new Creature();
         liven.weaponOverwrite = Weapon.weapons.randomValue(chaos);
-        liven.weaponElementsAdded = OrderedMap.makeMap(chaos.getRandomElement(Element.values()), 1, chaos.getRandomElement(Element.values()), 2);
+        liven.weaponElementsAdded = OrderedMap.makeMap(chaos.getRandomElement(Element.allDamage), 1, chaos.getRandomElement(Element.allDamage), 2);
         return liven;
     }
 }

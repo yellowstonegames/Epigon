@@ -10,7 +10,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
  * @author Eben Howard - http://squidpony.com
  */
 public enum Rating {
-
+    //0     1       2        3     4     5       6        7
     NONE, SLIGHT, TYPICAL, GOOD, HIGH, SUPERB, AMAZING, ULTIMATE;
 
     public String asAdverb() {
@@ -63,8 +63,8 @@ public enum Rating {
      */
     public Rating decrease() {
         switch (this) {
-            case NONE:
-                return NONE;
+            //case NONE:
+            //    return NONE;
             case SLIGHT:
                 return NONE;
             case TYPICAL:
