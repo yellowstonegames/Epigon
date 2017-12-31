@@ -4,6 +4,7 @@ import squidpony.Maker;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
+import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
@@ -12,11 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static squidpony.epigon.Epigon.chaos;
-import static squidpony.epigon.Epigon.mixer;
-import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.Epigon.*;
 import static squidpony.epigon.data.specific.Physical.*;
-import squidpony.epigon.universe.Rating;
 
 /**
  * Created by Tommy Ettinger on 11/25/2017.
@@ -67,12 +65,13 @@ public class Weapon {
             "Sinister", Element.SINISTER,
             "Slashing", Element.SLASHING,
             "Storm", Element.LIGHTNING,
-            "Time", Element.CHRONOMANCY,
+            "Time", Element.TEMPORAL,
             "Water", Element.WATER);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
-    public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2);
+    public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2),
+    cultures = new OrderedMap<>(24);
     static {
         makes.get("Metal|Wood").addAll(Wood.values());
         makes.get("Metal|Stone").addAll(Stone.values());
@@ -83,7 +82,17 @@ public class Weapon {
         {
             weapons.put(rw.name, (wpn = new Weapon(rw)));
             if(rw.materials.length > 0)
+            {
                 physicalWeapons.put(rw.name, wpn);
+                for(String culture : rw.culture)
+                {
+                    if((cat = cultures.get(culture)) != null)
+                        cat.add(wpn);
+                    else
+                        cultures.put(culture, Maker.makeList(wpn));
+                }
+
+            }
             else
                 unarmedWeapons.put(rw.name, wpn);
             for(String training : rw.training)
@@ -128,14 +137,12 @@ public class Weapon {
         statuses.add(raw.status1);
         statuses.add(raw.status2);
         elements = new ProbabilityTable<>(chaos);
-        elements.add(elementRename.getOrDefault(raw.type1, Element.BLUNT), 3);
-        elements.add(elementRename.getOrDefault(raw.type2, Element.BLUNT), 2);
+        elements.add(Element.valueOf(raw.type1), 3);
+        elements.add(Element.valueOf(raw.type2), 2);
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;
-        while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
-            blueprint.rarity = rng.getRandomElement(Rating.values());
-        }
+        blueprint.rarity = Rating.values()[rng.between(1, 8)];
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
