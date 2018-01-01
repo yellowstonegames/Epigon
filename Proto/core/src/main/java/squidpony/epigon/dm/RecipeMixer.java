@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static squidpony.epigon.Epigon.chaos;
 import static squidpony.epigon.Epigon.rng;
 
 /**
@@ -56,7 +57,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalConsumed != null && !blueprint.optionalConsumed.isEmpty()) {
-            Entry<Physical, Integer> entry = blueprint.optionalConsumed.randomEntry(rng);
+            Entry<Physical, Integer> entry = blueprint.optionalConsumed.randomEntry(chaos);
             recipe.consumed.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
@@ -64,7 +65,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalCatalyst != null && !blueprint.optionalCatalyst.isEmpty()) {
-            Entry<Physical, Integer> entry = blueprint.optionalCatalyst.randomEntry(rng);
+            Entry<Physical, Integer> entry = blueprint.optionalCatalyst.randomEntry(chaos);
             recipe.catalyst.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 

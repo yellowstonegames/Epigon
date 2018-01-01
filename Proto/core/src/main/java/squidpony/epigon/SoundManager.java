@@ -10,7 +10,7 @@ import squidpony.squidmath.OrderedSet;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.Epigon.chaos;
 
 /**
  * Singleton class which controls sound output.
@@ -197,7 +197,7 @@ public class SoundManager {
     public void playFootstep(){
         int step;
         do {
-            step = rng.nextInt(totalFootsteps);
+            step = chaos.nextInt(totalFootsteps);
         } while (step == lastFootstep);
 
         playSoundFX(footstep + step);

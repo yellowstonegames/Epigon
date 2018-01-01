@@ -2,6 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.epigon.Utilities;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
@@ -17,9 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import static squidpony.epigon.Epigon.chaos;
 import static squidpony.epigon.Epigon.infoSize;
-import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.Utilities;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -456,7 +456,7 @@ public class InfoHandler {
     }
 
     private void damage(Coord origin, Color color) {
-        fx.addAction(new DamageEffect((float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
+        fx.addAction(new DamageEffect((float) chaos.between(1.2, 3.1), chaos.between(2, 4), origin,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),

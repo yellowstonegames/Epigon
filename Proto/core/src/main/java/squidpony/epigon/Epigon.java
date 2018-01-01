@@ -4,12 +4,12 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import squidpony.ArrayTools;
 import squidpony.Messaging;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
@@ -121,19 +121,51 @@ public class Epigon extends Game {
     // Set up sizing all in one place
     static {
         int bigW = 70;
-        int bigH = 31;
+        int bigH = 26;
         int smallW = 50;
         int smallH = 22;
-        int cellW = 12;
-        int cellH = 24;
+        int cellW = 15;
+        int cellH = 28;
         int bottomH = 6;
         mapSize = new PanelSize(bigW, bigH, cellW, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 3 / 2, 7, 16);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 3 / 2, 7, 16);
+        infoSize = new PanelSize(smallW, smallH * 7 / 4, 7, 16);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 4, 7, 16);
         messageCount = bottomH - 2;
 
     }
+    public static final String outlineFragmentShader = "#ifdef GL_ES\n"
+            + "precision mediump float;\n"
+            + "precision mediump int;\n"
+            + "#endif\n"
+            + "\n"
+            + "uniform sampler2D u_texture;\n"
+            + "uniform float u_smoothing;\n"
+            + "varying vec4 v_color;\n"
+            + "varying vec2 v_texCoords;\n"
+            + "\n"
+            + "void main() {\n"
+            + "  if(u_smoothing <= 0.0) {\n"
+            + "    float smoothing = -u_smoothing;\n"
+            + "	   vec4 box = vec4(v_texCoords-0.000125, v_texCoords+0.000125);\n"
+            + "	   float asum = smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, v_texCoords).a) + 0.5 * (\n"
+            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xy).a) +\n"
+            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zw).a) +\n"
+            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xw).a) +\n"
+            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zy).a));\n"
+            + "    gl_FragColor = vec4(v_color.rgb, (asum / 3.0) * v_color.a);\n"
+            + "	 } else {\n"
+            + "    float distance = texture2D(u_texture, v_texCoords).a;\n"
+            + "	   vec2 box = vec2(0.0, 0.00375 * (u_smoothing + 0.0825));\n"
+            + "	   float asum = 0.7 * (smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, distance) + \n"
+            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.xy).a) +\n"
+            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.xy).a) +\n"
+            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.yx).a) +\n"
+            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.yx).a)),\n"
+            + "                 outline = clamp((distance * 0.8 - 0.415) * 18, 0, 1);\n"
+            + "	   gl_FragColor = vec4(mix(vec3(0.0), v_color.rgb * 1.2, outline), asum * v_color.a);\n" // the only change from SquidLib's version is: rgb * 1.2
+            + "  }\n"
+            + "}\n";
 
     public Epigon()
     {
@@ -156,7 +188,7 @@ public class Epigon extends Game {
 
         bgColor = colorCenter.dimmer(SColor.CW_DARK_GRAY);
         unseenColor = SColor.BLACK_DYE;
-        unseenCreatureColorFloat = -0x1.bebebep125F; // CW_DARK_GRAY without dimmer()
+        unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits(); // CW_DARK_GRAY without dimmer()
         bgColorFloat = bgColor.toFloatBits();
         unseenColorFloat = unseenColor.toFloatBits();
         //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
@@ -210,8 +242,13 @@ public class Epigon extends Game {
                 map.height,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
-                font);
-        ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
+                font.copy());
+        mapSLayers.font.shader = new ShaderProgram(DefaultResources.vertexShader, outlineFragmentShader);
+        if (!mapSLayers.font.shader.isCompiled()) {
+            Gdx.app.error("shader", "Outlined Distance Field font shader compilation failed:\n" + mapSLayers.font.shader.getLog());
+        }
+
+        //ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
@@ -541,7 +578,7 @@ public class Epigon extends Game {
             message("Nothing equippable found.");
             return;
         } else {
-            rng.shuffleInPlace(player.inventory);
+            chaos.shuffleInPlace(player.inventory);
             Physical chosen = player.inventory.get(0);
             equipItem(chosen);
         }
@@ -790,6 +827,7 @@ public class Epigon extends Game {
         batch.setProjectionMatrix(mapStage.getCamera().combined);
         //then we start a batch and manually draw the stage without having it handle its batch...
         batch.begin();
+        mapSLayers.font.configureShader(batch);
         mapStage.getRoot().draw(batch, 1f);
         //so we can draw the actors independently of the stage while still in the same batch
         playerEntity.draw(batch, 1.0f);

@@ -142,7 +142,7 @@ public class Weapon {
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;
-        blueprint.rarity = Rating.values()[rng.between(1, 8)];
+        blueprint.rarity = Rating.values()[chaos.between(1, 8)];
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
@@ -163,7 +163,7 @@ public class Weapon {
         rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
         while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
-            blueprint.rarity = rng.getRandomElement(Rating.values());
+            blueprint.rarity = chaos.getRandomElement(Rating.values());
         }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);

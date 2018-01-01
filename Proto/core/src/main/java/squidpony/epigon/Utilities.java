@@ -1,12 +1,14 @@
 package squidpony.epigon;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import regexodus.Matcher;
 import regexodus.Pattern;
-import static squidpony.epigon.Epigon.rng;
 import squidpony.squidgrid.Direction;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static squidpony.epigon.Epigon.chaos;
 import static squidpony.squidgrid.gui.gdx.SColor.COLOR_WHEEL_PALETTE;
 
 /**
@@ -94,7 +96,7 @@ public class Utilities {
         Color[][] cs = new Color[8][innerSize];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < innerSize; j++) {
-                cs[i][j] = rng.getRandomElement(COLOR_WHEEL_PALETTE);
+                cs[i][j] = chaos.getRandomElement(COLOR_WHEEL_PALETTE);
             }
         }
         return cs;
