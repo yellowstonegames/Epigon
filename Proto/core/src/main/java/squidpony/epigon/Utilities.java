@@ -1,8 +1,6 @@
 package squidpony.epigon;
 
 import com.badlogic.gdx.graphics.Color;
-import regexodus.Matcher;
-import regexodus.Pattern;
 import squidpony.squidgrid.Direction;
 
 import java.util.Arrays;
@@ -15,9 +13,6 @@ import static squidpony.squidgrid.gui.gdx.SColor.COLOR_WHEEL_PALETTE;
  * Created by Tommy Ettinger on 9/28/2017.
  */
 public class Utilities {
-
-    private static final Matcher capitalizeMatcher = Pattern.compile("(?<!\\pL)(\\pL)(\\pL*)(\\PL*)").matcher();
-    private static final StringBuilder sb = new StringBuilder(64);
 
     public static String caps(String input, String delimiter) {
         if (input == null || input.isEmpty()) {
