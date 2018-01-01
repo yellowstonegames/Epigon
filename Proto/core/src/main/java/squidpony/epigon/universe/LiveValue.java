@@ -64,9 +64,9 @@ public class LiveValue {
     }
 
     /**
-     * Changes the stat by one turn's delta and inertia
+     * Changes the stat by one turn's delta and inertia and returns the amount changed.
      */
-    public void tick() {
+    public double tick() {
         // NOTE - should inertia go before or after delta application?
         if (inertia != 0) {
             if (stable && (delta < 0) != (delta + inertia < 0)) {
@@ -81,6 +81,8 @@ public class LiveValue {
             //actual = Double.max(actual, min); // TODO - reconcile with rollover for stat damage
             actual = Double.min(actual, max);
         }
+
+        return delta;
     }
 
     /**

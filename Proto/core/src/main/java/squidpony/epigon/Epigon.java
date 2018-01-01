@@ -35,6 +35,7 @@ import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.*;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
@@ -347,6 +348,8 @@ public class Epigon extends Game {
                         if (creature.hitRoll(player)) {
                             int amt = creature.damageRoll(player);
                             Element element = creature.weaponData.elements.random();
+                            applyStatChange(player, Collections.singletonMap(Stat.VIGOR, (double)amt));
+                            amt *= -1; // flip sign for output message
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 message(Messaging.transform("The " + creature.name + " slay$ you with " +
                                         amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
@@ -379,16 +382,24 @@ public class Epigon extends Game {
         }
 
         // Update all the stats in motion
-        player.stats.values().stream().forEach(LiveValue::tick);
+        Map<Stat, Double> changes = new HashMap<>();
+        for (Entry<Stat, LiveValue> entry : player.stats.entrySet()) {
+            double amt = entry.getValue().tick();
+            if (amt != 0) {
+                changes.put(entry.getKey(), amt);
+                message(entry.getKey().toString() + " " + (amt > 0 ? "+" : "") + amt); // TEMP - direct message delta based stat changes
+            }
+        }
         for (Stat s : Stat.rolloverProcessOrder) {
             double val = player.stats.get(s).actual();
             if (val < 0) {
                 player.stats.get(s).actual(0);
                 player.stats.get(s.getRollover()).actual(player.stats.get(s.getRollover()).actual() + val);
+                changes.merge(s.getRollover(), val, Double::sum);
             }
         }
 
-        infoHandler.updateDisplay();
+        infoHandler.updateDisplay(player, changes);
         if (player.stats.get(Stat.VIGOR).actual() <= 0) {
             message("You are now dead with Vigor: " + player.stats.get(Stat.VIGOR).actual());
         }
@@ -405,6 +416,27 @@ public class Epigon extends Game {
                 }
             }, 0.2f);
         }
+    }
+
+    private void applyStatChange(Physical target, Map<Stat, Double> amounts) {
+        Map<Stat, Double> changes = new HashMap<>();
+        for (Entry<Stat, LiveValue> entry : target.stats.entrySet()) {
+            Double amount = amounts.get(entry.getKey());
+            if (amount != null) {
+                changes.put(entry.getKey(), amount);
+                entry.getValue().addActual(amount);
+            }
+        }
+        for (Stat s : Stat.rolloverProcessOrder) {
+            double val = target.stats.get(s).actual();
+            if (val < 0) {
+                target.stats.get(s).actual(0);
+                target.stats.get(s.getRollover()).addActual(val);
+                changes.merge(s.getRollover(), val, Double::sum);
+            }
+        }
+
+        infoHandler.updateDisplay(target, changes);
     }
 
     private void clearContents(SquidLayers layers, Color background) {

@@ -1,27 +1,38 @@
 package squidpony.epigon.display;
 
-import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.Maker;
+
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.ClothingSlot;
 import squidpony.epigon.universe.LiveValue;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
 import squidpony.epigon.universe.WieldSlot;
 
+import squidpony.squidgrid.gui.gdx.PanelEffect;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.NumberTools;
+import squidpony.squidmath.SeededNoise;
+
+import com.badlogic.gdx.graphics.Color;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.infoSize;
+import static squidpony.epigon.Epigon.rng;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -65,16 +76,20 @@ public class InfoHandler {
     }
 
     private final char[] eighthBlocks = new char[]{' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'};
+    private final String sparkles = "#$%&";
     private final int widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
     private SquidPanel back;
     private SquidPanel front;
+    private SquidPanel fxBack;
+    private SquidPanel fx;
     private int width;
     private int height;
     private InfoMode infoMode = InfoMode.HEALTH_AND_ARMOR;
     private SquidColorCenter colorCenter;
     private Physical player;
     private Physical target;
+    private Map<Stat, Double> changes = Collections.emptyMap();
 
     public Coord arrowLeft;
     public Coord arrowRight;
@@ -85,6 +100,8 @@ public class InfoHandler {
         height = layers.getGridHeight();
         back = layers.getBackgroundLayer();
         front = layers.getForegroundLayer();
+        fxBack = layers.addExtraLayer().getLayer(3);
+        fx = layers.addExtraLayer().getLayer(4);
 
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
@@ -93,6 +110,8 @@ public class InfoHandler {
         ArrayTools.fill(back.contents, '\0');
         ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
         ArrayTools.fill(front.contents, ' ');
+        fxBack.erase();
+        fx.erase();
     }
 
     public void setPlayer(Physical player) {
@@ -198,6 +217,7 @@ public class InfoHandler {
     }
 
     public void updateDisplay() {
+        updateDisplay(null, Collections.emptyMap());
         switch (infoMode) {
             case FULL_STATS:
                 infoFullStats(player);
@@ -212,6 +232,45 @@ public class InfoHandler {
                 infoFullStats(target);
                 break;
             case TARGET_HEALTH_AND_ARMOR:
+                infoHealthAndArmor(target);
+                break;
+        }
+    }
+
+    /**
+     * Shows the changes passed in on the current stat display. Expected that the displayed target has already had its
+     * values adjusted prior to calling this.
+     *
+     * @param changes a Map of the changes to stats
+     */
+    public void updateDisplay(Physical physical, Map<Stat, Double> changes) {
+        this.changes = Collections.emptyMap();
+        switch (infoMode) {
+            case FULL_STATS:
+                if (player == physical) {
+                    this.changes = changes;
+                }
+                infoFullStats(player);
+                break;
+            case HEALTH_AND_ARMOR:
+                if (player == physical) {
+                    this.changes = changes;
+                }
+                infoHealthAndArmor(player);
+                break;
+            case SKILLS:
+                infoSkills(player);
+                break;
+            case TARGET_FULL_STATS:
+                if (target == physical) {
+                    this.changes = changes;
+                }
+                infoFullStats(target);
+                break;
+            case TARGET_HEALTH_AND_ARMOR:
+                if (target == physical) {
+                    this.changes = changes;
+                }
                 infoHealthAndArmor(target);
                 break;
         }
@@ -240,39 +299,36 @@ public class InfoHandler {
         yOffset += Stat.needs.length + 1;
 
         if (physical.creatureData != null) {
-            drawFigure(physical.creatureData, yOffset );
+            drawFigure(physical.creatureData, yOffset);
 
             yOffset += ClothingSlot.height + 4;
 
             // Equipped items
-            Physical equippedRight = physical.creatureData.equipment.get(WieldSlot.RIGHT_HAND),
-                    equippedLeft = physical.creatureData.equipment.get(WieldSlot.LEFT_HAND);
-            if(equippedLeft == null && equippedRight == null)
-            {
-                put(3, yOffset, "Fighting unarmed using " + physical.weaponData.rawWeapon.name);
+            Physical equippedRight = physical.creatureData.equipment.get(WieldSlot.RIGHT_HAND);
+            Physical equippedLeft = physical.creatureData.equipment.get(WieldSlot.LEFT_HAND);
+            put(3, yOffset + 0, "RH:");
+            if (equippedRight != null) {
+                put(8, yOffset + 0, equippedRight.name, equippedRight.rarity.color());
+            } else {
+                put(8, yOffset + 0, "empty", Rating.NONE.color());
             }
-            else {
-                put(3, yOffset + 0, "RH:");
-                if (equippedRight != null) {
-                    put(8, yOffset + 0, equippedRight.name, equippedRight.rarity.color());
-                } else {
-                    put(8, yOffset + 0, "empty", Rating.NONE.color());
-                }
 
-                put(3, yOffset + 1, "LH:");
-                if (equippedLeft != null) {
-                    put(8, yOffset + 1, equippedLeft.name, equippedLeft.rarity.color());
-                } else {
-                    put(8, yOffset + 1, "empty", Rating.NONE.color());
-                }
+            put(3, yOffset + 1, "LH:");
+            if (equippedLeft != null) {
+                put(8, yOffset + 1, equippedLeft.name, equippedLeft.rarity.color());
+            } else {
+                put(8, yOffset + 1, "empty", Rating.NONE.color());
+            }
+            if (equippedLeft == null && equippedRight == null) {
+                put(3, yOffset + 2, "Fighting unarmed using " + physical.weaponData.rawWeapon.name);
             }
         }
     }
-    
-    private void drawFigure(Creature data, int startY){
+
+    private void drawFigure(Creature data, int startY) {
         // left and right are when viewed from behind, i.e. with an over-the-shoulder camera
-        int yOffset = startY;
-        int titleOffset = startY + ClothingSlot.height + 1;
+        int yOffset = startY + 2;
+        int titleOffset = startY;
 
         int x = 3;
         for (ClothingSlot cs : ClothingSlot.values()) {
@@ -340,13 +396,15 @@ public class InfoHandler {
     }
 
     private void showStats(int offset, Stat[] stats, Physical physical) {
-        int biggest = Arrays.stream(stats)
-            .map(s -> physical.stats.get(s))
-            .filter(s -> s != null)
-            .mapToInt(s -> (int) Math.ceil(Math.max(s.base(), s.actual())))
-            .max()
-            .getAsInt();
-        int biggestLength = Integer.toString(biggest).length();
+        double biggest = 0;
+        for (Stat s : stats) {
+            LiveValue lv = physical.stats.get(s);
+            if (lv != null) {
+                biggest = Math.max(biggest, Math.max(lv.base(), lv.actual()));
+                biggest = Math.max(biggest, lv.actual() + changes.getOrDefault(s, 0.0));
+            }
+        }
+        int biggestLength = Integer.toString((int) Math.ceil(biggest)).length();
         String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
 
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
@@ -371,6 +429,28 @@ public class InfoHandler {
             remainder = Math.max(remainder, 0);
             blockText += eighthBlocks[(int) Math.ceil(remainder)];
             put(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
+
+            Double change = changes.get(stats[s]);
+            if (change != null && change != 0) {
+                double startValue = actual - change; // minus because looking for previous value
+                filling = startValue / biggest;
+                int priorBlocks = (int) Math.ceil(filling * blockValue);
+                int changeBlocks = priorBlocks - blockText.length();
+                int startX = widestStatSize + 2 + numberText.length() + 1 + priorBlocks - 1; // left both 1s in to show that it's the prior length but bumped into the final block of the prior size
+                int endX = startX - changeBlocks;
+                color = SColor.CW_RICH_JADE;
+                if (change < 0) {
+                    int temp = startX;
+                    startX = endX;
+                    endX = temp;
+                    color = SColor.CW_RED;
+                }
+                System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
+                for (int x = startX; x <= endX; x++) {
+                    //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
+                    damage(Coord.get(x, s + offset), color);
+                }
+            }
         }
     }
 
@@ -387,6 +467,60 @@ public class InfoHandler {
             put(widestSkillSize + 2, y + offset, caps(entry.getValue().toString()), color);
 
             y++;
+        }
+    }
+
+    private void damage(Coord origin, Color color) {
+        fx.addAction(new DamageEffect((float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
+            Maker.makeList(
+                colorCenter.dim(colorCenter.desaturate(color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
+                colorCenter.desaturate(color, 0.3),
+                colorCenter.saturate(color, 0.3),
+                colorCenter.light(colorCenter.saturate(color, 0.15)),
+                colorCenter.lightest(color),
+                colorCenter.lighter(colorCenter.desaturate(color, 0.15)),
+                colorCenter.desaturate(color, 0.3),
+                colorCenter.dim(colorCenter.desaturate(color, 0.45), 0.1),
+                colorCenter.dim(colorCenter.desaturate(color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
+            )));
+    }
+
+    public class DamageEffect extends PanelEffect {
+
+        public int cycles;
+        public float[] colors;
+        public Coord c;
+
+        public DamageEffect(float duration, int cycles, Coord center, List<? extends Color> coloring) {
+            super(front, duration);
+            this.cycles = cycles;
+            c = center;
+            colors = new float[coloring.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = coloring.get(i).toFloatBits();
+            }
+        }
+
+        @Override
+        protected void end() {
+            super.end();
+            fxBack.clear(c.x, c.y);
+            fx.clear(c.x, c.y);
+        }
+
+        @Override
+        protected void update(float percent) {
+            float f, color;
+            int idx, seed = System.identityHashCode(this);
+            f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
+            idx = (int) (f * colors.length);
+            if (idx >= colors.length - 1) {
+                color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+            } else {
+                color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+            }
+            fxBack.put(c.x, c.y, colorCenter.lerp(SColor.TRANSPARENT, back.getDefaultForegroundColor(), 0.5f));
+            fx.put(c.x, c.y, sparkles.charAt((int) Math.floor(percent * (sparkles.length() * cycles + 1)) % cycles), color);
         }
     }
 
