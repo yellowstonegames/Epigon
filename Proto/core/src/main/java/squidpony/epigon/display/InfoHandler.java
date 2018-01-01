@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.infoSize;
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.Utilities;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -462,10 +463,8 @@ public class InfoHandler {
         int y = 0;
         for (Entry<Skill, Rating> entry : physical.creatureData.skills.entrySet()) {
             Color color = entry.getValue().color();
-            put(1, y + offset, caps(entry.getKey().name));
-
-            put(widestSkillSize + 2, y + offset, caps(entry.getValue().toString()), color);
-
+            put(1, y + offset, Utilities.caps(entry.getKey().name));
+            put(widestSkillSize + 2, y + offset, Utilities.caps(entry.getValue().toString()), color);
             y++;
         }
     }
@@ -522,15 +521,5 @@ public class InfoHandler {
             fxBack.put(c.x, c.y, colorCenter.lerp(SColor.TRANSPARENT, back.getDefaultForegroundColor(), 0.5f));
             fx.put(c.x, c.y, sparkles.charAt((int) Math.floor(percent * (sparkles.length() * cycles + 1)) % cycles), color);
         }
-    }
-
-    private String caps(String input) {
-        if (input == null || input.isEmpty()) {
-            return input;
-        }
-
-        return Arrays.stream(input.split(" "))
-            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
-            .collect(Collectors.joining(" "));
     }
 }
