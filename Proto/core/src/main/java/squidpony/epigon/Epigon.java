@@ -636,21 +636,22 @@ public class Epigon extends Game {
                 if (player.hitRoll(thing)) {
                     int amt = player.damageRoll(thing) + player.damageRoll(thing) + player.damageRoll(thing);
                     Element element = player.weaponData.elements.random();
+                    applyStatChange(thing, Collections.singletonMap(Stat.VIGOR, (double)amt));
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
-                        message("You defeat the " + thing.name + " with " + amt + " " + element.styledName + " damage!");
+                        message("You defeat the " + thing.name + " with " + -amt + " " + element.styledName + " damage!");
                         //message("Killed the " + thing.name + " with " + amt + ' ' + element.styledName + " damage");
                     } else {
-                        String amtText = String.valueOf(amt);
+                        String amtText = String.valueOf(-amt);
                         int startX = newX - (amtText.length() >> 1);
                         for (int i = 0; i < amtText.length(); i++, startX++) {
                             mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
                         }
                         message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
-                                amt + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         //message("Dealt " + amt + ' ' + element.styledName + " damage to the " + thing.name);
                     }
                 } else
