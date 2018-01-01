@@ -3,7 +3,7 @@ package squidpony.epigon.mapping;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 
-import static squidpony.epigon.Epigon.rng;
+import static squidpony.epigon.Epigon.chaos;
 
 /**
  * This represents a single explorable map level.
@@ -80,65 +80,65 @@ public class EpiMap {
         float color;
         switch (symbol) {
             case '.'://stone ground
-                color = SColor.SLATE_GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.SLATE_GRAY.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case '"':
             case '¸'://grass
-                color = SColor.GREEN.toRandomizedFloat(rng, 0.08f, 0.05f, 0.18f);
+                color = SColor.GREEN.toRandomizedFloat(chaos, 0.08f, 0.05f, 0.18f);
                 break;
             case ','://pathway
-                color = SColor.STOREROOM_BROWN.toRandomizedFloat(rng, 0.04f, 0.05f, 0.1f);
+                color = SColor.STOREROOM_BROWN.toRandomizedFloat(chaos, 0.04f, 0.05f, 0.1f);
                 break;
             case 'c':
-                color = SColor.SEPIA.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.SEPIA.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case '/':
-                color = SColor.BROWNER.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.BROWNER.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case '~':
-                color = SColor.AZUL.toRandomizedFloat(rng, 0.1f, 0f, 0.25f);
+                color = SColor.AZUL.toRandomizedFloat(chaos, 0.1f, 0f, 0.25f);
                 break;
             case '≈':
-                color = SColor.CW_FLUSH_BLUE.toRandomizedFloat(rng, 0.1f, 0f, 0.2f);
+                color = SColor.CW_FLUSH_BLUE.toRandomizedFloat(chaos, 0.1f, 0f, 0.2f);
                 break;
             case '<':
             case '>':
-                color = SColor.SLATE_GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.SLATE_GRAY.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 't':
-                color = SColor.BROWNER.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.BROWNER.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'm':
-                color = SColor.BAIKO_BROWN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.BAIKO_BROWN.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'u':
-                color = SColor.TAN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.TAN.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'T':
             case '₤':
-                color = SColor.FOREST_GREEN.toRandomizedFloat(rng, 0.1f, 0f, 0.2f);
+                color = SColor.FOREST_GREEN.toRandomizedFloat(chaos, 0.1f, 0f, 0.2f);
                 break;
             case 'E':
-                color = SColor.SILVER.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.SILVER.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'S':
-                color = SColor.BREWED_MUSTARD_BROWN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.BREWED_MUSTARD_BROWN.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case '#':
-                color = SColor.SLATE_GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.SLATE_GRAY.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case '+':
-                color = SColor.BROWNER.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.BROWNER.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'A':
-                color = SColor.ALICE_BLUE.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.ALICE_BLUE.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             case 'ø':
             case ' ':
-                color = SColor.DB_INK.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.DB_INK.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
                 break;
             default://opaque items
-                color = SColor.DEEP_PINK.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+                color = SColor.DEEP_PINK.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
         }
         return color;
     }
