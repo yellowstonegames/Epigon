@@ -344,8 +344,7 @@ public class Physical extends EpiData {
         long r = chaos.nextLong();
         int amt = Math.min(0, MathUtils.floor((NumberTools.randomFloatCurved(r) * 0.4f - 0.45f) * (calcStats[DAMAGE] + weaponData.calcStats[DAMAGE]) +
                 (NumberTools.randomFloatCurved(r + 1) * 0.3f + 0.35f) * (target.calcStats[DEFENSE] + target.weaponData.calcStats[DEFENSE])));
-        target.stats.get(Stat.VIGOR).addActual(amt);
-        return -amt;
+        return amt;
     }
 
     @Override
