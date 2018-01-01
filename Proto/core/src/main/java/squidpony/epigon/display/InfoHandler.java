@@ -1,32 +1,18 @@
 package squidpony.epigon.display;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
-import squidpony.Maker;
-
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.universe.ClothingSlot;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.Element;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
-import squidpony.epigon.universe.WieldSlot;
-
-import squidpony.squidgrid.gui.gdx.PanelEffect;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidLayers;
-import squidpony.squidgrid.gui.gdx.SquidPanel;
+import squidpony.epigon.universe.*;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.SeededNoise;
 
-import com.badlogic.gdx.graphics.Color;
-
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -446,7 +432,7 @@ public class InfoHandler {
                     endX = temp;
                     color = SColor.CW_RED;
                 }
-                System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
+                //System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
                     damage(Coord.get(x, s + offset), color);
@@ -471,17 +457,17 @@ public class InfoHandler {
 
     private void damage(Coord origin, Color color) {
         fx.addAction(new DamageEffect((float) rng.between(1.2, 3.1), rng.between(2, 4), origin,
-            Maker.makeList(
-                colorCenter.dim(colorCenter.desaturate(color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
-                colorCenter.desaturate(color, 0.3),
-                colorCenter.saturate(color, 0.3),
-                colorCenter.light(colorCenter.saturate(color, 0.15)),
-                colorCenter.lightest(color),
-                colorCenter.lighter(colorCenter.desaturate(color, 0.15)),
-                colorCenter.desaturate(color, 0.3),
-                colorCenter.dim(colorCenter.desaturate(color, 0.45), 0.1),
-                colorCenter.dim(colorCenter.desaturate(color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
-            )));
+            new float[]{
+                    SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
+                    SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
+                    SColor.toEditedFloat(color, 0f, 0.3f, 0f, -0.1f),
+                    SColor.toEditedFloat(color, 0f, 0.15f, 0.1f, 0f),
+                    SColor.toEditedFloat(color, 0f, 0f, 0.7f, 0f),
+                    SColor.toEditedFloat(color, 0f, -0.15f, 0.3f, 0f),
+                    SColor.toEditedFloat(color, 0f, -0.3f, 0f, 0f),
+                    SColor.toEditedFloat(color, 0f, -0.45f, -0.1f, 0.15f),
+                    SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
+            }));
     }
 
     public class DamageEffect extends PanelEffect {
@@ -490,14 +476,11 @@ public class InfoHandler {
         public float[] colors;
         public Coord c;
 
-        public DamageEffect(float duration, int cycles, Coord center, List<? extends Color> coloring) {
+        public DamageEffect(float duration, int cycles, Coord center, float[] coloring) {
             super(front, duration);
             this.cycles = cycles;
             c = center;
-            colors = new float[coloring.size()];
-            for (int i = 0; i < colors.length; i++) {
-                colors[i] = coloring.get(i).toFloatBits();
-            }
+            colors = coloring;
         }
 
         @Override
@@ -518,7 +501,7 @@ public class InfoHandler {
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            fxBack.put(c.x, c.y, colorCenter.lerp(SColor.TRANSPARENT, back.getDefaultForegroundColor(), 0.5f));
+            fxBack.put(c.x, c.y, '█', SColor.translucentColor(back.getDefaultForegroundColor().toFloatBits(), 0.5f));
             fx.put(c.x, c.y, sparkles.charAt((int) Math.floor(percent * (sparkles.length() * cycles + 1)) % cycles), color);
         }
     }
