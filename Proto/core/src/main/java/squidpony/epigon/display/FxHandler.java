@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static squidpony.epigon.Epigon.rng;
+import squidpony.epigon.Utilities;
 import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
@@ -109,7 +110,7 @@ public class FxHandler {
 
     public void layeredSparkle(Coord origin, int size, Radius radius) {
         fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius
-                /*, new Color[][]{
+        /*, new Color[][]{
                         { CW_PALE_RED, CW_LIGHT_RED, CW_BRIGHT_RED, CW_RED, CW_FLUSH_RED, CW_RICH_RED, CW_DARK_RED },
                         { CW_PALE_APRICOT, CW_LIGHT_APRICOT, CW_BRIGHT_APRICOT, CW_APRICOT, CW_FLUSH_APRICOT, CW_RICH_APRICOT, CW_DARK_APRICOT },
                         { CW_PALE_YELLOW, CW_LIGHT_YELLOW, CW_BRIGHT_YELLOW, CW_YELLOW, CW_FLUSH_YELLOW, CW_RICH_YELLOW, CW_DARK_YELLOW },
@@ -123,16 +124,17 @@ public class FxHandler {
 
     public static String twinkles = "+※+¤";
 
-    public static char randomBraille(){
+    public static char randomBraille() {
         return (char) rng.between(0x2801, 0x2900);
     }
     public static String[] brailleByDots = {"⠀",
-            "⠁⠂⠄⠈⠐⠠⡀⢀",
-            "⠃⠅⠆⠉⠊⠌⠑⠒⠔⠘⠡⠢⠤⠨⠰⡁⡂⡄⡈⡐⡠⢁⢂⢄⢈⢐⢠⣀",
-            "⠇⠋⠍⠎⠓⠕⠖⠙⠚⠜⠣⠥⠦⠩⠪⠬⠱⠲⠴⠸⡃⡅⡆⡉⡊⡌⡑⡒⡔⡘⡡⡢⡤⡨⡰⢃⢅⢆⢉⢊⢌⢑⢒⢔⢘⢡⢢⢤⢨⢰⣁⣂⣄⣈⣐⣠",
-            "⠏⠗⠛⠝⠞⠧⠫⠭⠮⠳⠵⠶⠹⠺⠼⡇⡋⡍⡎⡓⡕⡖⡙⡚⡜⡣⡥⡦⡩⡪⡬⡱⡲⡴⡸⢇⢋⢍⢎⢓⢕⢖⢙⢚⢜⢣⢥⢦⢩⢪⢬⢱⢲⢴⢸⣃⣅⣆⣉⣊⣌⣑⣒⣔⣘⣡⣢⣤⣨⣰",
-            "⠟⠯⠷⠻⠽⠾⡏⡗⡛⡝⡞⡧⡫⡭⡮⡳⡵⡶⡹⡺⡼⢏⢗⢛⢝⢞⢧⢫⢭⢮⢳⢵⢶⢹⢺⢼⣇⣋⣍⣎⣓⣕⣖⣙⣚⣜⣣⣥⣦⣩⣪⣬⣱⣲⣴⣸",
-            "⠿⡟⡯⡷⡻⡽⡾⢟⢯⢷⢻⢽⢾⣏⣗⣛⣝⣞⣧⣫⣭⣮⣳⣵⣶⣹⣺⣼", "⡿⢿⣟⣯⣷⣻⣽⣾", "⣿"};
+        "⠁⠂⠄⠈⠐⠠⡀⢀",
+        "⠃⠅⠆⠉⠊⠌⠑⠒⠔⠘⠡⠢⠤⠨⠰⡁⡂⡄⡈⡐⡠⢁⢂⢄⢈⢐⢠⣀",
+        "⠇⠋⠍⠎⠓⠕⠖⠙⠚⠜⠣⠥⠦⠩⠪⠬⠱⠲⠴⠸⡃⡅⡆⡉⡊⡌⡑⡒⡔⡘⡡⡢⡤⡨⡰⢃⢅⢆⢉⢊⢌⢑⢒⢔⢘⢡⢢⢤⢨⢰⣁⣂⣄⣈⣐⣠",
+        "⠏⠗⠛⠝⠞⠧⠫⠭⠮⠳⠵⠶⠹⠺⠼⡇⡋⡍⡎⡓⡕⡖⡙⡚⡜⡣⡥⡦⡩⡪⡬⡱⡲⡴⡸⢇⢋⢍⢎⢓⢕⢖⢙⢚⢜⢣⢥⢦⢩⢪⢬⢱⢲⢴⢸⣃⣅⣆⣉⣊⣌⣑⣒⣔⣘⣡⣢⣤⣨⣰",
+        "⠟⠯⠷⠻⠽⠾⡏⡗⡛⡝⡞⡧⡫⡭⡮⡳⡵⡶⡹⡺⡼⢏⢗⢛⢝⢞⢧⢫⢭⢮⢳⢵⢶⢹⢺⢼⣇⣋⣍⣎⣓⣕⣖⣙⣚⣜⣣⣥⣦⣩⣪⣬⣱⣲⣴⣸",
+        "⠿⡟⡯⡷⡻⡽⡾⢟⢯⢷⢻⢽⢾⣏⣗⣛⣝⣞⣧⣫⣭⣮⣳⣵⣶⣹⣺⣼", "⡿⢿⣟⣯⣷⣻⣽⣾", "⣿"};
+
     public static char randomBraille(long seed, int dots) {
         String s = brailleByDots[dots % 9];
         return s.charAt(ThrustRNG.determineBounded(seed, s.length()));
@@ -176,59 +178,8 @@ public class FxHandler {
         return b;
     }
 
-    /**
-     * Provides a String full of lines appropriate for the direction. If a stable set is
-     * desired, using the first character from the set returned will work nicely.
-     */
-    public static String linesFor(Direction dir) {
-        switch (dir) {
-            case DOWN:
-            case UP:
-                return "|｜∣ǀ";
-            case DOWN_LEFT:
-            case UP_RIGHT:
-                return "/／╱⁄";
-            case DOWN_RIGHT:
-            case UP_LEFT:
-                return "\\＼╲";
-            case LEFT:
-            case RIGHT:
-                return "-－−‐‑‒–—―";
-            case NONE:
-            default:
-                return "+＋✚✕✖✗";
-        }
-    }
-
-    /**
-     * Provides a String full of arrows appropriate for the direction. If a stable set is
-     * desired, using the first character from the set returned will work nicely.
-     */
-    public static String arrowsFor(Direction dir) {
-        switch (dir) {
-            case DOWN:
-                return "↓↡";
-            case DOWN_LEFT:
-                return "↙";
-            case DOWN_RIGHT:
-                return "↘";
-            case LEFT:
-                return "←↞↢";
-            case UP:
-                return "↑↟";
-            case UP_LEFT:
-                return "↖";
-            case UP_RIGHT:
-                return "↗";
-            case RIGHT:
-                return "→↠↣";
-            case NONE:
-            default:
-                return "⊙⊛";
-        }
-    }
-
     public class TwinkleEffect extends PanelEffect {
+
         public int cycles;
         public float[] colors;
         public Coord c;
@@ -260,7 +211,7 @@ public class FxHandler {
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            fx.put(c.x, c.y, twinkles.charAt((int)Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color, 0f, layer);
+            fx.put(c.x, c.y, twinkles.charAt((int) Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color, 0f, layer);
         }
     }
 
@@ -294,9 +245,9 @@ public class FxHandler {
             String lines;
 
             if (pathIndex == 0) {
-                lines = linesFor(Direction.toGoTo(c, path[pathIndex + 1]));
+                lines = Utilities.linesFor(Direction.toGoTo(c, path[pathIndex + 1]));
             } else {
-                lines = linesFor(Direction.toGoTo(path[pathIndex - 1], c));
+                lines = Utilities.linesFor(Direction.toGoTo(path[pathIndex - 1], c));
             }
 
             float color = colors[Math.min(colors.length - 1, Math.round(pathPercent))];
@@ -357,13 +308,13 @@ public class FxHandler {
                 } else {
                     color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
                 }
-                fx.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int)(percent * 8) + 1 : (int)(7.625 - percent * 7)), color, 0f, layer);
+                fx.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int) (percent * 8) + 1 : (int) (7.625 - percent * 7)), color, 0f, layer);
             }
         }
     }
 
-    public class ConeEffect extends PanelEffect
-    {
+    public class ConeEffect extends PanelEffect {
+
         /**
          * The default explosion colors are normal for (non-chemical, non-electrical) fire and smoke, going from orange
          * at the start to yellow, very light yellow, and then back to a different orange before going to smoke and
@@ -376,22 +327,21 @@ public class FxHandler {
          * is, packed as ABGR floats (usually the docs will mention this), can also be used.
          */
         public float[] colors = {
-                SColor.INTERNATIONAL_ORANGE.toFloatBits(),
-                SColor.FLORAL_LEAF.toFloatBits(),
-                SColor.LEMON.toFloatBits(),
-                SColor.LEMON_CHIFFON.toFloatBits(),
-                SColor.floatGet(0xFF6600EE),  // SColor.SAFETY_ORANGE
-                SColor.floatGet(0x595652DD),  // SColor.DB_SOOT
-                SColor.floatGet(0x59565299)}; // SColor.DB_SOOT
+            SColor.INTERNATIONAL_ORANGE.toFloatBits(),
+            SColor.FLORAL_LEAF.toFloatBits(),
+            SColor.LEMON.toFloatBits(),
+            SColor.LEMON_CHIFFON.toFloatBits(),
+            SColor.floatGet(0xFF6600EE), // SColor.SAFETY_ORANGE
+            SColor.floatGet(0x595652DD), // SColor.DB_SOOT
+            SColor.floatGet(0x59565299)}; // SColor.DB_SOOT
         /**
          * Used internally to determine how the explosion should spread; derived from {@link #validCells}.
          */
         public double[][] resMap,
-
-        /**
-         * The internal representation of how affected each cell is by the explosion, based on proximity to center.
-         */
-        lightMap;
+            /**
+             * The internal representation of how affected each cell is by the explosion, based on proximity to center.
+             */
+            lightMap;
 
         /**
          * The raw list of Coords that might be affected by the explosion; may include some cells that aren't going to
@@ -400,8 +350,7 @@ public class FxHandler {
          */
         public List<Coord> affected;
 
-        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius)
-        {
+        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius) {
             super(fx, duration, valid);
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
@@ -412,20 +361,21 @@ public class FxHandler {
             affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
         }
 
-        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring)
-        {
+        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring) {
             this(duration, valid, center, distance, angle, radius);
-            if(colors.length != coloring.size())
+            if (colors.length != coloring.size()) {
                 colors = new float[coloring.size()];
+            }
             for (int i = 0; i < colors.length; i++) {
                 colors[i] = coloring.get(i).toFloatBits();
             }
         }
+
         /**
          * Called each frame.
          *
          * @param percent The percentage of completion for this action, growing from 0 to 1 over the duration. If
-         *                {@link #setReverse(boolean) reversed}, this will shrink from 1 to 0.
+         * {@link #setReverse(boolean) reversed}, this will shrink from 1 to 0.
          */
         @Override
         protected void update(float percent) {
@@ -435,42 +385,38 @@ public class FxHandler {
             int idx, seed = System.identityHashCode(this);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
-                if(lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
+                if (lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
+                {
                     continue;
-                f = (float)SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
-                        * 0.17f + percent * 1.2f;
-                if(f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4)
+                }
+                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                    * 0.17f + percent * 1.2f;
+                if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
+                }
                 idx = (int) (f * colors.length);
-                if(idx >= colors.length - 1)
-                    color = SColor.lerpFloatColors(colors[colors.length-1], NumberTools.setSelectedByte(colors[colors.length-1], 3, (byte)0), (Math.min(0.99f, f) * colors.length) % 1f);
-                else
-                    color = SColor.lerpFloatColors(colors[idx], colors[idx+1], (f * colors.length) % 1f);
+                if (idx >= colors.length - 1) {
+                    color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+                } else {
+                    color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+                }
                 fx.put(c.x, c.y, '\u0000', color, 0f, layer);
             }
         }
     }
-    private static Color[][] randomColors(int innerSize)
-    {
-        Color[][] cs = new Color[8][innerSize];
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < innerSize; j++) {
-                cs[i][j] = rng.getRandomElement(COLOR_WHEEL_PALETTE);
-            }
-        }
-        return cs;
-    }
 
     public class ColorSparkleEffect extends PanelEffect {
+
         public float[][] colors;
         public double[][] resMap,
-                lightMap;
+            lightMap;
         public List<Coord> affected;
         private final char[] dots = "⠁⠂⠄⠈⠐⠠⡀⢀".toCharArray();
 
         public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius) {
-            this(duration, valid, center, distance, radius, randomColors(8));
+            this(duration, valid, center, distance, radius, Utilities.randomColors(8));
         }
+
         public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, Color[][] coloring) {
             super(fx, duration, valid);
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
@@ -488,7 +434,7 @@ public class FxHandler {
                 }
             }
         }
-        
+
         @Override
         protected void end() {
             super.end();
@@ -496,7 +442,7 @@ public class FxHandler {
                 fx.clear(layer + i);
             }
         }
-        
+
         @Override
         protected void update(float percent) {
             int len = affected.size();
@@ -509,7 +455,7 @@ public class FxHandler {
                     continue;
                 }
                 f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
-                        * 0.125f + percent;
+                    * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
                 }

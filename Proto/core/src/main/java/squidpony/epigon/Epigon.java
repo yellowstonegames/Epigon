@@ -733,7 +733,7 @@ public class Epigon extends Game {
             }else {
                 dir = Direction.toGoTo(toCursor.get(i - 1), c);
             }
-            mapSLayers.put(c.x, c.y, FxHandler.arrowsFor(dir).charAt(0), SColor.CW_BRIGHT_GREEN, null, 2);
+            mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_BRIGHT_GREEN, null, 2);
         }
     }
 
