@@ -19,18 +19,7 @@ public class Utilities {
     private static final Matcher capitalizeMatcher = Pattern.compile("(?<!\\pL)(\\pL)(\\pL*)(\\PL*)").matcher();
     private static final StringBuilder sb = new StringBuilder(64);
 
-    public static String capitalize(final String original) {
-        sb.setLength(0);
-        capitalizeMatcher.setTarget(original);
-        while (capitalizeMatcher.find()) {
-            sb.append(capitalizeMatcher.group(1).toUpperCase());
-            capitalizeMatcher.getGroup(2, sb, 1);
-            sb.append(capitalizeMatcher.group(3).replace('_', ' '));
-        }
-        return sb.toString();
-    }
-
-    public static String caps(String input) {
+    public static String caps(String input, String delimiter) {
         if (input == null || input.isEmpty()) {
             return input;
         }
@@ -38,6 +27,10 @@ public class Utilities {
         return Arrays.stream(input.split(" "))
             .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
             .collect(Collectors.joining(" "));
+    }
+
+    public static String caps(String input) {
+        return caps(input, " ");
     }
 
     /**

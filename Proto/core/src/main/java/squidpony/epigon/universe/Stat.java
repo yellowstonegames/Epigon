@@ -89,7 +89,7 @@ public enum Stat {
     Stat(String nick, String description) {
         this.nick = nick;
         this.description = description;
-        prettyName = Utilities.capitalize(name());
+        prettyName = Utilities.caps(name(), "_");
     }
     
     public String nick(){
