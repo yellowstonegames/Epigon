@@ -668,9 +668,10 @@ public class Epigon extends Game {
 
     public void putWithLight(int x, int y, char c, float foreground, float background, float lightColor, float lightAmount, float noise) {
         float base = 1 - RememberedTile.frontFade;
+        lightAmount *= 0.7f;
         float front = SColor.lerpFloatColors(RememberedTile.memoryColor, foreground, base + RememberedTile.frontFade * lightAmount);
         base = 1 - RememberedTile.backFade;
-        float adjustedLit = SColor.lerpFloatColors(background, lightColor, Math.max(Math.min(lightAmount + 0.1f * noise, 1f), base));
+        float adjustedLit = SColor.lerpFloatColors(background, lightColor, Math.max(Math.min(lightAmount + 0.4f * noise, 0.8f), base));
         float back = SColor.lerpFloatColors(RememberedTile.memoryColor, adjustedLit, base + RememberedTile.backFade * lightAmount);
         mapSLayers.put(x, y, c, front, back);
     }
@@ -684,10 +685,10 @@ public class Epigon extends Game {
 
         float time = (System.currentTimeMillis() & 0xffffffL) * 0.005f;
         long time0 = Noise.longFloor(time);
-        float noise = Math.min(
+        float noise = Math.max(
                 // this is a lot cheaper than 3D simplex noise and we don't need/want position to affect it.
                 Noise.cerp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0),
-                0.1f);
+                -0.3f);
                 //(float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
         //noise = Math.max(noise, -0.1f);
         Physical creature;
