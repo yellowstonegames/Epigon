@@ -185,7 +185,7 @@ public class Epigon extends Game {
 
         Coord.expandPoolTo(map.width, map.height);
 
-        bgColor = colorCenter.dimmer(SColor.CW_DARK_GRAY);
+        bgColor = colorCenter.dimmer(SColor.WHITE);
         unseenColor = SColor.BLACK_DYE;
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits(); // CW_DARK_GRAY without dimmer()
         bgColorFloat = bgColor.toFloatBits();
@@ -423,7 +423,6 @@ public class Epigon extends Game {
             double amt = entry.getValue().tick();
             if (amt != 0) {
                 changes.put(entry.getKey(), amt);
-                message(entry.getKey().toString() + " " + (amt > 0 ? "+" : "") + amt); // TEMP - direct message delta based stat changes
             }
         }
         for (Stat s : Stat.rolloverProcessOrder) {
@@ -668,9 +667,12 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground, float background, float lightColor, float lightAmount, float noise) {
-        mapSLayers.put(x, y, c, SColor.lerpFloatColors( SColor.CW_GRAY_BLACK.toFloatBits(), foreground, 0.5f + 0.35f * lightAmount),
-                SColor.lerpFloatColors(SColor.CW_GRAY_BLACK.toFloatBits(), SColor.lerpFloatColors(background, lightColor,
-                        (0x40p-9f + (0xDAp-9f * lightAmount * (0.8f + 0.75f * noise)))), 0.4f + 0.35f * lightAmount));
+        float base = 1 - RememberedTile.frontFade;
+        float front = SColor.lerpFloatColors(RememberedTile.memoryColor, foreground, base + RememberedTile.frontFade * lightAmount);
+        base = 1 - RememberedTile.backFade;
+        float adjustedLit = SColor.lerpFloatColors(background, lightColor, Math.max(Math.min(lightAmount + 0.1f * noise, 1f), base));
+        float back = SColor.lerpFloatColors(RememberedTile.memoryColor, adjustedLit, base + RememberedTile.backFade * lightAmount);
+        mapSLayers.put(x, y, c, front, back);
     }
 
     /**
