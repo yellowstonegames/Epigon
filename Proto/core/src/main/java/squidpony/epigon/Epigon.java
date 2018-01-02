@@ -465,7 +465,11 @@ public class Epigon extends Game {
             }
         }
         for (Stat s : Stat.rolloverProcessOrder) {
-            double val = target.stats.get(s).actual();
+            LiveValue lv = target.stats.get(s);
+            if (lv == null){
+                continue; // doesn't have this stat so skip it
+            }
+            double val = lv.actual();
             if (val < 0) {
                 target.stats.get(s).actual(0);
                 target.stats.get(s.getRollover()).addActual(val);
@@ -615,57 +619,14 @@ public class Epigon extends Game {
         }
 
         if (map.contents[newX][newY].blockage == null) {
-//            final float midX = player.location.x + dir.deltaX * 0.5f;
-//            final float midY = player.location.y + dir.deltaY * 0.5f;
-//            final Vector3 pos = camera.position.cpy();
-//            final Vector3 original = camera.position.cpy();
-//
-//            double checkWidth = (mapSize.gridWidth + 1) * 0.5f;
-//            double checkHeight = (mapSize.gridHeight + 1) * 0.5f;
-//            float cameraDeltaX = 0;
-//            if (midX <= map.width - checkWidth && midX >= checkWidth - 0.5f) { // not sure why the lower bound is offset...
-//                cameraDeltaX = (dir.deltaX * mapSize.cellWidth);
-//            }
-//            float cameraDeltaY = 0;
-//            if (midY <= map.height - checkHeight && midY >= checkHeight - 0.5f) { // but it causes the camera to jerk without "- 0.5f"
-//                cameraDeltaY = (-dir.deltaY * mapSize.cellHeight);
-//            }
-//            final Vector3 nextPos = camera.position.cpy().add(cameraDeltaX, cameraDeltaY, 0);
-
             mapSLayers.slide(playerEntity, player.location.x, player.location.y, newX, newY, 0.145f, () ->
             {
                 calcFOV(newX, newY);
                 calcDijkstra();
                 runTurn();
             });
-//            mixFOV(newX, newY);
             player.location = newPos;
             sound.playFootstep();
-
-//            mapSLayers.addAction(new TemporalAction(0.145f) {
-//                @Override
-//                protected void update(float percent) {
-//                    pos.lerp(nextPos, percent);
-//                    camera.position.set(pos);
-//                    pos.set(original);
-//                    camera.update();
-//                }
-//
-//                @Override
-//                protected void end() {
-//                    super.end();
-//
-//                    // Set the map and camera at the same time to have the same offset
-////                    mapSLayers.setGridOffsetX(newX - (mapSize.gridWidth >> 1));
-////                    mapSLayers.setGridOffsetY(newY - (mapSize.gridHeight >> 1));
-//                    camera.position.set(original);
-//                    camera.update();
-//
-//                    calcFOV(newX, newY);
-//                    calcDijkstra();
-//                    runTurn();
-//                }
-//            });
         } else {
             Physical thing = map.contents[newX][newY].getCreature();//creatures.get(newPos);
             if (thing != null) {
