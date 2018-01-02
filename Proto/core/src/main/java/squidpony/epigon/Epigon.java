@@ -4,7 +4,6 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -242,11 +241,11 @@ public class Epigon extends Game {
                 map.height,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
-                font.copy());
-        mapSLayers.font.shader = new ShaderProgram(DefaultResources.vertexShader, outlineFragmentShader);
-        if (!mapSLayers.font.shader.isCompiled()) {
-            Gdx.app.error("shader", "Outlined Distance Field font shader compilation failed:\n" + mapSLayers.font.shader.getLog());
-        }
+                font);
+//        mapSLayers.font.shader = new ShaderProgram(DefaultResources.vertexShader, outlineFragmentShader);
+//        if (!mapSLayers.font.shader.isCompiled()) {
+//            Gdx.app.error("shader", "Outlined Distance Field font shader compilation failed:\n" + mapSLayers.font.shader.getLog());
+//        }
 
         //ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
@@ -337,11 +336,11 @@ public class Epigon extends Game {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive());
-                if(SColor.saturationOfFloat(p.color) < 0.7f)
+                if(SColor.saturationOfFloat(p.color) < 0.8f)
                 {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
-                            0.7f,
-                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color));
+                            0.8f,
+                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
                 }
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
@@ -699,7 +698,11 @@ public class Epigon extends Game {
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if ((creature = creatures.get(Coord.get(x, y))) != null ) {
                         putWithLight(x, y, ' ', 0f, bgColorFloat, lightColor, sightAmount, noise);
+//                        System.out.println(creature.name + " has color with saturation " +
+//                                SColor.saturationOfFloat(creature.color) + " and alpha " + SColor.alphaOfFloat(creature.color));
                         creature.appearance.color = SColor.lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
+//                        System.out.println(creature.name + " has appearance.color with saturation " +
+//                                SColor.saturationOfFloat(creature.appearance.color) + " and alpha " + SColor.alphaOfFloat(creature.appearance.color));
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
