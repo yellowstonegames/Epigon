@@ -515,7 +515,7 @@ public class Epigon extends Game {
     }
 
     private void message(String text) {
-        clearAndBorder(messageSLayers, SColor.APRICOT, bgColor);
+        clearAndBorder(messageSLayers, SColor.APRICOT, unseenColor);
         messages.set(messageIndex++ % messageCount, GDXMarkup.instance.colorString("[]"+text));
         for (int i = messageIndex % messageCount, c = 0; c < messageCount; i = (i + 1) % messageCount, c++) {
             messageSLayers.getForegroundLayer().put(1, 1 + c, messages.get(i));
