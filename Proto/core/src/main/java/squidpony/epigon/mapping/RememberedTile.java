@@ -11,6 +11,10 @@ import squidpony.squidgrid.gui.gdx.SColor;
  */
 public class RememberedTile {
 
+    public static final float memoryColor = SColor.FLOAT_BLACK;
+    public static final float frontFade = 0.6f;
+    public static final float backFade = 0.89f;
+
     public char symbol = ' ';
     public float front = 0f;
     public float back = 0f;
@@ -23,9 +27,9 @@ public class RememberedTile {
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
         front = tile.getForegroundColor();
-        front = front == 0f ? 0f : SColor.lerpFloatColors(front, SColor.FLOAT_BLACK, 0.8f);
+        front = front == 0f ? 0f : SColor.lerpFloatColors(front, memoryColor, frontFade);
         back = tile.getBackgroundColor();
-        back = back == 0f ? 0f : SColor.lerpFloatColors(back, SColor.FLOAT_BLACK, 0.8f); //0x1.fffffep-126f
+        back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColor, backFade);
         if (tile.getCreature() != null){
             miniMapColor = SColor.SCARLET.toFloatBits();
         } else {
