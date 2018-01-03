@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -11,7 +12,8 @@ import squidpony.squidgrid.gui.gdx.SColor;
  */
 public class RememberedTile {
 
-    public static final float memoryColor = SColor.FLOAT_BLACK;
+    public static final Color memoryColor = SColor.BLACK;
+    public static final float memoryColorFloat = memoryColor.toFloatBits();
     public static final float frontFade = 0.6f;
     public static final float backFade = 0.89f;
 
@@ -27,9 +29,9 @@ public class RememberedTile {
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
         front = tile.getForegroundColor();
-        front = front == 0f ? 0f : SColor.lerpFloatColors(front, memoryColor, frontFade);
+        front = front == 0f ? 0f : SColor.lerpFloatColors(front, memoryColorFloat, frontFade);
         back = tile.getBackgroundColor();
-        back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColor, backFade);
+        back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColorFloat, backFade);
         if (tile.getCreature() != null){
             miniMapColor = SColor.SCARLET.toFloatBits();
         } else {
