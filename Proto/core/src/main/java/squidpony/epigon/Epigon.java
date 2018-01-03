@@ -4,6 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -666,14 +667,18 @@ public class Epigon extends Game {
         }
     }
 
-    public void putWithLight(int x, int y, char c, float foreground, float lightColor, float lightAmount, float noise) {
+    List<Color> lights;
+    public void putWithLight(int x, int y, char c, float foreground, float lightAmount, float noise) {
         float base = 1 - RememberedTile.frontFade;
-        lightAmount *= 0.7f;
-        float front = SColor.lerpFloatColors(RememberedTile.memoryColor, foreground, base + RememberedTile.frontFade * lightAmount);
-        base = 1 - RememberedTile.backFade;
-        float background = SColor.CRIMSON.toFloatBits();
-        float adjustedLit = SColor.lerpFloatColors(background, lightColor, Math.max(Math.min(lightAmount - 0.4f + 0.8f * noise, 1f), base));
-        float back = SColor.lerpFloatColors(RememberedTile.memoryColor, adjustedLit, base + RememberedTile.backFade * lightAmount);
+        float front = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
+        noise = Math.abs(noise);
+        lightAmount -= 0.1;
+        lightAmount += 0.3 * noise;
+        lightAmount = Math.min(lightAmount, 1);
+        int n = (int)(lightAmount * lights.size());
+        n = Math.max(n, 0);
+        n = Math.min(n, lights.size() - 1);
+        float back = lights.get(n).toFloatBits(); // background gets both lit and faded to memory
         mapSLayers.put(x, y, c, front, back);
     }
 
@@ -681,10 +686,11 @@ public class Epigon extends Game {
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
-        final float lightColor = //-0x1.cff1fep126F; //SColor.COSMIC_LATTE.toFloatBits();
-                -0x1.9d73fep125F;//SColor.FLORAL_LEAF.toFloatBits();
+        Color backLight = colorCenter.dim(SColor.CW_DARK_ORANGE);
+        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
+        lights.addAll(colorCenter.gradient(backLight, SColor.COSMIC_LATTE, 128, Interpolation.sineOut));
 
-        float time = (System.currentTimeMillis() & 0xffffffL) * 0.005f;
+        float time = (System.currentTimeMillis() & 0xffffffL) * 0.0005f;
         long time0 = Noise.longFloor(time);
         float noise = Math.max(
                 // this is a lot cheaper than 3D simplex noise and we don't need/want position to affect it.
@@ -701,16 +707,12 @@ public class Epigon extends Game {
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if ((creature = creatures.get(Coord.get(x, y))) != null ) {
-                        putWithLight(x, y, ' ', 0f, lightColor, sightAmount, noise);
-//                        System.out.println(creature.name + " has color with saturation " +
-//                                SColor.saturationOfFloat(creature.color) + " and alpha " + SColor.alphaOfFloat(creature.color));
+                        putWithLight(x, y, ' ', 0f, sightAmount, noise);
                         creature.appearance.color = SColor.lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
-//                        System.out.println(creature.name + " has appearance.color with saturation " +
-//                                SColor.saturationOfFloat(creature.appearance.color) + " and alpha " + SColor.alphaOfFloat(creature.appearance.color));
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
-                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), lightColor, (float) sightAmount * 0.9f, noise);
+                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), (float) sightAmount * 0.9f, noise);
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
