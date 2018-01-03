@@ -71,6 +71,12 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     allDamage = {BLUNT, PIERCING, SLASHING,
             EARTH, CRYSTAL, FIRE, AIR, SOUND, WATER, ICE, LIGHTNING, POISON, ACID, CAUSTIC, DISEASE,
             DEATH, LIFE, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
+            GRAVITY, VACUOUS, WARP, RADIATION},
+    /**
+     * Different from allDamage because it only contains magic-based elements, no blunt or slashing. Meant for mods.
+     */
+    allEnergy = {EARTH, CRYSTAL, FIRE, AIR, SOUND, WATER, ICE, LIGHTNING, POISON, ACID, CAUSTIC, DISEASE,
+            DEATH, LIFE, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
             GRAVITY, VACUOUS, WARP, RADIATION};
 
     public Element parent;
