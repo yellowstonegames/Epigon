@@ -11,6 +11,7 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.SeededNoise;
+import squidpony.squidmath.StatefulRNG;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import static squidpony.epigon.Epigon.chaos;
 import static squidpony.epigon.Epigon.infoSize;
 
 /**
@@ -435,7 +435,7 @@ public class InfoHandler {
                 //System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
-                    damage(Coord.get(x, s + offset), color);
+                    damage(Coord.get(x, s + offset), color, physical.chaos);
                 }
             }
         }
@@ -455,8 +455,8 @@ public class InfoHandler {
         }
     }
 
-    private void damage(Coord origin, Color color) {
-        fx.addAction(new DamageEffect((float) chaos.between(1.2, 3.1), chaos.between(2, 4), origin,
+    private void damage(Coord origin, Color color, StatefulRNG chaos) {
+        fx.addAction(new DamageEffect(chaos.nextFloat(1.9f) +  1.2f, chaos.between(2, 4), origin,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),

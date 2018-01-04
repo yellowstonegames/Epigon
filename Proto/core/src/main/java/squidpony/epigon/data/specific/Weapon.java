@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static squidpony.epigon.Epigon.*;
 import static squidpony.epigon.data.specific.Physical.*;
 
 /**
@@ -26,7 +25,6 @@ public class Weapon {
     public int hands = 1;
     public Physical blueprint;
     public RecipeBlueprint recipeBlueprint;
-    public Recipe recipe;
     public int[] calcStats = new int[11];
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
     public String[] qualities = new String[4];
@@ -44,35 +42,13 @@ public class Weapon {
             "Metal|Stone", new OrderedSet<>(Metal.values()),
             "Hide|Metal|Wood", new OrderedSet<>(Hide.values())
     );
-    public static final OrderedMap<String, Element> elementRename = OrderedMap.makeMap(
-            "Acid", Element.ACID,
-            "Air", Element.AIR,
-            "Blunt", Element.BLUNT,
-            "Contract", Element.CONTRACTUAL,
-            "Crystal", Element.CRYSTAL,
-            "Death", Element.DEATH,
-            "Divine", Element.DIVINE,
-            "Earth", Element.EARTH,
-            "Fate", Element.FATEFUL,
-            "Fire", Element.FIRE,
-            "Ice", Element.ICE,
-            "Light", Element.SHINING,
-            "Piercing", Element.PIERCING,
-            "Poison", Element.POISON,
-            "Pure", Element.PURE,
-            "Radiation", Element.RADIATION,
-            "Shadow", Element.SHADOW,
-            "Sinister", Element.SINISTER,
-            "Slashing", Element.SLASHING,
-            "Storm", Element.LIGHTNING,
-            "Time", Element.TEMPORAL,
-            "Water", Element.WATER);
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2),
     cultures = new OrderedMap<>(24);
-    static {
+    private static boolean initialized = false;
+    public static void init() {
         makes.get("Metal|Wood").addAll(Wood.values());
         makes.get("Metal|Stone").addAll(Stone.values());
         makes.get("Hide|Metal|Wood").addAll(makes.get("Metal|Wood"));
@@ -103,7 +79,24 @@ public class Weapon {
                     categories.put(training, Maker.makeList(wpn));
             }
         }
+        initialized = true;
     }
+    public static OrderedMap<String, Weapon> getWeapons()
+    {
+        if(!initialized) init();
+        return weapons;
+    }
+    public static OrderedMap<String, Weapon> getPhysicalWeapons()
+    {
+        if(!initialized) init();
+        return physicalWeapons;
+    }
+    public static OrderedMap<String, Weapon> getUnarmedWeapons()
+    {
+        if(!initialized) init();
+        return unarmedWeapons;
+    }
+
     //public static final Weapon UNARMED = weapons.getAt(0);
     public Weapon()
     {
@@ -136,17 +129,16 @@ public class Weapon {
         maneuvers.add(raw.maneuver2);
         statuses.add(raw.status1);
         statuses.add(raw.status2);
-        elements = new ProbabilityTable<>(chaos);
+        elements = new ProbabilityTable<>();
         elements.add(Element.valueOf(raw.type1), 3);
         elements.add(Element.valueOf(raw.type2), 2);
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;
-        blueprint.rarity = Rating.values()[chaos.between(1, 8)];
+        blueprint.rarity = Rating.values()[blueprint.chaos.between(1, 8)];
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
-        recipe = mixer.createRecipe(recipeBlueprint);
     }
     public Weapon(Weapon toCopy)
     {
@@ -163,12 +155,11 @@ public class Weapon {
         rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
         while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
-            blueprint.rarity = chaos.getRandomElement(Rating.values());
+            blueprint.rarity = blueprint.chaos.getRandomElement(Rating.values());
         }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
-        recipe = mixer.createRecipe(recipeBlueprint);
     }
 
     public Weapon copy()

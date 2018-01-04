@@ -2,8 +2,7 @@ package squidpony.epigon.mapping;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
-
-import static squidpony.epigon.Epigon.chaos;
+import squidpony.squidmath.StatefulRNG;
 
 /**
  * This represents a single explorable map level.
@@ -21,7 +20,7 @@ public class EpiMap {
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
     public double[][] resistances;
-
+    public StatefulRNG chaos = new StatefulRNG();
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
@@ -61,7 +60,7 @@ public class EpiMap {
         return ret;
     }
 
-    public static char altSymbolOf(char symbol) {
+    public char altSymbolOf(char symbol) {
 
         switch (symbol) {
             case '¸'://grass
@@ -76,7 +75,7 @@ public class EpiMap {
         }
     }
 
-    public static float colorOf(char symbol) {
+    public float colorOf(char symbol) {
         float color;
         switch (symbol) {
             case '.'://stone ground

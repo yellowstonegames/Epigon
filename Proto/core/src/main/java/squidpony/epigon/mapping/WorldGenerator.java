@@ -3,13 +3,13 @@ package squidpony.epigon.mapping;
 import squidpony.epigon.data.blueprint.Stone;
 import squidpony.epigon.data.mixin.Terrain;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.mapping.FlowingCaveGenerator;
+import squidpony.squidmath.StatefulRNG;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static squidpony.epigon.Epigon.*;
 
 /**
  * Creates and populates a world.
@@ -21,6 +21,8 @@ public class WorldGenerator {
     private EpiMap[] world;
     private int width, height, depth;
     private HandBuilt handBuilt;
+    private RecipeMixer mixer;
+    private StatefulRNG rng;
     private Map<Stone, Physical> walls = new HashMap<>();
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
@@ -28,6 +30,9 @@ public class WorldGenerator {
         this.height = height;
         this.depth = depth;
         this.handBuilt = handBuilt;
+        mixer = handBuilt.mixer;
+        rng = handBuilt.rng.copy();
+        rng.setState(1000L);
         world = new EpiMap[depth];
         for (int d = 0; d < depth; d++) {
             world[d] = new EpiMap(width, height);
@@ -64,10 +69,11 @@ public class WorldGenerator {
 
         EpiTile tile;
         Physical adding;
+        EpiMap eMap = world[0];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 char c = simpleChars[x][y];
-                tile = world[0].contents[x][y];
+                tile = eMap.contents[x][y];
                 tile.blockage = null;
                 switch (c) {
                     case '.':
@@ -86,8 +92,8 @@ public class WorldGenerator {
                         break;
                     default:
                         tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
-                        tile.floor.symbol = EpiMap.altSymbolOf(c);
-                        tile.floor.color = EpiMap.colorOf(c);
+                        tile.floor.symbol = eMap.altSymbolOf(c);
+                        tile.floor.color = eMap.colorOf(c);
                         tile.floor.name = "modified " + c;
                         break;
                 }

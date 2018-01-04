@@ -1,8 +1,6 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
@@ -10,7 +8,10 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
-import squidpony.squidmath.*;
+import squidpony.squidmath.Coord;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -128,7 +129,7 @@ public class PrimaryHandler {
     /**
      * Draws some characters to indicate that the current view has more content above or below.
      *
-     * @param startY
+     * @param y
      * @param contentHeight
      */
     private void doBorder(int y, int contentHeight) {

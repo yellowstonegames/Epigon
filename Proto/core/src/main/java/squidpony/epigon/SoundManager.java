@@ -6,11 +6,10 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import squidpony.Maker;
 import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.Map;
 import java.util.TreeMap;
-
-import static squidpony.epigon.Epigon.chaos;
 
 /**
  * Singleton class which controls sound output.
@@ -195,11 +194,7 @@ public class SoundManager {
      * Plays a random footstep sound.
      */
     public void playFootstep(){
-        int step;
-        do {
-            step = chaos.nextInt(totalFootsteps);
-        } while (step == lastFootstep);
-
+        int step = ThrustAltRNG.determineBounded( System.currentTimeMillis(),totalFootsteps - 1) + 1;
         playSoundFX(footstep + step);
     }
 }

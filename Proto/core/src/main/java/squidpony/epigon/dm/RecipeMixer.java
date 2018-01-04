@@ -9,14 +9,7 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
-import squidpony.epigon.universe.ClothingSlot;
-import squidpony.epigon.universe.JewelrySlot;
-import squidpony.epigon.universe.LiveValue;
-import squidpony.epigon.universe.LiveValueModification;
-import squidpony.epigon.universe.OverArmorSlot;
-import squidpony.epigon.universe.Rating;
-import squidpony.epigon.universe.Stat;
-import squidpony.epigon.universe.WieldSlot;
+import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.StatefulRNG;
@@ -25,9 +18,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static squidpony.epigon.Epigon.chaos;
-import static squidpony.epigon.Epigon.rng;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -47,6 +37,7 @@ public class RecipeMixer {
 
     private Map<Material, Physical> materials = new HashMap<>();
 
+    public StatefulRNG chaos = new StatefulRNG(), rng = new StatefulRNG(123456789L);
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
@@ -106,7 +97,7 @@ public class RecipeMixer {
     public Physical buildWeapon(Weapon weapon, StatefulRNG rng)
     {
         Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(rng);
-        return mix(weapon.recipe, Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), rng).get(0);
+        return mix(createRecipe(weapon.recipeBlueprint), Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), rng).get(0);
     }
 
     public Physical buildPhysical(Stone stone) {
@@ -253,8 +244,7 @@ public class RecipeMixer {
 
         physical.attached = blueprint.attached;
 
-        List<String> possibleNames = new ArrayList<>();
-        possibleNames.addAll(blueprint.possibleAliases);
+        List<String> possibleNames = new ArrayList<>(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
         physical.name = rng.getRandomElement(possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?

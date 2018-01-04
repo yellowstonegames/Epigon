@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
+import squidpony.epigon.Utilities;
 import squidpony.epigon.universe.Element;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
@@ -17,10 +18,6 @@ import squidpony.squidmath.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static squidpony.epigon.Epigon.rng;
-import squidpony.epigon.Utilities;
-import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -39,6 +36,7 @@ public class FxHandler {
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
     double[][] seen;
+    private StatefulRNG rng = new StatefulRNG();
 
     public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
@@ -109,7 +107,7 @@ public class FxHandler {
     }
 
     public void layeredSparkle(Coord origin, int size, Radius radius) {
-        fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius
+        fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius, rng
         /*, new Color[][]{
                         { CW_PALE_RED, CW_LIGHT_RED, CW_BRIGHT_RED, CW_RED, CW_FLUSH_RED, CW_RICH_RED, CW_DARK_RED },
                         { CW_PALE_APRICOT, CW_LIGHT_APRICOT, CW_BRIGHT_APRICOT, CW_APRICOT, CW_FLUSH_APRICOT, CW_RICH_APRICOT, CW_DARK_APRICOT },
@@ -124,7 +122,7 @@ public class FxHandler {
 
     public static String twinkles = "+※+¤";
 
-    public static char randomBraille() {
+    public char randomBraille() {
         return (char) rng.between(0x2801, 0x2900);
     }
     public static String[] brailleByDots = {"⠀",
@@ -413,8 +411,8 @@ public class FxHandler {
         public List<Coord> affected;
         private final char[] dots = "⠁⠂⠄⠈⠐⠠⡀⢀".toCharArray();
 
-        public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius) {
-            this(duration, valid, center, distance, radius, Utilities.randomColors(8));
+        public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, RNG rng) {
+            this(duration, valid, center, distance, radius, Utilities.randomColors(8, rng));
         }
 
         public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, Color[][] coloring) {

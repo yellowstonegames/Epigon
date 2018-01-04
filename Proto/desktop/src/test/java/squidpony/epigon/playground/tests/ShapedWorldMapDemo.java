@@ -364,58 +364,58 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
             wetterValueLower = 0.8,    wetterValueUpper  = 0.9,  // 4
             wettestValueLower = 0.9,   wettestValueUpper = 1.0;  // 5
 
-    private static float black = SColor.floatGetI(0, 0, 0),
-            white = SColor.floatGet(0xffffffff);
+    private static final float black = SColor.floatGetI(0, 0, 0);
+    private static final float white = SColor.floatGet(0xffffffff);
     // Biome map colors
 
-    private static float ice = SColor.ALICE_BLUE.toFloatBits();
-    private static float darkIce = SColor.lerpFloatColors(ice, black, 0.15f);
+    private static final float ice = SColor.ALICE_BLUE.toFloatBits();
+    private static final float darkIce = SColor.lerpFloatColors(ice, black, 0.15f);
     private static float lightIce = white;
 
-    private static float desert = SColor.floatGetI(248, 229, 180);
-    private static float darkDesert = SColor.lerpFloatColors(desert, black, 0.15f);
+    private static final float desert = SColor.floatGetI(248, 229, 180);
+    private static final float darkDesert = SColor.lerpFloatColors(desert, black, 0.15f);
 
-    private static float savanna = SColor.floatGetI(181, 200, 100);
-    private static float darkSavanna = SColor.lerpFloatColors(savanna, black, 0.15f);
+    private static final float savanna = SColor.floatGetI(181, 200, 100);
+    private static final float darkSavanna = SColor.lerpFloatColors(savanna, black, 0.15f);
 
-    private static float tropicalRainforest = SColor.floatGetI(66, 123, 25);
-    private static float darkTropicalRainforest = SColor.lerpFloatColors(tropicalRainforest, black, 0.15f);
+    private static final float tropicalRainforest = SColor.floatGetI(66, 123, 25);
+    private static final float darkTropicalRainforest = SColor.lerpFloatColors(tropicalRainforest, black, 0.15f);
 
-    private static float tundra = SColor.floatGetI(151, 175, 159);
-    private static float darkTundra = SColor.lerpFloatColors(tundra, black, 0.15f);
+    private static final float tundra = SColor.floatGetI(151, 175, 159);
+    private static final float darkTundra = SColor.lerpFloatColors(tundra, black, 0.15f);
 
-    private static float temperateRainforest = SColor.floatGetI(54, 113, 60);
-    private static float darkTemperateRainforest = SColor.lerpFloatColors(temperateRainforest, black, 0.15f);
+    private static final float temperateRainforest = SColor.floatGetI(54, 113, 60);
+    private static final float darkTemperateRainforest = SColor.lerpFloatColors(temperateRainforest, black, 0.15f);
 
-    private static float grassland = SColor.floatGetI(169, 185, 105);
-    private static float darkGrassland = SColor.lerpFloatColors(grassland, black, 0.15f);
+    private static final float grassland = SColor.floatGetI(169, 185, 105);
+    private static final float darkGrassland = SColor.lerpFloatColors(grassland, black, 0.15f);
 
-    private static float seasonalForest = SColor.floatGetI(100, 158, 75);
-    private static float darkSeasonalForest = SColor.lerpFloatColors(seasonalForest, black, 0.15f);
+    private static final float seasonalForest = SColor.floatGetI(100, 158, 75);
+    private static final float darkSeasonalForest = SColor.lerpFloatColors(seasonalForest, black, 0.15f);
 
-    private static float borealForest = SColor.floatGetI(75, 105, 45);
-    private static float darkBorealForest = SColor.lerpFloatColors(borealForest, black, 0.15f);
+    private static final float borealForest = SColor.floatGetI(75, 105, 45);
+    private static final float darkBorealForest = SColor.lerpFloatColors(borealForest, black, 0.15f);
 
-    private static float woodland = SColor.floatGetI(122, 170, 90);
-    private static float darkWoodland = SColor.lerpFloatColors(woodland, black, 0.15f);
+    private static final float woodland = SColor.floatGetI(122, 170, 90);
+    private static final float darkWoodland = SColor.lerpFloatColors(woodland, black, 0.15f);
 
-    private static float rocky = SColor.floatGetI(171, 175, 145);
-    private static float darkRocky = SColor.lerpFloatColors(rocky, black, 0.15f);
+    private static final float rocky = SColor.floatGetI(171, 175, 145);
+    private static final float darkRocky = SColor.lerpFloatColors(rocky, black, 0.15f);
 
-    private static float beach = SColor.floatGetI(255, 235, 180);
-    private static float darkBeach = SColor.lerpFloatColors(beach, black, 0.15f);
+    private static final float beach = SColor.floatGetI(255, 235, 180);
+    private static final float darkBeach = SColor.lerpFloatColors(beach, black, 0.15f);
 
     // water colors
-    private static float deepColor = SColor.floatGetI(0, 68, 128);
+    private static final float deepColor = SColor.floatGetI(0, 68, 128);
     private static float darkDeepColor = SColor.lerpFloatColors(deepColor, black, 0.15f);
-    private static float mediumColor = SColor.floatGetI(0, 89, 159);
+    private static final float mediumColor = SColor.floatGetI(0, 89, 159);
     private static float darkMediumColor = SColor.lerpFloatColors(mediumColor, black, 0.15f);
-    private static float shallowColor = SColor.floatGetI(0, 123, 167);
+    private static final float shallowColor = SColor.floatGetI(0, 123, 167);
     private static float darkShallowColor = SColor.lerpFloatColors(shallowColor, black, 0.15f);
-    private static float coastalColor = SColor.lerpFloatColors(shallowColor, white, 0.3f);
+    private static final float coastalColor = SColor.lerpFloatColors(shallowColor, white, 0.3f);
     private static float darkCoastalColor = SColor.lerpFloatColors(coastalColor, black, 0.15f);
-    private static float foamColor = SColor.floatGetI(61,  162, 215);
-    private static float darkFoamColor = SColor.lerpFloatColors(foamColor, black, 0.15f);
+    private static final float foamColor = SColor.floatGetI(61,  162, 215);
+    private static final float darkFoamColor = SColor.lerpFloatColors(foamColor, black, 0.15f);
 
     private static float iceWater = SColor.floatGetI(210, 255, 252);
     private static float coldWater = mediumColor;
@@ -446,7 +446,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
 
     private static float cloudFull = SColor.floatGet(0xffffffff);
 
-    private static float[] biomeColors = {
+    private static final float[] biomeColors = {
             desert,
             savanna,
             tropicalRainforest,
@@ -460,7 +460,8 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
             beach,
             rocky,
             foamColor//SColor.floatGetI(255, 40, 80)
-    }, biomeDarkColors = {
+    };
+    private static float[] biomeDarkColors = {
             darkDesert,
             darkSavanna,
             darkTropicalRainforest,
