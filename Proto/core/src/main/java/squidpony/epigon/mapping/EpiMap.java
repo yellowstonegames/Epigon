@@ -4,6 +4,8 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.StatefulRNG;
 
+import static squidpony.epigon.Epigon.rootChaos;
+
 /**
  * This represents a single explorable map level.
  *
@@ -20,10 +22,11 @@ public class EpiMap {
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
     public double[][] resistances;
-    public StatefulRNG chaos = new StatefulRNG();
+    public StatefulRNG chaos;
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
+        chaos = new StatefulRNG(rootChaos.nextLong());
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
         resistances = new double[width][height];

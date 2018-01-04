@@ -62,6 +62,8 @@ public class Epigon extends Game {
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     public static final RNG prng = new RNG(posrng);
+    // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
+    public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
     public final RecipeMixer mixer;
     public final HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
