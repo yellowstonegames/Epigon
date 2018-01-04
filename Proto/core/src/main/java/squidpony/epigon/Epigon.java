@@ -339,7 +339,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.getPhysicalWeapons().randomValue(player.chaos).copy(), player.chaos), player.chaos.getRandomElement(Element.allEnergy).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos), GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
         infoHandler.setPlayer(player);
         primaryHandler.setPlayer(player);
 
@@ -591,7 +591,7 @@ public class Epigon extends Game {
             message("Nothing equippable found.");
             return;
         } else {
-            player.chaos.shuffleInPlace(player.inventory);
+            GauntRNG.shuffleInPlace(player.chaos += player.inventory.size() - 1, player.inventory);
             Physical chosen = player.inventory.get(0);
             equipItem(chosen);
         }
@@ -986,7 +986,7 @@ public class Epigon extends Game {
                     message("Dropping all held items");
                     for(Physical dropped : player.unequip(BOTH))
                     {
-                        for (int i = 0, offset = player.chaos.next(3); i < 8; i++) {
+                        for (int i = 0, offset = GauntRNG.next(++player.chaos, 3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
                             if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
                                 map.contents[c.x][c.y].add(dropped);

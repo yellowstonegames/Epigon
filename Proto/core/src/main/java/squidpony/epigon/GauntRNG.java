@@ -4,17 +4,28 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.squidmath.NumberTools;
 
+import java.util.Collections;
 import java.util.List;
 
 import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
-import static squidpony.squidmath.ThrustAltRNG.determineBounded;
-import static squidpony.squidmath.ThrustAltRNG.determineDouble;
-import static squidpony.squidmath.ThrustAltRNG.determineFloat;
+import static squidpony.squidmath.ThrustAltRNG.*;
 
 /**
  * Created by Tommy Ettinger on 1/4/2018.
  */
 public final class GauntRNG {
+
+
+    /**
+     * Gets a random number with at most the given amount of bits; call with {@code ++state}.
+     * @param state must be called with {@code ++state}
+     * @param bits the number of bits to generate
+     * @return a number using the given amount of random bits
+     */
+    public static int next(long state, int bits)
+    {
+        return (int)determine(state) >>> (32 - bits);
+    }
     /**
      * Returns a value from an even distribution from min (inclusive) to max
      * (exclusive).
@@ -39,7 +50,7 @@ public final class GauntRNG {
      * @param max the maximum bound on the return value (exclusive)
      * @return the found value
      */
-    public int between(long state, int min, int max) {
+    public static int between(long state, int min, int max) {
         return determineBounded(state, max - min) + min;
     }
 
@@ -73,6 +84,26 @@ public final class GauntRNG {
             return null;
         }
         return list.get(determineBounded(state, list.size()));
+    }
+    /**
+     * Shuffles a List of T items in-place using the Fisher-Yates algorithm.
+     * This only shuffles List data structures.
+     * Unlike other methods in this class, this can change state by different amounts depending on the length of
+     * elements. This must be called with {@code state += elements.size() - 1}.
+     * <br>
+     * <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Wikipedia has more on this algorithm</a>.
+     *
+     * @param state must be called with {@code state += elements.size() - 1}
+     * @param elements a Collection of T; <b>will</b> be modified
+     * @param <T>      can be any non-primitive type.
+     * @return elements after shuffling it in-place
+     */
+    public static <T> List<T> shuffleInPlace(long state, List<T> elements) {
+        final int n = elements.size();
+        for (int i = n; i > 1; i--) {
+            Collections.swap(elements, determineBounded(state--, i), i - 1);
+        }
+        return elements;
     }
 
     /**

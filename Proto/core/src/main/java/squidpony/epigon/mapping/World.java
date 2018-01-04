@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
@@ -184,7 +185,7 @@ public class World {
                 }
                 EpiTile tile = map.contents[x][y];
                 Physical floor = new Physical();
-                floor.color = color.toRandomizedFloat(floor.chaos, 0.05f, 0f, 0.15f);
+                floor.color = GauntRNG.toRandomizedFloat(color, floor.chaos += 3, 0.05f, 0f, 0.15f);
                 floor.symbol = c;
                 tile.floor = floor;
             }

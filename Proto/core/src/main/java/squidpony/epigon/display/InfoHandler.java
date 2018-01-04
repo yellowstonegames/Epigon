@@ -2,16 +2,14 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.SeededNoise;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -435,7 +433,7 @@ public class InfoHandler {
                 //System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
-                    damage(Coord.get(x, s + offset), color, physical.chaos);
+                    damage(Coord.get(x, s + offset), color, physical.chaos += 2);
                 }
             }
         }
@@ -455,8 +453,8 @@ public class InfoHandler {
         }
     }
 
-    private void damage(Coord origin, Color color, StatefulRNG chaos) {
-        fx.addAction(new DamageEffect(chaos.nextFloat(1.9f) +  1.2f, chaos.between(2, 4), origin,
+    private void damage(Coord origin, Color color, long chaos) {
+        fx.addAction(new DamageEffect(ThrustAltRNG.determineFloat(chaos--) * 1.9f +  1.2f, GauntRNG.between(chaos, 2, 4), origin,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
