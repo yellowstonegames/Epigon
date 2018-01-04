@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static squidpony.epigon.Epigon.*;
-
 /**
  * A class for doing various tests and utilities work.
  */
@@ -35,8 +33,8 @@ public class Kickball {
 
     private void testFormulas() {
         HandBuilt handBuilt = new HandBuilt();
-        Physical source = mixer.buildPhysical(handBuilt.playerBlueprint);
-        Physical target = mixer.buildPhysical(Inclusion.ANDALUSITE);
+        Physical source = handBuilt.mixer.buildPhysical(handBuilt.playerBlueprint);
+        Physical target = handBuilt.mixer.buildPhysical(Inclusion.ANDALUSITE);
         source.stats.put(Stat.AIM, new LiveValue(52.5));
         target.stats.put(Stat.DODGE, new LiveValue(52));
         source.stats.put(Stat.IMPACT, new LiveValue(64));
@@ -82,7 +80,7 @@ public class Kickball {
     private Physical makePhysicalFromStone(Stone stone) {
         Physical pb = new Physical();
         pb.name = stone.toString();
-        pb.color = SColor.toRandomizedFloat(stone.front, rng, 0.05f, 0f, 0.15f);
+        pb.color = SColor.toRandomizedFloat(stone.front, pb.chaos, 0.05f, 0f, 0.15f);
 
         return pb;
     }

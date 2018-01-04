@@ -4,8 +4,6 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 
-import static squidpony.epigon.Epigon.chaos;
-
 /**
  * Contains links to everything in the current game world.
  *
@@ -186,7 +184,7 @@ public class World {
                 }
                 EpiTile tile = map.contents[x][y];
                 Physical floor = new Physical();
-                floor.color = color.toRandomizedFloat(chaos, 0.05f, 0f, 0.15f);
+                floor.color = color.toRandomizedFloat(floor.chaos, 0.05f, 0f, 0.15f);
                 floor.symbol = c;
                 tile.floor = floor;
             }

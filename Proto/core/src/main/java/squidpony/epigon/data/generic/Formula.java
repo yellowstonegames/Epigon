@@ -1,10 +1,10 @@
 package squidpony.epigon.data.generic;
 
-import static squidpony.epigon.Epigon.rng;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidmath.ThrustAltRNG;
 
 /**
  * A way to describe what calculations should be performed at run time.
@@ -19,8 +19,8 @@ public class Formula {
     private Formula() {
     }
 
-    public static int randomizedStartingStatLevel(){
-        int n = rng.nextInt(100);
+    public static int randomizedStartingStatLevel(long seed){
+        int n = ThrustAltRNG.determineBounded(seed, 100);
         if (n < 45){
             return 1;
         } else if (n < 65){

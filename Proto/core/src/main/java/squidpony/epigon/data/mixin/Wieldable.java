@@ -8,8 +8,6 @@ import squidpony.squidmath.ProbabilityTable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static squidpony.epigon.Epigon.chaos;
-
 /**
  * The specific information for a wieldable object.
  *
@@ -25,7 +23,7 @@ public class Wieldable {
     public double hitChance;
     public int damage;
     public int range;
-    public ProbabilityTable<Element> elements = new ProbabilityTable<>(chaos);
+    public ProbabilityTable<Element> elements = new ProbabilityTable<>();
     public static final Wieldable UNARMED = new Wieldable();
     static {
         UNARMED.range = 0;

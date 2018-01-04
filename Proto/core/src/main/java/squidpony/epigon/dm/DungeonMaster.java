@@ -1,9 +1,10 @@
 package squidpony.epigon.dm;
 
-import java.util.List;
 import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
+
+import java.util.List;
 
 /**
  * Controls the overall flow of the game world.
@@ -26,8 +27,9 @@ public class DungeonMaster {
     /**
      * Removes the provided condition. This may cause other conditions to become unsuppressed.
      *
+     * @param thing
      * @param condition
-     * @param canceled true if it's being removed due to cancellation rather than expiration
+     * @param cancelled true if it's being removed due to cancellation rather than expiration
      */
     private void detachCondition(Physical thing, Condition condition, boolean cancelled) {
         thing.conditions.remove(condition);

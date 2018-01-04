@@ -56,14 +56,13 @@ public class Epigon extends Game {
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
     // this is separated from the StatefulRNG so you can still call ThrustAltRNG-specific methods, mainly skip()
-    public static final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
-    public static final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
+    public final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
+    public final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
     // used for certain calculations where the state changes per-tile
+    // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     public static final RNG prng = new RNG(posrng);
-    //unseeded random number generator
-    public static final StatefulRNG chaos = new StatefulRNG(new ThrustRNG());
-    public static final RecipeMixer mixer = new RecipeMixer();
+    public final RecipeMixer mixer;
     public final HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
@@ -136,42 +135,44 @@ public class Epigon extends Game {
         messageCount = bottomH - 2;
 
     }
-    public static final String outlineFragmentShader = "#ifdef GL_ES\n"
-            + "precision mediump float;\n"
-            + "precision mediump int;\n"
-            + "#endif\n"
-            + "\n"
-            + "uniform sampler2D u_texture;\n"
-            + "uniform float u_smoothing;\n"
-            + "varying vec4 v_color;\n"
-            + "varying vec2 v_texCoords;\n"
-            + "\n"
-            + "void main() {\n"
-            + "  if(u_smoothing <= 0.0) {\n"
-            + "    float smoothing = -u_smoothing;\n"
-            + "	   vec4 box = vec4(v_texCoords-0.000125, v_texCoords+0.000125);\n"
-            + "	   float asum = smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, v_texCoords).a) + 0.5 * (\n"
-            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xy).a) +\n"
-            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zw).a) +\n"
-            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xw).a) +\n"
-            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zy).a));\n"
-            + "    gl_FragColor = vec4(v_color.rgb, (asum / 3.0) * v_color.a);\n"
-            + "	 } else {\n"
-            + "    float distance = texture2D(u_texture, v_texCoords).a;\n"
-            + "	   vec2 box = vec2(0.0, 0.00375 * (u_smoothing + 0.0825));\n"
-            + "	   float asum = 0.7 * (smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, distance) + \n"
-            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.xy).a) +\n"
-            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.xy).a) +\n"
-            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.yx).a) +\n"
-            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.yx).a)),\n"
-            + "                 outline = clamp((distance * 0.8 - 0.415) * 18, 0, 1);\n"
-            + "	   gl_FragColor = vec4(mix(vec3(0.0), v_color.rgb * 1.2, outline), asum * v_color.a);\n" // the only change from SquidLib's version is: rgb * 1.2
-            + "  }\n"
-            + "}\n";
+//    public static final String outlineFragmentShader = "#ifdef GL_ES\n"
+//            + "precision mediump float;\n"
+//            + "precision mediump int;\n"
+//            + "#endif\n"
+//            + "\n"
+//            + "uniform sampler2D u_texture;\n"
+//            + "uniform float u_smoothing;\n"
+//            + "varying vec4 v_color;\n"
+//            + "varying vec2 v_texCoords;\n"
+//            + "\n"
+//            + "void main() {\n"
+//            + "  if(u_smoothing <= 0.0) {\n"
+//            + "    float smoothing = -u_smoothing;\n"
+//            + "	   vec4 box = vec4(v_texCoords-0.000125, v_texCoords+0.000125);\n"
+//            + "	   float asum = smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, v_texCoords).a) + 0.5 * (\n"
+//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xy).a) +\n"
+//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zw).a) +\n"
+//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xw).a) +\n"
+//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zy).a));\n"
+//            + "    gl_FragColor = vec4(v_color.rgb, (asum / 3.0) * v_color.a);\n"
+//            + "	 } else {\n"
+//            + "    float distance = texture2D(u_texture, v_texCoords).a;\n"
+//            + "	   vec2 box = vec2(0.0, 0.00375 * (u_smoothing + 0.0825));\n"
+//            + "	   float asum = 0.7 * (smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, distance) + \n"
+//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.xy).a) +\n"
+//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.xy).a) +\n"
+//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.yx).a) +\n"
+//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.yx).a)),\n"
+//            + "                 outline = clamp((distance * 0.8 - 0.415) * 18, 0, 1);\n"
+//            + "	   gl_FragColor = vec4(mix(vec3(0.0), v_color.rgb * 1.2, outline), asum * v_color.a);\n" // the only change from SquidLib's version is: rgb * 1.2
+//            + "  }\n"
+//            + "}\n";
 
     public Epigon()
     {
-        handBuilt = new HandBuilt();
+        mixer = new RecipeMixer();
+        handBuilt = new HandBuilt(rng, mixer);
+        Weapon.init();
     }
 
     @Override
@@ -336,7 +337,7 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.physicalWeapons.randomValue(chaos).copy(), chaos), chaos.getRandomElement(Element.allEnergy).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.getPhysicalWeapons().randomValue(player.chaos).copy(), player.chaos), player.chaos.getRandomElement(Element.allEnergy).weaponModification())));
         infoHandler.setPlayer(player);
         primaryHandler.setPlayer(player);
 
@@ -361,7 +362,7 @@ public class Epigon extends Game {
         calcFOV(player.location.x, player.location.y);
 
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
-        toPlayerDijkstra.rng = new RNG(new ThrustRNG()); // random seed, player won't make deterministic choices
+        toPlayerDijkstra.rng = new RNG(); // random seed, player won't make deterministic choices
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -588,7 +589,7 @@ public class Epigon extends Game {
             message("Nothing equippable found.");
             return;
         } else {
-            chaos.shuffleInPlace(player.inventory);
+            player.chaos.shuffleInPlace(player.inventory);
             Physical chosen = player.inventory.get(0);
             equipItem(chosen);
         }
@@ -983,7 +984,7 @@ public class Epigon extends Game {
                     message("Dropping all held items");
                     for(Physical dropped : player.unequip(BOTH))
                     {
-                        for (int i = 0, offset = chaos.next(3); i < 8; i++) {
+                        for (int i = 0, offset = player.chaos.next(3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
                             if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
                                 map.contents[c.x][c.y].add(dropped);
