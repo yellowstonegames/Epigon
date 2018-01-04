@@ -14,6 +14,8 @@ import squidpony.squidmath.*;
 
 import java.util.*;
 
+import static squidpony.epigon.Epigon.rootChaos;
+
 /**
  * Base class for all instantiated physical objects in the world.
  *
@@ -127,7 +129,7 @@ public class Physical extends EpiData {
     public Physical() {
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
-        chaos = new StatefulRNG();
+        chaos = new StatefulRNG(rootChaos.nextLong());
     }
     public static Physical makeBasic(String name, char symbol, Color color)
     {

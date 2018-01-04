@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+import static squidpony.epigon.Epigon.rootChaos;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
@@ -32,12 +33,12 @@ import static squidpony.epigon.data.specific.Physical.basePhysical;
  */
 public class HandBuilt {
     public StatefulRNG rng;
-    public StatefulRNG chaos = new StatefulRNG();
+    public StatefulRNG chaos;
     public RecipeMixer mixer;
 
     public Physical doorBlueprint;
-    public Physical baseOpenDoor = new Physical();
-    public Physical baseClosedDoor = new Physical();
+    public Physical baseOpenDoor;
+    public Physical baseClosedDoor;
 
     public Recipe doorRecipe;
     public Modification openDoor;
@@ -53,7 +54,7 @@ public class HandBuilt {
 
     public Modification makeWall;
 
-    public Physical nan = new Physical();//trade currency (dust that's used for enchanting things and casting spells)
+    public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
 
     // Cooking skills
     public Skill cooking = new Skill("cooking");
@@ -109,7 +110,11 @@ public class HandBuilt {
 
     public HandBuilt(StatefulRNG rng, RecipeMixer mixer) {
         this.rng = rng.copy();
+        this.chaos = new StatefulRNG(rootChaos.nextLong());
         this.mixer = mixer;
+        baseOpenDoor = new Physical();
+        baseClosedDoor = new Physical();
+        nan = new Physical();
         initAbilities();
         initProfessions();
         initItems();

@@ -19,12 +19,15 @@ import java.util.Map.Entry;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static squidpony.epigon.Epigon.rootChaos;
+
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
  * various categories.
  *
  * There is some danger in using the construction bits as having an object A that creates B that create a new A will cause an infinite loop.
  * TODO - figure out a way to check for and prevent that loop...
+ * TODO - solve halting problem...
  *
  * Results may be based on using a specific recipe with specific items, or by looking for a result
  * in a recipe and then building it with that recipe.
@@ -37,7 +40,11 @@ public class RecipeMixer {
 
     private Map<Material, Physical> materials = new HashMap<>();
 
-    public StatefulRNG chaos = new StatefulRNG(), rng = new StatefulRNG(123456789L);
+    public StatefulRNG chaos, rng = new StatefulRNG(123456789L);
+    public RecipeMixer()
+    {
+        chaos = new StatefulRNG(rootChaos.nextLong());
+    }
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
