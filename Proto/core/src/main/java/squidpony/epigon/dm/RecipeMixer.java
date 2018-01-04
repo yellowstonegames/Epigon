@@ -12,7 +12,9 @@ import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -76,13 +78,13 @@ public class RecipeMixer {
     }
 
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
-        return mix(recipe, consumed, catalyst, rng);
+        return mix(recipe, consumed, catalyst, rng.nextLong());
     }
 
-    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, StatefulRNG otherRng) {
+    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, long state) {
         List<Physical> result = new ArrayList<>();
         long prevState = rng.getState();
-        rng.setState(otherRng.getState());
+        rng.setState(state);
         recipe.result.entrySet().stream()
             .forEach(e -> IntStream.range(0, e.getValue())
             .forEach(i -> {
@@ -96,15 +98,15 @@ public class RecipeMixer {
                 physical.calculateStats();
                 result.add(physical);
             }));
-        otherRng.setState(rng.getState());
         rng.setState(prevState);
         return result;
     }
 
-    public Physical buildWeapon(Weapon weapon, StatefulRNG rng)
+    public Physical buildWeapon(Weapon weapon, long state)
     {
-        Material mat = Weapon.makes.get(weapon.materialTypes[0]).randomItem(rng);
-        return mix(createRecipe(weapon.recipeBlueprint), Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), rng).get(0);
+        OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
+        Material mat = materials.getAt(ThrustAltRNG.determineBounded(state--, materials.size()));
+        return mix(createRecipe(weapon.recipeBlueprint), Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), state).get(0);
     }
 
     public Physical buildPhysical(Stone stone) {

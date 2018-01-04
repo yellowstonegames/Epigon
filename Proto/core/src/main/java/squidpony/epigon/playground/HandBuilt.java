@@ -2,6 +2,7 @@ package squidpony.epigon.playground;
 
 import squidpony.Maker;
 import squidpony.epigon.Epigon;
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.blueprint.Cloth;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.generic.Ability;
@@ -33,7 +34,7 @@ import static squidpony.epigon.data.specific.Physical.basePhysical;
  */
 public class HandBuilt {
     public StatefulRNG rng;
-    public StatefulRNG chaos;
+    public long chaos;
     public RecipeMixer mixer;
 
     public Physical doorBlueprint;
@@ -110,7 +111,7 @@ public class HandBuilt {
 
     public HandBuilt(StatefulRNG rng, RecipeMixer mixer) {
         this.rng = rng.copy();
-        this.chaos = new StatefulRNG(rootChaos.nextLong());
+        this.chaos = rootChaos.nextLong();
         this.mixer = mixer;
         baseOpenDoor = new Physical();
         baseClosedDoor = new Physical();
@@ -262,15 +263,15 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
-        playerBlueprint.unarmedData = Weapon.getUnarmedWeapons().randomValue(chaos).copy();
+        playerBlueprint.unarmedData = Weapon.randomUnarmedWeapon(++chaos).copy();
         playerBlueprint.weaponData = playerBlueprint.unarmedData.copy();
-        String culture = chaos.getRandomElement(playerBlueprint.unarmedData.rawWeapon.culture);
+        String culture = GauntRNG.getRandomElement(++chaos, playerBlueprint.unarmedData.rawWeapon.culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
             playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), chaos));
         }
         // and one weapon from some other group
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.getPhysicalWeapons().randomValue(chaos).copy(), chaos));
+        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.randomPhysicalWeapon(++chaos).copy(), chaos));
         mixer.addProfession(chef, playerBlueprint);
     }
 
@@ -340,8 +341,8 @@ public class HandBuilt {
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creatureOverwrite = new Creature();
-        liven.weaponOverwrite = Weapon.getWeapons().randomValue(chaos);
-        liven.weaponElementsAdded = OrderedMap.makeMap(chaos.getRandomElement(Element.allDamage), 1, chaos.getRandomElement(Element.allDamage), 2);
+        liven.weaponOverwrite = Weapon.randomWeapon(++chaos);
+        liven.weaponElementsAdded = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2);
         return liven;
     }
 }

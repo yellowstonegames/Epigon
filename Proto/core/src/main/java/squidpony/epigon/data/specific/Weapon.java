@@ -1,6 +1,7 @@
 package squidpony.epigon.data.specific;
 
 import squidpony.Maker;
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
@@ -8,6 +9,7 @@ import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,15 +88,46 @@ public class Weapon {
         if(!initialized) init();
         return weapons;
     }
+
+    /**
+     * Call with {@code ++state}.
+     * @param state must be called with {@code ++state}.
+     * @return a random weapon, which may be tangible or unarmed
+     */
+    public static Weapon randomWeapon(long state)
+    {
+        if(!initialized) init();
+        return weapons.getAt(ThrustAltRNG.determineBounded(state, weapons.size()));
+    }
     public static OrderedMap<String, Weapon> getPhysicalWeapons()
     {
         if(!initialized) init();
         return physicalWeapons;
     }
+    /**
+     * Call with {@code ++state}.
+     * @param state must be called with {@code ++state}.
+     * @return a random tangible weapon
+     */
+    public static Weapon randomPhysicalWeapon(long state)
+    {
+        if(!initialized) init();
+        return physicalWeapons.getAt(ThrustAltRNG.determineBounded(state, physicalWeapons.size()));
+    }
     public static OrderedMap<String, Weapon> getUnarmedWeapons()
     {
         if(!initialized) init();
         return unarmedWeapons;
+    }
+    /**
+     * Call with {@code ++state}.
+     * @param state must be called with {@code ++state}.
+     * @return a random unarmed weapon
+     */
+    public static Weapon randomUnarmedWeapon(long state)
+    {
+        if(!initialized) init();
+        return unarmedWeapons.getAt(ThrustAltRNG.determineBounded(state, unarmedWeapons.size()));
     }
 
     //public static final Weapon UNARMED = weapons.getAt(0);
@@ -135,7 +168,7 @@ public class Weapon {
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;
-        blueprint.rarity = Rating.values()[blueprint.chaos.between(1, 8)];
+        blueprint.rarity = Rating.values()[GauntRNG.between(++blueprint.chaos, 1, 8)];
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
@@ -155,7 +188,7 @@ public class Weapon {
         rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
         while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
-            blueprint.rarity = blueprint.chaos.getRandomElement(Rating.values());
+            blueprint.rarity = GauntRNG.getRandomElement(++blueprint.chaos, Rating.values());
         }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
