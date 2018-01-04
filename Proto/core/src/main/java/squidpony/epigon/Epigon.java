@@ -118,6 +118,8 @@ public class Epigon extends Game {
     //private Camera camera;
     private TextCellFactory.Glyph playerEntity;
 
+    List<Color> lights;
+
     // Set up sizing all in one place
     static {
         int bigW = 70;
@@ -294,6 +296,11 @@ public class Epigon extends Game {
         messageStage.addActor(messageSLayers);
         infoStage.addActor(infoSLayers);
         contextStage.addActor(contextSLayers);
+
+
+        Color backLight = SColor.CW_DARK_APRICOT;
+        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
+        lights.addAll(colorCenter.gradient(backLight, SColor.COSMIC_LATTE, 64, Interpolation.sineOut));
 
         startGame();
     }
@@ -667,17 +674,14 @@ public class Epigon extends Game {
         }
     }
 
-    List<Color> lights;
     public void putWithLight(int x, int y, char c, float foreground, float lightAmount, float noise) {
         float base = 1 - RememberedTile.frontFade;
         float front = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
-        noise = Math.abs(noise);
-        lightAmount -= 0.1;
-        lightAmount += 0.3 * noise;
-        lightAmount = Math.min(lightAmount, 1);
+        // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
+        // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
+        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.2f - 0.1f + 0.2f * noise, lightAmount));
         int n = (int)(lightAmount * lights.size());
-        n = Math.max(n, 0);
-        n = Math.min(n, lights.size() - 1);
+        n = Math.min(Math.max(n, 0), lights.size() - 1);
         float back = lights.get(n).toFloatBits(); // background gets both lit and faded to memory
         mapSLayers.put(x, y, c, front, back);
     }
@@ -686,16 +690,13 @@ public class Epigon extends Game {
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
-        Color backLight = colorCenter.dim(SColor.CW_DARK_ORANGE);
-        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
-        lights.addAll(colorCenter.gradient(backLight, SColor.COSMIC_LATTE, 128, Interpolation.sineOut));
-
-        float time = (System.currentTimeMillis() & 0xffffffL) * 0.0005f;
+        float time = (System.currentTimeMillis() & 0xffffffL) * 0.001f; // if you want to adjust the speed of flicker, change the multiplier
         long time0 = Noise.longFloor(time);
-        float noise = Math.max(
+        float noise =
                 // this is a lot cheaper than 3D simplex noise and we don't need/want position to affect it.
-                Noise.cerp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0),
-                -0.3f);
+                // we can use either Noise.querp (quintic Hermite spline) or Noise.cerp (cubic Hermite splne); cerp is cheaper but querp seems to look better.
+                // querp() is extremely close to cos(); see https://www.desmos.com/calculator/l31nflff3g for graphs. It is likely that querp performs better than cos.
+                Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0);
                 //(float) WhirlingNoise.noise(player.location.x * 0.3, player.location.y * 0.3, (System.currentTimeMillis() & 0xffffffL) * 0.00125);
         //noise = Math.max(noise, -0.1f);
         Physical creature;
@@ -712,7 +713,7 @@ public class Epigon extends Game {
                         mapSLayers.clear(x, y, 0);
                     } else {
                         posrng.move(x, y);
-                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), (float) sightAmount * 0.9f, noise);
+                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), sightAmount, noise);
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];
