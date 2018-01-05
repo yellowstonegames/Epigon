@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author Eben Howard
  */
-public class PrimaryHandler {
+public class MapOverlayHandler {
 
     public enum PrimaryMode {
         EQUIPMENT, CRAFTING, HELP;
@@ -72,7 +72,7 @@ public class PrimaryHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public PrimaryHandler(SquidLayers layers, SquidColorCenter colorCenter) {
+    public MapOverlayHandler(SquidLayers layers, SquidColorCenter colorCenter) {
         this.colorCenter = colorCenter;
         width = layers.getGridWidth();
         halfWidth = width / 2;
