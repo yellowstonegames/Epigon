@@ -332,13 +332,15 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 4)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos), GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(
+                        mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
+                        GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
         infoHandler.setPlayer(player);
         mapOverlayHandler.setPlayer(player);
-
-        for (Coord coord : floors.quasiRandomSeparated(0.05)) {
+        floors.randomScatter(rng, 5);
+        for (Coord coord : floors) {
             if (map.contents[coord.x][coord.y].blockage == null) {
-                Physical p = mixer.buildPhysical(rng.getRandomElement(Inclusion.values()));
+                Physical p = mixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive());
                 if(SColor.saturationOfFloat(p.color) < 0.8f)
                 {

@@ -342,7 +342,7 @@ public class HandBuilt {
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creatureOverwrite = new Creature();
         liven.weaponOverwrite = Weapon.randomWeapon(++chaos);
-        liven.weaponElementsAdded = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2);
+        liven.weaponElementsAdded = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
         return liven;
     }
 }

@@ -127,9 +127,9 @@ public enum Element { // TODO - make this a full EpiData class with external dat
             mod.elementalDamageMultiplier.put(this, new LiveValue(1.5));
         }
         if(mod.weaponElementsAdded != null)
-            mod.weaponElementsAdded.put(this, 5);
+            mod.weaponElementsAdded.put(this, 5.0);
         else
-            mod.weaponElementsAdded = OrderedMap.makeMap(this, 5);
+            mod.weaponElementsAdded = OrderedMap.makeMap(this, 5.0);
         mod.possiblePrefix.add(name);
         if(mod.color != null)
             mod.color = mod.color.cpy().lerp(color, 0.5f);
