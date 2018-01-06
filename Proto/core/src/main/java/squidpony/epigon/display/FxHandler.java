@@ -15,7 +15,6 @@ import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -107,73 +106,7 @@ public class FxHandler {
     }
 
     public void layeredSparkle(Coord origin, int size, Radius radius) {
-        fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius, rng
-        /*, new Color[][]{
-                        { CW_PALE_RED, CW_LIGHT_RED, CW_BRIGHT_RED, CW_RED, CW_FLUSH_RED, CW_RICH_RED, CW_DARK_RED },
-                        { CW_PALE_APRICOT, CW_LIGHT_APRICOT, CW_BRIGHT_APRICOT, CW_APRICOT, CW_FLUSH_APRICOT, CW_RICH_APRICOT, CW_DARK_APRICOT },
-                        { CW_PALE_YELLOW, CW_LIGHT_YELLOW, CW_BRIGHT_YELLOW, CW_YELLOW, CW_FLUSH_YELLOW, CW_RICH_YELLOW, CW_DARK_YELLOW },
-                        { CW_PALE_LIME, CW_LIGHT_LIME, CW_BRIGHT_LIME, CW_LIME, CW_FLUSH_LIME, CW_RICH_LIME, CW_DARK_LIME },
-                        { CW_PALE_JADE, CW_LIGHT_JADE, CW_BRIGHT_JADE, CW_JADE, CW_FLUSH_JADE, CW_RICH_JADE, CW_DARK_JADE },
-                        { CW_PALE_AZURE, CW_LIGHT_AZURE, CW_BRIGHT_AZURE, CW_AZURE, CW_FLUSH_AZURE, CW_RICH_AZURE, CW_DARK_AZURE },
-                        { CW_PALE_SAPPHIRE, CW_LIGHT_SAPPHIRE, CW_BRIGHT_SAPPHIRE, CW_SAPPHIRE, CW_FLUSH_SAPPHIRE, CW_RICH_SAPPHIRE, CW_DARK_SAPPHIRE },
-                        { CW_PALE_PURPLE, CW_LIGHT_PURPLE, CW_BRIGHT_PURPLE, CW_PURPLE, CW_FLUSH_PURPLE, CW_RICH_PURPLE, CW_DARK_PURPLE },
-                }*/));
-    }
-
-    public static String twinkles = "+※+¤";
-
-    public char randomBraille() {
-        return (char) rng.between(0x2801, 0x2900);
-    }
-    public static String[] brailleByDots = {"⠀",
-        "⠁⠂⠄⠈⠐⠠⡀⢀",
-        "⠃⠅⠆⠉⠊⠌⠑⠒⠔⠘⠡⠢⠤⠨⠰⡁⡂⡄⡈⡐⡠⢁⢂⢄⢈⢐⢠⣀",
-        "⠇⠋⠍⠎⠓⠕⠖⠙⠚⠜⠣⠥⠦⠩⠪⠬⠱⠲⠴⠸⡃⡅⡆⡉⡊⡌⡑⡒⡔⡘⡡⡢⡤⡨⡰⢃⢅⢆⢉⢊⢌⢑⢒⢔⢘⢡⢢⢤⢨⢰⣁⣂⣄⣈⣐⣠",
-        "⠏⠗⠛⠝⠞⠧⠫⠭⠮⠳⠵⠶⠹⠺⠼⡇⡋⡍⡎⡓⡕⡖⡙⡚⡜⡣⡥⡦⡩⡪⡬⡱⡲⡴⡸⢇⢋⢍⢎⢓⢕⢖⢙⢚⢜⢣⢥⢦⢩⢪⢬⢱⢲⢴⢸⣃⣅⣆⣉⣊⣌⣑⣒⣔⣘⣡⣢⣤⣨⣰",
-        "⠟⠯⠷⠻⠽⠾⡏⡗⡛⡝⡞⡧⡫⡭⡮⡳⡵⡶⡹⡺⡼⢏⢗⢛⢝⢞⢧⢫⢭⢮⢳⢵⢶⢹⢺⢼⣇⣋⣍⣎⣓⣕⣖⣙⣚⣜⣣⣥⣦⣩⣪⣬⣱⣲⣴⣸",
-        "⠿⡟⡯⡷⡻⡽⡾⢟⢯⢷⢻⢽⢾⣏⣗⣛⣝⣞⣧⣫⣭⣮⣳⣵⣶⣹⣺⣼", "⡿⢿⣟⣯⣷⣻⣽⣾", "⣿"};
-
-    public static char randomBraille(long seed, int dots) {
-        String s = brailleByDots[dots % 9];
-        return s.charAt(ThrustRNG.determineBounded(seed, s.length()));
-    }
-
-    public static char brailleFor(Collection<Coord> coords) {
-        char b = 0x2800;
-        for (Coord c : coords) {
-            if (c.x == 0) {
-                switch (c.y) {
-                    case 0:
-                        b += 0x1;
-                        break;
-                    case 1:
-                        b += 0x2;
-                        break;
-                    case 2:
-                        b += 0x4;
-                        break;
-                    case 3:
-                        b += 0x40;
-                        break;
-                }
-            } else if (c.x == 1) {
-                switch (c.y) {
-                    case 0:
-                        b += 0x8;
-                        break;
-                    case 1:
-                        b += 0x10;
-                        break;
-                    case 2:
-                        b += 0x20;
-                        break;
-                    case 3:
-                        b += 0x80;
-                        break;
-                }
-            }
-        }
-        return b;
+        fx.addAction(new ColorSparkleEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius, rng));
     }
 
     public class TwinkleEffect extends PanelEffect {
@@ -209,7 +142,7 @@ public class FxHandler {
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            fx.put(c.x, c.y, twinkles.charAt((int) Math.floor(percent * (twinkles.length() * cycles + 1)) % cycles), color, 0f, layer);
+            fx.put(c.x, c.y, Utilities.twinkles.charAt((int) Math.floor(percent * (Utilities.twinkles.length() * cycles + 1)) % cycles), color, 0f, layer);
         }
     }
 
@@ -306,7 +239,7 @@ public class FxHandler {
                 } else {
                     color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
                 }
-                fx.put(c.x, c.y, randomBraille(++seed2, percent < 0.375 ? (int) (percent * 8) + 1 : (int) (7.625 - percent * 7)), color, 0f, layer);
+                fx.put(c.x, c.y, Utilities.randomBraille(++seed2, percent < 0.375 ? (int) (percent * 8) + 1 : (int) (7.625 - percent * 7)), color, 0f, layer);
             }
         }
     }
