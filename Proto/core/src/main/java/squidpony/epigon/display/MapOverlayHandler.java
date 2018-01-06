@@ -98,13 +98,6 @@ public class MapOverlayHandler {
     private void doBorder() {
         int w = width;
         int h = height;
-        // all box drawing chars we know we can use:
-        // ┼├┤┴┬┌┐└┘│─
-        // ┌───┐
-        // │┌┐ │
-        // ├┴┼┬┤
-        // │ └┘│
-        // └───┘
         for (int x = 0; x < w; x++) {
             put(x, 0, '─');
             put(x, h - 1, '─');

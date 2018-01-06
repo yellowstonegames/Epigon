@@ -60,8 +60,6 @@ public class InfoHandler {
         }
     }
 
-    private final char[] eighthBlocks = new char[]{' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'};
-    private final String sparkles = "#$%&";
     private final int widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
     private SquidPanel back;
@@ -112,13 +110,6 @@ public class InfoHandler {
 
         int w = width;
         int h = height;
-        // all box drawing chars we know we can use:
-        // ┼├┤┴┬┌┐└┘│─
-        // ┌───┐
-        // │┌┐ │
-        // ├┴┼┬┤
-        // │ └┘│
-        // └───┘
         for (int x = 0; x < w; x++) {
             put(x, 0, '─');
             put(x, h - 1, '─');
@@ -409,10 +400,10 @@ public class InfoHandler {
             remainder *= 7;
             String blockText = "";
             for (int i = 0; i < fullBlocks; i++) {
-                blockText += eighthBlocks[7];
+                blockText += Utilities.eighthBlocks[7];
             }
             remainder = Math.max(remainder, 0);
-            blockText += eighthBlocks[(int) Math.ceil(remainder)];
+            blockText += Utilities.eighthBlocks[(int) Math.ceil(remainder)];
             put(widestStatSize + 2 + numberText.length() + 1, s + offset, blockText, color);
 
             Double change = changes.get(stats[s]);
@@ -500,7 +491,7 @@ public class InfoHandler {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
             fxBack.put(c.x, c.y, '█', SColor.translucentColor(back.getDefaultForegroundColor().toFloatBits(), 0.5f));
-            fx.put(c.x, c.y, sparkles.charAt((int) Math.floor(percent * (sparkles.length() * cycles + 1)) % cycles), color);
+            fx.put(c.x, c.y, Utilities.sparkles.charAt((int) Math.floor(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color);
         }
     }
 }
