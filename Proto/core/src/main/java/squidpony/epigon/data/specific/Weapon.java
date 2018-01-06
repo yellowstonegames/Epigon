@@ -2,13 +2,13 @@ package squidpony.epigon.data.specific;
 
 import squidpony.Maker;
 import squidpony.epigon.GauntRNG;
+import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
-import squidpony.squidmath.ProbabilityTable;
 import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class Weapon {
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
     public String[] qualities = new String[4];
     public String[] materialTypes, training;
-    public ProbabilityTable<Element> elements;
+    public WeightedTableWrapper<Element> elements;
     public static final OrderedMap<String, OrderedSet<Material>> makes = OrderedMap.makeMap(
             "Stone", new OrderedSet<>(Stone.values()),
             "Inclusion", new OrderedSet<>(Inclusion.values()),
@@ -162,9 +162,7 @@ public class Weapon {
         maneuvers.add(raw.maneuver2);
         statuses.add(raw.status1);
         statuses.add(raw.status2);
-        elements = new ProbabilityTable<>();
-        elements.add(Element.valueOf(raw.type1), 3);
-        elements.add(Element.valueOf(raw.type2), 2);
+        elements = new WeightedTableWrapper<>(blueprint.chaos, new Element[]{Element.valueOf(raw.type1), Element.valueOf(raw.type2)}, new double[]{3, 2});
         materialTypes = raw.materials;
         training = raw.training;
         blueprint.weaponData = this;

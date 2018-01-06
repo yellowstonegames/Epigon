@@ -509,8 +509,7 @@ public class RecipeMixer {
                         modification.weaponManeuversAdded != null ||
                         modification.weaponManeuversRemoved != null ||
                         modification.weaponElementsAdded != null ||
-                        modification.weaponElementsOverwrite != null ||
-                        modification.weaponElementsRemoved != null)) {
+                        modification.weaponElementsOverwrite != null)) {
             physical.weaponData = new Weapon();
         }
         if (modification.weaponStatusesAdded != null) {
@@ -529,7 +528,7 @@ public class RecipeMixer {
             physical.weaponData.elements = modification.weaponElementsOverwrite.copy();
         }
         if (modification.weaponElementsAdded != null) {
-            physical.weaponData.elements.addAll(modification.weaponElementsAdded);
+            physical.weaponData.elements.addAll(modification.weaponElementsAdded.keySet(), modification.weaponElementsAdded.values());
 //            for (int i = 0; i < modification.weaponElementsAdded.size(); i++) {
 //                Element e = modification.weaponElementsAdded.keyAt(i);
 //                int idx;
@@ -538,9 +537,6 @@ public class RecipeMixer {
 //                else
 //                    physical.weaponData.elements.add(e, modification.weaponElementsAdded.getAt(i));
 //            }
-        }
-        if (modification.weaponElementsRemoved != null) {
-            physical.weaponData.elements.removeAll(modification.weaponElementsRemoved);
         }
 
         if (modification.weaponCalcDelta != null) {
