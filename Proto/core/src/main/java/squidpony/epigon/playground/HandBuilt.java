@@ -62,6 +62,7 @@ public class HandBuilt {
     public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
 
     public Physical meat; // base item for dead animal chunks
+    public Recipe steakRecipe;
 
     // Cooking skills
     public Skill cooking = new Skill("cooking");
@@ -152,6 +153,7 @@ public class HandBuilt {
         cookSteak.maxTargets = 1;
         cookSteak.mustHaveSkillRatings.put(cooking, Rating.TYPICAL);
         cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(meat, 1));
+        cookSteak.validTargets.add(meat);
     }
 
     private static RatingValueModification rvmSkill(Rating rating)
@@ -331,6 +333,15 @@ public class HandBuilt {
         hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), '^');
         shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'ҭ');
         pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), ')');
+
+        Physical pb = new Physical();
+        pb.name = "steak";
+        pb.symbol = '%';
+        pb.color = SColor.DB_MUD.toFloatBits();
+        RecipeBlueprint rb = new RecipeBlueprint();
+        rb.requiredConsumed.put(meat, 1);
+        rb.result.put(pb, 1);
+        steakRecipe = mixer.createRecipe(rb);
     }
 
     private Recipe createSimpleRecipe(String name, float color, char symbol){
