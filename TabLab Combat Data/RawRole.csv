@@ -1,8 +1,8 @@
 squidpony.epigon.data.raw.RawRole	name		
 name	description	training	signature
-Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	At low Zone Tension you can avoid combat, and the first time Zone Tension goes high enough you enter a Power Burst.
+Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	You have a high chance of enemies not noticing you when they otherwise would; this chance falls as Zone tension rises.
 Brawler	A disciplined fighter who trains in both hand-to-hand combat and with various weapons.	Martial Arts	You deal more damage to enemies who are in a Power Burst and automatically counter their attacks.
-Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality	Each point of damage you take has a low chance of letting you enter a Power Burst.
+Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality	Each time you take damage, there is a moderate chance that you enter a Power Burst.
 Dervish	A deadly dancer in battle who sprints between skirmishes with an unpredictable weapon.	Whirling Death	You are always in a Power Burst, but take double damage and suffer crits twice as often.
 Duelist	A nimble noble who is courteous to a fault, unless dishonored… then a duel is called for.	Elegance	The first time each enemy damages you, your next attack has a chance to be a Power Strike if made against that enemy.
 Guardian	A cautious defender who prefers to use polearms and shields to keep foes at bay.	Foresight	You preemptive-counter all enemy Power Strikes when the attacker is in your attack range.
