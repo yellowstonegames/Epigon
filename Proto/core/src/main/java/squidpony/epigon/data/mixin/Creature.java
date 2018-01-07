@@ -13,6 +13,7 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.HashSet;
 import java.util.Set;
+import squidpony.epigon.data.specific.Recipe;
 
 /**
  * A specific creature in the world.
@@ -26,15 +27,15 @@ public class Creature {
     public OrderedMap<Skill, Rating> skillProgression = new OrderedMap<>();
     public Set<Ability> abilities = new HashSet<>();
 
+    public Set<Recipe> knownRecipes = new HashSet<>();
+    public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
+
     // TODO - add validity list for slots on a per-creature type (Humanoid, Quadreped) basis
     public EnumOrderedMap<JewelrySlot, Physical> jewelry = new EnumOrderedMap<>(JewelrySlot.class);
     public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);
     public EnumOrderedMap<ClothingSlot, Physical> armor = new EnumOrderedMap<>(ClothingSlot.class);
     public EnumOrderedMap<OverArmorSlot, Physical> overArmor = new EnumOrderedMap<>(OverArmorSlot.class);
     public EnumOrderedMap<WieldSlot, Physical> equipment = new EnumOrderedMap<>(WieldSlot.class);
-
-
-    public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
 
     // Runtime values
     public boolean aware;//has noticed the player

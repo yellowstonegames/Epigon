@@ -78,6 +78,7 @@ public class Modification extends EpiData {
 
 //    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>(); // TODO - this needs to be different than Element probably
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
+    public OrderedMap<Element, LiveValueModification> elementDamageMultiplierChanges = new OrderedMap<>();
 
     public List<Condition> conditions;
     public List<Condition> conditionsAdditive;
@@ -96,82 +97,81 @@ public class Modification extends EpiData {
 
     public List<Physical> inventory;
     public List<Physical> inventoryAdditive;
-    public List<Physical> inventorySubtractive; // TODO - priority on loss? exact match? what if it's not there?
+    public List<Physical> inventorySubtractive; // Removes everything that counts as an item in this list
     public List<Physical> optionalInventory;
     public List<Physical> optionalInventoryAdditive;
     public List<Physical> optionalInventorySubtractive;
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
-    public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDropsOverwrite;
-    public EnumOrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<Physical>>>> elementDropsOverwrite = new EnumOrderedMap<>(Element.class);
+    public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDrops;
+    public EnumOrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<Physical>>>> elementDrops;
 
-    public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsOverwrite;
+    public OrderedMap<Skill, OrderedMap<Rating, String>> identifications;
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsAdditive;
 
-    public EnumOrderedMap<Rating, List<Modification>> rarityModificationsOverwrite = new EnumOrderedMap<>(Rating.class); // Only for blueprints
+    public EnumOrderedMap<Rating, List<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class); // Only for blueprints
     public EnumOrderedMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumOrderedMap<>(Rating.class); // Only for blueprints
 
     // Creature changes
-    public Creature creatureOverwrite; // Become a new creature (or become one for the first time)
+    public Creature creature; // Become a new creature (or become one for the first time)
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
     public OrderedMap<Skill, RatingValueModification> skillProgressionChanges = new OrderedMap<>();
+    public List<Ability> abilities;
+    public List<Ability> abiliitiesAdditive;
+    public List<Ability> abilitiesSubtractive;
 
-    public OrderedMap<Element, LiveValueModification> elementDamageMultiplierChanges = new OrderedMap<>();
+    public List<RecipeBlueprint> knownRecipesAdditive; // Can only gain known recipes, never lose them
 
-    public List<RecipeBlueprint> gainedRecipes;
-
-    public Set<ConditionBlueprint> gainedPerks;
-    public Set<ConditionBlueprint> lostPerks;
-    public List<ConditionBlueprint> gainedConditions;
-    public Set<ConditionBlueprint> lostConditions;
-
-    public Set<Ability> gainedAbilities;
-    public Set<Ability> lostAbilities;
-
-    public Set<Profession> gainedProfessions; // Can only gain professions, never lose them
+    public List<Profession> professionsAdditive; // Can only gain professions, never lose them
 
     // Ammunition changes
-    public List<ConditionBlueprint> ammunitionCausesOverwrite;
-    public Set<ConditionBlueprint> ammunitionCausesRemoved;
-    public List<ConditionBlueprint> ammunitionCausesAdded;
-    public Set<Physical> ammunitionLaunchersOverwrite;
-    public Set<Physical> ammunitionLaunchersRemoved;
-    public Set<Physical> ammunitionLaunchersAdded;
-    public Boolean ammunitionThrowableOverwrite;
-    public Double ammunitionHitChanceOverwrite;
+    public List<ConditionBlueprint> ammunitionCauses;
+    public List<ConditionBlueprint> ammunitionCausesAdditive;
+    public List<ConditionBlueprint> ammunitionCausesSubtractive;
+    public List<Physical> ammunitionLaunchers;
+    public List<Physical> ammunitionLaunchersAdditive;
+    public List<Physical> ammunitionLaunchersSubtractive;
+    public Boolean ammunitionThrowable;
+    public Double ammunitionDistance;
+    public Double ammunitionDistanceAdditive;
+    public Double ammunitionDistanceMultiplier;
+
+    // TODO - have stats when used as ammunition work the same way as when wielded in hand
+    public Double ammunitionHitChance;
     public Double ammunitionHitChanceDelta;
-    public Double ammunitionDamageOverwrite;
+    public Double ammunitionDamage;
     public Double ammunitionDamageDelta;
-    public Double ammunitionDistanceOverwrite;
-    public Double ammunitionDistanceDelta;
 
     // Container changes
-    public Double capacityOverwrite;
+    public Double capacity;
     public Double capacityDelta;
-    public List<Physical> contentsOverwrite;
-    public List<Physical> contentsRemoved;
-    public List<Physical> contentsAdded;
+    public List<Physical> contents;
+    public List<Physical> contentsAdditive;
+    public List<Physical> contentsSubtractive;
 
     // Grouping changes
-    public Integer quantityOverwrite;
+    public Integer quantity;
     public Integer quantityDelta;
 
     // Wearable changes
-    public Boolean wornOverwrite;
+    public Boolean worn;
 
     // Wieldable changes
 //    public List<ConditionBlueprint> wieldableCausesOverwrite;
 //    public Set<ConditionBlueprint> wieldableCausesRemoved;
 //    public List<ConditionBlueprint> wieldableCausesAdded;
-    public WeightedTableWrapper<Element> weaponElementsOverwrite;
-    public OrderedMap<Element, Double> weaponElementsAdded;
+    public WeightedTableWrapper<Element> weaponElements;
+    public OrderedMap<Element, Double> weaponElementsAdditive;
 //    public Double wieldableHitChanceOverwrite;
 //    public Double wieldableHitChanceDelta;
 //    public Integer wieldableDamageOverwrite;
 //    public Integer wieldableDamageDelta;
 //    public Integer wieldableRangeOverwrite;
 //    public Integer wieldableRangeDelta;
-    public Weapon weaponOverwrite;
+    public Weapon weaponData;
     public int[] weaponCalcDelta;
-    public List<String> weaponStatusesAdded, weaponStatusesRemoved, weaponManeuversAdded, weaponManeuversRemoved;
+    public List<String> weaponStatusesAdditive;
+    public List<String> weaponStatusesSubtractive;
+    public List<String> weaponManeuversAdditive;
+    public List<String> weaponManeuversSubtractive;
 }

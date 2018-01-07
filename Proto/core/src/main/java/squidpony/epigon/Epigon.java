@@ -37,6 +37,8 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -624,6 +626,12 @@ public class Epigon extends Game {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
+                        Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                            .parallel()
+                            .map(table -> table.random())
+                            .flatMap(e -> IntStream.range(0, rng.between(e.minQuantity, e.maxQuantity + 1))
+                            .mapToObj(i -> mixer.buildPhysical(e.item)))
+                            .forEach(item -> map.contents[newX][newY].add(item));
                         mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                         message("You defeat the " + thing.name + " with " + -amt + " " + element.styledName + " damage!");
                     } else {
@@ -709,7 +717,7 @@ public class Epigon extends Game {
             }else {
                 dir = Direction.toGoTo(toCursor.get(i - 1), c);
             }
-            mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_BRIGHT_GREEN, null, 2);
+            mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE, null, 2);
         }
     }
 

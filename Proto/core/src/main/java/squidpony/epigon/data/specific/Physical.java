@@ -74,7 +74,7 @@ public class Physical extends EpiData {
     public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
     public List<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
 
-    public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
+    public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>(); // The change to incoming damage
 
     public List<Condition> conditions = new ArrayList<>();
 
@@ -82,9 +82,10 @@ public class Physical extends EpiData {
     public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
     public int[] calcStats = new int[11];
     public List<Physical> inventory = new ArrayList<>();
+    public List<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
 
     /**
-     * The list of physical objects it drops on destruction no matter what the source.
+     * The list of physical objects it drops on destruction no matter what the damage source.
      */
     public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDrops = new ArrayList<>();
 

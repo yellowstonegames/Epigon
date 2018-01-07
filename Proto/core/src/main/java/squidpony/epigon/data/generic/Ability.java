@@ -1,8 +1,10 @@
 package squidpony.epigon.data.generic;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import squidpony.squidmath.OrderedMap;
 
@@ -24,11 +26,13 @@ public class Ability extends EpiData {
     //range
     //vs creatures / items / open space
     //
+    public boolean canTargetTile; // if true can generally target a spot insteaad of a thing
     public boolean appliesToAllInTile; // All objects in a target tile are affected
     public boolean appliesToAllTilesInArea;
     public boolean randomChoiceInRange;
     public boolean requiresConfirmation;
     public int maxTargets = Integer.MAX_VALUE;
+    public Set<Physical> validTargets = new HashSet<>();
 
     public OrderedMap<Skill, Rating> mustHaveSkillRatings = new OrderedMap<>();
     public List<String> effectsString = new ArrayList<>();
