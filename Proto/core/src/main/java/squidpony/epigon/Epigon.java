@@ -1038,6 +1038,21 @@ public class Epigon extends Game {
                     equipItem();
                     mapOverlayHandler.updateDisplay();
                     break;
+                case INTERACT: // NOTE - just for testing, cook steaks!
+                    message("Trying to cook steaks");
+                    Physical meat = player.inventory
+                        .stream()
+                        .filter(p -> p.countsAs(handBuilt.meat))
+                        .findAny()
+                        .orElse(null);
+                    if (meat != null){
+                        player.inventory.remove(meat);
+                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(meat), Collections.emptyList());
+                        message("Made " + steaks.size() + " steaks.");
+                        player.inventory.addAll(steaks);
+                        mapOverlayHandler.updateDisplay();
+                    }
+                    break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();
                     break;
