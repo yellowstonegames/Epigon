@@ -1,5 +1,6 @@
 package squidpony.epigon.playground;
 
+import java.util.ArrayList;
 import squidpony.Maker;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
@@ -27,7 +28,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
+import squidpony.epigon.data.ProbabilityTableEntry;
+import squidpony.epigon.data.mixin.Grouping;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
+import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Contains objects to use to test out connections.
@@ -56,6 +60,8 @@ public class HandBuilt {
     public Modification makeWall;
 
     public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
+
+    public Physical meat; // base item for dead animal chunks
 
     // Cooking skills
     public Skill cooking = new Skill("cooking");
@@ -90,7 +96,7 @@ public class HandBuilt {
     public Skill ax = new Skill("ax", armedCombat);
     public Skill smallAx = new Skill("ax (small)", ax);
     public Skill largeAx = new Skill("ax (large)", ax);
-    public Skill fist = new Skill("fist", armedCombat);
+    public Skill fist = new Skill("fist", unarmedCombat);
     public Skill fan = new Skill("fan", fist);
     public Skill glove = new Skill("glove", fist);
     public Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
@@ -100,6 +106,8 @@ public class HandBuilt {
     public Skill hammer = new Skill("hammer", armedCombat);
     public Skill smallClub = new Skill("club (small)", hammer);
 
+    public Ability unarmedStrike;
+    public Ability armedStrike;
     public Ability cookSteak;
 
     public Profession chef;
@@ -116,6 +124,14 @@ public class HandBuilt {
         baseOpenDoor = new Physical();
         baseClosedDoor = new Physical();
         nan = new Physical();
+        nan.name = "nan";
+        nan.description = "currency of power";
+        meat = new Physical();
+        meat.name = "meat";
+        meat.description = "chunk of something";
+        meat.symbol = '%';
+        meat.color = SColor.DB_FAWN.toFloatBits();
+
         initAbilities();
         initProfessions();
         initItems();
@@ -133,6 +149,9 @@ public class HandBuilt {
     private void initAbilities() {
         cookSteak = new Ability();
         cookSteak.name = "cook steak";
+        cookSteak.maxTargets = 1;
+        cookSteak.mustHaveSkillRatings.put(cooking, Rating.TYPICAL);
+        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(meat, 1));
     }
 
     private static RatingValueModification rvmSkill(Rating rating)
@@ -167,6 +186,8 @@ public class HandBuilt {
         mod.skillChanges.put(foodPrep, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(foodChopping, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(foodMixing, rvmSkill(Rating.SLIGHT));
+        mod.abiliitiesAdditive = new ArrayList<>();
+        mod.abiliitiesAdditive.add(cookSteak);
 
         mod.name = "chef slight";
         chef.improvements.put(Rating.SLIGHT, mod);
@@ -340,9 +361,22 @@ public class HandBuilt {
 
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
-        liven.creatureOverwrite = new Creature();
-        liven.weaponOverwrite = Weapon.randomWeapon(++chaos);
-        liven.weaponElementsAdded = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
+        liven.creature = new Creature();
+
+        ProbabilityTable table = new ProbabilityTable();
+        Physical meats = mixer.buildPhysical(meat);
+//        meats.groupingData = new Grouping(); // is this better or worse than using the entry to get a range?
+//        meats.groupingData.quantity = rng.between(3, 12);
+        ProbabilityTableEntry meatEntry = new ProbabilityTableEntry<>();
+        meatEntry.item = meat;
+        meatEntry.minQuantity = 3;
+        meatEntry.maxQuantity = 12;
+        table.add(meatEntry, 1);
+        liven.physicalDrops = new ArrayList<>();
+        liven.physicalDrops.add(table);
+
+        liven.weaponData = Weapon.randomWeapon(++chaos);
+        liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
         return liven;
     }
 }

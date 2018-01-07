@@ -18,10 +18,12 @@ import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rootChaos;
+import squidpony.epigon.data.mixin.Grouping;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -418,7 +420,7 @@ public class RecipeMixer {
             physical.parent = null;
         }
 
-        if (modification.contentsOverwrite != null) {
+        if (modification.contents != null) {
             physical.countsAs = new HashSet<>(modification.countsAs);
         } else {
             if (modification.countsAsGained != null) {
@@ -473,69 +475,192 @@ public class RecipeMixer {
             physical.lightEmittedStrength.modify(modification.lightEmittedStrengthChange);
         }
 
-        physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
-
-        physical.stats.putAll(modification.stats);
-        modification.statChanges.entrySet()
-                .stream()
-                .forEach(e -> {
-                    LiveValue lv = physical.stats.getOrDefault(e.getKey(), new LiveValue(1));
-                    lv.modify(e.getValue());
-                    physical.stats.put(e.getKey(), lv);
-                });
-        if(modification.calcStats != null && modification.calcStats.length == 11)
-            System.arraycopy(modification.calcStats, 0, physical.calcStats, 0, 11);
-        else
-            physical.calculateStats();
-        if(modification.calcStatChanges != null && !modification.calcStatChanges.isEmpty()) {
-            for (int i = 0; i < modification.calcStatChanges.size(); i++) {
-                physical.calcStats[modification.calcStatChanges.keyAt(i).ordinal()] += modification.calcStatChanges.getAt(i);
-            }
-        }
-
         if (modification.whenUsedAsMaterial != null) {
             physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);
         }
-
-        if (modification.creatureOverwrite != null) {
-            physical.creatureData = createCreature(modification.creatureOverwrite);
+        if (modification.whenUsedAsMaterialAdditive != null) {
+            physical.whenUsedAsMaterial.addAll(modification.whenUsedAsMaterialAdditive);
         }
-        if (modification.weaponOverwrite != null) {
-            physical.weaponData = modification.weaponOverwrite.copy();
-        } else if (physical.weaponData == null && (
-                modification.weaponCalcDelta != null ||
-                        modification.weaponStatusesAdded != null ||
-                        modification.weaponStatusesRemoved != null ||
-                        modification.weaponManeuversAdded != null ||
-                        modification.weaponManeuversRemoved != null ||
-                        modification.weaponElementsAdded != null ||
-                        modification.weaponElementsOverwrite != null)) {
+
+        // TODO - required and optional modifications
+
+        physical.elementalDamageMultiplier.putAll(modification.elementalDamageMultiplier);
+        modification.elementDamageMultiplierChanges.entrySet()
+            .stream()
+            .forEach(e -> {
+                LiveValue lv = physical.elementalDamageMultiplier.getOrDefault(e.getKey(), new LiveValue(1));
+                lv.modify(e.getValue());
+                physical.elementalDamageMultiplier.put(e.getKey(), lv);
+            });
+
+        // TODO - Conditions
+
+        physical.stats.putAll(modification.stats);
+        modification.statChanges.entrySet()
+            .stream()
+            .forEach(e -> {
+                LiveValue lv = physical.stats.getOrDefault(e.getKey(), new LiveValue(1));
+                lv.modify(e.getValue());
+                physical.stats.put(e.getKey(), lv);
+            });
+        if (modification.calcStats != null && modification.calcStats.length == 11) {
+            System.arraycopy(modification.calcStats, 0, physical.calcStats, 0, 11);
+        } else {
+            physical.calculateStats();
+        }
+        for (int i = 0; i < modification.calcStatChanges.size(); i++) {
+            physical.calcStats[modification.calcStatChanges.keyAt(i).ordinal()] += modification.calcStatChanges.getAt(i);
+        }
+        physical.statProgression.putAll(modification.statProgression);
+        modification.statProgressionChanges.entrySet()
+            .stream()
+            .forEach(e -> {
+                Rating r = physical.statProgression.getOrDefault(e.getKey(), Rating.NONE);
+                r = r.applyRatingValueModification(e.getValue());
+                physical.statProgression.put(e.getKey(), r);
+            });
+
+        if (modification.inventory != null) {
+            physical.inventory = modification.inventory
+                .stream()
+                .map(i -> buildPhysical(i))
+                .collect(Collectors.toList());
+        }
+        if (modification.inventoryAdditive != null) {
+            physical.inventory.addAll(modification.inventoryAdditive
+                .stream()
+                .map(i -> buildPhysical(i))
+                .collect(Collectors.toList()));
+        }
+        if (modification.inventorySubtractive != null) {
+            for (Physical subtract : modification.inventorySubtractive) {
+                physical.inventory.removeIf(p -> p.countsAs(subtract));
+            }
+        }
+
+        if (modification.optionalInventory != null) {
+            physical.optionalInventory = modification.optionalInventory
+                .stream()
+                .map(i -> buildPhysical(i))
+                .collect(Collectors.toList());
+        }
+        if (modification.optionalInventoryAdditive != null) {
+            physical.optionalInventory.addAll(modification.optionalInventoryAdditive
+                .stream()
+                .map(i -> buildPhysical(i))
+                .collect(Collectors.toList()));
+        }
+        if (modification.optionalInventorySubtractive != null) {
+            for (Physical subtract : modification.optionalInventorySubtractive) {
+                physical.optionalInventory.removeIf(p -> p.countsAs(subtract));
+            }
+        }
+
+        if (modification.physicalDrops != null){
+            physical.physicalDrops = modification.physicalDrops;
+        }
+        if (modification.elementDrops != null){
+            physical.elementDrops = modification.elementDrops;
+        }
+
+        // TODO - identification
+
+        // TODO - rarity Modifications
+
+        if (modification.creature != null) {
+            physical.creatureData = createCreature(modification.creature);
+        }
+
+        if (physical.creatureData != null) {
+            modification.skillChanges.entrySet()
+                .stream()
+                .forEach(e -> {
+                    Rating rating = physical.creatureData.skills.getOrDefault(e.getKey(), Rating.NONE);
+                    rating = rating.applyRatingValueModification(e.getValue());
+                    physical.creatureData.skills.put(e.getKey(), rating);
+                });
+
+            modification.skillProgressionChanges.entrySet()
+                .stream()
+                .forEach(e -> {
+                    Rating rating = physical.creatureData.skillProgression.getOrDefault(e.getKey(), Rating.NONE);
+                    rating = rating.applyRatingValueModification(e.getValue());
+                    physical.creatureData.skillProgression.put(e.getKey(), rating);
+                });
+
+            if (modification.abilities != null) {
+                physical.creatureData.abilities = new HashSet(modification.abilities);
+            }
+
+            if (modification.abiliitiesAdditive != null) {
+                physical.creatureData.abilities.addAll(modification.abiliitiesAdditive);
+            }
+
+            if (modification.abilitiesSubtractive != null) {
+                physical.creatureData.abilities.removeAll(modification.abilitiesSubtractive);
+            }
+
+            if (modification.knownRecipesAdditive != null) {
+                for (RecipeBlueprint rb : modification.knownRecipesAdditive) {
+                    physical.creatureData.knownRecipes.add(createRecipe(rb));
+                }
+            }
+        }
+
+        // TODO - Ammunition data
+
+        // TODO - Container data
+
+        if (modification.quantity != null){
+            if (physical.groupingData == null){
+                physical.groupingData = new Grouping();
+            }
+            physical.groupingData.quantity = modification.quantity;
+        }
+        if (modification.quantityDelta != null){
+            if (physical.groupingData == null){
+                physical.groupingData = new Grouping();
+            }
+            physical.groupingData.quantity += modification.quantityDelta;
+        }
+
+        // TODO - Wearable changes
+
+        if (modification.weaponData != null) {
+            physical.weaponData = modification.weaponData.copy();
+        } else if (physical.weaponData == null && (modification.weaponCalcDelta != null
+            || modification.weaponStatusesAdditive != null
+            || modification.weaponStatusesSubtractive != null
+            || modification.weaponManeuversAdditive != null
+            || modification.weaponManeuversSubtractive != null
+            || modification.weaponElementsAdditive != null
+            || modification.weaponElements != null)) {
             physical.weaponData = new Weapon();
         }
-        if (modification.weaponStatusesAdded != null) {
-            physical.weaponData.statuses.addAll(modification.weaponStatusesAdded);
+        if (modification.weaponStatusesAdditive != null) {
+            physical.weaponData.statuses.addAll(modification.weaponStatusesAdditive);
         }
-        if (modification.weaponStatusesRemoved != null) {
-            physical.weaponData.statuses.removeAll(modification.weaponStatusesRemoved);
+        if (modification.weaponStatusesSubtractive != null) {
+            physical.weaponData.statuses.removeAll(modification.weaponStatusesSubtractive);
         }
-        if (modification.weaponManeuversAdded != null) {
-            physical.weaponData.maneuvers.addAll(modification.weaponManeuversAdded);
+        if (modification.weaponManeuversAdditive != null) {
+            physical.weaponData.maneuvers.addAll(modification.weaponManeuversAdditive);
         }
-        if (modification.weaponManeuversRemoved != null) {
-            physical.weaponData.maneuvers.addAll(modification.weaponManeuversRemoved);
+        if (modification.weaponManeuversSubtractive != null) {
+            physical.weaponData.maneuvers.addAll(modification.weaponManeuversSubtractive);
         }
-        if (modification.weaponElementsOverwrite != null) {
-            physical.weaponData.elements = modification.weaponElementsOverwrite.copy();
+        if (modification.weaponElements != null) {
+            physical.weaponData.elements = modification.weaponElements.copy();
         }
-        if (modification.weaponElementsAdded != null) {
-            physical.weaponData.elements.addAll(modification.weaponElementsAdded.keySet(), modification.weaponElementsAdded.values());
-//            for (int i = 0; i < modification.weaponElementsAdded.size(); i++) {
-//                Element e = modification.weaponElementsAdded.keyAt(i);
+        if (modification.weaponElementsAdditive != null) {
+            physical.weaponData.elements.addAll(modification.weaponElementsAdditive.keySet(), modification.weaponElementsAdditive.values());
+//            for (int i = 0; i < modification.weaponElementsAdditive.size(); i++) {
+//                Element e = modification.weaponElementsAdditive.keyAt(i);
 //                int idx;
 //                if ((idx = physical.weaponData.elements.table.getInt(e)) >= 0)
-//                    physical.weaponData.elements.weights.incr(idx, modification.weaponElementsAdded.getAt(i));
+//                    physical.weaponData.elements.weights.incr(idx, modification.weaponElementsAdditive.getAt(i));
 //                else
-//                    physical.weaponData.elements.add(e, modification.weaponElementsAdded.getAt(i));
+//                    physical.weaponData.elements.add(e, modification.weaponElementsAdditive.getAt(i));
 //            }
         }
 
@@ -545,23 +670,6 @@ public class RecipeMixer {
             }
         }
 
-        if (physical.creatureData != null) {
-            modification.skillChanges.entrySet()
-                    .stream()
-                    .forEach(e -> {
-                        Rating rating = physical.creatureData.skills.getOrDefault(e.getKey(), Rating.NONE);
-                        rating = rating.applyRatingValueModification(e.getValue());
-                        physical.creatureData.skills.put(e.getKey(), rating);
-                    });
-
-            modification.skillProgressionChanges.entrySet()
-                    .stream()
-                    .forEach(e -> {
-                        Rating rating = physical.creatureData.skillProgression.getOrDefault(e.getKey(), Rating.NONE);
-                        rating = rating.applyRatingValueModification(e.getValue());
-                        physical.creatureData.skillProgression.put(e.getKey(), rating);
-                    });
-        }
         return physical;
     }
 
