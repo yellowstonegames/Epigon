@@ -24,14 +24,12 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
-import squidpony.epigon.data.ProbabilityTableEntry;
-import squidpony.epigon.data.mixin.Grouping;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
-import squidpony.squidmath.ProbabilityTable;
 
 /**
  * Contains objects to use to test out connections.
@@ -374,20 +372,22 @@ public class HandBuilt {
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creature = new Creature();
 
-        ProbabilityTable table = new ProbabilityTable();
-        Physical meats = mixer.buildPhysical(meat);
-//        meats.groupingData = new Grouping(); // is this better or worse than using the entry to get a range?
-//        meats.groupingData.quantity = rng.between(3, 12);
-        ProbabilityTableEntry meatEntry = new ProbabilityTableEntry<>();
-        meatEntry.item = meat;
-        meatEntry.minQuantity = 3;
-        meatEntry.maxQuantity = 12;
-        table.add(meatEntry, 1);
-        liven.physicalDrops = new ArrayList<>();
-        liven.physicalDrops.add(table);
-
         liven.weaponData = Weapon.randomWeapon(++chaos);
         liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
         return liven;
+    }
+    
+    public Modification makeMeats(){
+        Modification meaten = new Modification();
+        meaten.possibleSuffix = Arrays.asList("meat");
+        meaten.countsAs = new HashSet<>();
+        meaten.countsAs.add(meat);
+        meaten.symbol = '%';
+        meaten.large = false;
+        meaten.removeCreature = true;
+        meaten.statChanges.put(Stat.MOBILITY, new LiveValueModification(0));
+        meaten.statChanges.put(Stat.SIGHT, new LiveValueModification(0));
+        meaten.quantity = rng.between(3, 12);
+        return meaten;
     }
 }

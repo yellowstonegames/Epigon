@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import squidpony.epigon.data.ProbabilityTableEntry;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -344,12 +345,16 @@ public class Epigon extends Game {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 mixer.applyModification(p, handBuilt.makeAlive());
-                if(SColor.saturationOfFloat(p.color) < 0.8f)
-                {
+                if (SColor.saturationOfFloat(p.color) < 0.8f) {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
-                            0.8f,
-                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
+                        0.8f,
+                        SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
                 }
+                Physical pMeat = mixer.buildPhysical(p);
+                mixer.applyModification(pMeat, handBuilt.makeMeats());
+                ProbabilityTable pt = new ProbabilityTable();
+                pt.add(new ProbabilityTableEntry<Physical>(pMeat, 2, 6), 1);
+                p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
                 creatures.put(coord, p);
