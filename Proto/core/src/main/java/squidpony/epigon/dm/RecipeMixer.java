@@ -571,6 +571,10 @@ public class RecipeMixer {
             physical.creatureData = createCreature(modification.creature);
         }
 
+        if (modification.removeCreature != null && modification.removeCreature == true){
+            physical.creatureData = null;
+        }
+
         if (physical.creatureData != null) {
             modification.skillChanges.entrySet()
                 .stream()

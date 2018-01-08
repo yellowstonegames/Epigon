@@ -114,6 +114,7 @@ public class Modification extends EpiData {
 
     // Creature changes
     public Creature creature; // Become a new creature (or become one for the first time)
+    public Boolean removeCreature; // No longer a creature
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
     public OrderedMap<Skill, RatingValueModification> skillProgressionChanges = new OrderedMap<>();
     public List<Ability> abilities;
