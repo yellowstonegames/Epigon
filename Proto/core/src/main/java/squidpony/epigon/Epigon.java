@@ -333,7 +333,7 @@ public class Epigon extends Game {
 
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
-        floors.copy().randomScatter(rng, 4)
+        floors.copy().randomScatter(rng, 3)
                 .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(
                         mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
                         GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
