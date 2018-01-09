@@ -1,26 +1,23 @@
 package squidpony.epigon;
 
 import com.badlogic.gdx.graphics.Color;
-
+import regexodus.Matcher;
+import regexodus.Pattern;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.RNG;
-import squidpony.squidmath.StatefulRNG;
 import squidpony.squidmath.ThrustRNG;
+
+import java.util.Collection;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.
  */
 public class Utilities {
 
-    public static char randomBraille(StatefulRNG rng) {
-        return (char) rng.between(0x2801, 0x2900);
+    public static char randomBraille(long state) {
+        return (char) GauntRNG.between(state, 0x2801, 0x2900);
     }
 
     public static final String sparkles = "#$%&";
@@ -79,20 +76,64 @@ public class Utilities {
         }
         return b;
     }
-
-    public static String caps(String input, String delimiter) {
-        if (input == null || input.isEmpty()) {
-            return input;
+    private static final Matcher capitalizeMatcher = Pattern.compile("(?<!\\pL)(\\pL)(\\pL*)(\\PL*)").matcher();
+    private static final StringBuilder sb = new StringBuilder(64);
+    public static String caps(final CharSequence original)
+    {
+        if (original == null || original.length() <= 0) {
+            return "";
         }
+        sb.setLength(0);
+        capitalizeMatcher.setTarget(original);
+        while (capitalizeMatcher.find()) {
+            sb.append(capitalizeMatcher.group(1).toUpperCase());
+            capitalizeMatcher.getGroup(2, sb, 1); // mode 1 is case-insensitive, which lower-cases result
+            sb.append(capitalizeMatcher.group(3));
+        }
+        return sb.toString();
 
-        return Arrays.stream(input.split(" "))
-            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
-            .collect(Collectors.joining(" "));
     }
-
-    public static String caps(String input) {
-        return caps(input, " ");
+    public static String caps(final CharSequence original,
+                                    final CharSequence oldDelimiter) {
+        if (original == null || original.length() <= 0) {
+            return "";
+        }
+        sb.setLength(0);
+        capitalizeMatcher.setTarget(original);
+        while (capitalizeMatcher.find()) {
+            sb.append(capitalizeMatcher.group(1).toUpperCase());
+            capitalizeMatcher.getGroup(2, sb, 1); // mode 1 is case-insensitive, which lower-cases result
+            sb.append(capitalizeMatcher.group(3).replace(oldDelimiter, " "));
+        }
+        return sb.toString();
     }
+    public static String caps(final CharSequence original,
+                                    final CharSequence oldDelimiter, final CharSequence newDelimiter) {
+        if (original == null || original.length() <= 0) {
+            return "";
+        }
+        sb.setLength(0);
+        capitalizeMatcher.setTarget(original);
+        while (capitalizeMatcher.find()) {
+            sb.append(capitalizeMatcher.group(1).toUpperCase());
+            capitalizeMatcher.getGroup(2, sb, 1); // mode 1 is case-insensitive, which lower-cases result
+            sb.append(capitalizeMatcher.group(3).replace(oldDelimiter, newDelimiter));
+        }
+        return sb.toString();
+    }
+//    public static String caps(String input, String delimiter) {
+//        if (input == null || input.isEmpty()) {
+//            return input;
+//        }
+//
+//        return Arrays.stream(input.split(delimiter))
+//            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
+//            .collect(Collectors.joining(" "));
+//    }
+//
+//    public static String caps(String input) {
+//        return caps(input, " ");
+//    }
 
     /**
      * Provides a String full of lines appropriate for the direction. If a stable set is desired, using the first

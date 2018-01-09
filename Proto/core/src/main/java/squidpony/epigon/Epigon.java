@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
+import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
@@ -39,7 +40,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import squidpony.epigon.data.ProbabilityTableEntry;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
