@@ -2,6 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.epigon.Utilities;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -10,7 +11,6 @@ import squidpony.squidgrid.gui.gdx.SquidLayers;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
@@ -25,10 +25,8 @@ public class MapOverlayHandler {
 
         private final String name;
 
-        private PrimaryMode() {
-            name = Arrays.stream(name().split("_"))
-                .map(s -> s.substring(0, 1) + s.substring(1).toLowerCase())
-                .collect(Collectors.joining(" "));
+        PrimaryMode() {
+            name = Utilities.caps(name(), "_", " ");
         }
 
         private int position() {
@@ -91,6 +89,7 @@ public class MapOverlayHandler {
     private void clear() {
         ArrayTools.fill(back.contents, '\0');
         ArrayTools.fill(front.contents, ' ');
+        //ArrayTools.fill(front.colors, -0x1.0p125F); // transparent
 
         doBorder();
     }
@@ -127,12 +126,13 @@ public class MapOverlayHandler {
      */
     private void doBorder(int y, int contentHeight) {
         doBorder();
-        if (y < 1) {
+        if (y < 0) {
             put(width - 1, 1, '▲');
         }
-        if (contentHeight + y >= height) {
+        if (contentHeight + y > height) {
             put(width - 1, height - 2, '▼');
         }
+        put(width - 1, Math.round(((height - 5f) * y) / (height - contentHeight)) + 2, '█');
     }
 
     private void put(int x, int y, String s) {
@@ -182,7 +182,7 @@ public class MapOverlayHandler {
                 showEquipment();
                 break;
             case HELP:
-                if (scrollOffsetY < 1) {
+                if (scrollOffsetY < 0) {
                     scrollOffsetY++;
                     clear();
                     showHelp(scrollOffsetY);
@@ -202,7 +202,7 @@ public class MapOverlayHandler {
                 showEquipment();
                 break;
             case HELP:
-                if (scrollOffsetY > -(helpHeight - height)) {
+                if (scrollOffsetY >= 1 - (helpHeight - height)) {
                     scrollOffsetY--;
                     clear();
                     showHelp(scrollOffsetY);
@@ -214,12 +214,12 @@ public class MapOverlayHandler {
     }
 
     private void showHelp() {
-        scrollOffsetY = 1;
-        showHelp(1);
+        scrollOffsetY = 0;
+        showHelp(scrollOffsetY);
     }
 
     private void showHelp(int startY) {
-        int y = startY;
+        int y = startY + 1;
 
         put(1, y, "Game Overview", headingColor);
         y++;
@@ -312,7 +312,7 @@ public class MapOverlayHandler {
         put(descX, y, "Shut - shuts all nearby doors");
         y += 2;
 
-        helpHeight = y;
+        helpHeight = y - startY;
         doBorder(startY, helpHeight);
     }
 
