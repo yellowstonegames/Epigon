@@ -13,4 +13,13 @@ public class Grouping {
     // TODO - add naming convention information
 
     public int quantity; // All quantities should be integers, if small amounts are desired than small units should be used
+
+    public Grouping()
+    {
+    }
+
+    public Grouping(int amount)
+    {
+        quantity = amount;
+    }
 }

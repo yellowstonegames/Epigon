@@ -2,19 +2,14 @@ package squidpony.epigon.dm;
 
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.generic.Modification;
-import squidpony.epigon.data.mixin.Creature;
-import squidpony.epigon.data.mixin.Profession;
-import squidpony.epigon.data.mixin.Terrain;
+import squidpony.epigon.data.mixin.*;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.OrderedSet;
-import squidpony.squidmath.StatefulRNG;
-import squidpony.squidmath.ThrustAltRNG;
+import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -23,7 +18,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rootChaos;
-import squidpony.epigon.data.mixin.Grouping;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -420,14 +414,30 @@ public class RecipeMixer {
             physical.parent = null;
         }
 
-        if (modification.contents != null) {
-            physical.countsAs = new HashSet<>(modification.countsAs);
+        if (modification.countsAs != null) {
+            physical.countsAs = new UnorderedSet<>(modification.countsAs);
         } else {
             if (modification.countsAsGained != null) {
                 physical.countsAs.addAll(modification.countsAsGained);
             }
             if (modification.countsAsLost != null) {
                 physical.countsAs.removeAll(modification.countsAsLost);
+            }
+        }
+        if(modification.contents != null)
+        {
+            if(physical.containerData == null) physical.containerData = new Container();
+            physical.containerData.contents = new ArrayList<>(modification.contents);
+        }
+        else {
+            if(modification.contentsAdditive != null)
+            {
+                if(physical.containerData == null) physical.containerData = new Container(modification.contentsAdditive.size(), modification.contentsAdditive);
+                else physical.containerData.contents.addAll(modification.contentsAdditive);
+            }
+            if(modification.contentsSubtractive != null)
+            {
+                if(physical.containerData != null) physical.containerData.contents.removeAll(modification.contentsSubtractive);
             }
         }
 

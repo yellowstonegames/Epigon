@@ -2,7 +2,6 @@ package squidpony.epigon.data.generic;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.ProbabilityTableEntry;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
@@ -14,7 +13,6 @@ import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.ProbabilityTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,8 +101,8 @@ public class Modification extends EpiData {
     public List<Physical> optionalInventorySubtractive;
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
-    public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDrops;
-    public EnumOrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<Physical>>>> elementDrops;
+    public List<WeightedTableWrapper<Physical>> physicalDrops;
+    public EnumOrderedMap<Element, List<WeightedTableWrapper<Physical>>> elementDrops;
 
     public OrderedMap<Skill, OrderedMap<Rating, String>> identifications;
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsAdditive;

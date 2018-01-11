@@ -4,14 +4,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.EpiData;
-import squidpony.epigon.data.ProbabilityTableEntry;
+import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.*;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
-import squidpony.squidmath.*;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.EnumOrderedMap;
+import squidpony.squidmath.NumberTools;
+import squidpony.squidmath.OrderedMap;
 
 import java.util.*;
 
@@ -87,13 +90,13 @@ public class Physical extends EpiData {
     /**
      * The list of physical objects it drops on destruction no matter what the damage source.
      */
-    public List<ProbabilityTable<ProbabilityTableEntry<Physical>>> physicalDrops = new ArrayList<>();
+    public List<WeightedTableWrapper<Physical>> physicalDrops = new ArrayList<>();
 
     /**
      * A list of what the item might drop when a given element is used on it. This is in addition to
      * the regular drop table.
      */
-    public OrderedMap<Element, List<ProbabilityTable<ProbabilityTableEntry<Physical>>>> elementDrops = new OrderedMap<>();
+    public OrderedMap<Element, List<WeightedTableWrapper<Physical>>> elementDrops = new OrderedMap<>();
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
