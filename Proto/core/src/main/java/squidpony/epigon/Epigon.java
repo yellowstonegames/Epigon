@@ -668,11 +668,12 @@ public class Epigon extends Game {
         float front = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
-        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.1f * noise, lightAmount));
+        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
         int n = (int)(lightAmount * lights.size());
         n = Math.min(Math.max(n, 0), lights.size() - 1);
         float back = lights.get(n).toFloatBits(); // background gets both lit and faded to memory
-        mapSLayers.put(x, y, c, front, back);
+        //mapSLayers.put(x, y, c, front, back); // "light" theme
+        mapSLayers.put(x, y, c, back, RememberedTile.memoryColorFloat); // "dark" theme
     }
 
     /**
@@ -715,6 +716,8 @@ public class Epigon extends Game {
                 }
             }
         }
+
+        mapSLayers.clear(player.location.x, player.location.y);
 
         mapSLayers.clear(2);
         for (int i = 0; i < toCursor.size(); i++) {
