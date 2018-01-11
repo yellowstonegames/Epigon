@@ -347,10 +347,10 @@ public class HandBuilt {
         blueprint.color = color;
         blueprint.symbol = symbol;
 
-        RecipeBlueprint recipeBLueprint = new RecipeBlueprint();
-        recipeBLueprint.requiredConsumed.put(basePhysical, 1);
-        recipeBLueprint.result.put(blueprint, 1);
-        return mixer.createRecipe(recipeBLueprint);
+        RecipeBlueprint recipeBlueprint = new RecipeBlueprint();
+        recipeBlueprint.requiredConsumed.put(basePhysical, 1);
+        recipeBlueprint.result.put(blueprint, 1);
+        return mixer.createRecipe(recipeBlueprint);
     }
 
     public Modification makeAlive() {

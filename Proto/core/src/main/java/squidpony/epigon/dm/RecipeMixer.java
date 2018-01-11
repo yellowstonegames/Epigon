@@ -14,7 +14,6 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.Epigon.rootChaos;
@@ -81,19 +80,23 @@ public class RecipeMixer {
         List<Physical> result = new ArrayList<>();
         long prevState = rng.getState();
         rng.setState(state);
-        recipe.result.entrySet().stream()
-            .forEach(e -> IntStream.range(0, e.getValue())
-            .forEach(i -> {
-                Physical physical = buildPhysical(e.getKey());
-                Stream.of(consumed.stream(), catalyst.stream())
+        for (int i = 0; i < recipe.result.size(); i++) {
+            Physical physical = buildPhysical(recipe.result.keyAt(i));
+            Stream.of(consumed.stream(), catalyst.stream())
                     .flatMap(m -> m)
                     .map(m -> m.whenUsedAsMaterial)
                     .flatMap(Collection::stream)
                     .forEach(modification -> applyModification(physical, modification));
-                physical.stats.values().forEach(lv -> lv.actual(lv.base()));// Make sure actual is set to base value on first creation
-                physical.calculateStats();
+            physical.stats.values().forEach(lv -> lv.actual(lv.base()));// Make sure actual is set to base value on first creation
+            physical.calculateStats();
+            if(physical.groupingData != null) {
+                for (int j = 0; j < physical.groupingData.quantity; j++) {
+                    result.add(physical);
+                }
+            }
+            else
                 result.add(physical);
-            }));
+        }
         rng.setState(prevState);
         return result;
     }
@@ -301,7 +304,7 @@ public class RecipeMixer {
         physical.weaponData = blueprint.weaponData;
 
         physical.terrainData = blueprint.terrainData;
-
+        physical.groupingData = blueprint.groupingData;
         // TODO - add rest of mixins
 
         // finally work any modifications
