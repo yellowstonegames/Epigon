@@ -1049,6 +1049,7 @@ public class Epigon extends Game {
                     if (meat != null){
                         player.inventory.remove(meat);
                         List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(meat), Collections.emptyList());
+                        if(meat.groupingData != null) steaks = Collections.nCopies(meat.groupingData.quantity, steaks.get(0));
                         message("Made " + steaks.size() + " steaks.");
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
