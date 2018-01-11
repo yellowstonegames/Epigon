@@ -1,6 +1,5 @@
 package squidpony.epigon.playground;
 
-import java.util.ArrayList;
 import squidpony.Maker;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
@@ -22,9 +21,9 @@ import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.StatefulRNG;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -380,8 +379,7 @@ public class HandBuilt {
     public Modification makeMeats(){
         Modification meaten = new Modification();
         meaten.possibleSuffix = Arrays.asList("meat");
-        meaten.countsAs = new HashSet<>();
-        meaten.countsAs.add(meat);
+        meaten.countsAs = Maker.makeUOS(meat);
         meaten.symbol = '%';
         meaten.large = false;
         meaten.removeCreature = true;

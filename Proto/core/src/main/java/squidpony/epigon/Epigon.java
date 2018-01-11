@@ -11,8 +11,9 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
-import squidpony.epigon.data.ProbabilityTableEntry;
+import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.Inclusion;
+import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.display.*;
@@ -38,7 +39,6 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -352,8 +352,7 @@ public class Epigon extends Game {
                 }
                 Physical pMeat = mixer.buildPhysical(p);
                 mixer.applyModification(pMeat, handBuilt.makeMeats());
-                ProbabilityTable pt = new ProbabilityTable();
-                pt.add(new ProbabilityTableEntry<Physical>(pMeat, 2, 6), 1);
+                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.chaos, pMeat, 1.0, 2, 6);
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
@@ -632,10 +631,7 @@ public class Epigon extends Game {
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                            .parallel()
-                            .map(table -> table.random())
-                            .flatMap(e -> IntStream.range(0, rng.between(e.minQuantity, e.maxQuantity + 1))
-                            .mapToObj(i -> mixer.buildPhysical(e.item)))
+                            .map(table -> {int q = table.quantity(); Physical p = mixer.buildPhysical(table.random()); p.groupingData = new Grouping(q); return p;})
                             .forEach(item -> map.contents[newX][newY].add(item));
                         mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                         message("You defeat the " + thing.name + " with " + -amt + " " + element.styledName + " damage!");
