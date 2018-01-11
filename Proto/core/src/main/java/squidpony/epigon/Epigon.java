@@ -621,6 +621,8 @@ public class Epigon extends Game {
         } else {
             Physical thing = map.contents[newX][newY].getCreature();
             if (thing != null) {
+                awaitedMoves.clear(); // don't keep moving if something hit
+                toCursor.clear();
                 mapSLayers.bump(playerEntity, dir, 0.145f);
                 if (player.hitRoll(thing)) {
                     int amt = player.damageRoll(thing) + player.damageRoll(thing) + player.damageRoll(thing);
@@ -651,6 +653,8 @@ public class Epigon extends Game {
                 calcDijkstra();
                 runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
+                awaitedMoves.clear(); // don't keep moving if something hit
+                toCursor.clear();
                 message("Ran into " + thing.name);
                 runTurn();
             } else {
@@ -693,6 +697,11 @@ public class Epigon extends Game {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
                         creature.appearance.color = SColor.lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
                         mapSLayers.clear(x, y, 0);
+                        if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
+                            awaitedMoves.clear();
+                            toCursor.clear();
+                        }
+                        creature.wasSeen = true;
                     } else {
                         posrng.move(x, y);
                         putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), sightAmount, noise);
