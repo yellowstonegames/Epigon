@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
+import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.mixin.Grouping;
@@ -393,21 +394,37 @@ public class Epigon extends Game {
                     if(player.location.x == step.x && player.location.y == step.y)
                     {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
-                        if (creature.hitRoll(player)) {
-                            int amt = creature.damageRoll(player);
+                        ActionOutcome ao = ActionOutcome.attack(creature, player);
+                        if (ao.hit) {
+                            int amt = ao.actualDamage >> 1;
                             Element element = creature.weaponData.elements.random();
-                            applyStatChange(player, Collections.singletonMap(Stat.VIGOR, (double)amt));
+                            applyStatChange(player, Stat.VIGOR, amt);
                             amt *= -1; // flip sign for output message
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
-                                message(Messaging.transform("The " + creature.name + " slay$ you with " +
+                                if(ao.crit)
+                                    message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with " +
+                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                else
+                                    message(Messaging.transform("The " + creature.name + " slay$ you with " +
                                         amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                             } else {
-                                message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
-                                        amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                if(ao.crit) {
+                                    mapSLayers.wiggle(playerEntity, 0.3f);
+                                    message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for " +
+                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                }
+                                else
+                                {
+                                    message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
+                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                }
                             }
                         } else
                         {
-                            message("The " + creature.name + " missed you.");
+                            if(ao.crit)
+                                message("The " + creature.name + " missed you, but just barely.");
+                            else
+                                message("The " + creature.name + " missed you.");
                         }
                     }
                     else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
@@ -469,6 +486,26 @@ public class Epigon extends Game {
                 entry.getValue().addActual(amount);
             }
         }
+        for (Stat s : Stat.rolloverProcessOrder) {
+            LiveValue lv = target.stats.get(s);
+            if (lv == null){
+                continue; // doesn't have this stat so skip it
+            }
+            double val = lv.actual();
+            if (val < 0) {
+                target.stats.get(s).actual(0);
+                target.stats.get(s.getRollover()).addActual(val);
+                changes.merge(s.getRollover(), val, Double::sum);
+            }
+        }
+
+        infoHandler.updateDisplay(target, changes);
+    }
+
+    private void applyStatChange(Physical target, Stat stat, double amount) {
+        Map<Stat, Double> changes = new HashMap<>();
+        changes.put(stat, amount);
+        target.stats.get(stat).addActual(amount);
         for (Stat s : Stat.rolloverProcessOrder) {
             LiveValue lv = target.stats.get(s);
             if (lv == null){
@@ -574,8 +611,15 @@ public class Epigon extends Game {
             message("Nothing equippable found.");
         } else {
             GauntRNG.shuffleInPlace(player.chaos += player.inventory.size() - 1, player.inventory);
-            Physical chosen = player.inventory.get(0);
-            equipItem(chosen);
+            for (int i = 0; i < player.inventory.size(); i++) {
+                Physical chosen = player.inventory.get(i);
+                if(chosen.weaponData != null)
+                {
+                    equipItem(chosen);
+                    return;
+                }
+            }
+            player.weaponData = player.unarmedData;
         }
     }
     public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
@@ -624,30 +668,63 @@ public class Epigon extends Game {
                 awaitedMoves.clear(); // don't keep moving if something hit
                 toCursor.clear();
                 mapSLayers.bump(playerEntity, dir, 0.145f);
-                if (player.hitRoll(thing)) {
-                    int amt = player.damageRoll(thing) + player.damageRoll(thing) + player.damageRoll(thing);
+                ActionOutcome ao = ActionOutcome.attack(player, thing);
+                if (ao.hit) {
                     Element element = player.weaponData.elements.random();
-                    applyStatChange(thing, Collections.singletonMap(Stat.VIGOR, (double)amt));
+                    applyStatChange(thing, Stat.VIGOR, ao.actualDamage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
-                        Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                            .map(table -> {int q = table.quantity(); Physical p = mixer.buildPhysical(table.random()); p.groupingData = new Grouping(q); return p;})
-                            .forEach(item -> map.contents[newX][newY].add(item));
-                        mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
-                        message("You defeat the " + thing.name + " with " + -amt + " " + element.styledName + " damage!");
-                    } else {
-                        String amtText = String.valueOf(-amt);
+                        if (ao.crit) {
+                            Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                                    .map(table -> {
+                                        int q = table.quantity();
+                                        Physical p = mixer.buildPhysical(table.random());
+                                        p.groupingData = new Grouping(q);
+                                        return p;
+                                    })
+                                    .forEach(item -> {map.contents[newX][newY].add(item);
+                                    if(map.resistances[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)] < 0.9)
+                                        map.contents[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)].add(item);
+                                    });
+                            mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
+                            message("You [Blood]brutally[] defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                        }
+                        else
+                        {
+                            Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                                    .map(table -> {
+                                        int q = table.quantity();
+                                        Physical p = mixer.buildPhysical(table.random());
+                                        p.groupingData = new Grouping(q);
+                                        return p;
+                                    })
+                                    .forEach(item -> map.contents[newX][newY].add(item));
+                            mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
+                            message("You defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                        }
+                    }else {
+                        String amtText = String.valueOf(-ao.actualDamage);
                         int startX = newX - (amtText.length() >> 1);
                         for (int i = 0; i < amtText.length(); i++, startX++) {
                             mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
                         }
-                        message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
-                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        if(ao.crit)
+                        {
+                            mapSLayers.wiggle(thing.appearance, 0.3f);
+                            message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + thing.name + " for " +
+                                    amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        }
+                        else
+                        {
+                            message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
+                                    amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+
+                        }
                     }
                 } else {
-                    message("Missed the " + thing.name);
+                    message("Missed the " + thing.name + (ao.crit ? ", but just barely." : "..."));
                 }
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
