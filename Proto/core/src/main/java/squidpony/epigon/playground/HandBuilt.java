@@ -215,7 +215,7 @@ public class HandBuilt {
         Rating[] ratingChoices = new Rating[]{Rating.SLIGHT, Rating.TYPICAL, Rating.GOOD, Rating.HIGH};
         for (Stat s : Stat.bases) {
             Rating rating = rng.getRandomElement(ratingChoices);
-            LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel(rng.nextLong()));
+            LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel(rng));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }

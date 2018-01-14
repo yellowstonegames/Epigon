@@ -4,7 +4,7 @@ import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
-import squidpony.squidmath.ThrustAltRNG;
+import squidpony.squidmath.RNG;
 
 /**
  * A way to describe what calculations should be performed at run time.
@@ -19,23 +19,24 @@ public class Formula {
     private Formula() {
     }
 
-    public static int randomizedStartingStatLevel(long seed){
-        int n = ThrustAltRNG.determineBounded(seed, 100);
-        if (n < 45){
-            return 1;
-        } else if (n < 65){
-            return 2;
-        } else if (n < 80){
-            return 3;
-        } else if (n < 88){
-            return 4;
-        } else if (n < 94){
-            return 5;
-        } else if (n < 98){
-            return 6;
-        } else {
-            return 7;
-        }
+    public static int randomizedStartingStatLevel(RNG rng){
+        return rng.maxIntOf(8, 4) + 1;
+//        int n = ThrustAltRNG.determineBounded(seed, 100);
+//        if (n < 45){
+//            return 1;
+//        } else if (n < 65){
+//            return 2;
+//        } else if (n < 80){
+//            return 3;
+//        } else if (n < 88){
+//            return 4;
+//        } else if (n < 94){
+//            return 5;
+//        } else if (n < 98){
+//            return 6;
+//        } else {
+//            return 7;
+//        }
     }
 
     public static int healthForLevel(int level, Rating rating) {

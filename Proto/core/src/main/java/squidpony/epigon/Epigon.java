@@ -61,7 +61,6 @@ public class Epigon extends Game {
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
-    public static final RNG prng = new RNG(posrng);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
     public final RecipeMixer mixer;
@@ -118,7 +117,7 @@ public class Epigon extends Game {
     //private Camera camera;
     private TextCellFactory.Glyph playerEntity;
 
-    List<Color> lights;
+    private float[] lightLevels;
 
     // Set up sizing all in one place
     static {
@@ -298,9 +297,17 @@ public class Epigon extends Game {
         contextStage.addActor(contextSLayers);
 
 
-        Color backLight = SColor.AMUR_CORK_TREE;
-        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
-        lights.addAll(colorCenter.gradient(backLight, SColor.ALICE_BLUE, 64, Interpolation.sineOut));
+//        Color backLight = SColor.AMUR_CORK_TREE;
+//        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
+//        lights.addAll(colorCenter.gradient(backLight, SColor.ALICE_BLUE, 64, Interpolation.sineOut));
+        lightLevels = new float[76];
+        float initial = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
+        for (int i = 0; i < 12; i++) {
+            lightLevels[i] = SColor.lerpFloatColors(initial, -0x1.7583e6p125F, Interpolation.sineOut.apply(i / 12f)); // AMUR_CORK_TREE again
+        }
+        for (int i = 0; i < 64; i++) {
+            lightLevels[12 + i] = SColor.lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F,  Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
+        }
 
         startGame();
     }
@@ -746,18 +753,18 @@ public class Epigon extends Game {
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
         lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
-        int n = (int)(lightAmount * lights.size());
-        n = Math.min(Math.max(n, 0), lights.size() - 1);
-        float back = lights.get(n).toFloatBits(); // background gets both lit and faded to memory
+        int n = (int)(lightAmount * lightLevels.length);
+        n = Math.min(Math.max(n, 0), lightLevels.length - 1);
+        float back = lightLevels[n]; // background gets both lit and faded to memory
         //mapSLayers.put(x, y, c, front, back); // "light" theme
-        mapSLayers.put(x, y, c, back, RememberedTile.memoryColorFloat); // "dark" theme
+        mapSLayers.put(x, y, c, SColor.lerpFloatColors(foreground, back, 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
     }
 
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putMap() {
-        float time = (System.currentTimeMillis() & 0xffffffL) * 0.001f; // if you want to adjust the speed of flicker, change the multiplier
+        float time = (System.currentTimeMillis() & 0xffffffL) * 0.00125f; // if you want to adjust the speed of flicker, change the multiplier
         long time0 = Noise.longFloor(time);
 
         // we can use either Noise.querp (quintic Hermite spline) or Noise.cerp (cubic Hermite splne); cerp is cheaper but querp seems to look better.
@@ -794,7 +801,7 @@ public class Epigon extends Game {
             }
         }
 
-        mapSLayers.clear(player.location.x, player.location.y);
+        mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
         for (int i = 0; i < toCursor.size(); i++) {
