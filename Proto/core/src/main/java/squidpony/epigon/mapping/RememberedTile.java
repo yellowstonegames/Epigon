@@ -12,7 +12,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
  */
 public class RememberedTile {
 
-    public static final Color memoryColor = SColor.BLACK;
+    public static final Color memoryColor = SColor.DB_INK;
     public static final float memoryColorFloat = memoryColor.toFloatBits();
     public static final float frontFade = 0.6f;
     public static final float backFade = 0.89f;
