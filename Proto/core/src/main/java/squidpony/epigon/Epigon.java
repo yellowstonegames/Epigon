@@ -235,8 +235,8 @@ public class Epigon extends Game {
                 contextSize.cellWidth,
                 contextSize.cellHeight,
                 smallFont);
-        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.COSMIC_LATTE);
-        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.FLIRTATIOUS_INDIGO_TEA);
+        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
+        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
                 map.width,
@@ -377,7 +377,6 @@ public class Epigon extends Game {
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
-        clearAndBorder(contextSLayers, SColor.FLIRTATIOUS_INDIGO_TEA, SColor.COSMIC_LATTE);
         contextHandler.message("Have fun!",
                 "The fates of countless worlds rest on you...",
                 style("Bump into statues ([*][/]s[,]) and stuff."),

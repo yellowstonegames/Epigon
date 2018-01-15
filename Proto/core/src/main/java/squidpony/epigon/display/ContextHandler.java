@@ -114,6 +114,22 @@ public class ContextHandler {
 
     private void clear() {
         ArrayTools.fill(front.contents, ' ');
+
+        int w = width;
+        int h = height;
+        for (int x = 0; x < w; x++) {
+            put(x, 0, '─', true);
+            put(x, h - 1, '─', true);
+        }
+        for (int y = 0; y < h; y++) {
+            put(0, y, '│', true);
+            put(w - 1, y, '│', true);
+        }
+        put(0, 0, '┌', true);
+        put(w - 1, 0, '┐', true);
+        put(0, h - 1, '└', true);
+        put(w - 1, h - 1, '┘', true);
+
         String title = contextMode.toString();
         int x = width / 2 - title.length() / 2;
         put(x, 0, title, true);
@@ -174,6 +190,7 @@ public class ContextHandler {
 
     public void contextStatDetails(Stat stat, LiveValue lv) {
         contextMode = ContextMode.STAT_DETAILS;
+        miniMap.setVisible(false);
         clear();
         put(1, 1, stat.toString() + " (" + stat.nick() + ")", true);
         put(1, 1, "Base:  " + lv.base(),true);
@@ -189,6 +206,7 @@ public class ContextHandler {
 
     public void contextInventory(List<Physical> inventory) {
         contextMode = ContextMode.INVENTORY;
+        miniMap.setVisible(false);
         clear();
         put(inventory.stream()
             .map(i -> i.name)
@@ -199,6 +217,7 @@ public class ContextHandler {
 
     public void tileContents(Coord location, EpiTile tile) {
         contextMode = ContextMode.TILE_CONTENTS;
+        miniMap.setVisible(false);
         String tileDescription = "[" + location.x + ", " + location.y + "] ";
         if (tile.floor != null) {
             tileDescription += tile.floor.name + " floor";
@@ -216,6 +235,7 @@ public class ContextHandler {
 
     public void message(CharSequence... text) {
         contextMode = ContextMode.MESSAGE;
+        miniMap.setVisible(false);
         clear();
         put(text, true);
     }
