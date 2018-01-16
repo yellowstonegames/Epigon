@@ -14,7 +14,7 @@ public class RememberedTile {
 
     public static final Color memoryColor = SColor.DB_INK;
     public static final float memoryColorFloat = memoryColor.toFloatBits();
-    public static final float frontFade = 0.6f;
+    public static final float frontFade = 0.2f;
     public static final float backFade = 0.89f;
 
     public char symbol = ' ';
@@ -29,7 +29,10 @@ public class RememberedTile {
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
         front = tile.getForegroundColor();
-        front = front == 0f ? 0f : SColor.lerpFloatColors(front, memoryColorFloat, frontFade);
+        front = front == 0f ? 0f :
+                tile.contents.isEmpty()
+                        ? SColor.floatGetHSV(0, 0, SColor.valueOfFloat(front), 1f)
+                        : SColor.lerpFloatColors(front, memoryColorFloat, frontFade);
         back = tile.getBackgroundColor();
         back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColorFloat, backFade);
         if (tile.getCreature() != null){
