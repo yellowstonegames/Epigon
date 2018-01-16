@@ -1,9 +1,9 @@
 package squidpony.epigon.display;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import squidpony.ArrayTools;
+import squidpony.epigon.Epigon;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.universe.LiveValue;
@@ -79,16 +79,16 @@ public class ContextHandler {
             @Override
             public void draw(Batch batch, float parentAlpha) {
                 super.draw(batch, parentAlpha);
-                float xo = getX(), yo = getY(), yOff = yo + 1f + mainMap.gridHeight * 3f;
-                mainMap.font.configureShader(batch);
+                float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(), yOff = yo + 1f + mainMap.gridHeight * 3f;
+                //mainMap.font.configureShader(batch);
                 mainMap.getLayer(0).draw(batch, miniMapFont, xo, yOff, '\u0000');
                 int x, y;
                 ArrayList<TextCellFactory.Glyph> glyphs = mainMap.glyphs;
-                for (int i = 0, n = glyphs.size(); i < n; i++) {
+                for (int i = 0; i < glyphs.size(); i++) {
                     TextCellFactory.Glyph glyph = glyphs.get(i);
                     if(glyph == null)
                         continue;
-                    glyph.act(Gdx.graphics.getDeltaTime());
+                    //glyph.act(Gdx.graphics.getDeltaTime());
                     if((x = Math.round((glyph.getX() - xo) / 3)) < 0 || x >= mainMap.gridWidth ||
                             (y = Math.round((glyph.getY() - yOff) / -3 + mainMap.gridHeight)) < 0 || y >= mainMap.gridHeight ||
                             mainMap.backgrounds[x][y] == 0f)

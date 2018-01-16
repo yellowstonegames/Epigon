@@ -794,7 +794,7 @@ public class Epigon extends Game {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
                         mapSLayers.clear(x, y);
-                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 1);
+                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 0);
                     }
                 }
             }
@@ -909,10 +909,10 @@ public class Epigon extends Game {
         contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
             contextSize.gridWidth, contextSize.gridHeight,
             -(int) (messageSLayers.getRight()),
-            -(int) (infoSLayers.getTop() + 8f));
+            -(int) (infoSLayers.getTop() + infoSize.cellHeight * currentZoomY));
         infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
             infoSize.gridWidth, infoSize.gridHeight,
-            -(int) (messageSLayers.getRight()), 0);
+            -(int) (messageSLayers.getRight()), -(int)(infoSize.cellHeight * currentZoomY));
 
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
@@ -1347,10 +1347,10 @@ public class Epigon extends Game {
     });
 
     private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight, new InputAdapter() {
+            mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (screenX < 0 || screenX >= infoSize.gridWidth || screenY < 0 || screenY >= infoSize.gridHeight) {
+            if (screenX < 0 || screenX >= contextSize.gridWidth || screenY < 0 || screenY >= contextSize.gridHeight) {
                 return false;
             }
             switch (button) {
