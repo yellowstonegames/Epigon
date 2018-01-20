@@ -14,6 +14,7 @@ import squidpony.squidmath.EnumOrderedMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,9 @@ public class ContextHandler {
     private TextCellFactory miniMapFont;
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
     private EnumOrderedMap<ContextMode, char[][]> cachedTexts = new EnumOrderedMap<>(ContextMode.class);
+    private EnumOrderedMap<ContextMode, float[][]> cachedColors = new EnumOrderedMap<>(ContextMode.class);
+    private EnumOrderedMap<ContextMode, Boolean> cacheIsValid = new EnumOrderedMap<>(ContextMode.class);
+    private float defaultFrontColor;
 
     public Coord arrowLeft;
     public Coord arrowRight;
@@ -102,13 +106,17 @@ public class ContextHandler {
         miniMap.setVisible(false);
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
+
+        defaultFrontColor = front.getDefaultForegroundColor().toFloatBits();
         for (ContextMode mode : ContextMode.values()) {
             cachedTexts.put(mode, ArrayTools.fill(' ', width, height));
+            cachedColors.put(mode, ArrayTools.fill(defaultFrontColor, width, height));
+            cacheIsValid.put(mode, Boolean.FALSE);
         }
 
         ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
         ArrayTools.fill(back.contents, '\0');
-        ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(front.colors, defaultFrontColor);
         ArrayTools.fill(front.contents, ' ');
     }
 
@@ -118,84 +126,112 @@ public class ContextHandler {
         int w = width;
         int h = height;
         for (int x = 0; x < w; x++) {
-            put(x, 0, '─', true);
-            put(x, h - 1, '─', true);
+            put(x, 0, '─');
+            put(x, h - 1, '─');
         }
         for (int y = 0; y < h; y++) {
-            put(0, y, '│', true);
-            put(w - 1, y, '│', true);
+            put(0, y, '│');
+            put(w - 1, y, '│');
         }
-        put(0, 0, '┌', true);
-        put(w - 1, 0, '┐', true);
-        put(0, h - 1, '└', true);
-        put(w - 1, h - 1, '┘', true);
+        put(0, 0, '┌');
+        put(w - 1, 0, '┐');
+        put(0, h - 1, '└');
+        put(w - 1, h - 1, '┘');
 
         String title = contextMode.toString();
         int x = width / 2 - title.length() / 2;
-        put(x, 0, title, true);
+        put(x, 0, title);
 
-        put(arrowLeft.x, arrowLeft.y, '◀', true);
-        put(arrowRight.x, arrowRight.y, '▶', true);
+        put(arrowLeft.x, arrowLeft.y, '◀');
+        put(arrowRight.x, arrowRight.y, '▶');
     }
 
-    private void put(CharSequence[] text, boolean cache) {
+    private void put(CharSequence[] text) {
         for (int y = 0; y < text.length && y < height - 2; y++) {
-            put(1, y + 1, text[y], cache);
+            put(1, y + 1, text[y]);
         }
     }
 
-    private void put(char[][] chars, boolean cache) {
-        clear();
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                put(x, y, chars[x][y], cache);
+    private void put(int x, int y, CharSequence s) {
+        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
+            put(sx + x, y, s.charAt(sx));
+        }
+    }
+
+    private void put(int x, int y, char c){
+        put(x, y, c, defaultFrontColor);
+    }
+
+    private void put(int x, int y, char c, float color) {
+        front.put(x, y, c);
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            cachedTexts.get(contextMode)[x][y] = c;
+            cachedColors.get(contextMode)[x][y] = color;
+        }
+    }
+
+    private void putFromCache(){
+        for (int x = 0; x< width;x++){
+            for(int y =0; y<height;y++){
+                front.put(x, y, cachedTexts.get(contextMode)[x][y], cachedColors.get(contextMode)[x][y]);
             }
         }
     }
 
-    private void put(int x, int y, CharSequence s, boolean cache) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx), cache);
-        }
-    }
-
-    private void put(int x, int y, char c, boolean cache) {
-        front.put(x, y, c);
-        if (cache && x >= 0 && x < width && y >= 0 && y < height) {
-            cachedTexts.get(contextMode)[x][y] = c;
-        }
-    }
-
     public void next() {
-        front.summon(arrowRight.x, arrowRight.y, arrowRight.x+1, arrowRight.y-2, '✔', SColor.CW_HONEYDEW,
-                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f),0f, 0.6f);
-        if(contextMode == ContextMode.MINI_MAP)
-            miniMap.setVisible(false);
-        contextMode = contextMode.next();
-        put(cachedTexts.get(contextMode), false);
-        if(contextMode == ContextMode.MINI_MAP)
-            contextMiniMap();
+        front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
+            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        switchTo(contextMode.next());
     }
 
     public void prior() {
-        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x+1, arrowLeft.y-2, '✔', SColor.CW_HONEYDEW,
-                SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f),0f, 0.6f);
-        if(contextMode == ContextMode.MINI_MAP)
+        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', SColor.CW_HONEYDEW,
+            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        switchTo(contextMode.prior());
+    }
+
+    public void invalidateCache(ContextMode mode){
+        cacheIsValid.put(mode, Boolean.FALSE);
+    }
+
+    private void switchTo(ContextMode mode) {
+        if (contextMode == ContextMode.MINI_MAP) {
             miniMap.setVisible(false);
-        contextMode = contextMode.prior();
-        put(cachedTexts.get(contextMode), false);
-        if(contextMode == ContextMode.MINI_MAP)
-            contextMiniMap();
+        }
+        contextMode = mode;
+        if (cacheIsValid.get(mode)) { // map cache is never valid
+            putFromCache();
+        } else {
+            switch (mode) {
+                case INVENTORY:
+                    contextInventory(Collections.emptyList());
+                    break;
+                case MESSAGE:
+                    message("");
+                    break;
+                case MINI_MAP:
+                    contextMiniMap();
+                    break;
+                case STAT_DETAILS:
+                    contextStatDetails(null, null);
+                    break;
+                case TILE_CONTENTS:
+                    tileContents(null, null);
+            }
+        }
     }
 
     public void contextStatDetails(Stat stat, LiveValue lv) {
         contextMode = ContextMode.STAT_DETAILS;
         miniMap.setVisible(false);
         clear();
-        put(1, 1, stat.toString() + " (" + stat.nick() + ")", true);
-        put(1, 1, "Base:  " + lv.base(),true);
-        put(1, 1, "Max:   " + lv.max(),true);
-        put(1, 1, "Delta: " + lv.delta(),true);
+        if (stat != null && lv != null) {
+            put(1, 1, stat.toString() + " (" + stat.nick() + ")");
+            put(1, 2, "Base:  " + lv.base());
+            put(1, 3, "Max:   " + lv.max());
+            put(1, 4, "Delta: " + lv.delta());
+        }
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void contextMiniMap() {
@@ -211,33 +247,37 @@ public class ContextHandler {
         put(inventory.stream()
             .map(i -> i.name)
             .collect(Collectors.toList())
-            .toArray(new String[]{}),
-            true);
+            .toArray(new String[]{}));
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void tileContents(Coord location, EpiTile tile) {
         contextMode = ContextMode.TILE_CONTENTS;
         miniMap.setVisible(false);
-        String tileDescription = "[" + location.x + ", " + location.y + "] ";
-        if (tile.floor != null) {
-            tileDescription += tile.floor.name + " floor";
-        } else {
-            tileDescription += "empty space";
-        }
-        if (!tile.contents.isEmpty()) {
-            tileDescription = tile.contents.stream()
-                .map(p -> p.name)
-                .collect(Collectors.joining("\n", tileDescription + "\n", ""));
-        }
         clear();
-        put(tileDescription.split("\n"), true);
+        if (location != null && tile != null) {
+            String tileDescription = "[" + location.x + ", " + location.y + "] ";
+            if (tile.floor != null) {
+                tileDescription += tile.floor.name + " floor";
+            } else {
+                tileDescription += "empty space";
+            }
+            if (!tile.contents.isEmpty()) {
+                tileDescription = tile.contents.stream()
+                    .map(p -> p.name)
+                    .collect(Collectors.joining("\n", tileDescription + "\n", ""));
+            }
+            put(tileDescription.split("\n"));
+        }
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void message(CharSequence... text) {
         contextMode = ContextMode.MESSAGE;
         miniMap.setVisible(false);
         clear();
-        put(text, true);
+        put(text);
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
 }

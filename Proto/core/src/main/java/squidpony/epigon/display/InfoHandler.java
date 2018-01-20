@@ -381,7 +381,7 @@ public class InfoHandler {
             }
         }
         int biggestLength = Integer.toString((int) Math.ceil(biggest)).length();
-        String format = "%0" + biggestLength + "d / %0" + biggestLength + "d";
+        String format = "%" + biggestLength + "d / %" + biggestLength + "d";
 
         for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
             Color color = physical.statProgression.getOrDefault(stats[s], Rating.NONE).color();
