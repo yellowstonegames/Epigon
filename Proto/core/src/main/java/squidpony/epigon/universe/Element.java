@@ -35,7 +35,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     DEATH(MAGIC, "necrotic", "wither$", SColor.SISKIN_SPROUT_YELLOW),
     LIFE(MAGIC, "vital", "heal$", SColor.CW_BRIGHT_RED),
     SHINING(MAGIC, "shining", "blind$", SColor.WHITE), // light that burns! especially dungeon-dwelling monsters!
-    SHADOW(MAGIC, "shadowy", "dim$", new Color(0x111111BB)), // darkness doesn't really do damage normally, so this is magic
+    SHADOW(MAGIC, "shadowy", "dim$", new Color(0x404040EE)), // darkness doesn't really do damage normally, so this is magic
     PRIMAL(MAGIC, "worldly", "trap$", SColor.DISTANT_RIVER_BROWN), // Using this as Primal magic (druids, shamans, etc.) when it needs to be used directly
     TEMPORAL(MAGIC, "temporal", "wobble$", SColor.DB_EGGSHELL), // wibbly-wobbly timey-wimey bits
     FATEFUL(MAGIC, "fateful", "curse$", SColor.VEGAS_GOLD), // luck, fortune and destined damage
