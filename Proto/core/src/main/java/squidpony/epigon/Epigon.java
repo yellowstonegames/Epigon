@@ -42,6 +42,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
+
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
  * Doesn't use any platform-specific code.
@@ -64,7 +66,7 @@ public class Epigon extends Game {
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
     public final RecipeMixer mixer;
-    public final HandBuilt handBuilt;
+    public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     // Audio
@@ -119,8 +121,11 @@ public class Epigon extends Game {
 
     private float[] lightLevels;
 
+    public static final int worldWidth, worldHeight;
     // Set up sizing all in one place
     static {
+        worldWidth = 100;
+        worldHeight = 50;
         int bigW = 70;
         int bigH = 26;
         int smallW = 50;
@@ -184,10 +189,9 @@ public class Epigon extends Game {
         colorCenter = new SquidColorCenter();
 
         // Set the map size early so things can reference it
-        map = new EpiMap(100, 50);
         System.out.println(rng.getState());
 
-        Coord.expandPoolTo(map.width, map.height);
+        Coord.expandPoolTo(worldWidth, worldHeight);
 
         bgColor = SColor.WHITE;
         unseenColor = SColor.BLACK_DYE;
@@ -239,8 +243,8 @@ public class Epigon extends Game {
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
-                map.width,
-                map.height,
+                worldWidth,
+                worldHeight,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
@@ -301,12 +305,12 @@ public class Epigon extends Game {
 //        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
 //        lights.addAll(colorCenter.gradient(backLight, SColor.ALICE_BLUE, 64, Interpolation.sineOut));
         lightLevels = new float[76];
-        float initial = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
+        float initial = lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
         for (int i = 0; i < 12; i++) {
-            lightLevels[i] = SColor.lerpFloatColors(initial, -0x1.7583e6p125F, Interpolation.sineOut.apply(i / 12f)); // AMUR_CORK_TREE again
+            lightLevels[i] = lerpFloatColors(initial, -0x1.7583e6p125F, Interpolation.sineOut.apply(i / 12f)); // AMUR_CORK_TREE again
         }
         for (int i = 0; i < 64; i++) {
-            lightLevels[12 + i] = SColor.lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F,  Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
+            lightLevels[12 + i] = lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F,  Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
         }
 
         startGame();
@@ -317,6 +321,12 @@ public class Epigon extends Game {
     }
 
     private void startGame() {
+        mapSLayers.clear();
+        mapSLayers.glyphs.clear();
+        mapSLayers.animationCount = 0;
+        creatures.clear();
+        handBuilt = new HandBuilt(rng, mixer);
+        map = new EpiMap(worldWidth, worldHeight);
         fovResult = new double[map.width][map.height];
         priorFovResult = new double[map.width][map.height];
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
@@ -747,16 +757,16 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground, float lightAmount, float noise) {
-        float base = 1 - RememberedTile.frontFade;
-        float front = SColor.lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
+        //float base = 1 - RememberedTile.frontFade;
+        //float front = lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
         lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
         int n = (int)(lightAmount * lightLevels.length);
         n = Math.min(Math.max(n, 0), lightLevels.length - 1);
-        float back = lightLevels[n]; // background gets both lit and faded to memory
+        //float back = lightLevels[n]; // background gets both lit and faded to memory
         //mapSLayers.put(x, y, c, front, back); // "light" theme
-        mapSLayers.put(x, y, c, SColor.lerpFloatColors(foreground, back, 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
     }
 
     /**
@@ -779,7 +789,7 @@ public class Epigon extends Game {
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if ((creature = creatures.get(Coord.get(x, y))) != null ) {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
-                        creature.appearance.color = SColor.lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
+                        creature.appearance.color = lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();
@@ -965,6 +975,11 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            if(combined == (0x60000 | SquidInput.BACKSPACE))
+            {
+                startGame();
+                return;
+            }
             Verb verb = ControlMapping.defaultMapViewMapping.get(combined);
             if (verb == null){
                 message("Unknown input for map mode: " + key);

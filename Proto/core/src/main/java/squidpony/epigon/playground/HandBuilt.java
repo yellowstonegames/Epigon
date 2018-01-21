@@ -288,7 +288,7 @@ public class HandBuilt {
         String culture = GauntRNG.getRandomElement(++chaos, playerBlueprint.unarmedData.rawWeapon.culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
-            playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), chaos));
+            playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), ++chaos));
         }
         // and one weapon from some other group
         playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.randomPhysicalWeapon(++chaos).copy(), chaos));
