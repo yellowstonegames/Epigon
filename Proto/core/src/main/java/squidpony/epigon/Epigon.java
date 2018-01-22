@@ -1150,10 +1150,10 @@ public class Epigon extends Game {
             }
             switch (verb) {
                 case MOVE_DOWN:
-                    // TODO - keyboard controls in equipment screen
+                    mapOverlayHandler.moveDown();
                     break;
                 case MOVE_UP:
-                    // TODO - keyboard controls in equipment screen
+                    mapOverlayHandler.moveUp();
                     break;
                 case MOVE_LEFT:
                     // TODO - keyboard controls in equipment screen
@@ -1177,17 +1177,14 @@ public class Epigon extends Game {
                     equipItem();
                     mapOverlayHandler.updateDisplay();
                     break;
-                case INTERACT: // NOTE - just for testing, cook steaks!
-                    message("Trying to cook steaks");
-                    Physical meat = player.inventory
-                        .stream()
-                        .filter(p -> p.countsAs(handBuilt.meat))
-                        .findAny()
-                        .orElse(null);
-                    if (meat != null){
-                        player.inventory.remove(meat);
-                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(meat), Collections.emptyList());
-                        if(meat.groupingData != null) steaks = Collections.nCopies(meat.groupingData.quantity, steaks.get(0));
+                case INTERACT:
+                    Physical selected = mapOverlayHandler.getSelected();
+                    if (selected.countsAs(handBuilt.rawMeat)) {
+                        player.inventory.remove(selected);
+                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
+                        if (selected.groupingData != null) {
+                            steaks = Collections.nCopies(selected.groupingData.quantity, steaks.get(0));
+                        }
                         message("Made " + steaks.size() + " steaks.");
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();

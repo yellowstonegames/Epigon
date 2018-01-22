@@ -1,6 +1,8 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import java.util.ArrayList;
+import java.util.List;
 import squidpony.ArrayTools;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.specific.Physical;
@@ -12,6 +14,8 @@ import squidpony.squidgrid.gui.gdx.SquidPanel;
 import squidpony.squidmath.Coord;
 
 import java.util.stream.Collectors;
+import squidpony.squidgrid.Direction;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -66,6 +70,11 @@ public class MapOverlayHandler {
 
     private int scrollOffsetY;
     private int helpHeight;
+
+    private Coord selection;
+    private List<Coord> leftSelectables = new ArrayList<>(); // track left and right for future using of right and left arrow keys
+    private List<Coord> rightSelectables = new ArrayList<>();
+    private OrderedMap<Coord, Physical> selectables = new OrderedMap<>();
 
     public Coord arrowLeft;
     public Coord arrowRight;
@@ -179,7 +188,8 @@ public class MapOverlayHandler {
                 showCrafting();
                 break;
             case EQUIPMENT:
-                showEquipment();
+                clear();
+                showEquipment(Direction.UP);
                 break;
             case HELP:
                 if (scrollOffsetY < 0) {
@@ -199,7 +209,8 @@ public class MapOverlayHandler {
                 showCrafting();
                 break;
             case EQUIPMENT:
-                showEquipment();
+                clear();
+                showEquipment(Direction.DOWN);
                 break;
             case HELP:
                 if (scrollOffsetY >= 1 - (helpHeight - height)) {
@@ -211,6 +222,10 @@ public class MapOverlayHandler {
                 }
                 break;
         }
+    }
+
+    public Physical getSelected(){
+        return selectables.get(selection);
     }
 
     private void showHelp() {
@@ -317,6 +332,17 @@ public class MapOverlayHandler {
     }
 
     private void showEquipment() {
+        showEquipment(Direction.NONE);
+    }
+    private void showEquipment(Direction moveSelection){
+        // Clear out selection tracking
+        if (moveSelection == Direction.NONE) {
+            selection = null;
+        }
+        leftSelectables.clear();
+        rightSelectables.clear();
+        selectables.clear();
+
         // Create divider
         for (int line = 1; line < height - 1; line++) {
             put(halfWidth, line, '│');
@@ -328,8 +354,11 @@ public class MapOverlayHandler {
         put(1, y, "Inventory", headingColor);
         y++;
         for (Physical p : player.inventory) {
-            int x = 1;
+            int x = 2;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            leftSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
@@ -341,8 +370,11 @@ public class MapOverlayHandler {
         put(xOffset, y, "Wielded Equipment", headingColor);
         y++;
         for (Physical p : player.creatureData.equipment.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset;
+            int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            rightSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
@@ -352,8 +384,11 @@ public class MapOverlayHandler {
         put(xOffset, y, "Worn Armor", headingColor);
         y++;
         for (Physical p : player.creatureData.armor.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset;
+            int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            rightSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
@@ -363,8 +398,11 @@ public class MapOverlayHandler {
         put(xOffset, y, "Worn Over Armor", headingColor);
         y++;
         for (Physical p : player.creatureData.overArmor.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset;
+            int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            rightSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
@@ -374,8 +412,11 @@ public class MapOverlayHandler {
         put(xOffset, y, "Worn Clothing", headingColor);
         y++;
         for (Physical p : player.creatureData.clothing.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset;
+            int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            rightSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
@@ -385,11 +426,41 @@ public class MapOverlayHandler {
         put(xOffset, y, "Worn Jewelry", headingColor);
         y++;
         for (Physical p : player.creatureData.jewelry.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset;
+            int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
+            Coord select = Coord.get(x - 1, y);
+            rightSelectables.add(select);
+            selectables.put(select, p);
             x += 2;
             put(x, y, p.name);
             y++;
+        }
+
+        if (selectables.isEmpty()) {
+            selection = null;
+        } else {
+            int i;
+            switch (moveSelection) {
+                case DOWN:
+                    i = selectables.indexOf(selection);
+                    if (i >= 0 && i < selectables.size() - 1){
+                        selection = selectables.keyAt(i + 1);
+                    }
+                    break;
+                case UP:
+                    i = selectables.indexOf(selection);
+                    if (i > 0){
+                        selection = selectables.keyAt(i - 1);
+                    }
+                    break;
+                case NONE:
+                default:
+                    selection = selectables.firstKey();
+            }
+        }
+        
+        if (selection != null){
+            put(selection.x, selection.y, '↣');
         }
     }
 
