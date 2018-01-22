@@ -58,7 +58,7 @@ public class HandBuilt {
 
     public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
 
-    public Physical meat; // base item for dead animal chunks
+    public Physical rawMeat; // base item for dead animal chunks
     public Recipe steakRecipe;
 
     // Cooking skills
@@ -124,11 +124,11 @@ public class HandBuilt {
         nan = new Physical();
         nan.name = "nan";
         nan.description = "currency of power";
-        meat = new Physical();
-        meat.name = "meat";
-        meat.description = "chunk of something";
-        meat.symbol = '%';
-        meat.color = SColor.DB_FAWN.toFloatBits();
+        rawMeat = new Physical();
+        rawMeat.name = "meat";
+        rawMeat.description = "chunk of something";
+        rawMeat.symbol = '%';
+        rawMeat.color = SColor.DB_FAWN.toFloatBits();
 
         initAbilities();
         initProfessions();
@@ -149,8 +149,8 @@ public class HandBuilt {
         cookSteak.name = "cook steak";
         cookSteak.maxTargets = 1;
         cookSteak.mustHaveSkillRatings.put(cooking, Rating.TYPICAL);
-        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(meat, 1));
-        cookSteak.validTargets.add(meat);
+        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(rawMeat, 1));
+        cookSteak.validTargets.add(rawMeat);
     }
 
     private static RatingValueModification rvmSkill(Rating rating)
@@ -336,7 +336,7 @@ public class HandBuilt {
         pb.symbol = '%';
         pb.color = SColor.DB_MUD.toFloatBits();
         RecipeBlueprint rb = new RecipeBlueprint();
-        rb.requiredConsumed.put(meat, 1);
+        rb.requiredConsumed.put(rawMeat, 1);
         rb.result.put(pb, 1);
         steakRecipe = mixer.createRecipe(rb);
     }
@@ -379,7 +379,7 @@ public class HandBuilt {
     public Modification makeMeats(){
         Modification meaten = new Modification();
         meaten.possibleSuffix = Arrays.asList("meat");
-        meaten.countsAs = Maker.makeUOS(meat);
+        meaten.countsAs = Maker.makeUOS(rawMeat);
         meaten.symbol = '%';
         meaten.large = false;
         meaten.removeCreature = true;
