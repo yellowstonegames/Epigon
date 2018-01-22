@@ -467,6 +467,23 @@ public class RecipeMixer {
         if (modification.color != null) {
             physical.color = SColor.toRandomizedFloat(modification.color, rng, 0.05f, 0f, 0.15f);
         }
+        if((modification.symbol != null || modification.color != null) && physical.appearance != null)
+        {
+            physical.appearance.color = physical.color;
+            physical.appearance.shown = physical.symbol;
+        }
+
+        if (modification.overlayColor != null) {
+            physical.overlayColor = SColor.toRandomizedFloat(modification.overlayColor, rng, 0.05f, 0f, 0.15f);
+        }
+        if (modification.overlaySymbol != null) {
+            physical.overlaySymbol = modification.overlaySymbol;
+        }
+        if(modification.overlaySymbol != null || modification.overlayColor != null && physical.overlayAppearance != null)
+        {
+            physical.overlayAppearance.color = physical.overlayColor;
+            physical.overlayAppearance.shown = physical.overlaySymbol;
+        }
 
         if (modification.baseValue != null) {
             physical.baseValue = modification.baseValue;

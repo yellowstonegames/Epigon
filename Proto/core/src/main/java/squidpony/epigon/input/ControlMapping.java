@@ -1,6 +1,5 @@
 package squidpony.epigon.input;
 
-import squidpony.Maker;
 import squidpony.squidmath.OrderedMap;
 
 import static squidpony.epigon.input.Verb.*;
@@ -13,7 +12,7 @@ public class ControlMapping {
 
     private static final int CAPS = 0x40000, CTRL = 0x20000;
     public static final OrderedMap<Integer, Verb> defaultMapViewMapping =
-            Maker.<Integer, Verb>makeOM((int)'A'|CAPS, ATTEMPT,
+            OrderedMap.makeMap((int)'A'|CAPS, ATTEMPT,
                 (int)'c', CONSUME,
                 (int)'c'|CTRL, CONSUME_WEIRDLY, // ctrl-c to eat the delicious soap
                 (int)'e', EQUIPMENT,
@@ -61,7 +60,7 @@ public class ControlMapping {
                 (int)ESCAPE, QUIT
         );
         public static final OrderedMap<Integer, Verb> defaultEquipmentViewMapping =
-            Maker.<Integer, Verb>makeOM((int)'A'|CAPS, ATTEMPT,
+                OrderedMap.makeMap((int)'A'|CAPS, ATTEMPT,
                 (int)'c', CONSUME,
                 (int)'c'|CTRL, CONSUME_WEIRDLY, // ctrl-c to eat the delicious soap
                 (int)'f', FIRE,
@@ -98,8 +97,7 @@ public class ControlMapping {
                 (int)'q'|CTRL, UI_CLOSE_WINDOW,
                 (int)ESCAPE, UI_CLOSE_WINDOW
         );
-        public static final OrderedMap<Integer, Verb> defaultHelpViewMapping =
-            Maker.<Integer, Verb>makeOM(
+        public static final OrderedMap<Integer, Verb> defaultHelpViewMapping = OrderedMap.makeMap(
                 (int)UP_ARROW, MOVE_UP,
                 (int)DOWN_ARROW, MOVE_DOWN,
                 (int)LEFT_ARROW, MOVE_LEFT,

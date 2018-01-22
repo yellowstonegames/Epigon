@@ -9,7 +9,7 @@ public abstract class EpiData {
 
     public String name;
     public String description;
-    public String notes; // NOTE - don't need to copy this into created objects
+    //public String notes; // NOTE - don't need to copy this into created objects <-- no way to eliminate the field
 
     private final String id;
     private final int idHash;
