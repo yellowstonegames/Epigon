@@ -53,19 +53,22 @@ public class Physical extends EpiData {
     public boolean aware; // knows where the player is
     public boolean wasSeen;
     public TextCellFactory.Glyph appearance; // for things that move, we should use Glyph, which is a kind of Actor
+    public TextCellFactory.Glyph overlayAppearance; // mainly for showing status effects over the existing appearance
 
     // backing data
-    public Physical parent;   
-    public List<String> possibleAliases = new ArrayList<>(); // One of these is picked when instantiated (maybe choice locked by world region?)
-
+    public Physical parent;
     public Set<Physical> countsAs = new HashSet<>();
     public Set<Physical> createdFrom = new HashSet<>();//only important items should track this since it will cause object lifetimes to extend
     public boolean generic; // should not be directly used, only available as a building block object
     public boolean unique; // should only have one in existence of exactly this type
     public boolean buildingBlock; // can be used as a building block
 
+    public List<String> possibleAliases = new ArrayList<>(); // One of these is picked when instantiated (maybe choice locked by world region?)
+
     public char symbol;
+    public Character overlaySymbol;
     public float color;
+    public float overlayColor = 0f; // if == 0f, this will be disregarded by SparseLayers
     public double baseValue;
     public boolean blocking;
 

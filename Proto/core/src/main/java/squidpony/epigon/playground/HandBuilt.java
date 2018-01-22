@@ -204,7 +204,7 @@ public class HandBuilt {
         playerBlueprint = new Physical();
         playerBlueprint.name = "Plae Haa";
         playerBlueprint.description = "It's you!";
-        playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
+        //playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
         playerBlueprint.color = SColor.BRIGHT_PINK.toFloatBits();
         playerBlueprint.blocking = true;

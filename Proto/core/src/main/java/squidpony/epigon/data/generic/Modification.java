@@ -52,8 +52,9 @@ public class Modification extends EpiData {
     public Boolean buildingBlock;
 
     public Character symbol;
-
+    public Character overlaySymbol;
     public Color color;
+    public Color overlayColor;
 
     public Double baseValue;
     public Double baseValueMultiplier;

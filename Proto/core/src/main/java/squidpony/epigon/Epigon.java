@@ -106,7 +106,6 @@ public class Epigon extends Game {
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
-    private FOV fov = new FOV(FOV.SHADOW);
     private double[][] fovResult;
     private double[][] priorFovResult;
     private OrderedMap<Coord, Physical> creatures = new OrderedMap<>();
@@ -117,7 +116,7 @@ public class Epigon extends Game {
     private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage;
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport, mapOverlayViewport;
     //private Camera camera;
-    private TextCellFactory.Glyph playerEntity;
+    //private TextCellFactory.Glyph playerEntity;
 
     private float[] lightLevels;
 
@@ -378,7 +377,7 @@ public class Epigon extends Game {
             }
         }
 
-        playerEntity = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
         calcFOV(player.location.x, player.location.y);
 
@@ -425,7 +424,7 @@ public class Epigon extends Game {
                                         amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                             } else {
                                 if(ao.crit) {
-                                    mapSLayers.wiggle(playerEntity, 0.3f);
+                                    mapSLayers.wiggle(player.appearance, 0.3f);
                                     message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for " +
                                             amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                 }
@@ -434,6 +433,14 @@ public class Epigon extends Game {
                                     message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
                                             amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                 }
+                                if(ao.targetConditioned)
+                                {
+                                    player.overlaySymbol = '~';//'ʻ';
+                                    player.overlayColor = element.floatColor;
+                                    if(player.overlayAppearance != null) mapSLayers.removeGlyph(player.overlayAppearance);
+                                    player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
+                                }
+
                             }
                         } else
                         {
@@ -447,11 +454,15 @@ public class Epigon extends Game {
                         map.contents[c.x][c.y].remove(creature);
                         if (creature.appearance == null) {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
+                            if(creature.overlaySymbol != null)
+                                creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
                         }
                         creatures.alterAt(i, step);
                         creature.location = step;
                         map.contents[step.x][step.y].add(creature);
                         mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
+                        if(creature.overlayAppearance != null)
+                            mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                     }
                 }
             }
@@ -592,10 +603,14 @@ public class Epigon extends Game {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
                         else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
+                            if(creature.overlayAppearance != null)
+                                mapSLayers.glyphs.add(creature.overlayAppearance);
                         }
                     }
                 } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
+                    if(creature.overlayAppearance != null)
+                        mapSLayers.removeGlyph(creature.overlayAppearance);
                 }
             }
         }
@@ -670,12 +685,14 @@ public class Epigon extends Game {
         }
 
         if (map.contents[newX][newY].blockage == null) {
-            mapSLayers.slide(playerEntity, player.location.x, player.location.y, newX, newY, 0.145f, () ->
+            mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () ->
             {
                 calcFOV(newX, newY);
                 calcDijkstra();
                 runTurn();
             });
+            if(player.overlayAppearance != null)
+                mapSLayers.slide(player.overlayAppearance, player.location.x, player.location.y, newX, newY, 0.145f, null);
             player.location = newPos;
             sound.playFootstep();
         } else {
@@ -683,13 +700,15 @@ public class Epigon extends Game {
             if (thing != null) {
                 awaitedMoves.clear(); // don't keep moving if something hit
                 toCursor.clear();
-                mapSLayers.bump(playerEntity, dir, 0.145f);
+                mapSLayers.bump(player.appearance, dir, 0.145f);
                 ActionOutcome ao = ActionOutcome.attack(player, thing);
                 if (ao.hit) {
                     Element element = player.weaponData.elements.random();
                     applyStatChange(thing, Stat.VIGOR, ao.actualDamage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
+                        if(thing.overlayAppearance != null)
+                            mapSLayers.removeGlyph(thing.overlayAppearance);
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         if (ao.crit) {
@@ -736,8 +755,15 @@ public class Epigon extends Game {
                         {
                             message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
                                     amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-
                         }
+                        if(ao.targetConditioned)
+                        {
+                            thing.overlaySymbol = '˝';
+                            thing.overlayColor = element.floatColor;
+                            if(thing.overlayAppearance != null) mapSLayers.removeGlyph(thing.overlayAppearance);
+                            thing.overlayAppearance = mapSLayers.glyph(thing.overlaySymbol, thing.overlayColor, newX, newY);
+                        }
+
                     }
                 } else {
                     message("Missed the " + thing.name + (ao.crit ? ", but just barely." : "..."));
@@ -790,6 +816,8 @@ public class Epigon extends Game {
                     if ((creature = creatures.get(Coord.get(x, y))) != null ) {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
                         creature.appearance.color = lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount);
+                        if(creature.overlayAppearance != null)
+                            creature.overlayAppearance.color = lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount);
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();
@@ -835,8 +863,8 @@ public class Epigon extends Game {
         Gdx.gl.glClearColor(unseenColor.r, unseenColor.g, unseenColor.b, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        mapStage.getCamera().position.x = playerEntity.getX();
-        mapStage.getCamera().position.y = playerEntity.getY();
+        mapStage.getCamera().position.x = player.appearance.getX();
+        mapStage.getCamera().position.y = player.appearance.getY();
         putMap();
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
@@ -882,7 +910,7 @@ public class Epigon extends Game {
         mapSLayers.font.configureShader(batch);
         mapStage.getRoot().draw(batch, 1f);
         //so we can draw the actors independently of the stage while still in the same batch
-        playerEntity.draw(batch, 1.0f);
+        //player.appearance.draw(batch, 1.0f);
         //we still need to end
         batch.end();
 
