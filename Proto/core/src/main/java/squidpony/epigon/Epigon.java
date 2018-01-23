@@ -1188,6 +1188,13 @@ public class Epigon extends Game {
                         message("Made " + steaks.size() + " steaks.");
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
+                    } else if (selected.countsAs(handBuilt.baseFood)) {
+                        player.inventory.remove(selected);
+                        player.stats.get(Stat.HUNGER).addActual(20);
+                        mapOverlayHandler.updateDisplay();
+                        message("Ate " + selected.name);
+                    } else {
+                        message("No interaction for " + selected.name);
                     }
                     break;
                 case CONTEXT_PRIOR:

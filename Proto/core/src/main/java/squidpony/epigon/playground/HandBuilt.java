@@ -58,6 +58,8 @@ public class HandBuilt {
 
     public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
 
+    public Physical baseFood; // base item for anything edible
+
     public Physical rawMeat; // base item for dead animal chunks
     public Recipe steakRecipe;
 
@@ -121,9 +123,17 @@ public class HandBuilt {
         this.mixer = mixer;
         baseOpenDoor = new Physical();
         baseClosedDoor = new Physical();
+
         nan = new Physical();
         nan.name = "nan";
         nan.description = "currency of power";
+
+        baseFood = new Physical();
+        baseFood.name = "fūd";
+        baseFood.description = "base food item";
+        baseFood.symbol = '%';
+        baseFood.color = SColor.AMBER_DYE.toFloatBits();
+
         rawMeat = new Physical();
         rawMeat.name = "meat";
         rawMeat.description = "chunk of something";
@@ -335,6 +345,8 @@ public class HandBuilt {
         pb.name = "steak";
         pb.symbol = '%';
         pb.color = SColor.DB_MUD.toFloatBits();
+        pb.countsAs.add(baseFood);
+
         RecipeBlueprint rb = new RecipeBlueprint();
         rb.requiredConsumed.put(rawMeat, 1);
         rb.result.put(pb, 1);
@@ -385,7 +397,7 @@ public class HandBuilt {
         meaten.removeCreature = true;
         meaten.statChanges.put(Stat.MOBILITY, new LiveValueModification(0));
         meaten.statChanges.put(Stat.SIGHT, new LiveValueModification(0));
-        meaten.quantity = rng.between(3, 12);
+        meaten.quantity = rng.between(1, 4);
         return meaten;
     }
 }
