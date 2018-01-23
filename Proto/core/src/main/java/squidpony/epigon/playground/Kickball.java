@@ -3,14 +3,16 @@ package squidpony.epigon.playground;
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
 import squidpony.epigon.GauntRNG;
+import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.Utilities;
 import squidpony.epigon.data.DataMaster;
-import squidpony.epigon.data.blueprint.Inclusion;
-import squidpony.epigon.data.blueprint.Stone;
+import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.generic.Formula;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Rating;
 import squidpony.epigon.universe.Stat;
+import squidpony.squidmath.OrderedSet;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,11 +28,26 @@ public class Kickball {
     }
 
     private void go() {
-        testFormulas();
+        testImmutableKeys();
+//        testFormulas();
 //        testJSON();
 //        printStones();
     }
 
+    private void testImmutableKeys() {
+        OrderedSet<Material> materials = new OrderedSet<>(ImmutableKey.ImmutableKeyHasher.instance);
+        materials.addAll(Cloth.values());
+        materials.addAll(Hide.values());
+        materials.addAll(Inclusion.values());
+        materials.addAll(Metal.values());
+        materials.addAll(Paper.values());
+        materials.addAll(Stone.values());
+        materials.addAll(Wood.values());
+        for(Material m : materials)
+        {
+            System.out.println(Utilities.capitalizeFirst(m.toString()) + "? I can pay $" + m.getValue() + ", not a nan more.");
+        }
+    }
     private void testFormulas() {
         HandBuilt handBuilt = new HandBuilt();
         Physical source = handBuilt.mixer.buildPhysical(handBuilt.playerBlueprint);
