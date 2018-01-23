@@ -1,6 +1,7 @@
 package squidpony.epigon.data.blueprint;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.epigon.ImmutableKey;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -148,6 +149,17 @@ public enum Stone implements Material {
         this.extrusive = extrusive;
         this.value = value;
         this.hardness = hardness;
+        hash = ImmutableKey.precomputeHash("material.Stone", ordinal());
+    }
+
+    public long hash;
+    @Override
+    public long hash64() {
+        return hash;
+    }
+    @Override
+    public int hash32() {
+        return (int)(hash & 0xFFFFFFFFL);
     }
 
 

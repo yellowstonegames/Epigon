@@ -76,6 +76,17 @@ public class Utilities {
         }
         return b;
     }
+    public static String capitalizeFirst(final CharSequence original)
+    {
+        if (original == null || original.length() <= 0) {
+            return "";
+        }
+        sb.setLength(0);
+        sb.append(original);
+        sb.setCharAt(0, Character.toUpperCase(original.charAt(0)));
+        return sb.toString();
+    }
+
     private static final Matcher capitalizeMatcher = Pattern.compile("(?<!\\pL)(\\pL)(\\pL*)(\\PL*)").matcher();
     private static final StringBuilder sb = new StringBuilder(64);
     public static String caps(final CharSequence original)
@@ -91,7 +102,6 @@ public class Utilities {
             sb.append(capitalizeMatcher.group(3));
         }
         return sb.toString();
-
     }
     public static String caps(final CharSequence original,
                                     final CharSequence oldDelimiter) {

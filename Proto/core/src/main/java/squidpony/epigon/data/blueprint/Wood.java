@@ -1,6 +1,7 @@
 package squidpony.epigon.data.blueprint;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.epigon.ImmutableKey;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -12,7 +13,9 @@ public enum Wood implements Material {
     CHERRY(SColor.RED_BEAN, SColor.RED_BIRCH, 120, 170),
     MAPLE(SColor.CLOVE_BROWN, SColor.BAIKO_BROWN, 110),
     WALNUT(SColor.WALNUT, SColor.WILLOW_GREY),
-    KOA(SColor.FLATTERY_BROWN, SColor.DB_SEAL_BROWN, 150, 200);
+    KOA(SColor.FLATTERY_BROWN, SColor.DB_SEAL_BROWN, 150, 200),
+    WILLOW(SColor.WILLOW_LEAVES_UNDERSIDE, SColor.WILLOW_DYE, 80, 80),
+    MANZANITA(SColor.RUSSET, SColor.GREEN_BAMBOO, 90, 300);
 
     public Color front, back;
     public int value; //base material is 100
@@ -31,6 +34,17 @@ public enum Wood implements Material {
         this.back = back;
         this.value = value;
         this.hardness = hardness;
+        hash = ImmutableKey.precomputeHash("material.Wood", ordinal());
+    }
+
+    public long hash;
+    @Override
+    public long hash64() {
+        return hash;
+    }
+    @Override
+    public int hash32() {
+        return (int)(hash & 0xFFFFFFFFL);
     }
 
     @Override
