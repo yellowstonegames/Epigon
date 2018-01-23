@@ -397,7 +397,7 @@ public class HandBuilt {
         meaten.removeCreature = true;
         meaten.statChanges.put(Stat.MOBILITY, new LiveValueModification(0));
         meaten.statChanges.put(Stat.SIGHT, new LiveValueModification(0));
-        meaten.quantity = rng.between(1, 4);
+        meaten.quantity = rng.between(1, 3);
         return meaten;
     }
 }
