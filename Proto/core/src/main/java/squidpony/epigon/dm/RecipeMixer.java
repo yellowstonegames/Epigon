@@ -305,6 +305,9 @@ public class RecipeMixer {
 
         physical.terrainData = blueprint.terrainData;
         physical.groupingData = blueprint.groupingData;
+        if (blueprint.interactableData != null) {
+            physical.interactableData = new ArrayList<>(blueprint.interactableData);
+        }
         // TODO - add rest of mixins
 
         // finally work any modifications
@@ -656,6 +659,20 @@ public class RecipeMixer {
                 physical.groupingData = new Grouping();
             }
             physical.groupingData.quantity += modification.quantityDelta;
+        }
+
+        if (modification.interactable != null){
+            physical.interactableData = new ArrayList<>(modification.interactable);
+        }
+        if (modification.interactableAdditive != null){
+            if (physical.interactableData == null){
+                physical.interactableData = new ArrayList<>();
+            }
+            physical.interactableData.addAll(modification.interactableAdditive);
+        }
+        if (modification.interactableSubtractive != null && physical.interactableData != null){
+            // TODO - make Interactable have a countsAs property?
+            physical.interactableData.removeAll(modification.interactableSubtractive);
         }
 
         // TODO - Wearable changes

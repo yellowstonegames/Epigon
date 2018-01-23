@@ -17,6 +17,7 @@ import squidpony.squidmath.OrderedMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import squidpony.epigon.data.mixin.Interactable;
 
 /**
  * Represents a modification to another object.
@@ -152,6 +153,11 @@ public class Modification extends EpiData {
     // Grouping changes
     public Integer quantity;
     public Integer quantityDelta;
+
+    // Interactable changes
+    public List<Interactable> interactable;
+    public List<Interactable> interactableAdditive;
+    public List<Interactable> interactableSubtractive;
 
     // Wearable changes
     public Boolean worn;

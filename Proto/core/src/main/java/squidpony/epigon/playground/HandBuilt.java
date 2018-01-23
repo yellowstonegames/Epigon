@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
+import squidpony.epigon.data.generic.Effect;
+import squidpony.epigon.data.mixin.Interactable;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
@@ -341,11 +343,27 @@ public class HandBuilt {
         shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'ҭ');
         pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), ')');
 
+        // Steak
         Physical pb = new Physical();
         pb.name = "steak";
         pb.symbol = '%';
         pb.color = SColor.DB_MUD.toFloatBits();
         pb.countsAs.add(baseFood);
+
+        Modification hungerUp = new Modification();
+        LiveValueModification lvm = LiveValueModification.add(20);
+        hungerUp.statChanges.put(Stat.HUNGER, lvm);
+
+        Interactable eat = new Interactable();
+        eat.phrasing = "eat";
+        eat.effects = new ArrayList<>();
+        Effect e = new Effect();
+        e.sourceModifications = new ArrayList<>();
+        e.sourceModifications.add(hungerUp);
+        eat.effects.add(e);
+        eat.consumes = true;
+        pb.interactableData = new ArrayList<>();
+        pb.interactableData.add(eat);
 
         RecipeBlueprint rb = new RecipeBlueprint();
         rb.requiredConsumed.put(rawMeat, 1);
