@@ -495,7 +495,7 @@ public class MapOverlayHandler {
         this.player = player;
     }
 
-    public void updateDisplay() {
+    public void updateDisplay() { // TODO - add version that doesn't disrupt selection
         back.setVisible(true);
         front.setVisible(true);
         scrollOffsetY = 0;

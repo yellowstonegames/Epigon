@@ -125,7 +125,7 @@ public class Physical extends EpiData {
     public Ammunition ammunitionData;
     public Container containerData;
     public Grouping groupingData;
-    public Interactable interactableData;
+    public List<Interactable> interactableData;
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
@@ -304,6 +304,34 @@ public class Physical extends EpiData {
             weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos);
         }
         return removed;
+    }
+
+    public void addToInventory(Physical adding){
+        Physical owned = inventory.stream().filter(p -> p.equals(adding)).findAny().orElse(null);
+        if (owned == null){
+            inventory.add(adding);
+        } else { // This is meant to work with groupingData not counting in equality comparison
+            int quantity = owned.groupingData == null ? 1 : owned.groupingData.quantity;
+            if (adding.groupingData == null){
+                adding.groupingData = new Grouping(1 + quantity);
+            } else {
+                adding.groupingData.quantity += quantity;
+            }
+        }
+    }
+
+    public void removeFromInventory(Physical removing) {
+        removeFromInventory(removing, 1);
+    }
+
+    public void removeFromInventory(Physical removing, int quantity) {
+        // TODO - handle negatives
+        // TODO - message that requested quantity not found
+        if (removing.groupingData == null || removing.groupingData.quantity <= quantity) {
+            inventory.remove(removing);
+        } else {
+            removing.groupingData.quantity -= quantity;
+        }
     }
 
     public void calculateStats() {

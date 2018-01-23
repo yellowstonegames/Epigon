@@ -3,9 +3,8 @@ package squidpony.epigon.data.blueprint;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import squidpony.epigon.actions.Action;
 import squidpony.epigon.data.EpiData;
+import squidpony.epigon.data.generic.Effect;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.Element;
 
@@ -33,9 +32,9 @@ public class ConditionBlueprint extends EpiData {
     public int period;//how often effects trigger -- 0 means it's constant
     public Element element;
     public Modification modification;
-    public List<Action> tickActions = new ArrayList<>();
-    public List<Action> wearsOffActions = new ArrayList<>();//what happens when it wears off
-    public List<Action> canceledActions = new ArrayList<>();//what happens when it's cancelled
+    public List<Effect> tickActions = new ArrayList<>();
+    public List<Effect> wearsOffActions = new ArrayList<>();//what happens when it wears off
+    public List<Effect> canceledActions = new ArrayList<>();//what happens when it's cancelled
     public List<ConditionBlueprint> conflicts = new ArrayList<>();//can't exist at the same time, new one cancels the old one
     public List<ConditionBlueprint> immunizes = new ArrayList<>();//can't exist at the same time, old one prevents the new one from being applies
     public List<ConditionBlueprint> suppresses = new ArrayList<>();//can both exist, but only newest one has effect

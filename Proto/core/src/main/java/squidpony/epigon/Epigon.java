@@ -40,8 +40,8 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import squidpony.epigon.data.mixin.Interactable;
 
 import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
 
@@ -1085,7 +1085,7 @@ public class Epigon extends Game {
                                 if (p.attached || p.creatureData != null) {
                                     continue;
                                 }
-                                player.inventory.add(p);
+                                player.addToInventory(p);
                                 it.remove();
                             }
                         }
@@ -1189,21 +1189,26 @@ public class Epigon extends Game {
                     break;
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
-                    if (selected.countsAs(handBuilt.rawMeat)) {
-                        if (selected.groupingData == null || selected.groupingData.quantity < 2) {
-                            player.inventory.remove(selected);
-                        } else {
-                            selected.groupingData.quantity--; // use up one of them
+                    if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
+                        message("Interactions for " + selected.name + ": " + selected.interactableData
+                            .stream()
+                            .map(interact -> interact.phrasing)
+                            .collect(Collectors.joining(", ")));
+                        Interactable interaction = selected.interactableData.get(0);
+                        if (interaction.consumes){
+                            player.removeFromInventory(selected);
                         }
+                        interaction.effects
+                            .stream()
+                            .flatMap(s -> s.sourceModifications.stream())
+                            .forEachOrdered(mod -> mixer.applyModification(player, mod));
+                        mapOverlayHandler.updateDisplay();
+                    } else if (selected.countsAs(handBuilt.rawMeat)) {
+                        player.removeFromInventory(selected);
                         List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
                         message("Made " + steaks.size() + " steaks.");
-                    } else if (selected.countsAs(handBuilt.baseFood)) {
-                        player.inventory.remove(selected);
-                        player.stats.get(Stat.HUNGER).addActual(20);
-                        mapOverlayHandler.updateDisplay();
-                        message("Ate " + selected.name);
                     } else {
                         message("No interaction for " + selected.name);
                     }

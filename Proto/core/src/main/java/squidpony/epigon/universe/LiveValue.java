@@ -100,7 +100,7 @@ public class LiveValue {
 
         // these default to 1 if unassigned, so nothing changes if they are the default
         base *=    mod.baseMultiply;
-        actual *=  mod.actualMultiply;
+        multiplyActual(mod.actualMultiply);
         max *=     mod.maxMultiply;
         min *=     mod.minMultiply;
         delta *=   mod.deltaMultiply;
@@ -108,7 +108,7 @@ public class LiveValue {
 
         // these default to 0 if unassigned, so this is similar to the above case
         base +=    mod.baseAdd;
-        actual +=  mod.actualAdd;
+        addActual(mod.actualAdd);
         max +=     mod.maxAdd;
         min +=     mod.minAdd;
         delta +=   mod.deltaAdd;
