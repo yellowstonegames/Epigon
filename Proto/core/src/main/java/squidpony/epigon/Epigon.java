@@ -40,6 +40,7 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
@@ -369,7 +370,7 @@ public class Epigon extends Game {
                 }
                 Physical pMeat = mixer.buildPhysical(p);
                 mixer.applyModification(pMeat, handBuilt.makeMeats());
-                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.chaos, pMeat, 1.0, 2, 6);
+                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.chaos, pMeat, 1.0, 2, 4);
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
@@ -707,39 +708,48 @@ public class Epigon extends Game {
                     applyStatChange(thing, Stat.VIGOR, ao.actualDamage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
-                        if(thing.overlayAppearance != null)
+                        if (thing.overlayAppearance != null) {
                             mapSLayers.removeGlyph(thing.overlayAppearance);
+                        }
                         creatures.remove(thing.location);
                         map.contents[newX][newY].remove(thing);
                         if (ao.crit) {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                    .map(table -> {
-                                        int q = table.quantity();
-                                        Physical p = mixer.buildPhysical(table.random());
-                                        p.groupingData = new Grouping(q);
-                                        return p;
-                                    })
-                                    .forEach(item -> {map.contents[newX][newY].add(item);
-                                    if(map.resistances[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)] < 0.9)
+                                .map(table -> {
+                                    int quantity = table.quantity();
+                                    Physical p = mixer.buildPhysical(table.random());
+                                    if (p.groupingData != null) {
+                                        p.groupingData.quantity += quantity;
+                                    } else {
+                                        p.groupingData = new Grouping(quantity);
+                                    }
+                                    return p;
+                                })
+                                .forEach(item -> {
+                                    map.contents[newX][newY].add(item);
+                                    if (map.resistances[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)] < 0.9) {
                                         map.contents[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)].add(item);
-                                    });
+                                    }
+                                });
                             mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                             message("You [Blood]brutally[] defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
-                        }
-                        else
-                        {
+                        } else {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                    .map(table -> {
-                                        int q = table.quantity();
-                                        Physical p = mixer.buildPhysical(table.random());
-                                        p.groupingData = new Grouping(q);
-                                        return p;
-                                    })
-                                    .forEach(item -> map.contents[newX][newY].add(item));
+                                .map(table -> {
+                                    int quantity = table.quantity();
+                                    Physical p = mixer.buildPhysical(table.random());
+                                    if (p.groupingData != null) {
+                                        p.groupingData.quantity += quantity;
+                                    } else {
+                                        p.groupingData = new Grouping(quantity);
+                                    }
+                                    return p;
+                                })
+                                .forEach(item -> map.contents[newX][newY].add(item));
                             mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                             message("You defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                         }
-                    }else {
+                    } else {
                         String amtText = String.valueOf(-ao.actualDamage);
                         int startX = newX - (amtText.length() >> 1);
                         for (int i = 0; i < amtText.length(); i++, startX++) {
@@ -1180,14 +1190,15 @@ public class Epigon extends Game {
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
                     if (selected.countsAs(handBuilt.rawMeat)) {
-                        player.inventory.remove(selected);
-                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
-                        if (selected.groupingData != null) {
-                            steaks = Collections.nCopies(selected.groupingData.quantity, steaks.get(0));
+                        if (selected.groupingData == null || selected.groupingData.quantity < 2) {
+                            player.inventory.remove(selected);
+                        } else {
+                            selected.groupingData.quantity--; // use up one of them
                         }
-                        message("Made " + steaks.size() + " steaks.");
+                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
+                        message("Made " + steaks.size() + " steaks.");
                     } else if (selected.countsAs(handBuilt.baseFood)) {
                         player.inventory.remove(selected);
                         player.stats.get(Stat.HUNGER).addActual(20);

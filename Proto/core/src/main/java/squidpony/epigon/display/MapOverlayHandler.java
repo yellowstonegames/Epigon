@@ -334,6 +334,7 @@ public class MapOverlayHandler {
     private void showEquipment() {
         showEquipment(Direction.NONE);
     }
+
     private void showEquipment(Direction moveSelection){
         // Clear out selection tracking
         if (moveSelection == Direction.NONE) {
@@ -360,7 +361,7 @@ public class MapOverlayHandler {
             leftSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -376,7 +377,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -390,7 +391,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -404,7 +405,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -418,7 +419,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -432,7 +433,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, p.name);
+            put(x, y, getDisplay(p));
             y++;
         }
 
@@ -461,6 +462,14 @@ public class MapOverlayHandler {
         
         if (selection != null){
             put(selection.x, selection.y, '↣');
+        }
+    }
+    
+    private String getDisplay(Physical p){
+        if (p.groupingData != null && p.groupingData.quantity > 1){
+            return p.name + " x" + p.groupingData.quantity;
+        } else {
+            return p.name;
         }
     }
 
