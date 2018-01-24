@@ -5,11 +5,9 @@ import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.blueprint.Cloth;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
-import squidpony.epigon.data.generic.Ability;
-import squidpony.epigon.data.generic.Formula;
-import squidpony.epigon.data.generic.Modification;
-import squidpony.epigon.data.generic.Skill;
+import squidpony.epigon.data.generic.*;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Recipe;
@@ -28,8 +26,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
-import squidpony.epigon.data.generic.Effect;
-import squidpony.epigon.data.mixin.Interactable;
 import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
