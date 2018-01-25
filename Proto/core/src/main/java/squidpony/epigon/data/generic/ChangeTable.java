@@ -1,8 +1,9 @@
 package squidpony.epigon.data.generic;
 
 import com.badlogic.gdx.utils.CharArray;
-import com.badlogic.gdx.utils.LongArray;
+import com.badlogic.gdx.utils.FloatArray;
 import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.universe.LiveValue;
 import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.OrderedMap;
 
@@ -13,7 +14,7 @@ import java.util.Iterator;
  */
 public class ChangeTable implements Iterable<ImmutableKey> {
     public Arrangement<ImmutableKey> indexer;
-    public LongArray longValues;
+    public FloatArray values;
     public CharArray changeSymbols;
     public ChangeTable()
     {
@@ -22,7 +23,7 @@ public class ChangeTable implements Iterable<ImmutableKey> {
     public ChangeTable(int expectedSize)
     {
         indexer = new Arrangement<>(expectedSize, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
-        longValues = new LongArray(expectedSize);
+        values = new FloatArray(expectedSize);
         changeSymbols = new CharArray(expectedSize);
     }
 
@@ -34,17 +35,17 @@ public class ChangeTable implements Iterable<ImmutableKey> {
      * @param value
      * @return true if the triplet was added normally, or false if it overwrote an existing triplet
      */
-    public boolean put(ImmutableKey key, char symbol, long value) {
+    public boolean put(ImmutableKey key, char symbol, double value) {
         int index = indexer.add(key);
         if (index < 0) {
             changeSymbols.add(symbol);
-            longValues.add(value);
+            values.add((float) value);
             return true;
         }
         else
         {
             changeSymbols.set(index, symbol);
-            longValues.set(index, value);
+            values.set(index, (float)value);
             return false;
         }
 
@@ -52,12 +53,12 @@ public class ChangeTable implements Iterable<ImmutableKey> {
 
     public void clear() {
         indexer.clear();
-        longValues.clear();
+        values.clear();
         changeSymbols.clear();
     }
 
     public int size() {
-        return longValues.size;
+        return values.size;
     }
 
     public boolean isEmpty() {
@@ -70,16 +71,16 @@ public class ChangeTable implements Iterable<ImmutableKey> {
     }
 
     /**
-     * Edits the existing OrderedMap of ImmutableKey keys to Long values using the changes in this ChangeTable.
-     * @param changing a non-null OrderedMap of ImmutableKey keys to Long values
+     * Edits the existing OrderedMap of ImmutableKey keys to Double values using the changes in this ChangeTable.
+     * @param changing a non-null OrderedMap of ImmutableKey keys to Double values; will be modified
      * @return the parameter this was given, after modifications
      */
-    public OrderedMap<ImmutableKey, Long> change(OrderedMap<ImmutableKey, Long> changing)
+    public OrderedMap<ImmutableKey, Double> changeDoubles(OrderedMap<ImmutableKey, Double> changing)
     {
-        int mySize = longValues.size;
+        int mySize = values.size;
         ImmutableKey k;
         char op = '=';
-        Long e;
+        Double e;
         for (int i = 0; i < mySize; i++) {
             k = indexer.keyAt(i);
             op = changeSymbols.get(i);
@@ -88,16 +89,16 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                 switch (op)
                 {
                     case '=':
-                        changing.put(k, longValues.get(i));
+                        changing.put(k, (double)values.get(i));
                         break;
                     case '+':
-                        changing.put(k, e + longValues.get(i));
+                        changing.put(k, e + values.get(i));
                         break;
                     case '-':
-                        changing.put(k, e - longValues.get(i));
+                        changing.put(k, e - values.get(i));
                         break;
                     case '*':
-                        changing.put(k, e * longValues.get(i));
+                        changing.put(k, e * values.get(i));
                         break;
                 }
             }
@@ -106,19 +107,56 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                 switch (op)
                 {
                     case '=':
-                        changing.put(k, longValues.get(i));
+                        changing.put(k, (double)values.get(i));
                         break;
                     case '+':
-                        changing.put(k, longValues.get(i));
+                        changing.put(k, (double)values.get(i));
                         break;
                     case '-':
-                        changing.put(k, -longValues.get(i));
+                        changing.put(k, -(double)values.get(i));
                         break;
                     case '*':
-                        changing.put(k, 0L);
+                        changing.put(k, 0.0);
                         break;
                 }
 
+            }
+        }
+        return changing;
+    }
+    /**
+     * Edits the existing OrderedMap of ImmutableKey keys to LiveValue values using the changes in this ChangeTable.
+     * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
+     * will be ignored without affecting the rest of the changes.
+     * @param changing a non-null OrderedMap of ImmutableKey keys to LiveValue values; will be modified
+     * @return the parameter this was given, after modifications
+     */
+    public OrderedMap<ImmutableKey, LiveValue> changeLiveValues(OrderedMap<ImmutableKey, LiveValue> changing)
+    {
+        int mySize = values.size;
+        ImmutableKey k;
+        char op = '=';
+        LiveValue e;
+        for (int i = 0; i < mySize; i++) {
+            k = indexer.keyAt(i);
+            op = changeSymbols.get(i);
+            if((e = changing.get(k)) != null)
+            {
+                switch (op)
+                {
+                    case '=':
+                        e.set(values.get(i));
+                        break;
+                    case '+':
+                        e.addActual(values.get(i));
+                        break;
+                    case '-':
+                        e.addActual(-values.get(i));
+                        break;
+                    case '*':
+                        e.multiplyActual(values.get(i));
+                        break;
+                }
             }
         }
         return changing;
@@ -133,7 +171,7 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         ChangeTable am = new ChangeTable(rest.length / 3);
         for (int i = 0; i < rest.length - 2; i += 3) {
             try {
-                am.put((ImmutableKey)rest[i], (Character) rest[i + 1], (Long)rest[i+2]);
+                am.put((ImmutableKey)rest[i], (Character) rest[i + 1], (Double) rest[i+2]);
             }catch (ClassCastException ignored) {
             }
         }
