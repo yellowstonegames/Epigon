@@ -536,14 +536,7 @@ public class RecipeMixer {
                 lv.modify(e.getValue());
                 physical.stats.put(e.getKey(), lv);
             });
-        if (modification.calcStats != null && modification.calcStats.length == 11) {
-            System.arraycopy(modification.calcStats, 0, physical.calcStats, 0, 11);
-        } else {
-            physical.calculateStats();
-        }
-        for (int i = 0; i < modification.calcStatChanges.size(); i++) {
-            physical.calcStats[modification.calcStatChanges.keyAt(i).ordinal()] += modification.calcStatChanges.getAt(i);
-        }
+        physical.calculateStats();
         physical.statProgression.putAll(modification.statProgression);
         modification.statProgressionChanges.entrySet()
             .stream()

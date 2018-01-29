@@ -15,6 +15,7 @@ import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.mixin.Grouping;
+import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.display.*;
@@ -41,7 +42,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import squidpony.epigon.data.mixin.Interactable;
 
 import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
 
@@ -470,8 +470,8 @@ public class Epigon extends Game {
         }
 
         // Update all the stats in motion
-        Map<Stat, Double> changes = new HashMap<>();
-        for (Entry<Stat, LiveValue> entry : player.stats.entrySet()) {
+        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+        for (Entry<ImmutableKey, LiveValue> entry : player.stats.entrySet()) {
             double amt = entry.getValue().tick();
             if (amt != 0) {
                 changes.put(entry.getKey(), amt);
@@ -505,9 +505,9 @@ public class Epigon extends Game {
         }
     }
 
-    private void applyStatChange(Physical target, Map<Stat, Double> amounts) {
-        Map<Stat, Double> changes = new HashMap<>();
-        for (Entry<Stat, LiveValue> entry : target.stats.entrySet()) {
+    private void applyStatChange(Physical target, Map<ImmutableKey, Double> amounts) {
+        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+        for (Entry<ImmutableKey, LiveValue> entry : target.stats.entrySet()) {
             Double amount = amounts.get(entry.getKey());
             if (amount != null) {
                 changes.put(entry.getKey(), amount);
@@ -531,7 +531,7 @@ public class Epigon extends Game {
     }
 
     private void applyStatChange(Physical target, Stat stat, double amount) {
-        Map<Stat, Double> changes = new HashMap<>();
+        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
         changes.put(stat, amount);
         target.stats.get(stat).addActual(amount);
         for (Stat s : Stat.rolloverProcessOrder) {

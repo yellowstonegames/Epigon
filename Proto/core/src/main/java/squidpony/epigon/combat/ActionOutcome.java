@@ -1,8 +1,10 @@
 package squidpony.epigon.combat;
 
-import com.badlogic.gdx.math.MathUtils;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.universe.CalcStat;
+import squidpony.epigon.universe.LiveValue;
+import squidpony.squidmath.Noise;
 import squidpony.squidmath.NumberTools;
 
 import static squidpony.epigon.data.specific.Physical.*;
@@ -27,18 +29,18 @@ public class ActionOutcome {
     {
         ActionOutcome ao = new ActionOutcome();
         long r = determine(++actor.chaos);
-        ao.crit = (20 + 4 * (actor.calcStats[CRIT] + actor.weaponData.calcStats[CRIT] -
-                target.calcStats[STEALTH] - target.weaponData.calcStats[STEALTH])) >= GauntRNG.next(r, 9);
-        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.calcStats[PRECISION] + actor.weaponData.calcStats[PRECISION] -
-                target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) >= GauntRNG.next(r + 1, 7);
+        ao.crit = (20 + 4 * (actor.stats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() + actor.weaponData.calcStats[CRIT] -
+                target.stats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual() - target.weaponData.calcStats[STEALTH])) >= GauntRNG.next(r, 9);
+        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() + actor.weaponData.calcStats[PRECISION] -
+                target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual() - target.weaponData.calcStats[EVASION])) >= GauntRNG.next(r + 1, 7);
         if(ao.hit)
         {
-            ao.attemptedDamage = Math.min(0, MathUtils.floor((NumberTools.randomFloatCurved(r + 2) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +
-                    actor.calcStats[DAMAGE] + actor.weaponData.calcStats[DAMAGE])));
+            ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.randomFloatCurved(r + 2) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +
+                    actor.stats.getOrDefault(CalcStat.DAMAGE, LiveValue.ZERO).actual() + actor.weaponData.calcStats[DAMAGE])));
             ao.actualDamage = Math.min(0, ao.attemptedDamage -
-                    MathUtils.floor(NumberTools.randomFloatCurved(r + 3) * 0.3f + 0.35f) * (target.calcStats[DEFENSE] + target.weaponData.calcStats[DEFENSE]));
-            ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + actor.calcStats[INFLUENCE] + actor.weaponData.calcStats[INFLUENCE] -
-                    target.calcStats[LUCK] - target.weaponData.calcStats[LUCK])) >= GauntRNG.next(r + 4, 8);
+                    Noise.fastFloor((NumberTools.randomFloatCurved(r + 3) * 0.3f + 0.35f) * (target.stats.getOrDefault(CalcStat.DEFENSE, LiveValue.ZERO).actual() + target.weaponData.calcStats[DEFENSE])));
+            ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + actor.stats.getOrDefault(CalcStat.INFLUENCE, LiveValue.ZERO).actual() + actor.weaponData.calcStats[INFLUENCE] -
+                    actor.stats.getOrDefault(CalcStat.LUCK, LiveValue.ZERO).actual() - target.weaponData.calcStats[LUCK])) >= GauntRNG.next(r + 4, 8);
         }
         return ao;
     }

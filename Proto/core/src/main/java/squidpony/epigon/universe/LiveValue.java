@@ -42,6 +42,17 @@ public class LiveValue {
         set(base);
     }
 
+    public LiveValue(double base, double max) {
+        base = Math.min(max, base);
+        this.base = base;
+        this.max = max;
+        min = 0;
+        actual = base;
+        delta = 0;
+        inertia = 0;
+        stable = true;
+    }
+
     public LiveValue(LiveValue other) {
         base = other.base;
         max = other.max;
