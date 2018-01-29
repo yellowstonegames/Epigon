@@ -193,8 +193,8 @@ public class HandBuilt {
         mod.skillChanges.put(foodPrep, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(foodChopping, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(foodMixing, rvmSkill(Rating.SLIGHT));
-        mod.abiliitiesAdditive = new ArrayList<>();
-        mod.abiliitiesAdditive.add(cookSteak);
+        mod.abilitiesAdditive = new ArrayList<>();
+        mod.abilitiesAdditive.add(cookSteak);
 
         mod.name = "chef slight";
         chef.improvements.put(Rating.SLIGHT, mod);

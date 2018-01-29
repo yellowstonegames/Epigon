@@ -546,6 +546,10 @@ public class RecipeMixer {
                 physical.statProgression.put(e.getKey(), r);
             });
 
+        physical.statEffects.addAll(modification.statEffectsAdditive);
+
+        physical.statEffects.removeAll(modification.statEffectsSubtractive);
+
         if (modification.inventory != null) {
             physical.inventory = modification.inventory
                 .stream()
@@ -622,8 +626,8 @@ public class RecipeMixer {
                 physical.creatureData.abilities = new HashSet(modification.abilities);
             }
 
-            if (modification.abiliitiesAdditive != null) {
-                physical.creatureData.abilities.addAll(modification.abiliitiesAdditive);
+            if (modification.abilitiesAdditive != null) {
+                physical.creatureData.abilities.addAll(modification.abilitiesAdditive);
             }
 
             if (modification.abilitiesSubtractive != null) {
@@ -672,8 +676,8 @@ public class RecipeMixer {
 
         if (modification.weaponData != null) {
             physical.weaponData = modification.weaponData.copy();
-        } else if (physical.weaponData == null && (modification.weaponCalcDelta != null
-            || modification.weaponStatusesAdditive != null
+        } else if (physical.weaponData == null && (
+               modification.weaponStatusesAdditive != null
             || modification.weaponStatusesSubtractive != null
             || modification.weaponManeuversAdditive != null
             || modification.weaponManeuversSubtractive != null
@@ -706,12 +710,6 @@ public class RecipeMixer {
 //                else
 //                    physical.weaponData.elements.add(e, modification.weaponElementsAdditive.getAt(i));
 //            }
-        }
-
-        if (modification.weaponCalcDelta != null) {
-            for (int i = 0; i < 12; i++) {
-                physical.weaponData.calcStats[i] = Math.max(0, physical.weaponData.calcStats[i] + modification.weaponCalcDelta[i]);
-            }
         }
 
         return physical;

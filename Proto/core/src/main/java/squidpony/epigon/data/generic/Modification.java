@@ -13,8 +13,10 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.*;
+import squidpony.squidmath.CrossHash;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.OrderedSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +95,8 @@ public class Modification extends EpiData {
     public OrderedMap<ImmutableKey, LiveValueModification> statChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
     public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
     public OrderedMap<ImmutableKey, RatingValueModification> statProgressionChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-
+    public OrderedSet<ChangeTable> statEffectsAdditive = new OrderedSet<>(CrossHash.identityHasher);
+    public OrderedSet<ChangeTable> statEffectsSubtractive = new OrderedSet<>(CrossHash.identityHasher);
     public List<Physical> inventory;
     public List<Physical> inventoryAdditive;
     public List<Physical> inventorySubtractive; // Removes everything that counts as an item in this list
@@ -117,7 +120,7 @@ public class Modification extends EpiData {
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
     public OrderedMap<Skill, RatingValueModification> skillProgressionChanges = new OrderedMap<>();
     public List<Ability> abilities;
-    public List<Ability> abiliitiesAdditive;
+    public List<Ability> abilitiesAdditive;
     public List<Ability> abilitiesSubtractive;
 
     public List<RecipeBlueprint> knownRecipesAdditive; // Can only gain known recipes, never lose them
@@ -174,7 +177,6 @@ public class Modification extends EpiData {
 //    public Integer wieldableRangeOverwrite;
 //    public Integer wieldableRangeDelta;
     public Weapon weaponData;
-    public int[] weaponCalcDelta;
     public List<String> weaponStatusesAdditive;
     public List<String> weaponStatusesSubtractive;
     public List<String> weaponManeuversAdditive;

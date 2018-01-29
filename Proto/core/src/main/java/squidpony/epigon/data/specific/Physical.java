@@ -5,14 +5,13 @@ import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
+import squidpony.epigon.data.generic.ChangeTable;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.*;
 import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.EnumOrderedMap;
-import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.*;
 
 import java.util.*;
 
@@ -81,10 +80,10 @@ public class Physical extends EpiData {
 
     public List<Condition> conditions = new ArrayList<>();
 
-    //public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
-    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-    //public int[] calcStats = new int[11];
+    // initial stats on instantiation come from required modification
     public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<ImmutableKey, LiveValue>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedSet<ChangeTable> statEffects = new OrderedSet<>(8, CrossHash.identityHasher);
+    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
     public List<Physical> inventory = new ArrayList<>();
     public List<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
 
@@ -259,7 +258,7 @@ public class Physical extends EpiData {
 
         for (Physical p : removing) {
             inventory.add(p);
-            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out mult-handed unequips
+            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equipment.get(subSlot))) {
                     creatureData.equipment.remove(subSlot);
                 }
@@ -299,7 +298,7 @@ public class Physical extends EpiData {
         }
         if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
         {
-            weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos);
+            statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
         }
         return removed;
     }

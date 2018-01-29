@@ -26,6 +26,13 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         values = new FloatArray(expectedSize);
         changeSymbols = new CharArray(expectedSize);
     }
+    public ChangeTable(ChangeTable other)
+    {
+        indexer = new Arrangement<>(other.size(), 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+        indexer.putAll(other.indexer);
+        values = new FloatArray(other.values);
+        changeSymbols = new CharArray(other.changeSymbols);
+    }
 
     /**
      * Puts a new triplet of ImmutableKey, char, and long into this ChangeTable. Returns true if everything went normally,
@@ -164,7 +171,7 @@ public class ChangeTable implements Iterable<ImmutableKey> {
 
     public static ChangeTable makeCT(Object... rest)
     {
-        if(rest == null || rest.length == 0)
+        if(rest == null || rest.length < 3)
         {
             return new ChangeTable();
         }
@@ -176,6 +183,21 @@ public class ChangeTable implements Iterable<ImmutableKey> {
             }
         }
         return am;
+    }
+
+    public ChangeTable putMany(Object... rest)
+    {
+        if(rest == null || rest.length < 3)
+        {
+            return this;
+        }
+        for (int i = 0; i < rest.length - 2; i += 3) {
+            try {
+                put((ImmutableKey)rest[i], (Character) rest[i + 1], (Double) rest[i+2]);
+            }catch (ClassCastException ignored) {
+            }
+        }
+        return this;
     }
 
 }
