@@ -1,5 +1,7 @@
 package squidpony.epigon.data.raw;
 
+import squidpony.squidmath.NumberTools;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -112,7 +114,7 @@ public class RawWeapon implements Serializable {
     new RawWeapon("lightning magic", "Lightning magic strikes suddenly with potent but inaccurate thunderbolts.", '⚡', "Magic", "Repeat", 0, "LIGHTNING", "LIGHTNING", "Energy", "Energy", "Beam", "Straight", "Ricochet", "Yank", "Sizzle", "Energize", 0, 5, 0, 2, 2, 0, 0, 4, 4, 2, 5, new String[] {}, new String[] {"Sorcery", "Hurling"}, new String[] {"Bididhayi", "Hidzaajji"}),
     new RawWeapon("poison magic", "Poison magic is usually studied in lawless places, where the cruel death it delivers is already commonplace.", '⚡', "Magic", "Repeat", 0, "POISON", "POISON", "Energy", "Energy", "Burst", "Arc", "Condemn", "Seal", "Afflict", "Slay", 2, 3, 6, 6, 0, 0, 0, 6, 3, 0, 1, new String[] {}, new String[] {"Sorcery", "Assassination"}, new String[] {"Ninja", "Mobyuld"}),
     new RawWeapon("acid magic", "Acid magic is considered marginally less dishonorable than poison magic because it also has practical uses in etching.", '⚡', "Magic", "Repeat", 0, "ACID", "ACID", "Energy", "Energy", "Wave", "Straight", "Heave", "Sweep", "Sunder", "Sizzle", 3, 4, 2, 6, 0, 0, 0, 4, 3, 2, 1, new String[] {}, new String[] {"Sorcery", "Hurling"}, new String[] {"Laathrik", "Hueztotli"}),
-    new RawWeapon("caustic magic", "Caustic magic is exceptionally rare, and though it mainly finds industrial uses, some mages can wield it in battle.", '⚡', "Magic", "Repeat", 0, "CAUSTIC", "CAUSTIC", "Energy", "Energy", "Wave", "Straight", "Exorcise", "Reveal", "Afflict", "Blind", 4, 0, 0, 6, 2, 1, 0, 4, 4, 1, 3, new String[] {}, new String[] {"Sorcery", "Swordplay"}, new String[] {"Keungeuh", "Ninja"}),
+    new RawWeapon("caustic magic", "Caustic magic is exceptionally rare, and though it mainly finds industrial uses, some mages can wield it in battle.", '⚡', "Magic", "Repeat", 0, "CAUSTIC", "CAUSTIC", "Energy", "Energy", "Wave", "Straight", "Exorcise", "Reveal", "Afflict", "Blind", 4, 0, 0, 6, 2, 1, 0, 4, 4, 1, 3, new String[] {}, new String[] {"Sorcery", "Swordplay"}, new String[] {"Keungeuh", "Ugexiir"}),
     new RawWeapon("disease magic", "Disease magic revolves just as much around curing illnesses as causing them because it backfires so often.", '⚡', "Magic", "Repeat", 0, "DISEASE", "DISEASE", "Energy", "Energy", "Multi", "Arc", "Ricochet", "Condemn", "Afflict", "Regenerate", 3, 1, 0, 6, 4, 0, 0, 6, 4, 0, 2, new String[] {}, new String[] {"Sorcery", "Naturalism"}, new String[] {"Mbegonda", "Chobesh"}),
     new RawWeapon("death magic", "Death magic is reviled by most of the world because it has no practical applications other than overt warfare or murder.", '⚡', "Magic", "Repeat", 0, "DEATH", "DEATH", "Energy", "Energy", "Multi", "Straight", "Condemn", "Hex", "Slay", "Sizzle", 4, 9, 4, 1, 0, 0, 0, 4, 4, 0, 0, new String[] {}, new String[] {"Sorcery", "Brutality"}, new String[] {"Krort", "Ninja"}),
     new RawWeapon("life magic", "Life magic can be used offensively by moving vitality around in opponents, potentially weakening or even killing them.", '⚡', "Magic", "Repeat", 0, "LIFE", "LIFE", "Energy", "Energy", "Multi", "Straight", "Exorcise", "Weave", "Regenerate", "Bleed", 5, 1, 3, 6, 0, 0, 3, 4, 4, 0, 0, new String[] {}, new String[] {"Sorcery", "Foresight"}, new String[] {"Elethian", "Bididhayi"}),
@@ -127,7 +129,7 @@ public class RawWeapon implements Serializable {
     new RawWeapon("divine magic", "Divine magic channels the power of a god to unleash awesome vengeance on heretics.", '⚡', "Magic", "Repeat", 0, "DIVINE", "DIVINE", "Energy", "Energy", "Burst", "Arc", "Exorcise", "Shine", "Sizzle", "Regenerate", 2, 6, 0, 3, 0, 3, 4, 0, 3, 2, 2, new String[] {}, new String[] {"Sorcery", "Elegance"}, new String[] {"Bididhayi", "Hyrden"}),
     new RawWeapon("gravity magic", "Gravity magic is tricky and can be an excellent way to immobilize an enemy, but gravity doesn't need to pull downwards...", '⚡', "Magic", "Repeat", 0, "GRAVITY", "GRAVITY", "Energy", "Energy", "Burst", "Straight", "Pin", "Yank", "Trip", "Disarm", 3, 1, 0, 5, 3, 0, 2, 4, 3, 2, 2, new String[] {}, new String[] {"Sorcery", "Whirling Death"}, new String[] {"Jalgeaux", "Hidzaajji"}),
     new RawWeapon("vacuous magic", "Vacuous magic deals with a peculiar subject: regions that contain no other elements, such as the void of space.", '⚡', "Magic", "Repeat", 0, "VACUOUS", "VACUOUS", "Energy", "Energy", "Burst", "Arc", "Yank", "Reveal", "Silence", "Disarm", 1, 4, 0, 4, 2, 0, 0, 4, 3, 3, 3, new String[] {}, new String[] {"Sorcery", "Assassination"}, new String[] {"Chobesh", "Cheuritae"}),
-    new RawWeapon("warp magic", "Warp magic is a skill in high demand from criminals and police alike, since it can move objects or people instantly.", '⚡', "Magic", "Repeat", 0, "WARP", "WARP", "Energy", "Energy", "Through", "Straight", "Yank", "Seal", "Disarm", "Confound", 2, 1, 0, 3, 6, 0, 2, 6, 5, 0, 0, new String[] {}, new String[] {"Sorcery", "Whirling Death"}, new String[] {"Ugexiir", "Ikkutiq"}),
+    new RawWeapon("warp magic", "Warp magic is a skill in high demand from criminals and police alike, since it can move objects or people instantly.", '⚡', "Magic", "Repeat", 0, "WARP", "WARP", "Energy", "Energy", "Through", "Straight", "Yank", "Seal", "Disarm", "Confound", 2, 1, 0, 3, 6, 0, 2, 6, 5, 0, 0, new String[] {}, new String[] {"Sorcery", "Whirling Death"}, new String[] {"Ninja", "Ikkutiq"}),
     new RawWeapon("radiation magic", "Radiation magic isn't well-understood by common folk, and its users are generally feared for the illnesses that follow them.", '⚡', "Magic", "Repeat", 0, "RADIATION", "RADIATION", "Energy", "Energy", "Beam", "Straight", "Shine", "Exorcise", "Sizzle", "Afflict", 4, 6, 0, 5, 0, 0, 0, 4, 4, 1, 1, new String[] {}, new String[] {"Sorcery", "Marksmanship"}, new String[] {"Zedmedov", "Khainghal"}),
   };
 
@@ -210,27 +212,27 @@ public class RawWeapon implements Serializable {
 
   public String status2;
 
-  public int precision;
+  public double precision;
 
-  public int damage;
+  public double damage;
 
-  public int crit;
+  public double crit;
 
-  public int influence;
+  public double influence;
 
-  public int evasion;
+  public double evasion;
 
-  public int defense;
+  public double defense;
 
-  public int luck;
+  public double luck;
 
-  public int stealth;
+  public double stealth;
 
-  public int range;
+  public double range;
 
-  public int area;
+  public double area;
 
-  public int prepare;
+  public double prepare;
 
   public String[] materials;
 
@@ -244,9 +246,9 @@ public class RawWeapon implements Serializable {
   public RawWeapon(String name, String description, char glyph, String kind, String usage,
       int hands, String type1, String type2, String group1, String group2, String shape,
       String path, String maneuver1, String maneuver2, String status1, String status2,
-      int precision, int damage, int crit, int influence, int evasion, int defense, int luck,
-      int stealth, int range, int area, int prepare, String[] materials, String[] training,
-      String[] culture) {
+      double precision, double damage, double crit, double influence, double evasion,
+      double defense, double luck, double stealth, double range, double area, double prepare,
+      String[] materials, String[] training, String[] culture) {
     this.name = name;
     this.description = description;
     this.glyph = glyph;
@@ -311,17 +313,17 @@ public class RawWeapon implements Serializable {
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(maneuver2));
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(status1));
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(status2));
-    result += (a ^= 0x8329C6EB9E6AD3E3L * precision);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * damage);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * crit);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * influence);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * evasion);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * defense);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * luck);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * stealth);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * range);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * area);
-    result += (a ^= 0x8329C6EB9E6AD3E3L * prepare);
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(precision));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(damage));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(crit));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(influence));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(evasion));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(defense));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(luck));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(stealth));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(range));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(area));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(prepare));
     innerR = 0x9E3779B97F4A7C94L;
     innerA = 0x632BE59BD9B4E019L;
     len = (materials == null ? 0 : materials.length);

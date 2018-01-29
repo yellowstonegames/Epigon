@@ -4,7 +4,9 @@ import squidpony.Maker;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.*;
+import squidpony.epigon.data.generic.ChangeTable;
 import squidpony.epigon.data.raw.RawWeapon;
+import squidpony.epigon.universe.CalcStat;
 import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static squidpony.epigon.data.specific.Physical.*;
+import static squidpony.epigon.data.specific.Physical.basePhysical;
 
 /**
  * Created by Tommy Ettinger on 11/25/2017.
@@ -27,7 +29,7 @@ public class Weapon {
     public int hands = 1;
     public Physical blueprint;
     public RecipeBlueprint recipeBlueprint;
-    public int[] calcStats = new int[11];
+    public ChangeTable calcStats;
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
     public String[] qualities = new String[4];
     public String[] materialTypes, training;
@@ -140,17 +142,29 @@ public class Weapon {
     {
         rawWeapon = raw;
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
-        calcStats[PRECISION] = raw.precision;
-        calcStats[DAMAGE] = raw.damage;
-        calcStats[CRIT] = raw.crit;
-        calcStats[INFLUENCE] = raw.influence;
-        calcStats[EVASION] = raw.evasion;
-        calcStats[DEFENSE] = raw.defense;
-        calcStats[LUCK] = raw.luck;
-        calcStats[STEALTH] = raw.stealth;
-        calcStats[RANGE] = raw.range;
-        calcStats[AREA] = raw.area;
-        calcStats[PREPARE] = raw.prepare;
+        calcStats = ChangeTable.makeCT(
+                CalcStat.PRECISION, '+', raw.precision,
+                CalcStat.DAMAGE, '+', raw.damage,
+                CalcStat.CRIT, '+', raw.crit,
+                CalcStat.INFLUENCE, '+', raw.influence,
+                CalcStat.EVASION, '+', raw.evasion,
+                CalcStat.DEFENSE, '+', raw.defense,
+                CalcStat.LUCK, '+', raw.luck,
+                CalcStat.STEALTH, '+', raw.stealth,
+                CalcStat.RANGE, '+', raw.range,
+                CalcStat.AREA, '+', raw.area,
+                CalcStat.PREPARE, '+', raw.prepare);
+//        calcStats[PRECISION] = raw.precision;
+//        calcStats[DAMAGE] = raw.damage;
+//        calcStats[CRIT] = raw.crit;
+//        calcStats[INFLUENCE] = raw.influence;
+//        calcStats[EVASION] = raw.evasion;
+//        calcStats[DEFENSE] = raw.defense;
+//        calcStats[LUCK] = raw.luck;
+//        calcStats[STEALTH] = raw.stealth;
+//        calcStats[RANGE] = raw.range;
+//        calcStats[AREA] = raw.area;
+//        calcStats[PREPARE] = raw.prepare;
         qualities[KIND] = raw.kind;
         qualities[USAGE] = raw.usage;
         qualities[SHAPE] = raw.shape;
@@ -174,7 +188,7 @@ public class Weapon {
     public Weapon(Weapon toCopy)
     {
         blueprint = Physical.makeBasic(toCopy.rawWeapon.name, toCopy.rawWeapon.glyph, -0x1.81818p126F);
-        System.arraycopy(toCopy.calcStats, 0, calcStats, 0, 11);
+        calcStats = new ChangeTable(toCopy.calcStats);
         System.arraycopy(toCopy.qualities, 0, qualities, 0, 4);
         materialTypes = Arrays.copyOf(toCopy.materialTypes, toCopy.materialTypes.length);
         training = Arrays.copyOf(toCopy.training, toCopy.training.length);
