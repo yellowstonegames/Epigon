@@ -1,11 +1,13 @@
 package squidpony.epigon.data.generic;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.RecipeBlueprint;
 import squidpony.epigon.data.mixin.Creature;
+import squidpony.epigon.data.mixin.Interactable;
 import squidpony.epigon.data.mixin.Profession;
 import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
@@ -17,7 +19,6 @@ import squidpony.squidmath.OrderedMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import squidpony.epigon.data.mixin.Interactable;
 
 /**
  * Represents a modification to another object.
@@ -88,12 +89,10 @@ public class Modification extends EpiData {
     public List<Condition> optionalConditionsAdditive;
     public List<Condition> optionalConditionsSubtractive;
 
-    public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class);
-    public int[] calcStats;
-    public EnumOrderedMap<Stat, LiveValueModification> statChanges = new EnumOrderedMap<>(Stat.class);
-    public EnumOrderedMap<CalcStat, Integer> calcStatChanges = new EnumOrderedMap<>(CalcStat.class);
-    public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
-    public EnumOrderedMap<Stat, RatingValueModification> statProgressionChanges = new EnumOrderedMap<>(Stat.class);
+    public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ImmutableKey, LiveValueModification> statChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ImmutableKey, RatingValueModification> statProgressionChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
 
     public List<Physical> inventory;
     public List<Physical> inventoryAdditive;

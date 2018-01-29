@@ -1,8 +1,7 @@
 package squidpony.epigon.data.specific;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
-import squidpony.epigon.GauntRNG;
+import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
@@ -13,13 +12,11 @@ import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
-import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 
 import java.util.*;
 
 import static squidpony.epigon.Epigon.rootChaos;
-import static squidpony.squidmath.ThrustAltRNG.determine;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -84,9 +81,10 @@ public class Physical extends EpiData {
 
     public List<Condition> conditions = new ArrayList<>();
 
-    public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
-    public EnumOrderedMap<Stat, Rating> statProgression = new EnumOrderedMap<>(Stat.class);
-    public int[] calcStats = new int[11];
+    //public EnumOrderedMap<Stat, LiveValue> stats = new EnumOrderedMap<>(Stat.class); // initial stats on instantiation come from required modification
+    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    //public int[] calcStats = new int[11];
+    public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<ImmutableKey, LiveValue>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
     public List<Physical> inventory = new ArrayList<>();
     public List<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
 
@@ -335,56 +333,73 @@ public class Physical extends EpiData {
     }
 
     public void calculateStats() {
-        LiveValue lv;
+        LiveValue lv, calc;
         int current;
-        Arrays.fill(calcStats, 0);
         if ((lv = stats.get(Stat.AIM)) != null) {
             current = (int) lv.actual();
-            calcStats[PRECISION] += current;
-            calcStats[CRIT] += current >> 1;
+
+            calc = stats.get(CalcStat.PRECISION);
+            if(calc == null) stats.put(CalcStat.PRECISION, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.CRIT);
+            if(calc == null) stats.put(CalcStat.CRIT, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
         if ((lv = stats.get(Stat.IMPACT)) != null) {
             current = (int) lv.actual();
-            calcStats[DAMAGE] += current;
-            calcStats[CRIT] += current >> 1;
+
+            calc = stats.get(CalcStat.DAMAGE);
+            if(calc == null) stats.put(CalcStat.DAMAGE, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.CRIT);
+            if(calc == null) stats.put(CalcStat.CRIT, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
         if ((lv = stats.get(Stat.DODGE)) != null) {
             current = (int) lv.actual();
-            calcStats[EVASION] += current;
-            calcStats[STEALTH] += current >> 1;
+
+            calc = stats.get(CalcStat.EVASION);
+            if(calc == null) stats.put(CalcStat.EVASION, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.STEALTH);
+            if(calc == null) stats.put(CalcStat.STEALTH, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
         if ((lv = stats.get(Stat.TOUGHNESS)) != null) {
             current = (int) lv.actual();
-            calcStats[DEFENSE] += current;
-            calcStats[DAMAGE] += current >> 1;
+
+            calc = stats.get(CalcStat.DEFENSE);
+            if(calc == null) stats.put(CalcStat.DEFENSE, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.DAMAGE);
+            if(calc == null) stats.put(CalcStat.DAMAGE, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
         if ((lv = stats.get(Stat.POTENCY)) != null) {
             current = (int) lv.actual();
-            calcStats[INFLUENCE] += current;
-            calcStats[PRECISION] += current >> 1;
+
+            calc = stats.get(CalcStat.INFLUENCE);
+            if(calc == null) stats.put(CalcStat.INFLUENCE, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.PRECISION);
+            if(calc == null) stats.put(CalcStat.PRECISION, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
         if ((lv = stats.get(Stat.ATTUNEMENT)) != null) {
             current = (int) lv.actual();
-            calcStats[LUCK] += current;
-            calcStats[STEALTH] += current >> 1;
+            calc = stats.get(CalcStat.LUCK);
+            if(calc == null) stats.put(CalcStat.LUCK, new LiveValue(current, 99.0));
+            else calc.addActual(current);
+
+            calc = stats.get(CalcStat.STEALTH);
+            if(calc == null) stats.put(CalcStat.STEALTH, new LiveValue(current * 0.5, 99.0));
+            else calc.addActual(current * 0.5);
         }
-    }
-    public boolean hitRoll(Physical target) {
-        if(target == null || target.creatureData == null)
-            return true;
-
-        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) >= GauntRNG.next(++chaos, 7);
-    }
-    public double hitProbability(Physical target)
-    {
-        return (67 + 5 * (calcStats[PRECISION] + weaponData.calcStats[PRECISION] - target.calcStats[EVASION] - target.weaponData.calcStats[EVASION])) * 0x1p-7;
-    }
-
-    public int damageRoll(Physical target) {
-        long r = determine(++chaos);
-        int amt = Math.min(0, MathUtils.floor((NumberTools.randomFloatCurved(r) * 0.4f - 0.45f) * (calcStats[DAMAGE] + weaponData.calcStats[DAMAGE]) +
-                (NumberTools.randomFloatCurved(r + 1) * 0.3f + 0.35f) * (target.calcStats[DEFENSE] + target.weaponData.calcStats[DEFENSE])));
-        return amt;
     }
 
     @Override

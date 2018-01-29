@@ -3,6 +3,7 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.epigon.GauntRNG;
+import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.generic.Skill;
 import squidpony.epigon.data.mixin.Creature;
@@ -12,8 +13,6 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.*;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class InfoHandler {
     private SquidColorCenter colorCenter;
     private Physical player;
     private Physical target;
-    private Map<Stat, Double> changes = Collections.emptyMap();
+    private OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
 
     public Coord arrowLeft;
     public Coord arrowRight;
@@ -193,7 +192,7 @@ public class InfoHandler {
     }
 
     public void updateDisplay() {
-        updateDisplay(null, Collections.emptyMap());
+        updateDisplay(null, new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance));
         switch (infoMode) {
             case FULL_STATS:
                 infoFullStats(player);
@@ -219,8 +218,8 @@ public class InfoHandler {
      *
      * @param changes a Map of the changes to stats
      */
-    public void updateDisplay(Physical physical, Map<Stat, Double> changes) {
-        this.changes = Collections.emptyMap();
+    public void updateDisplay(Physical physical, OrderedMap<ImmutableKey, Double> changes) {
+        this.changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
         switch (infoMode) {
             case FULL_STATS:
                 if (player == physical) {
