@@ -651,7 +651,11 @@ public class Epigon extends Game {
                     return;
                 }
             }
-            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = player.unarmedData).calcStats);
+            if(player.statEffects.contains(player.weaponData.calcStats))
+                player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = player.unarmedData).calcStats);
+            else
+                player.statEffects.add((player.weaponData = player.unarmedData).calcStats);
+
         }
     }
     public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
@@ -659,7 +663,10 @@ public class Epigon extends Game {
             BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND);
 
     private void equipItem(Physical item) {
-        player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
+        if(player.statEffects.contains(player.weaponData.calcStats))
+            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
+        else
+            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
         switch (item.weaponData.hands)
         {
             case 2: player.equip(item, BOTH);

@@ -298,7 +298,10 @@ public class Physical extends EpiData {
         }
         if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
         {
-            statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
+            if(statEffects.contains(weaponData.calcStats))
+                statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
+            else
+                statEffects.add((weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
         }
         return removed;
     }
