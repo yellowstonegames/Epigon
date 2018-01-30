@@ -195,4 +195,9 @@ public class LiveValue {
     public void stable(boolean stable) {
         this.stable = stable;
     }
+
+    @Override
+    public String toString() {
+        return "Live{" + actual + "}";
+    }
 }

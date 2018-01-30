@@ -27,20 +27,28 @@ public class ActionOutcome {
     }
     public static final OrderedMap<ImmutableKey, LiveValue> tempActorStats = new OrderedMap<>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance),
             tempTargetStats = new OrderedMap<>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+    public static void deepCopyInto(OrderedMap<ImmutableKey, LiveValue> source, OrderedMap<ImmutableKey, LiveValue> toFill)
+    {
+        final int len = source.size();
+        toFill.clear();
+        for (int i = 0; i < len; i++) {
+            toFill.put(source.keyAt(i), new LiveValue(source.getAt(i)));
+        }
+    }
     public static ActionOutcome attack(Physical actor, Physical target)
     {
         ActionOutcome ao = new ActionOutcome();
         long r = determine(++actor.chaos);
-        tempActorStats.clear();
-        tempActorStats.putAll(actor.stats);
+        deepCopyInto(actor.stats, tempActorStats);
         for (int i = 0; i < actor.statEffects.size(); i++) {
             actor.statEffects.getAt(i).changeLiveValues(tempActorStats);
         }
-        tempTargetStats.clear();
-        tempTargetStats.putAll(target.stats);
+        //System.out.println("Attacker is " + actor.name + " with base stats " + actor.stats + " and adjusted stats: " + tempActorStats);
+        deepCopyInto(target.stats, tempTargetStats);
         for (int i = 0; i < target.statEffects.size(); i++) {
             target.statEffects.getAt(i).changeLiveValues(tempTargetStats);
         }
+        //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
         ao.crit = (20 + 4 * (tempActorStats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() -
                 tempTargetStats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual())) >= GauntRNG.next(r, 9);
         ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + tempActorStats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
