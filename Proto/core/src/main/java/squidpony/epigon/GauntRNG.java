@@ -3,6 +3,7 @@ package squidpony.epigon;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.squidmath.NumberTools;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.Collections;
 import java.util.List;
@@ -105,6 +106,44 @@ public final class GauntRNG {
         }
         return elements;
     }
+    /**
+     * Generates a random permutation of the range from 0 (inclusive) to length (exclusive).
+     * Useful for passing to OrderedMap or OrderedSet's reorder() methods.
+     * Unlike other methods in this class, this can change state by different amounts depending on the length of
+     * elements. This must be called with {@code state += length - 1}.
+     * @param length the size of the ordering to produce
+     * @return a random ordering containing all ints from 0 to length (exclusive)
+     */
+    public static int[] randomOrdering(long state, int length) {
+        if (length <= 0)
+            return new int[0];
+        return randomOrdering(state, length, new int[length]);
+    }
+
+    /**
+     * Generates a random permutation of the range from 0 (inclusive) to length (exclusive) and stores it in
+     * the dest parameter, avoiding allocations.
+     * Useful for passing to OrderedMap or OrderedSet's reorder() methods.
+     * Unlike other methods in this class, this can change state by different amounts depending on the length of
+     * elements. This must be called with {@code state += Math.min(length, dest.length) - 1}.
+     * @param length the size of the ordering to produce
+     * @param dest   the destination array; will be modified, must not be null
+     * @return dest, filled with a random ordering containing all ints from 0 to length (exclusive)
+     */
+    public static int[] randomOrdering(long state, int length, int[] dest) {
+        final int n = Math.min(length, dest.length);
+        for (int i = 0; i < n; i++) {
+            dest[i] = i;
+        }
+        for (int i = n - 1; i > 0; i--) {
+            final int r = ThrustAltRNG.determineBounded(state--, i+1),
+                    t = dest[r];
+            dest[r] = dest[i];
+            dest[i] = t;
+        }
+        return dest;
+    }
+
 
     /**
      * Gets a variation on the Color basis as a packed float that can have its hue, saturation, value, and opacity

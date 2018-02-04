@@ -2,7 +2,9 @@ package squidpony.epigon.combat;
 
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.ChangeTable;
+import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.CalcStat;
@@ -67,6 +69,10 @@ public class ActionOutcome {
         }
         actor.statEffects.removeLast();
         target.statEffects.removeLast();
+        if(ao.targetConditioned)
+        {
+            target.conditions.add(new Condition(ConditionBlueprint.CONDITIONS.getAt(0), target));
+        }
         return ao;
     }
 }

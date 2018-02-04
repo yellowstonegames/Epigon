@@ -402,6 +402,7 @@ public class Epigon extends Game {
         int size = creatures.size();
         for (int i = 0; i < size; i++) {
             final Physical creature = creatures.getAt(i);
+            creature.update();
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);

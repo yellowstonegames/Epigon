@@ -1,5 +1,6 @@
 package squidpony.epigon.dm;
 
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.blueprint.*;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.data.mixin.*;
@@ -37,31 +38,29 @@ public class RecipeMixer {
 
     private Map<Material, Physical> materials = new HashMap<>();
 
-    public StatefulRNG chaos, rng = new StatefulRNG(123456789L);
     public RecipeMixer()
     {
-        chaos = new StatefulRNG(rootChaos.nextLong());
     }
     public Stream<RecipeBlueprint> blueprintsContainingIngredient(Physical ingredient) {
         return recipes.stream().filter(r -> r.uses(ingredient));
     }
 
-    public Recipe createRecipe(RecipeBlueprint blueprint) {
+    public static Recipe createRecipe(RecipeBlueprint blueprint) {
         Recipe recipe = new Recipe();
         recipe.consumed = new OrderedMap<>(blueprint.requiredConsumed);
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalConsumed != null && !blueprint.optionalConsumed.isEmpty()) {
-            Entry<Physical, Integer> entry = blueprint.optionalConsumed.randomEntry(chaos);
-            recipe.consumed.merge(entry.getKey(), entry.getValue(), Integer::sum);
+            int idx = ThrustAltRNG.determineBounded(rootChaos.nextLong(), blueprint.optionalConsumed.size());
+            recipe.consumed.merge(blueprint.optionalConsumed.keyAt(idx), blueprint.optionalConsumed.getAt(idx), Integer::sum);
         }
 
         recipe.catalyst = new OrderedMap<>(blueprint.requiredCatalyst);
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalCatalyst != null && !blueprint.optionalCatalyst.isEmpty()) {
-            Entry<Physical, Integer> entry = blueprint.optionalCatalyst.randomEntry(chaos);
-            recipe.catalyst.merge(entry.getKey(), entry.getValue(), Integer::sum);
+            int idx = ThrustAltRNG.determineBounded(rootChaos.nextLong(), blueprint.optionalCatalyst.size());
+            recipe.catalyst.merge(blueprint.optionalCatalyst.keyAt(idx), blueprint.optionalCatalyst.getAt(idx), Integer::sum);
         }
 
         recipe.result = new OrderedMap<>();
@@ -73,13 +72,13 @@ public class RecipeMixer {
     }
 
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
-        return mix(recipe, consumed, catalyst, rng.nextLong());
+        return mix(recipe, consumed, catalyst, rootChaos.nextLong());
     }
 
     public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, long state) {
         List<Physical> result = new ArrayList<>();
-        long prevState = rng.getState();
-        rng.setState(state);
+        long prevState = rootChaos.getState();
+        rootChaos.setState(state);
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
             Stream.of(consumed.stream(), catalyst.stream())
@@ -97,7 +96,7 @@ public class RecipeMixer {
             else
                 result.add(physical);
         }
-        rng.setState(prevState);
+        rootChaos.setState(prevState);
         return result;
     }
 
@@ -151,7 +150,7 @@ public class RecipeMixer {
         }
 
         blueprint = new Physical();
-        blueprint.color = inclusion.front.toFloatBits();//toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        blueprint.color = inclusion.front.toFloatBits();
         blueprint.name = inclusion.toString();
         blueprint.baseValue = inclusion.value;
         blueprint.symbol = '.';
@@ -211,7 +210,7 @@ public class RecipeMixer {
      * @param blueprint
      * @return
      */
-    public Physical buildPhysical(Physical blueprint) {
+    public static Physical buildPhysical(Physical blueprint) {
         return buildPhysical(blueprint, blueprint.rarity == null ? Rating.NONE : blueprint.rarity, false);
     }
 
@@ -223,7 +222,7 @@ public class RecipeMixer {
      * @param rarity
      * @return
      */
-    public Physical buildPhysical(Physical blueprint, Rating rarity) {
+    public static Physical buildPhysical(Physical blueprint, Rating rarity) {
         return buildPhysical(blueprint, rarity, true);
     }
 
@@ -236,7 +235,7 @@ public class RecipeMixer {
      * @param applyRatingModifications
      * @return
      */
-    public Physical buildPhysical(Physical blueprint, Rating rarity, boolean applyRatingModifications){
+    public static Physical buildPhysical(Physical blueprint, Rating rarity, boolean applyRatingModifications){
         if (blueprint.generic) {
             // TODO - figure out how to allow sub instances of generics to be used without using generics
         }
@@ -254,7 +253,7 @@ public class RecipeMixer {
 
         List<String> possibleNames = new ArrayList<>(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
-        physical.name = rng.getRandomElement(possibleNames);
+        physical.name = GauntRNG.getRandomElement(++physical.chaos, possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
 
         if (!blueprint.countsAs.isEmpty()) {
@@ -266,7 +265,7 @@ public class RecipeMixer {
         physical.buildingBlock = blueprint.buildingBlock;
 
         physical.symbol = blueprint.symbol;
-        physical.color = blueprint.color == 0f ? SColor.GRAY.toRandomizedFloat(rng, 0.05f, 0f, 0.15f) : blueprint.color;
+        physical.color = blueprint.color == 0f ? GauntRNG.toRandomizedFloat(SColor.GRAY, ++physical.chaos, 1f, 0.1f, 0.15f) : blueprint.color;
         physical.baseValue = blueprint.baseValue;
         physical.blocking = blueprint.blocking;
 
@@ -314,8 +313,8 @@ public class RecipeMixer {
             applyModification(physical, m);
         }
 
-        int count = rng.nextInt(blueprint.optionalModifications.size());
-        int[] ints = rng.randomOrdering(count);
+        int count = ThrustAltRNG.determineBounded(++physical.chaos, blueprint.optionalModifications.size());
+        int[] ints = GauntRNG.randomOrdering(physical.chaos += count - 1, count);
         for (int i = 0; i < count; i++) {
             applyModification(physical, blueprint.optionalModifications.get(ints[i]));
         }
@@ -339,12 +338,11 @@ public class RecipeMixer {
     /**
      * Creates a specific Condition from a blueprint.
      */
-    public Condition createCondition(ConditionBlueprint blueprint) {
-        // TODO - createRecipe condition
-        return new Condition();
+    public static Condition createCondition(ConditionBlueprint blueprint) {
+        return new Condition(blueprint);
     }
 
-    public Creature createCreature(Creature other) {
+    public static Creature createCreature(Creature other) {
         if (other == null) {
             return null;
         }
@@ -391,7 +389,7 @@ public class RecipeMixer {
     /**
      * Applies the provided modification to the provided physical in place.
      */
-    public Physical applyModification(Physical physical, Modification modification) {
+    public static Physical applyModification(Physical physical, Modification modification) {
         physical.modifications.add(modification);
 
         if (modification.possibleAliases != null) {
@@ -402,7 +400,7 @@ public class RecipeMixer {
 
         int count = modification.possiblePrefix.size() + modification.possibleSuffix.size();
         if (count > 0) {
-            int i = rng.nextInt(count);
+            int i = ThrustAltRNG.determineBounded(++physical.chaos, count);
             if (i < modification.possiblePrefix.size()) {
                 physical.name = modification.possiblePrefix.get(i) + " " + physical.name;
             } else {
@@ -468,7 +466,7 @@ public class RecipeMixer {
         }
 
         if (modification.color != null) {
-            physical.color = SColor.toRandomizedFloat(modification.color, rng, 0.05f, 0f, 0.15f);
+            physical.color = GauntRNG.toRandomizedFloat(modification.color, physical.chaos + 1, 0.05f, 0f, 0.15f);
         }
         if((modification.symbol != null || modification.color != null) && physical.appearance != null)
         {
@@ -477,7 +475,7 @@ public class RecipeMixer {
         }
 
         if (modification.overlayColor != null) {
-            physical.overlayColor = SColor.toRandomizedFloat(modification.overlayColor, rng, 0.05f, 0f, 0.15f);
+            physical.overlayColor = GauntRNG.toRandomizedFloat(modification.overlayColor, physical.chaos + 2, 0.05f, 0f, 0.15f);
         }
         if (modification.overlaySymbol != null) {
             physical.overlaySymbol = modification.overlaySymbol;
@@ -601,7 +599,7 @@ public class RecipeMixer {
             physical.creatureData = createCreature(modification.creature);
         }
 
-        if (modification.removeCreature != null && modification.removeCreature == true){
+        if (modification.removeCreature != null && modification.removeCreature){
             physical.creatureData = null;
         }
 
@@ -623,8 +621,10 @@ public class RecipeMixer {
                 });
 
             if (modification.abilities != null) {
-                physical.creatureData.abilities = new HashSet(modification.abilities);
+                physical.creatureData.abilities = new HashSet<>(modification.abilities);
             }
+            if(physical.creatureData.abilities == null && (modification.abilitiesAdditive != null || modification.abilitiesSubtractive != null))
+                physical.creatureData.abilities = new HashSet<>();
 
             if (modification.abilitiesAdditive != null) {
                 physical.creatureData.abilities.addAll(modification.abilitiesAdditive);

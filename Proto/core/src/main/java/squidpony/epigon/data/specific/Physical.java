@@ -79,6 +79,7 @@ public class Physical extends EpiData {
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>(); // The change to incoming damage
 
     public List<Condition> conditions = new ArrayList<>();
+    private ArrayList<Condition> conditionsToRemove = new ArrayList<>();
 
     // initial stats on instantiation come from required modification
     public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<ImmutableKey, LiveValue>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
@@ -149,6 +150,17 @@ public class Physical extends EpiData {
         p.symbol = symbol;
         p.color = color;
         return p;
+    }
+
+    public void update()
+    {
+        for(Condition c : conditions)
+        {
+            if(c.update())
+                conditionsToRemove.add(c);
+        }
+        conditions.removeAll(conditionsToRemove);
+        conditionsToRemove.clear();
     }
 
     public boolean countsAs(Physical blueprint) {
