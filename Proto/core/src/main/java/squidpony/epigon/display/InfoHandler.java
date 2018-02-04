@@ -279,8 +279,8 @@ public class InfoHandler {
             yOffset += ClothingSlot.height + 4;
 
             // Equipped items
-            Physical equippedRight = physical.creatureData.equipment.get(WieldSlot.RIGHT_HAND);
-            Physical equippedLeft = physical.creatureData.equipment.get(WieldSlot.LEFT_HAND);
+            Physical equippedRight = physical.creatureData.wielded.get(WieldSlot.RIGHT_HAND);
+            Physical equippedLeft = physical.creatureData.wielded.get(WieldSlot.LEFT_HAND);
             put(3, yOffset + 0, "RH:");
             if (equippedRight != null) {
                 put(8, yOffset + 0, equippedRight.name, equippedRight.rarity.color());
@@ -294,9 +294,7 @@ public class InfoHandler {
             } else {
                 put(8, yOffset + 1, "empty", Rating.NONE.color());
             }
-            if (equippedLeft == null && equippedRight == null) {
-                put(3, yOffset + 2, "Fighting unarmed using " + physical.weaponData.rawWeapon.name);
-            }
+            put(3, yOffset + 2, "Fighting unarmed using " + physical.creatureData.weaponChoices.items().first().rawWeapon.name);
         }
     }
 

@@ -7,6 +7,7 @@ import squidpony.epigon.universe.LiveValue;
 import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.OrderedMap;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -165,6 +166,48 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                         break;
                 }
             }
+        }
+        return changing;
+    }
+    /**
+     * Edits the existing OrderedMap of ImmutableKey keys to LiveValue values using the changes in this ChangeTable.
+     * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
+     * will be ignored without affecting the rest of the changes.
+     * @param changing a non-null OrderedMap of ImmutableKey keys to LiveValue values; will be modified
+     * @return the parameter this was given, after modifications
+     */
+    public static OrderedMap<ImmutableKey, LiveValue> changeManyLiveValues(OrderedMap<ImmutableKey, LiveValue> changing, Collection<ChangeTable> tables)
+    {
+        int originalSize = changing.size();
+        ImmutableKey k;
+        char op = '=';
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case '=':
+                        v = ct.values.get(index);
+                        break;
+                    case '+':
+                        v += ct.values.get(index);
+                        break;
+                    case '-':
+                        v -= ct.values.get(index);
+                        break;
+                    case '*':
+                        v *= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
         }
         return changing;
     }

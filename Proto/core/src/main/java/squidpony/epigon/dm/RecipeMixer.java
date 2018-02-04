@@ -300,7 +300,6 @@ public class RecipeMixer {
 
         physical.creatureData = createCreature(blueprint.creatureData);
 
-        physical.unarmedData = blueprint.unarmedData;
         physical.weaponData = blueprint.weaponData;
 
         physical.terrainData = blueprint.terrainData;
@@ -367,9 +366,9 @@ public class RecipeMixer {
             }
         }
 
-        for (Entry<WieldSlot, Physical> entry : other.equipment.entrySet()){
+        for (Entry<WieldSlot, Physical> entry : other.wielded.entrySet()){
             if (entry.getValue() != null){
-                creature.equipment.put(entry.getKey(), buildPhysical(entry.getValue()));
+                creature.wielded.put(entry.getKey(), buildPhysical(entry.getValue()));
             }
         }
 
@@ -384,6 +383,7 @@ public class RecipeMixer {
                 creature.overArmor.put(entry.getKey(), buildPhysical(entry.getValue()));
             }
         }
+        creature.weaponChoices = other.weaponChoices.copy();
 
         return creature;
     }

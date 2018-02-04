@@ -17,6 +17,7 @@ import squidpony.epigon.universe.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.ProbabilityTable;
 import squidpony.squidmath.StatefulRNG;
 
 import java.util.ArrayList;
@@ -291,9 +292,10 @@ public class HandBuilt {
         }
 
         cb.skills.put(cooking, Rating.TYPICAL);
-        playerBlueprint.unarmedData = Weapon.randomUnarmedWeapon(++chaos).copy();
-        playerBlueprint.weaponData = playerBlueprint.unarmedData.copy();
-        String culture = GauntRNG.getRandomElement(++chaos, playerBlueprint.unarmedData.rawWeapon.culture);
+        Weapon unarmed = Weapon.randomUnarmedWeapon(++chaos).copy();
+        playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
+        playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
+        String culture = GauntRNG.getRandomElement(++chaos, unarmed.rawWeapon.culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
             playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), ++chaos));
@@ -396,8 +398,8 @@ public class HandBuilt {
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
         liven.creature = new Creature();
-
-        liven.weaponData = Weapon.randomWeapon(++chaos);
+        liven.creature.weaponChoices = new ProbabilityTable<>(++chaos);
+        liven.creature.weaponChoices.add(Weapon.randomWeapon(++chaos), 4);
         liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
         return liven;
     }
