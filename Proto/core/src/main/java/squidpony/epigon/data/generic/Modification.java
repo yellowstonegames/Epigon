@@ -181,4 +181,11 @@ public class Modification extends EpiData {
     public List<String> weaponStatusesSubtractive;
     public List<String> weaponManeuversAdditive;
     public List<String> weaponManeuversSubtractive;
+
+    public static Modification makeBasicChangeTable(ChangeTable changes)
+    {
+        Modification m = new Modification();
+        m.statEffectsAdditive.add(changes);
+        return m;
+    }
 }
