@@ -126,7 +126,7 @@ public class Physical extends EpiData {
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
-    public Weapon weaponData, unarmedData;
+    public Weapon weaponData;
     public Zappable zappableData;
 
     // Non-action mixins
@@ -249,18 +249,21 @@ public class Physical extends EpiData {
 
         Set<Physical> removing = new HashSet<>();
         for (WieldSlot ws : slots) {
-            Physical p = creatureData.equipment.get(ws);
+            Physical p = creatureData.wielded.get(ws);
             if (p != null) {
                 removing.add(p);
+                creatureData.weaponChoices.remove(p.weaponData);
             }
-            creatureData.equipment.put(ws, item);
+            if(!item.equals(p))
+                creatureData.weaponChoices.add(item.weaponData, 2);
+            creatureData.wielded.put(ws, item);
         }
 
         for (Physical p : removing) {
             inventory.add(p);
             for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.equipment.get(subSlot))) {
-                    creatureData.equipment.remove(subSlot);
+                if (p.equals(creatureData.wielded.get(subSlot))) {
+                    creatureData.wielded.remove(subSlot);
                 }
             }
         }
@@ -282,7 +285,7 @@ public class Physical extends EpiData {
 
         Set<Physical> removing = new HashSet<>();
         for (WieldSlot ws : slots) {
-            Physical p = creatureData.equipment.remove(ws);
+            Physical p = creatureData.wielded.remove(ws);
             if (p != null) {
                 removing.add(p);
             }
@@ -291,18 +294,20 @@ public class Physical extends EpiData {
         for (Physical p : removing) {
             removed.add(p);
             for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out mult-handed unequips
-                if (p.equals(creatureData.equipment.get(subSlot))) {
-                    creatureData.equipment.remove(subSlot);
+                if (p.equals(creatureData.wielded.get(subSlot))) {
+                    creatureData.wielded.remove(subSlot);
+                    if(p.weaponData != null)
+                        creatureData.weaponChoices.remove(p.weaponData);
                 }
             }
         }
-        if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
-        {
-            if(statEffects.contains(weaponData.calcStats))
-                statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
-            else
-                statEffects.add((weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
-        }
+//        if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
+//        {
+//            if(statEffects.contains(weaponData.calcStats))
+//                statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
+//            else
+//                statEffects.add((weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
+//        }
         return removed;
     }
 

@@ -413,7 +413,7 @@ public class Epigon extends Game {
                         ActionOutcome ao = ActionOutcome.attack(creature, player);
                         if (ao.hit) {
                             int amt = ao.actualDamage >> 1;
-                            Element element = creature.weaponData.elements.random();
+                            Element element = ao.actorWeapon.elements.random();
                             applyStatChange(player, Stat.VIGOR, amt);
                             amt *= -1; // flip sign for output message
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
@@ -651,10 +651,10 @@ public class Epigon extends Game {
                     return;
                 }
             }
-            if(player.statEffects.contains(player.weaponData.calcStats))
-                player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = player.unarmedData).calcStats);
-            else
-                player.statEffects.add((player.weaponData = player.unarmedData).calcStats);
+//            if(player.statEffects.contains(player.weaponData.calcStats))
+//                player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = player.unarmedData).calcStats);
+//            else
+//                player.statEffects.add((player.weaponData = player.unarmedData).calcStats);
 
         }
     }
@@ -663,15 +663,23 @@ public class Epigon extends Game {
             BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND);
 
     private void equipItem(Physical item) {
-        if(player.statEffects.contains(player.weaponData.calcStats))
-            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
-        else
-            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
+//        if(player.statEffects.contains(player.weaponData.calcStats))
+//            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
+//        else
+//            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
         switch (item.weaponData.hands)
         {
-            case 2: player.equip(item, BOTH);
-            break;
-            default: player.equip(item, RIGHT);
+            case 2:
+                player.equip(item, BOTH);
+                break;
+            case 0:
+                player.creatureData.weaponChoices.add(item.weaponData, 1);
+                break;
+            default:
+                if(!player.creatureData.wielded.containsKey(WieldSlot.RIGHT_HAND))
+                    player.equip(item, RIGHT);
+                else
+                    player.equip(item, LEFT);
         }
     }
 
@@ -711,7 +719,7 @@ public class Epigon extends Game {
                 mapSLayers.bump(player.appearance, dir, 0.145f);
                 ActionOutcome ao = ActionOutcome.attack(player, thing);
                 if (ao.hit) {
-                    Element element = player.weaponData.elements.random();
+                    Element element = ao.actorWeapon.elements.random();
                     applyStatChange(thing, Stat.VIGOR, ao.actualDamage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);

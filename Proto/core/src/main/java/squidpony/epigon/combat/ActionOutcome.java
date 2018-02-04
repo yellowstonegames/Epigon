@@ -2,7 +2,9 @@ package squidpony.epigon.combat;
 
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.data.generic.ChangeTable;
 import squidpony.epigon.data.specific.Physical;
+import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.CalcStat;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.squidmath.Noise;
@@ -22,6 +24,7 @@ import static squidpony.squidmath.ThrustAltRNG.determine;
 public class ActionOutcome {
     public boolean crit, hit, targetConditioned, actorConditioned;
     public int attemptedDamage, actualDamage, actorDamage;
+    public Weapon actorWeapon, targetWeapon;
     public ActionOutcome()
     {
     }
@@ -39,15 +42,15 @@ public class ActionOutcome {
     {
         ActionOutcome ao = new ActionOutcome();
         long r = determine(++actor.chaos);
+        ao.actorWeapon = actor.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : actor.creatureData.weaponChoices.random();
+        ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : target.creatureData.weaponChoices.random();
+        actor.statEffects.add(ao.actorWeapon.calcStats);
+        target.statEffects.add(ao.targetWeapon.calcStats);
         deepCopyInto(actor.stats, tempActorStats);
-        for (int i = 0; i < actor.statEffects.size(); i++) {
-            actor.statEffects.getAt(i).changeLiveValues(tempActorStats);
-        }
+        ChangeTable.changeManyLiveValues(tempActorStats, actor.statEffects);
         //System.out.println("Attacker is " + actor.name + " with base stats " + actor.stats + " and adjusted stats: " + tempActorStats);
         deepCopyInto(target.stats, tempTargetStats);
-        for (int i = 0; i < target.statEffects.size(); i++) {
-            target.statEffects.getAt(i).changeLiveValues(tempTargetStats);
-        }
+        ChangeTable.changeManyLiveValues(tempTargetStats, target.statEffects);
         //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
         ao.crit = (20 + 4 * (tempActorStats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() -
                 tempTargetStats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual())) >= GauntRNG.next(r, 9);
@@ -62,6 +65,8 @@ public class ActionOutcome {
             ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + tempActorStats.getOrDefault(CalcStat.INFLUENCE, LiveValue.ZERO).actual() -
                     tempTargetStats.getOrDefault(CalcStat.LUCK, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 4, 8);
         }
+        actor.statEffects.removeLast();
+        target.statEffects.removeLast();
         return ao;
     }
 }

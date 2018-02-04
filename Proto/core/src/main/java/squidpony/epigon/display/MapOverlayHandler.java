@@ -370,7 +370,7 @@ public class MapOverlayHandler {
         int xOffset = halfWidth + 1;
         put(xOffset, y, "Wielded Equipment", headingColor);
         y++;
-        for (Physical p : player.creatureData.equipment.values().stream().distinct().collect(Collectors.toList())) {
+        for (Physical p : player.creatureData.wielded.values().stream().distinct().collect(Collectors.toList())) {
             int x = xOffset + 1;
             put(x, y, p.symbol, p.color);
             Coord select = Coord.get(x - 1, y);
