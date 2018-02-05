@@ -5,6 +5,7 @@ import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.generic.Effect;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.dm.RecipeMixer;
+import squidpony.epigon.universe.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class Condition extends EpiData {
     public int currentTick = 0;
     public List<Condition> suppressedBys;//lists the specific conditions that are currently suppressing this one
     public Physical attachedTo;
-
+    public Element overrideElement;
     private Condition()
     {
     }
@@ -34,6 +35,13 @@ public class Condition extends EpiData {
         suppressedBys = new ArrayList<>();
         attach(attached);
     }
+
+    public Condition(ConditionBlueprint blueprint, Physical attached, Element element){
+        parent = blueprint;
+        suppressedBys = new ArrayList<>();
+        overrideElement = element;
+        attach(attached);
+    }
     public void attach(Physical attachTo)
     {
         if(attachedTo != null)
@@ -42,6 +50,10 @@ public class Condition extends EpiData {
         }
         attachedTo = attachTo;
         RecipeMixer.applyModification(attachedTo, parent.modification);
+        if(parent.overlaySymbol != null) {
+            attachedTo.overlaySymbol = parent.overlaySymbol;
+            attachedTo.overlayColor = overrideElement == null ? -0x1.0101p126F : overrideElement.floatColor; // SColor.GRAY
+        }
         if(parent.changes != null)
             attachedTo.statEffects.add(parent.changes);
     }
@@ -65,6 +77,7 @@ public class Condition extends EpiData {
         }
         if(parent.changes != null)
             attachedTo.statEffects.remove(parent.changes);
+        attachedTo.overlaySymbol = null;
         attachedTo = null;
         return true;
     }

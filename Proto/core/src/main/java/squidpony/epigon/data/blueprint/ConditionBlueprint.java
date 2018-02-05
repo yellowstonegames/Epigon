@@ -36,7 +36,9 @@ public class ConditionBlueprint extends EpiData {
     public ConditionBlueprint parent;
     public int duration;//how many turns until it wears off -- 0 means it lasts until removed some other way
     public int period;//how often ticks trigger -- 0 means it's constant, 1 means once per round, 2 means every other round, etc.
-    public Element element;
+    public Element baseElement;
+    public Character overlaySymbol;
+    public String verb;
     public Modification modification;
     public ChangeTable changes;
     public List<Effect> tickEffects = new ArrayList<>();
@@ -46,14 +48,16 @@ public class ConditionBlueprint extends EpiData {
     public Set<ConditionBlueprint> immunizes = new UnorderedSet<>();//can't exist at the same time, old one prevents the new one from being applies
     public Set<ConditionBlueprint> suppresses = new UnorderedSet<>();//can both exist, but only newest one has effect
 
-    public ConditionBlueprint(String name, int duration, int period, Element element, ChangeTable changes,
+    public ConditionBlueprint(String name, String verb, int duration, int period, Element baseElement, Character overlay, ChangeTable changes,
                               Collection<Effect> onTick, Collection<Effect> onWearOff, Collection<Effect> onCancel)
     {
         super();
         this.name = name;
+        this.verb = verb;
         this.duration = duration;
         this.period = period;
-        this.element = element;
+        this.baseElement = baseElement;
+        this.overlaySymbol = overlay;
         this.modification = new Modification();
         this.changes = changes;
         if(onTick != null)
@@ -85,6 +89,6 @@ public class ConditionBlueprint extends EpiData {
         }
     }
     public static OrderedMap<String, ConditionBlueprint> CONDITIONS = OrderedMap.makeMap(
-            "Confounded", new ConditionBlueprint("Confounded", 3, 0, Element.BLUNT, ChangeTable.makeCT(CalcStat.PRECISION, '-', 4.0, CalcStat.INFLUENCE, '-', 4.0, CalcStat.CRIT, '-', 2.0), null, null, null)
+            "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ', ChangeTable.makeCT(CalcStat.PRECISION, '-', 4.0, CalcStat.INFLUENCE, '-', 4.0, CalcStat.CRIT, '-', 2.0), null, null, null)
     );
 }
