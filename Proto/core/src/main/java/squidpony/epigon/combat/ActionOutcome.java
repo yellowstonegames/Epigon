@@ -8,6 +8,7 @@ import squidpony.epigon.data.specific.Condition;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.data.specific.Weapon;
 import squidpony.epigon.universe.CalcStat;
+import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.squidmath.Noise;
 import squidpony.squidmath.NumberTools;
@@ -27,6 +28,8 @@ public class ActionOutcome {
     public boolean crit, hit, targetConditioned, actorConditioned;
     public int attemptedDamage, actualDamage, actorDamage;
     public Weapon actorWeapon, targetWeapon;
+    public Element element;
+    public String actorCondition, targetCondition;
     public ActionOutcome()
     {
     }
@@ -45,6 +48,9 @@ public class ActionOutcome {
         ActionOutcome ao = new ActionOutcome();
         long r = determine(++actor.chaos);
         ao.actorWeapon = actor.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : actor.creatureData.weaponChoices.random();
+        int index = ao.actorWeapon.elements.table.random(r - 1);
+        ao.element = ao.actorWeapon.elements.items.get(index);
+        ao.targetCondition = index < ao.actorWeapon.statuses.size() ? ao.actorWeapon.statuses.get(index) : GauntRNG.getRandomElement(r - 2, ao.actorWeapon.statuses);
         ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : target.creatureData.weaponChoices.random();
         actor.statEffects.add(ao.actorWeapon.calcStats);
         target.statEffects.add(ao.targetWeapon.calcStats);
@@ -71,7 +77,7 @@ public class ActionOutcome {
         target.statEffects.removeLast();
         if(ao.targetConditioned)
         {
-            target.conditions.add(new Condition(ConditionBlueprint.CONDITIONS.getAt(0), target));
+            target.conditions.add(new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element));
         }
         return ao;
     }

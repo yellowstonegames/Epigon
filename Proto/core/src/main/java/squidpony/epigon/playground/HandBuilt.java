@@ -387,7 +387,7 @@ public class HandBuilt {
         liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         liven.large = true;
         for(Stat s : Stat.bases) {
-            LiveValueModification lvm = new LiveValueModification((rng.minIntOf(28, 4) >> 2) + 1);
+            LiveValueModification lvm = new LiveValueModification((rng.minIntOf(32, 3) >> 2) + 1);
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {

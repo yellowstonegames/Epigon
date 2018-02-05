@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.WeightedTableWrapper;
+import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.blueprint.Inclusion;
 import squidpony.epigon.data.mixin.Grouping;
 import squidpony.epigon.data.mixin.Interactable;
@@ -403,6 +404,11 @@ public class Epigon extends Game {
         for (int i = 0; i < size; i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
+            if(creature.overlaySymbol == null)
+            {
+                mapSLayers.removeGlyph(creature.overlayAppearance);
+                creature.overlayAppearance = null;
+            }
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
@@ -433,14 +439,16 @@ public class Epigon extends Game {
                                 else
                                 {
                                     message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
-                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                            amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
                                 }
                                 if(ao.targetConditioned)
                                 {
-                                    player.overlaySymbol = '~';//'ʻ';
-                                    player.overlayColor = element.floatColor;
-                                    if(player.overlayAppearance != null) mapSLayers.removeGlyph(player.overlayAppearance);
-                                    player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
+                                    message(Messaging.transform("The " + creature.name + " " +
+                                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @his attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                    if(player.overlaySymbol != null) {
+                                        if(player.overlayAppearance != null) mapSLayers.removeGlyph(player.overlayAppearance);
+                                        player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
+                                    }
                                 }
 
                             }
@@ -693,7 +701,12 @@ public class Epigon extends Game {
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
     private void move(Direction dir) {
-
+        player.update();
+        if(player.overlaySymbol == null)
+        {
+            mapSLayers.removeGlyph(player.overlayAppearance);
+            player.overlayAppearance = null;
+        }
         int newX = player.location.x + dir.deltaX;
         int newY = player.location.y + dir.deltaY;
         Coord newPos = Coord.get(newX, newY);
@@ -784,12 +797,14 @@ public class Epigon extends Game {
                         }
                         if(ao.targetConditioned)
                         {
-                            thing.overlaySymbol = '˝';
-                            thing.overlayColor = element.floatColor;
-                            if(thing.overlayAppearance != null) mapSLayers.removeGlyph(thing.overlayAppearance);
-                            thing.overlayAppearance = mapSLayers.glyph(thing.overlaySymbol, thing.overlayColor, newX, newY);
+                            message(Messaging.transform("You " +
+                                    ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
+                                    " the " + thing.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                            if(thing.overlaySymbol != null) {
+                                if (thing.overlayAppearance != null) mapSLayers.removeGlyph(thing.overlayAppearance);
+                                thing.overlayAppearance = mapSLayers.glyph(thing.overlaySymbol, thing.overlayColor, newX, newY);
+                            }
                         }
-
                     }
                 } else {
                     message("Missed the " + thing.name + (ao.crit ? ", but just barely." : "..."));
