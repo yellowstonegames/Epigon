@@ -99,7 +99,7 @@ public class RawWeapon implements Serializable {
     new RawWeapon("Hueztotli style", "The isolated land of Hueztotli practices a hard-hitting form of unarmed combat meant mainly for subduing monsters.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Brawling", "Multi", "Straight", "Heft", "Lunge", "Slay", "Trip", 1, 6, 2, 2, 2, 1, 4, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Brutality"}, new String[] {"Hueztotli"}),
     new RawWeapon("Keungeuh style", "The merchant-ruled state called Keungeuh practices unarmed combat that exerts control over the enemy's movement.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Flowing", "Multi", "Straight", "Yank", "Pin", "Trip", "Disarm", 4, 1, 1, 5, 4, 0, 3, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Hurling"}, new String[] {"Keungeuh"}),
     new RawWeapon("Khainghal style", "The steppe nomads of the Khainghal clan primarily use bows, but they practice unarmed combat with similar precision.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Flowing", "Multi", "Straight", "Thrust", "Pin", "Disable", "Silence", 6, 3, 5, 2, 1, 0, 1, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Marksmanship"}, new String[] {"Khainghal"}),
-    new RawWeapon("Bididhayi style", "\"The pious nation of Bididhayi teaches a \"\"thunderbolt\"\" school of unarmed combat that strikes quickly with grabs and throws.\"", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Flowing", "Multi", "Straight", "Lunge", "Pin", "Confound", "Favor", 4, 4, 2, 1, 3, 0, 4, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Hurling"}, new String[] {"Bididhayi"}),
+    new RawWeapon("Bididhayi style", "The pious nation of Bididhayi teaches a \"thunderbolt\" school of unarmed combat that strikes quickly with grabs and throws.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Flowing", "Multi", "Straight", "Lunge", "Pin", "Confound", "Favor", 4, 4, 2, 1, 3, 0, 4, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Hurling"}, new String[] {"Bididhayi"}),
     new RawWeapon("Mobyuld style", "The Goblin nation of Mobyuld teaches a sneaky style of unarmed combat based around striking pressure points.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Flowing", "Flowing", "Multi", "Straight", "Thrust", "Condemn", "Disable", "Curse", 6, 1, 5, 6, 0, 0, 0, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Marksmanship"}, new String[] {"Mobyuld"}),
     new RawWeapon("Chobesh style", "The nation of Chobesh collapsed after a century of war, so what's left emphasizes making do with minimal equipment.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Brawling", "Brawling", "Multi", "Straight", "Yank", "Brace", "Disarm", "Bleed", 2, 2, 5, 2, 1, 1, 5, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Naturalism"}, new String[] {"Chobesh"}),
     new RawWeapon("Elethian style", "The Elf nation of Elethian loves swordplay, and their unarmed combat similarly emphasizes balance and parrying.", 'ɱ', "Unarmed", "Repeat", 0, "BLUNT", "BLUNT", "Flowing", "Flowing", "Multi", "Straight", "Parry", "Sweep", "Disarm", "Trip", 5, 2, 1, 3, 5, 0, 2, 6, 0, 0, 6, new String[] {}, new String[] {"Martial Arts", "Swordplay"}, new String[] {"Elethian"}),
@@ -122,7 +122,7 @@ public class RawWeapon implements Serializable {
     new RawWeapon("shadow magic", "Shadow magic is frequently used by thieves because of how effortlessly it lets them sneak past guards.", '⚡', "Magic", "Repeat", 0, "SHADOW", "SHADOW", "Energy", "Energy", "Burst", "Arc", "Sweep", "Hex", "Blind", "Curse", 3, 1, 0, 6, 6, 0, 0, 6, 2, 1, 2, new String[] {}, new String[] {"Sorcery", "Assassination"}, new String[] {"Laathrik", "Khainghal"}),
     new RawWeapon("temporal magic", "Temporal magic manipulates time in minor ways to cause significant headaches for enemies.", '⚡', "Magic", "Repeat", 0, "TEMPORAL", "TEMPORAL", "Energy", "Energy", "Through", "Straight", "Blur", "Pin", "Confound", "Trip", 4, 0, 0, 6, 4, 0, 0, 4, 3, 0, 6, new String[] {}, new String[] {"Sorcery", "Whirling Death"}, new String[] {"Cheuritae", "Ikkutiq"}),
     new RawWeapon("fateful magic", "Fateful magic seeks to alter enemies' fortunes while simultaneously improving the user's odds.", '⚡', "Magic", "Repeat", 0, "FATEFUL", "FATEFUL", "Energy", "Energy", "Through", "Straight", "Condemn", "Hex", "Favor", "Curse", 2, 0, 2, 6, 3, 0, 6, 4, 3, 0, 1, new String[] {}, new String[] {"Sorcery", "Foresight"}, new String[] {"Jalgeaux", "Hueztotli"}),
-    new RawWeapon("pure magic", "\"Pure magic is meant to drive away despoilers of nature, especially undead, but almost any foe is \"\"impure\"\" in some way.\"", '⚡', "Magic", "Repeat", 0, "PURE", "PURE", "Energy", "Energy", "Through", "Straight", "Exorcise", "Seal", "Slay", "Silence", 3, 2, 0, 6, 1, 0, 6, 4, 3, 0, 2, new String[] {}, new String[] {"Sorcery", "Naturalism"}, new String[] {"Zedmedov", "Otekai"}),
+    new RawWeapon("pure magic", "Pure magic is meant to drive away despoilers of nature, especially undead, but almost any foe is \"impure\" in some way.", '⚡', "Magic", "Repeat", 0, "PURE", "PURE", "Energy", "Energy", "Through", "Straight", "Exorcise", "Seal", "Slay", "Silence", 3, 2, 0, 6, 1, 0, 6, 4, 3, 0, 2, new String[] {}, new String[] {"Sorcery", "Naturalism"}, new String[] {"Zedmedov", "Otekai"}),
     new RawWeapon("primal magic", "Primal magic draws on nature's power to strike foes in unpredictable ways, from creating sinkholes to dropping trees.", '⚡', "Magic", "Repeat", 0, "PRIMAL", "PRIMAL", "Energy", "Energy", "Burst", "Arc", "Pin", "Reveal", "Trip", "Sunder", 1, 5, 0, 1, 2, 2, 4, 4, 3, 2, 1, new String[] {}, new String[] {"Sorcery", "Naturalism"}, new String[] {"Mbegonda", "Ugexiir"}),
     new RawWeapon("contractual magic", "Contractual magic uses the power of laws, both laws written by people and laws that define the cosmos, to disable foes.", '⚡', "Magic", "Repeat", 0, "CONTRACTUAL", "CONTRACTUAL", "Energy", "Energy", "Through", "Straight", "Reveal", "Seal", "Disable", "Confound", 6, 0, 0, 6, 0, 4, 2, 0, 4, 0, 4, new String[] {}, new String[] {"Sorcery", "Elegance"}, new String[] {"Otekai", "Keungeuh"}),
     new RawWeapon("sinister magic", "Sinister magic steals strength from terrible demons, then redirects the fiendish punishment for that theft onto others.", '⚡', "Magic", "Repeat", 0, "SINISTER", "SINISTER", "Energy", "Energy", "Burst", "Straight", "Condemn", "Ricochet", "Slay", "Curse", 1, 9, 0, 2, 4, 0, 0, 4, 2, 2, 2, new String[] {}, new String[] {"Sorcery", "Swordplay"}, new String[] {"Mobyuld", "Hueztotli"}),
@@ -347,6 +347,53 @@ public class RawWeapon implements Serializable {
 
   public int hashCode() {
     return (int)(hash64() & 0xFFFFFFFFL);
+  }
+
+  private static boolean stringArrayEquals(String[] left, String[] right) {
+    if (left == right) return true;
+    if (left == null || right == null) return false;
+    final int len = left.length;
+    if(len != right.length) return false;
+    String l, r;
+    for (int i = 0; i < len; i++) { if(((l = left[i]) != (r = right[i])) && (((l == null) != (r == null)) || !l.equals(r))) { return false; } }
+    return true;
+  }
+
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    RawWeapon other = (RawWeapon) o;
+    if (name != null ? !name.equals(other.name) : other.name != null) return false;
+    if (description != null ? !description.equals(other.description) : other.description != null) return false;
+    if (glyph != other.glyph) return false;
+    if (kind != null ? !kind.equals(other.kind) : other.kind != null) return false;
+    if (usage != null ? !usage.equals(other.usage) : other.usage != null) return false;
+    if (hands != other.hands) return false;
+    if (type1 != null ? !type1.equals(other.type1) : other.type1 != null) return false;
+    if (type2 != null ? !type2.equals(other.type2) : other.type2 != null) return false;
+    if (group1 != null ? !group1.equals(other.group1) : other.group1 != null) return false;
+    if (group2 != null ? !group2.equals(other.group2) : other.group2 != null) return false;
+    if (shape != null ? !shape.equals(other.shape) : other.shape != null) return false;
+    if (path != null ? !path.equals(other.path) : other.path != null) return false;
+    if (maneuver1 != null ? !maneuver1.equals(other.maneuver1) : other.maneuver1 != null) return false;
+    if (maneuver2 != null ? !maneuver2.equals(other.maneuver2) : other.maneuver2 != null) return false;
+    if (status1 != null ? !status1.equals(other.status1) : other.status1 != null) return false;
+    if (status2 != null ? !status2.equals(other.status2) : other.status2 != null) return false;
+    if (precision != other.precision) return false;
+    if (damage != other.damage) return false;
+    if (crit != other.crit) return false;
+    if (influence != other.influence) return false;
+    if (evasion != other.evasion) return false;
+    if (defense != other.defense) return false;
+    if (luck != other.luck) return false;
+    if (stealth != other.stealth) return false;
+    if (range != other.range) return false;
+    if (area != other.area) return false;
+    if (prepare != other.prepare) return false;
+    if(!stringArrayEquals(materials, other.materials)) return false;
+    if(!stringArrayEquals(training, other.training)) return false;
+    if(!stringArrayEquals(culture, other.culture)) return false;
+    return true;
   }
 
   public static RawWeapon get(String item) {

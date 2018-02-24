@@ -1,4 +1,3 @@
-squidpony.epigon.data.raw.RawRole	name		
 name	description	training	signature
 Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	You enter an area with a large bonus to Crit and Stealth, but this bonus is reduced as Zone Tension rises.
 Brawler	A disciplined fighter who trains in both hand-to-hand combat and with various weapons.	Martial Arts	Each time you attack an enemy, you have a small chance to repeat that attack immediately.
