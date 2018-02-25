@@ -2,7 +2,6 @@ package squidpony.epigon.data.blueprint;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.generic.ChangeTable;
-import squidpony.epigon.data.generic.Effect;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.universe.CalcStat;
 import squidpony.epigon.universe.Element;
@@ -17,7 +16,7 @@ import java.util.Set;
 /**
  * Blueprint for a Condition.
  *
- * The element associated with a Condition is inherited from the Effect that
+ * The element associated with a Condition is inherited from the action that
  * applied it.
  *
  * Conditions are temporary (although perhaps indefinite) and can cause any
@@ -41,15 +40,15 @@ public class ConditionBlueprint extends EpiData {
     public String verb;
     public Modification modification;
     public ChangeTable changes;
-    public List<Effect> tickEffects = new ArrayList<>();
-    public List<Effect> wearOffEffects = new ArrayList<>();//what happens when it wears off
-    public List<Effect> canceledEffects = new ArrayList<>();//what happens when it's cancelled
+    public List<Modification> tickEffects = new ArrayList<>();
+    public List<Modification> wearOffEffects = new ArrayList<>();//what happens when it wears off
+    public List<Modification> canceledEffects = new ArrayList<>();//what happens when it's cancelled
     public Set<ConditionBlueprint> conflicts = new UnorderedSet<>();//can't exist at the same time, new one cancels the old one
     public Set<ConditionBlueprint> immunizes = new UnorderedSet<>();//can't exist at the same time, old one prevents the new one from being applies
     public Set<ConditionBlueprint> suppresses = new UnorderedSet<>();//can both exist, but only newest one has effect
 
     public ConditionBlueprint(String name, String verb, int duration, int period, Element baseElement, Character overlay, ChangeTable changes,
-                              Collection<Effect> onTick, Collection<Effect> onWearOff, Collection<Effect> onCancel)
+                              Collection<Modification> onTick, Collection<Modification> onWearOff, Collection<Modification> onCancel)
     {
         super();
         this.name = name;
@@ -89,6 +88,11 @@ public class ConditionBlueprint extends EpiData {
         }
     }
     public static OrderedMap<String, ConditionBlueprint> CONDITIONS = OrderedMap.makeMap(
-            "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ', ChangeTable.makeCT(CalcStat.PRECISION, '-', 4.0, CalcStat.INFLUENCE, '-', 4.0, CalcStat.CRIT, '-', 2.0), null, null, null)
+            "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
+                    ChangeTable.makeCT(CalcStat.PRECISION, '-', 4.0, CalcStat.INFLUENCE, '-', 4.0, CalcStat.CRIT, '-', 2.0), 
+                    null, null, null)
+//            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 0, 0, Element.BLUNT, null,
+//                    null,
+//                    null, Maker.makeUOS(new Modification()), null)
     );
 }

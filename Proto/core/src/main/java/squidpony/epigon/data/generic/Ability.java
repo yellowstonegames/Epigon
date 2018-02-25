@@ -1,17 +1,12 @@
 package squidpony.epigon.data.generic;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import squidpony.squidmath.OrderedMap;
-
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
+import squidpony.squidmath.OrderedMap;
+
+import java.util.*;
 
 /**
  * An ability is an action choice a creature, item, or condition can make.
@@ -26,7 +21,7 @@ public class Ability extends EpiData {
     //range
     //vs creatures / items / open space
     //
-    public boolean canTargetTile; // if true can generally target a spot insteaad of a thing
+    public boolean canTargetTile; // if true can generally target a spot instead of a thing
     public boolean appliesToAllInTile; // All objects in a target tile are affected
     public boolean appliesToAllTilesInArea;
     public boolean randomChoiceInRange;
@@ -36,7 +31,8 @@ public class Ability extends EpiData {
 
     public OrderedMap<Skill, Rating> mustHaveSkillRatings = new OrderedMap<>();
     public List<String> effectsString = new ArrayList<>();
-    public List<Effect> effects = new ArrayList<>();
+    public List<Modification> userModifications = new ArrayList<>();
+    public List<Modification> targetModifications = new ArrayList<>();
 
     // Preconditions for user of ability
     public List<Map<Physical, Integer>> mustPossess = new ArrayList<>();
