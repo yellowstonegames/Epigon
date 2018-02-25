@@ -325,14 +325,14 @@ public class HandBuilt {
         doorBlueprint.color = SColor.WALNUT.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         doorBlueprint.generic = true;
         doorBlueprint.attached = true;
-        mixer.applyModification(doorBlueprint, closeDoor);
+        RecipeMixer.applyModification(doorBlueprint, closeDoor);
 
         RecipeBlueprint doorRecipeBlueprint;
         doorRecipeBlueprint = new RecipeBlueprint();
         doorRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
         doorRecipeBlueprint.result.put(doorBlueprint, 1);
 
-        doorRecipe = mixer.createRecipe(doorRecipeBlueprint);
+        doorRecipe = RecipeMixer.createRecipe(doorRecipeBlueprint);
     }
 
     private void initItems() {
@@ -354,11 +354,7 @@ public class HandBuilt {
 
         Interactable eat = new Interactable();
         eat.phrasing = "eat";
-        eat.effects = new ArrayList<>();
-        Effect e = new Effect();
-        e.sourceModifications = new ArrayList<>();
-        e.sourceModifications.add(hungerUp);
-        eat.effects.add(e);
+        eat.actorModifications = Maker.makeList(hungerUp);
         eat.consumes = true;
         pb.interactableData = new ArrayList<>();
         pb.interactableData.add(eat);
@@ -366,7 +362,7 @@ public class HandBuilt {
         RecipeBlueprint rb = new RecipeBlueprint();
         rb.requiredConsumed.put(rawMeat, 1);
         rb.result.put(pb, 1);
-        steakRecipe = mixer.createRecipe(rb);
+        steakRecipe = RecipeMixer.createRecipe(rb);
     }
 
     private Recipe createSimpleRecipe(String name, float color, char symbol){
@@ -378,7 +374,7 @@ public class HandBuilt {
         RecipeBlueprint recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredConsumed.put(basePhysical, 1);
         recipeBlueprint.result.put(blueprint, 1);
-        return mixer.createRecipe(recipeBlueprint);
+        return RecipeMixer.createRecipe(recipeBlueprint);
     }
 
     public Modification makeAlive() {

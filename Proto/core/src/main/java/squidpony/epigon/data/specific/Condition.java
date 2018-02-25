@@ -2,7 +2,6 @@ package squidpony.epigon.data.specific;
 
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
-import squidpony.epigon.data.generic.Effect;
 import squidpony.epigon.data.generic.Modification;
 import squidpony.epigon.dm.RecipeMixer;
 import squidpony.epigon.universe.Element;
@@ -70,10 +69,9 @@ public class Condition extends EpiData {
     public boolean wearOff()
     {
         if(attachedTo == null) return false;
-        for (Effect e : parent.wearOffEffects)
-        {
-            for (Modification m : e.sourceModifications)
-                RecipeMixer.applyModification(attachedTo, m);
+        for (Modification m : parent.wearOffEffects)
+        {             
+            RecipeMixer.applyModification(attachedTo, m);
         }
         if(parent.changes != null)
             attachedTo.statEffects.remove(parent.changes);
@@ -83,12 +81,10 @@ public class Condition extends EpiData {
     }
     public boolean update()
     {
-        if(parent.period != 0 && currentTick % parent.period == 0)
-        {
-            for (Effect e : parent.tickEffects)
+        if(parent.period != 0 && currentTick % parent.period == 0) {
+            for (Modification m : parent.tickEffects)
             {
-                for (Modification m : e.sourceModifications)
-                    RecipeMixer.applyModification(attachedTo, m);
+                RecipeMixer.applyModification(attachedTo, m);
             }
         }
         if(++currentTick >= parent.duration)

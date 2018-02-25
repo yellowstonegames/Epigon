@@ -1229,10 +1229,8 @@ public class Epigon extends Game {
                         if (interaction.consumes){
                             player.removeFromInventory(selected);
                         }
-                        interaction.effects
-                            .stream()
-                            .flatMap(s -> s.sourceModifications.stream())
-                            .forEachOrdered(mod -> mixer.applyModification(player, mod));
+                        interaction.actorModifications.forEach(mod -> RecipeMixer.applyModification(player, mod));
+                        interaction.targetModifications.forEach(mod -> RecipeMixer.applyModification(selected, mod));
                         mapOverlayHandler.updateDisplay();
                     } else if (selected.countsAs(handBuilt.rawMeat)) {
                         player.removeFromInventory(selected);
