@@ -1,0 +1,17 @@
+Rules Concept	Description
+Turn-based Combat	Combat is split into turns, with limited reactions (always automatic) possible to another character's action.
+Multiple PCs	There are multiple player-characters in a combat, each controlled directly on their turn.
+Randomness	Most effects have a chance of success and many have variable amounts of effect that may occur upon success and/or failure; the chances are determined by seeded PRNGs and can be deterministic given the same player choices and starting seed.
+Attacks	All characters in a combat are expected to be able to take some form of player-relevant action; all characters are capable of performing at least basic attacks, and many have other options.
+Non-Attack Actions	Some characters can attempt to inflict status ailments on enemies or status augments on allies; others can cast spells to perform one of a variety of effects, some of which may be attacks.
+Non-Action Effects	Some characters have auras that periodically make automatic attacks or attempts to inflict ailments on nearby cells; others have fields that apply a constant effect to nearby cells (usually only affecting allies).
+Weapons	Many attacks are performed with an item used as a weapon; this requires a character to be able to wield that item (have enough hands free to hold the item, and some items have other prerequisites to be used as weapons).
+Impromptu Weapons	Any item can be used as an impromptu weapon (including a weapon that a character can't normally use, like a firearm can be used as a club even if someone doesn't know how to fire one); these still require free hands.
+Item Quantities	Some items may be measured in a volume, such as water or gunpowder, and that volume may affect how it responds to other events (in a fire, a very small amount of water evaporates instantly, while a larger amount boils).
+Consumable Items	Some items are consumed by using them, rendering some amount of that item or its ammunition useless (like firing an arrow by attacking with a longbow destroys the arrow).
+Grid	Combat takes place on a square 2D grid.
+Abstract Size	Fitting with roguelike expectations, the physical size of a creature doesn't change how many grid cells it occupies.
+Movement	Characters are expected to move multiple cells per turn, and different terrain can prevent movement for some characters (i.e. fish can't enter land tiles).
+Push and Pull	Attacks may change the position of their target relative to the user, in a push away from the user or a pull toward the user; this needs to happen one cell at a time to avoid “skipping over” walls or obstacles.
+Location Effects	Various qualities may be associated with groups of cells, and apply some change to creatures and/or objects on those cells (may be on a tick basis, such as once per 3 turns, or constant).
+Opposition	Curses and similar effects may make a character opposed by his surroundings or equipment, causing normally innocuous terrain or item usage to become hazardous for that character.
