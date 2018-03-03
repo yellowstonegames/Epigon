@@ -7,6 +7,8 @@ import squidpony.squidgrid.gui.gdx.SColor;
  * This enum represents a rating of none to high, in order, for use in skills and any other relative
  * values such as monster level and item worth.
  *
+ * Colors based on classic MMORPG color range, modified somewhat for clarity between elements.
+ *
  * @author Eben Howard - http://squidpony.com
  */
 public enum Rating {
@@ -54,7 +56,7 @@ public enum Rating {
                 return SColor.FUCSHIA_PINK;// Pink
             case NONE:
             default:
-                return SColor.CHESTNUT_LEATHER_BROWN; // Dark grey
+                return SColor.ALOEWOOD_BROWN; // Dark grey
         }
     }
 
@@ -63,8 +65,6 @@ public enum Rating {
      */
     public Rating decrease() {
         switch (this) {
-            //case NONE:
-            //    return NONE;
             case SLIGHT:
                 return NONE;
             case TYPICAL:

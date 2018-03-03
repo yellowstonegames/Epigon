@@ -1191,16 +1191,16 @@ public class Epigon extends Game {
             }
             switch (verb) {
                 case MOVE_DOWN:
-                    mapOverlayHandler.moveDown();
+                    mapOverlayHandler.move(Direction.DOWN);
                     break;
                 case MOVE_UP:
-                    mapOverlayHandler.moveUp();
+                    mapOverlayHandler.move(Direction.UP);
                     break;
                 case MOVE_LEFT:
-                    // TODO - keyboard controls in equipment screen
+                    mapOverlayHandler.move(Direction.LEFT);
                     break;
                 case MOVE_RIGHT:
-                    // TODO - keyboard controls in equipment screen
+                    mapOverlayHandler.move(Direction.RIGHT);
                     break;
                 case MOVE_DOWN_LEFT:
                     // TODO - keyboard controls in equipment screen
@@ -1283,16 +1283,16 @@ public class Epigon extends Game {
             }
             switch (verb) {
                 case MOVE_DOWN:
-                    mapOverlayHandler.moveDown();
+                    mapOverlayHandler.move(Direction.DOWN);
                     break;
                 case MOVE_UP:
-                    mapOverlayHandler.moveUp();
+                    mapOverlayHandler.move(Direction.UP);
                     break;
                 case MOVE_LEFT:
-                    // TODO - keyboard controls in help screen
+                    mapOverlayHandler.move(Direction.LEFT);
                     break;
                 case MOVE_RIGHT:
-                    // TODO - keyboard controls in help screen
+                    mapOverlayHandler.move(Direction.RIGHT);
                     break;
                 case MOVE_DOWN_LEFT:
                     // TODO - keyboard controls in help screen
