@@ -1,22 +1,19 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import squidpony.ArrayTools;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.specific.Physical;
 import squidpony.epigon.universe.Rating;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidLayers;
-import squidpony.squidgrid.gui.gdx.SquidPanel;
-import squidpony.squidmath.Coord;
-
-import java.util.stream.Collectors;
 import squidpony.squidgrid.Direction;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidmath.Coord;
 import squidpony.squidmath.OrderedMap;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -60,13 +57,11 @@ public class MapOverlayHandler {
     private SColor headingColor = SColor.CW_BLUE;
     private SColor keyColor = SColor.FLORAL_LEAF;
 
-    private SquidPanel back;
-    private SquidPanel front;
+    private SparseLayers layers;
     private int width;
     private int halfWidth;
     private int height;
     private PrimaryMode mode = PrimaryMode.EQUIPMENT;
-    private SquidColorCenter colorCenter;
     private Physical player;
 
     private int scrollOffsetY;
@@ -80,25 +75,21 @@ public class MapOverlayHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public MapOverlayHandler(SquidLayers layers, SquidColorCenter colorCenter) {
-        this.colorCenter = colorCenter;
-        width = layers.getGridWidth();
+    public MapOverlayHandler(SparseLayers layers) {
+        width = layers.gridWidth;
         halfWidth = width / 2;
-        height = layers.getGridHeight();
-        back = layers.getBackgroundLayer();
-        front = layers.getForegroundLayer();
+        height = layers.gridHeight;
+        this.layers = layers;
 
         arrowLeft = Coord.get(1, 0);
-        arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
+        arrowRight = Coord.get(layers.gridWidth - 2, 0);
 
-        ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
-        ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
+        ArrayTools.fill(this.layers.backgrounds, layers.defaultPackedBackground);
         hide();
     }
 
     private void clear() {
-        ArrayTools.fill(back.contents, '\0');
-        ArrayTools.fill(front.contents, ' ');
+        layers.clear(0);
         //ArrayTools.fill(front.colors, -0x1.0p125F); // transparent
 
         doBorder();
@@ -158,15 +149,15 @@ public class MapOverlayHandler {
     }
 
     private void put(int x, int y, char c) {
-        front.put(x, y, c);
+        layers.put(x, y, c);
     }
 
     private void put(int x, int y, char c, Color color) {
-        front.put(x, y, c, color);
+        layers.put(x, y, c, color);
     }
 
     private void put(int x, int y, char c, float color) {
-        front.put(x, y, c, color);
+        layers.put(x, y, c, color);
     }
 
     private void putWithRarityColor(int x, int y, Physical p) {
@@ -177,29 +168,32 @@ public class MapOverlayHandler {
             put(x + display.length() + 1, y, "x" + quantity);
         }
     }
+    private Runnable postFlash = new Runnable() {
+        @Override
+        public void run() {
+            layers.fillBackground(layers.defaultPackedBackground);
+        }
+    };
 
     private void flashScreen() {
-        float time = 0.1f;
+        float time = 0.5f;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                front.tint(x, y, SColor.WHITE, time);
-                front.tint(x, y, SColor.WHITE, time);
-                front.tint(time, x, y, SColor.BLACK_CHESTNUT_OAK, time);
-                front.tint(time, x, y, SColor.BLACK_CHESTNUT_OAK, time);
+                layers.tint(0f, x, y, -0x1.d5bf64p126F, time, postFlash); //SColor.CW_PALE_AZURE
             }
         }
     }
 
     public void next() {
-        front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', -0x1.abed4ap125F, //SColor.CW_HONEYDEW
+                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), .6f); //SColor.CW_HONEYDEW
         mode = mode.next();
         updateDisplay();
     }
 
     public void prior() {
-        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', -0x1.abed4ap125F, //SColor.CW_HONEYDEW
+                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), .6f); //SColor.CW_HONEYDEW
         mode = mode.prior();
         updateDisplay();
     }
@@ -344,7 +338,7 @@ public class MapOverlayHandler {
         put(descX, y, "Fire - shoots an equipped ranged weapon");
         y++;
         put(x, y, "G", keyColor);
-        put(descX, y, "Get - picks up the items at yoru feet");
+        put(descX, y, "Get - picks up the items at your feet");
         y++;
         put(x, y, "g", keyColor);
         put(descX, y, "Gather - pick up all items from surrounding tiles");
@@ -580,8 +574,7 @@ public class MapOverlayHandler {
     }
 
     public void hide() {
-        back.setVisible(false);
-        front.setVisible(false);
+        layers.setVisible(false);
     }
 
     public PrimaryMode getMode() {
@@ -598,8 +591,7 @@ public class MapOverlayHandler {
     }
 
     public void updateDisplay() { // TODO - add version that doesn't disrupt selection
-        back.setVisible(true);
-        front.setVisible(true);
+        layers.setVisible(true);
         scrollOffsetY = 0;
         clear();
         switch (mode) {
