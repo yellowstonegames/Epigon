@@ -2,6 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import squidpony.ArrayTools;
 import squidpony.epigon.Utilities;
@@ -246,10 +247,32 @@ public class MapOverlayHandler {
                 }
                 break;
             case LEFT:
-
+                switch (mode) {
+                    case CRAFTING:
+                        showCrafting();
+                        break;
+                    case EQUIPMENT:
+                        clear();
+                        showEquipment(Direction.LEFT);
+                        break;
+                    case HELP:
+                        // noop
+                        break;
+                }
                 break;
             case RIGHT:
-
+                switch (mode) {
+                    case CRAFTING:
+                        showCrafting();
+                        break;
+                    case EQUIPMENT:
+                        clear();
+                        showEquipment(Direction.RIGHT);
+                        break;
+                    case HELP:
+                        // noop
+                        break;
+                }
                 break;
         }
     }
@@ -470,18 +493,48 @@ public class MapOverlayHandler {
         if (selectables.isEmpty()) {
             selection = null;
         } else {
-            int i;
+            int  i = selectables.indexOf(selection);
             switch (moveSelection) {
                 case DOWN:
-                    i = selectables.indexOf(selection);
                     if (i >= 0 && i < selectables.size() - 1){
                         selection = selectables.keyAt(i + 1);
                     }
                     break;
                 case UP:
-                    i = selectables.indexOf(selection);
                     if (i > 0){
                         selection = selectables.keyAt(i - 1);
+                    }
+                    break;
+                case LEFT:
+                    if (rightSelectables.contains(selection) && !leftSelectables.isEmpty()){
+                        leftSelectables.sort((c1, c2) -> Integer.compare(c2.y, c1.y)); // sort in reverse order
+                        boolean found = false;
+                        for (Coord c : leftSelectables) {
+                            if (c.y <= selection.y) {
+                                selection = c;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found){
+                            selection = leftSelectables.get(leftSelectables.size() - 1);
+                        }
+                    }
+                    break;
+                case RIGHT:
+                    if (leftSelectables.contains(selection) && !rightSelectables.isEmpty()){
+                        rightSelectables.sort((c1, c2) -> Integer.compare(c2.y, c1.y)); // sort in reverse order
+                        boolean found = false;
+                        for (Coord c : rightSelectables) {
+                            if (c.y <= selection.y) {
+                                selection = c;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found){
+                            selection = rightSelectables.get(rightSelectables.size() - 1);
+                        }
                     }
                     break;
                 case NONE:
