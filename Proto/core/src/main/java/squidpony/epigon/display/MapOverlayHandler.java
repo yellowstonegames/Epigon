@@ -168,6 +168,27 @@ public class MapOverlayHandler {
         front.put(x, y, c, color);
     }
 
+    private void putWithRarityColor(int x, int y, Physical p) {
+        String display = getDisplayString(p);
+        put(x, y, display, p.rarity.color());
+        int quantity = getDisplayQuantity(p);
+        if (quantity > 1) {
+            put(x + display.length() + 1, y, "x" + quantity);
+        }
+    }
+
+    private void flashScreen() {
+        float time = 0.1f;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                front.tint(x, y, SColor.WHITE, time);
+                front.tint(x, y, SColor.WHITE, time);
+                front.tint(time, x, y, SColor.BLACK_CHESTNUT_OAK, time);
+                front.tint(time, x, y, SColor.BLACK_CHESTNUT_OAK, time);
+            }
+        }
+    }
+
     public void next() {
         front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
             SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
@@ -182,44 +203,53 @@ public class MapOverlayHandler {
         updateDisplay();
     }
 
-    public void moveUp() {
-        switch (mode) {
-            case CRAFTING:
-                showCrafting();
-                break;
-            case EQUIPMENT:
-                clear();
-                showEquipment(Direction.UP);
-                break;
-            case HELP:
-                if (scrollOffsetY < 0) {
-                    scrollOffsetY++;
-                    clear();
-                    showHelp(scrollOffsetY);
-                } else {
-                    // TODO - visual cue that end of screen is reached
+    public void move(Direction dir) {
+        switch (dir) {
+            case UP:
+                switch (mode) {
+                    case CRAFTING:
+                        showCrafting();
+                        break;
+                    case EQUIPMENT:
+                        clear();
+                        showEquipment(Direction.UP);
+                        break;
+                    case HELP:
+                        if (scrollOffsetY < 0) {
+                            scrollOffsetY++;
+                            clear();
+                            showHelp(scrollOffsetY);
+                        } else {
+                            flashScreen();
+                        }
+                        break;
                 }
                 break;
-        }
-    }
+            case DOWN:
+                switch (mode) {
+                    case CRAFTING:
+                        showCrafting();
+                        break;
+                    case EQUIPMENT:
+                        clear();
+                        showEquipment(Direction.DOWN);
+                        break;
+                    case HELP:
+                        if (scrollOffsetY >= 1 - (helpHeight - height)) {
+                            scrollOffsetY--;
+                            clear();
+                            showHelp(scrollOffsetY);
+                        } else {
+                            flashScreen();
+                        }
+                        break;
+                }
+                break;
+            case LEFT:
 
-    public void moveDown() {
-        switch (mode) {
-            case CRAFTING:
-                showCrafting();
                 break;
-            case EQUIPMENT:
-                clear();
-                showEquipment(Direction.DOWN);
-                break;
-            case HELP:
-                if (scrollOffsetY >= 1 - (helpHeight - height)) {
-                    scrollOffsetY--;
-                    clear();
-                    showHelp(scrollOffsetY);
-                } else {
-                    // TODO - visual cue that end of screen is reached
-                }
+            case RIGHT:
+
                 break;
         }
     }
@@ -361,7 +391,7 @@ public class MapOverlayHandler {
             leftSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -377,7 +407,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -391,7 +421,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -405,7 +435,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -419,7 +449,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -433,7 +463,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            put(x, y, getDisplay(p));
+            putWithRarityColor(x, y, p);
             y++;
         }
 
@@ -465,11 +495,30 @@ public class MapOverlayHandler {
         }
     }
     
-    private String getDisplay(Physical p){
-        if (p.groupingData != null && p.groupingData.quantity > 1){
-            return p.name + " x" + p.groupingData.quantity;
+    private String getDisplayString(Physical p){
+        int allowedWidth = halfWidth - 5; // allow for left and right edges, selection arrow, symbol, and space
+        int quantity = getDisplayQuantity(p);
+        int quantWidth = 0;
+        if (quantity > 1) {
+            quantWidth = (int)(Math.log10(quantity)) +3; // digits in quantity plus 'x' plus space
+            allowedWidth -= quantWidth; // log10 gives us the number of digits - 1 in base 10
+        }
+
+        int length = p.name.length();
+        if (length > allowedWidth && quantWidth < 1) {
+            return p.name.substring(0, allowedWidth - 1) + "…";
+        } else if (length > allowedWidth) {
+            return p.name.substring(0, allowedWidth - quantWidth - 1) + "…"; // leave room for the eventual quantity presentation
+        }
+
+        return p.name;
+    }
+
+    private int getDisplayQuantity(Physical p) {
+        if (p.groupingData != null && p.groupingData.quantity > 1) {
+            return p.groupingData.quantity;
         } else {
-            return p.name;
+            return 0;
         }
     }
 

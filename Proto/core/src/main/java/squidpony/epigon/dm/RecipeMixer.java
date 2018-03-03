@@ -24,8 +24,7 @@ import static squidpony.epigon.Epigon.rootChaos;
  * various categories.
  *
  * There is some danger in using the construction bits as having an object A that creates B that create a new A will cause an infinite loop.
- * TODO - figure out a way to check for and prevent that loop...
- * TODO - solve halting problem...
+ * NOTE - preventing such a loop was the intention behind blueprints that could be instantiated only when needed, but that structure no longer exists that way
  *
  * Results may be based on using a specific recipe with specific items, or by looking for a result
  * in a recipe and then building it with that recipe.
