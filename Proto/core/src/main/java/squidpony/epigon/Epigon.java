@@ -78,7 +78,7 @@ public class Epigon extends Game {
     SpriteBatch batch;
     private SquidColorCenter colorCenter;
     private SparseLayers mapSLayers;
-    private SquidLayers mapOverlaySLayers;
+    private SparseLayers mapOverlaySLayers;
     private SquidLayers infoSLayers;
     private SquidLayers contextSLayers;
     private SquidLayers messageSLayers;
@@ -258,15 +258,15 @@ public class Epigon extends Game {
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
-        mapOverlaySLayers = new SquidLayers(
+        mapOverlaySLayers = new SparseLayers(
                 mapSize.gridWidth,
                 mapSize.gridHeight,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
-        mapOverlaySLayers.getBackgroundLayer().setDefaultForeground(colorCenter.desaturate(SColor.DB_INK, 0.8));
-        mapOverlaySLayers.getForegroundLayer().setDefaultForeground(SColor.LIME);
-        mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers, colorCenter);
+        mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
+        mapOverlaySLayers.setDefaultForeground(SColor.LIME);
+        mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
         smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
