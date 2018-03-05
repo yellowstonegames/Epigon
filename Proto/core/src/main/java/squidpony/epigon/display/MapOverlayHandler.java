@@ -168,18 +168,21 @@ public class MapOverlayHandler {
             put(x + display.length() + 1, y, "x" + quantity);
         }
     }
-    private Runnable postFlash = new Runnable() {
-        @Override
-        public void run() {
-            layers.fillBackground(layers.defaultPackedBackground);
-        }
-    };
+//    private Runnable postFlash = new Runnable() {
+//        @Override
+//        public void run() {
+//            layers.fillBackground(layers.defaultPackedBackground);
+//        }
+//    };
 
     private void flashScreen() {
-        float time = 0.5f;
+        if(layers.hasActiveAnimations())
+            return;
+        final float time = 0.625f;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                layers.tint(0f, x, y, -0x1.d5bf64p126F, time, postFlash); //SColor.CW_PALE_AZURE
+                layers.tint(x, y, -0x1.fefefep125F, time);
+                layers.tint(x, y, 0, -0x1.d5bf64p126F, time); //SColor.CW_PALE_AZURE
             }
         }
     }
