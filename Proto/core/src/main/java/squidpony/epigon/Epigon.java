@@ -59,14 +59,14 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call ThrustAltRNG-specific methods, mainly skip()
-    public final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
-    public final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
+    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
+    public final LightRNG lightRNG = new LightRNG(seed);
+    public final StatefulRNG rng = new StatefulRNG(lightRNG);
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
+    public static final LightRNG rootChaos = new LightRNG();
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';

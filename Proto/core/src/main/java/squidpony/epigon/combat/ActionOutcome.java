@@ -14,8 +14,6 @@ import squidpony.squidmath.Noise;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 
-import static squidpony.squidmath.ThrustAltRNG.determine;
-
 /**
  * Handles the specific result of one event in a combat, such as whether a sword swing hit, how much damage it did, if
  * a crit occurred (which makes a hit more likely and damage higher, but does not guarantee either), and if conditions
@@ -46,7 +44,7 @@ public class ActionOutcome {
     public static ActionOutcome attack(Physical actor, Physical target)
     {
         ActionOutcome ao = new ActionOutcome();
-        long r = determine(++actor.chaos);
+        long r = GauntRNG.nextLong(++actor.chaos);
         ao.actorWeapon = actor.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : actor.creatureData.weaponChoices.random();
         int index = ao.actorWeapon.elements.table.random(r - 1);
         ao.element = ao.actorWeapon.elements.items.get(index);
