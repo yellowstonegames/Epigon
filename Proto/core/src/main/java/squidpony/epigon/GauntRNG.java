@@ -3,13 +3,12 @@ package squidpony.epigon;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.Collections;
 import java.util.List;
 
 import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
-import static squidpony.squidmath.ThrustAltRNG.*;
+import static squidpony.squidmath.LightRNG.*;
 
 /**
  * Created by Tommy Ettinger on 1/4/2018.
@@ -26,6 +25,24 @@ public final class GauntRNG {
     public static int next(long state, int bits)
     {
         return (int)determine(state) >>> (32 - bits);
+    }
+
+    public static long nextLong(long state)
+    {
+        return determine(state);
+    }
+    public static int nextInt(long state)
+    {
+        return (int)determine(state);
+    }
+    
+    public static int nextInt(long state, int bits) {
+        return determineBounded(state, bits);
+    }
+    
+    public static float nextFloat(long state)
+    {
+        return determineFloat(state);
     }
     /**
      * Returns a value from an even distribution from min (inclusive) to max
@@ -136,7 +153,7 @@ public final class GauntRNG {
             dest[i] = i;
         }
         for (int i = n - 1; i > 0; i--) {
-            final int r = ThrustAltRNG.determineBounded(state--, i+1),
+            final int r = determineBounded(state--, i+1),
                     t = dest[r];
             dest[r] = dest[i];
             dest[i] = t;

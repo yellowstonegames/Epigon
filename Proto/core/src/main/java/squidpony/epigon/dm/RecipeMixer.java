@@ -50,7 +50,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalConsumed != null && !blueprint.optionalConsumed.isEmpty()) {
-            int idx = ThrustAltRNG.determineBounded(rootChaos.nextLong(), blueprint.optionalConsumed.size());
+            int idx = GauntRNG.nextInt(rootChaos.nextLong(), blueprint.optionalConsumed.size());
             recipe.consumed.merge(blueprint.optionalConsumed.keyAt(idx), blueprint.optionalConsumed.getAt(idx), Integer::sum);
         }
 
@@ -58,7 +58,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalCatalyst != null && !blueprint.optionalCatalyst.isEmpty()) {
-            int idx = ThrustAltRNG.determineBounded(rootChaos.nextLong(), blueprint.optionalCatalyst.size());
+            int idx = GauntRNG.nextInt(rootChaos.nextLong(), blueprint.optionalCatalyst.size());
             recipe.catalyst.merge(blueprint.optionalCatalyst.keyAt(idx), blueprint.optionalCatalyst.getAt(idx), Integer::sum);
         }
 
@@ -102,7 +102,7 @@ public class RecipeMixer {
     public Physical buildWeapon(Weapon weapon, long state)
     {
         OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
-        Material mat = materials.getAt(ThrustAltRNG.determineBounded(state--, materials.size()));
+        Material mat = materials.getAt(GauntRNG.nextInt(state--, materials.size()));
         return mix(createRecipe(weapon.recipeBlueprint), Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), state).get(0);
     }
 
@@ -312,7 +312,7 @@ public class RecipeMixer {
             applyModification(physical, m);
         }
 
-        int count = ThrustAltRNG.determineBounded(++physical.chaos, blueprint.optionalModifications.size());
+        int count = GauntRNG.nextInt(++physical.chaos, blueprint.optionalModifications.size());
         int[] ints = GauntRNG.randomOrdering(physical.chaos += count - 1, count);
         for (int i = 0; i < count; i++) {
             applyModification(physical, blueprint.optionalModifications.get(ints[i]));
@@ -399,7 +399,7 @@ public class RecipeMixer {
 
         int count = modification.possiblePrefix.size() + modification.possibleSuffix.size();
         if (count > 0) {
-            int i = ThrustAltRNG.determineBounded(++physical.chaos, count);
+            int i = GauntRNG.nextInt(++physical.chaos, count);
             if (i < modification.possiblePrefix.size()) {
                 physical.name = modification.possiblePrefix.get(i) + " " + physical.name;
             } else {
