@@ -22,10 +22,12 @@ public class EpiMap {
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
     public double[][] resistances;
+    public double[][] fovResult;
     public StatefulRNG chaos;
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
+        fovResult = new double[width][height];
         chaos = new StatefulRNG(rootChaos.nextLong());
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];

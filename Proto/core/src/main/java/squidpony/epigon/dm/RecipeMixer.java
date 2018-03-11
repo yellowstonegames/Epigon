@@ -469,7 +469,7 @@ public class RecipeMixer {
         }
         if((modification.symbol != null || modification.color != null) && physical.appearance != null)
         {
-            physical.appearance.color = physical.color;
+            physical.appearance.setPackedColor(physical.color);
             physical.appearance.shown = physical.symbol;
         }
 
@@ -481,7 +481,7 @@ public class RecipeMixer {
         }
         if(modification.overlaySymbol != null || modification.overlayColor != null && physical.overlayAppearance != null)
         {
-            physical.overlayAppearance.color = physical.overlayColor;
+            physical.overlayAppearance.setPackedColor(physical.overlayColor);
             physical.overlayAppearance.shown = physical.overlaySymbol;
         }
 
