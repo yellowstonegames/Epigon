@@ -13,12 +13,9 @@ allprojects {
     version = '1.0'
     ext {
         appName = "EpigonProto"
-        squidlibVersion = '682895db88'
-        jacksonVersion = '2.8.6'
+        squidlibVersion = '955c3477ec'
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
-        box2DLightsVersion = '1.4'
-        ashleyVersion = '1.7.0'
         aiVersion = '1.8.0'
         regexodusVersion = '0.1.9'
     }
