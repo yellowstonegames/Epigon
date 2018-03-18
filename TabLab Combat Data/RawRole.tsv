@@ -13,7 +13,7 @@ Seer	A wise wielder of Mystic powers who can sense impending danger; fortune smi
 Shaman	A protector of nature who can commune with spirits of the land to gain Primal powers.	Primal	You recover from ailments in half the time it normally takes.
 Priest	A devoted servant of a god who gains Blessed power through prayer and the support of a church.	Blessed	When an enemy inflicts an ailment on you, you gain a moderate bonus to Damage and Defense.
 Diabolist	A rogue magician who seeks out Occult power everywhere he can, signing deals with devils regularly.	Occult	You enter an area with a small penalty to Influence and Crit that becomes a large bonus as Zone Tension rises.
-Wizard	A learned sage who has studied magic enough to wield Arcane powers with gestures and words.	Arcane	Every time you attack, you gain a small bonus to Precision and Influence.
+Wizard	A learned sage who has studied magic enough to wield Arcane powers with gestures and words.	Arcane	You have a moderate chance to halve all bonuses on enemies you hit, but this chance shrinks as Zone Tension rises.
 			
 			
 			A Power Burst is a 2-turn period where a character has doubled Precision, Damage, Crit, and Influence.
