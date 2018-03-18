@@ -21,7 +21,7 @@ public class Formula {
 
     public static int randomizedStartingStatLevel(RNG rng){
         return rng.maxIntOf(8, 4) + 1;
-//        int n = GauntRNG.nextInt(seed, 100);
+//        int n = ThrustAltRNG.determineBounded(seed, 100);
 //        if (n < 45){
 //            return 1;
 //        } else if (n < 65){

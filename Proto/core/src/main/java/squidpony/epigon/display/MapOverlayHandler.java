@@ -14,6 +14,7 @@ import squidpony.squidmath.OrderedMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import squidpony.epigon.Prefs;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -181,8 +182,8 @@ public class MapOverlayHandler {
         final float time = 0.625f;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                layers.tint(x, y, -0x1.fefefep125F, time);
-                layers.tint(x, y, 0, -0x1.d5bf64p126F, time); //SColor.CW_PALE_AZURE
+                layers.tint(0f, x, y, -0x1.fefefep125F, time, () ->{});
+                layers.tint(0f, x, y, -0x1.d5bf64p126F, time, () ->{}); //SColor.CW_PALE_AZURE
             }
         }
     }
@@ -288,7 +289,7 @@ public class MapOverlayHandler {
 
         put(1, y, "Game Overview", headingColor);
         y++;
-        put(1, y, "Epigon is a roguelike. Probably gonna die and such.");
+        put(1, y, Prefs.getGameTitle() + " is a roguelike. Probably gonna die and such.");
         y += 2;
 
         put(1, y, "Ratings & Rarities, worst to best", headingColor);
@@ -302,6 +303,8 @@ public class MapOverlayHandler {
         y += 2;
 
         put(1, y, "Movement Keys (Numpad and Arrows also work)", headingColor);
+        y++;
+        put(3, y, "Falling mode only supports cardinal movement", headingColor);
         y++;
         int tempY = y;
         x = 2;
@@ -319,6 +322,7 @@ public class MapOverlayHandler {
         put(x, y, "Bumping into enemies attacks with");
         put(x, y + 1, "your default attack skill.");
         put(x, y + 3, "Waiting '.' skips your turn.");
+        put(x, y + 5, "Space ' ' pauses during falling.");
         y += 6;
 
         put(1, y, "Default Key Commands", headingColor);

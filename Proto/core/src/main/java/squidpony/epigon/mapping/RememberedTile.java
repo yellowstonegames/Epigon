@@ -35,11 +35,9 @@ public class RememberedTile {
                         : SColor.lerpFloatColors(front, memoryColorFloat, frontFade);
         back = tile.getBackgroundColor();
         back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColorFloat, backFade);
-//        if 
-//                (tile.getCreature() != null){
-//            miniMapColor = SColor.SCARLET.toFloatBits();
-//        } else
-            {
+        if (tile.getCreature() != null){
+            miniMapColor = SColor.SCARLET.toFloatBits();
+        } else {
             Physical p = tile.getLargeNonCreature();
             if (p == null){
                 miniMapColor = SColor.DARK_INDIGO.toFloatBits();

@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import squidpony.Maker;
 import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -193,7 +194,7 @@ public class SoundManager {
      * Plays a random footstep sound.
      */
     public void playFootstep(){
-        int step = GauntRNG.nextInt( System.currentTimeMillis(),totalFootsteps - 1) + 1;
+        int step = ThrustAltRNG.determineBounded( System.currentTimeMillis(),totalFootsteps - 1) + 1;
         playSoundFX(footstep + step);
     }
 }

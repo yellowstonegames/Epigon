@@ -54,8 +54,10 @@ public class HandBuilt {
     public Recipe swordRecipe;
 
     public Modification makeWall;
+    public Physical emptySpace;
 
     public Physical nan;//trade currency (dust that's used for enchanting things and casting spells)
+    public Physical money;
 
     public Physical baseFood; // base item for anything edible
 
@@ -127,6 +129,12 @@ public class HandBuilt {
         nan.name = "nan";
         nan.description = "currency of power";
 
+        money = new Physical();
+        money.name = "Gold Coin";
+        money.color = SColor.CW_GOLD.toFloatBits();
+        money.symbol = '$';
+        money.blocking = false;
+
         baseFood = new Physical();
         baseFood.name = "fūd";
         baseFood.description = "base food item";
@@ -151,6 +159,11 @@ public class HandBuilt {
         makeWall.symbol = '#';
         makeWall.large = true;
         makeWall.attached = true;
+
+        emptySpace = new Physical();
+        emptySpace.name = "ø";
+        emptySpace.symbol = ' ';
+        emptySpace.color = SColor.TRANSPARENT.toFloatBits();
     }
 
     private void initAbilities() {
