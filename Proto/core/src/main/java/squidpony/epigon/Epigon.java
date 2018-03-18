@@ -5,12 +5,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
+import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.blueprint.ConditionBlueprint;
@@ -39,6 +41,8 @@ import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -52,6 +56,10 @@ import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
  */
 public class Epigon extends Game {
 
+    private enum GameMode {
+        DIVE, CRAWL;
+    }
+
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
     public static final PanelSize mapSize;
     public static final PanelSize messageSize;
@@ -59,17 +67,19 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
-    public final LightRNG lightRNG = new LightRNG(seed);
-    public final StatefulRNG rng = new StatefulRNG(lightRNG);
+    // this is separated from the StatefulRNG so you can still call ThrustAltRNG-specific methods, mainly skip()
+    public final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
+    public final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final LightRNG rootChaos = new LightRNG();
+    public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
+
+    private GameMode mode = GameMode.CRAWL;
 
     // Audio
     private SoundManager sound;
@@ -82,6 +92,8 @@ public class Epigon extends Game {
     private SquidLayers infoSLayers;
     private SquidLayers contextSLayers;
     private SquidLayers messageSLayers;
+    private SparseLayers fallingSLayers;
+
     private SquidInput mapInput;
     private SquidInput contextInput;
     private SquidInput infoInput;
@@ -99,33 +111,49 @@ public class Epigon extends Game {
     // World
     private WorldGenerator worldGenerator;
     private EpiMap map;
+    private int depth;
     private FxHandler fxHandler;
     private MapOverlayHandler mapOverlayHandler;
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
+    private FallingHandler fallingHandler;
     private GreasedRegion blocked;
     private DijkstraMap toPlayerDijkstra;
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
+    private double[][] fovResult;
+    private double[][] priorFovResult;
     private OrderedMap<Coord, Physical> creatures = new OrderedMap<>();
     private int autoplayTurns = 0;
     private boolean processingCommand = true;
 
+    // Timing
+    private long fallDelay = 300;
+    private Instant nextFall = Instant.now();
+    private boolean paused = true;
+    private Instant pausedAt = Instant.now();
+    private Instant unpausedAt = Instant.now();
+    private long inputDelay = 100;
+    private Instant nextInput = Instant.now();
+    private long fallDuration = 0L, currentFallDuration = 0L;
+
     // WIP stuff, needs large sample map
-    private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage;
-    private Viewport mapViewport, messageViewport, infoViewport, contextViewport, mapOverlayViewport;
-    //private Camera camera;
-    //private TextCellFactory.Glyph playerEntity;
+    private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage, fallingStage;
+    private Viewport mapViewport, messageViewport, infoViewport, contextViewport, mapOverlayViewport, fallingViewport;
 
     private float[] lightLevels;
 
-    public static final int worldWidth, worldHeight;
+    public static final int worldWidth, worldHeight, worldDepth, totalDepth;
+    public float startingY, finishY, timeToFall;
+
     // Set up sizing all in one place
     static {
         worldWidth = 100;
         worldHeight = 50;
-        int bigW = 70;
+        worldDepth = 300;
+        totalDepth = worldDepth + World.DIVE_HEADER.length;
+        int bigW = World.DIVE_HEADER[0].length() + 2;
         int bigH = 26;
         int smallW = 50;
         int smallH = 22;
@@ -137,43 +165,9 @@ public class Epigon extends Game {
         infoSize = new PanelSize(smallW, smallH * 7 / 4, 7, 16);
         contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 4, 7, 16);
         messageCount = bottomH - 2;
-
     }
-//    public static final String outlineFragmentShader = "#ifdef GL_ES\n"
-//            + "precision mediump float;\n"
-//            + "precision mediump int;\n"
-//            + "#endif\n"
-//            + "\n"
-//            + "uniform sampler2D u_texture;\n"
-//            + "uniform float u_smoothing;\n"
-//            + "varying vec4 v_color;\n"
-//            + "varying vec2 v_texCoords;\n"
-//            + "\n"
-//            + "void main() {\n"
-//            + "  if(u_smoothing <= 0.0) {\n"
-//            + "    float smoothing = -u_smoothing;\n"
-//            + "	   vec4 box = vec4(v_texCoords-0.000125, v_texCoords+0.000125);\n"
-//            + "	   float asum = smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, v_texCoords).a) + 0.5 * (\n"
-//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xy).a) +\n"
-//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zw).a) +\n"
-//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.xw).a) +\n"
-//            + "                 smoothstep(0.5 - smoothing, 0.5 + smoothing, texture2D(u_texture, box.zy).a));\n"
-//            + "    gl_FragColor = vec4(v_color.rgb, (asum / 3.0) * v_color.a);\n"
-//            + "	 } else {\n"
-//            + "    float distance = texture2D(u_texture, v_texCoords).a;\n"
-//            + "	   vec2 box = vec2(0.0, 0.00375 * (u_smoothing + 0.0825));\n"
-//            + "	   float asum = 0.7 * (smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, distance) + \n"
-//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.xy).a) +\n"
-//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.xy).a) +\n"
-//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords + box.yx).a) +\n"
-//            + "                   smoothstep(0.5 - u_smoothing, 0.5 + u_smoothing, texture2D(u_texture, v_texCoords - box.yx).a)),\n"
-//            + "                 outline = clamp((distance * 0.8 - 0.415) * 18, 0, 1);\n"
-//            + "	   gl_FragColor = vec4(mix(vec3(0.0), v_color.rgb * 1.2, outline), asum * v_color.a);\n" // the only change from SquidLib's version is: rgb * 1.2
-//            + "  }\n"
-//            + "}\n";
 
-    public Epigon()
-    {
+    public Epigon() {
         mixer = new RecipeMixer();
         handBuilt = new HandBuilt(rng, mixer);
         Weapon.init();
@@ -187,12 +181,11 @@ public class Epigon extends Game {
         sound = new SoundManager();
         colorCenter = new SquidColorCenter();
 
+        // Set the map size early so things can reference it
         System.out.println(rng.getState());
 
-        // Set the map size early so things can reference it
-        Coord.expandPoolTo(worldWidth, worldHeight);
-        map = new EpiMap(worldWidth, worldHeight);
-        
+        Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
+
         bgColor = SColor.WHITE;
         unseenColor = SColor.BLACK_DYE;
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
@@ -207,6 +200,7 @@ public class Epigon extends Game {
         infoViewport = new StretchViewport(infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport = new StretchViewport(contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlayViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
+        fallingViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
 
         // Here we make sure our Stages, which holds any text-based grids we make, uses our Batch.
         mapStage = new Stage(mapViewport, batch);
@@ -214,58 +208,65 @@ public class Epigon extends Game {
         infoStage = new Stage(infoViewport, batch);
         contextStage = new Stage(contextViewport, batch);
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
+        fallingStage = new Stage(fallingViewport, batch);
+
         font = DefaultResources.getLeanFamily();
         TextCellFactory smallFont = font.copy();
         messageIndex = messageCount;
         messageSLayers = new SquidLayers(
-                messageSize.gridWidth,
-                messageSize.gridHeight,
-                messageSize.cellWidth,
-                messageSize.cellHeight,
-                font);
+            messageSize.gridWidth,
+            messageSize.gridHeight,
+            messageSize.cellWidth,
+            messageSize.cellHeight,
+            font);
 
         infoSLayers = new SquidLayers(
-                infoSize.gridWidth,
-                infoSize.gridHeight,
-                infoSize.cellWidth,
-                infoSize.cellHeight,
-                smallFont);
+            infoSize.gridWidth,
+            infoSize.gridHeight,
+            infoSize.cellWidth,
+            infoSize.cellHeight,
+            smallFont);
         infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SquidLayers(
-                contextSize.gridWidth,
-                contextSize.gridHeight,
-                contextSize.cellWidth,
-                contextSize.cellHeight,
-                smallFont);
+            contextSize.gridWidth,
+            contextSize.gridHeight,
+            contextSize.cellWidth,
+            contextSize.cellHeight,
+            smallFont);
         contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
-                worldWidth,
-                worldHeight,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                font);
-//        mapSLayers.font.shader = new ShaderProgram(DefaultResources.vertexShader, outlineFragmentShader);
-//        if (!mapSLayers.font.shader.isCompiled()) {
-//            Gdx.app.error("shader", "Outlined Distance Field font shader compilation failed:\n" + mapSLayers.font.shader.getLog());
-//        }
+            worldWidth,
+            worldHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font);
 
-        //ArrayTools.fill(mapSLayers.getBackgrounds(), unseenColorFloat);
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
-        contextHandler = new ContextHandler(contextSLayers, mapSLayers, map);
+        contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
         mapOverlaySLayers = new SparseLayers(
-                mapSize.gridWidth,
-                mapSize.gridHeight,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                font);
+            mapSize.gridWidth,
+            mapSize.gridHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font);
         mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
+
+        fallingSLayers = new SparseLayers(
+            worldWidth,
+            totalDepth,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font);
+        fallingSLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
+        fallingSLayers.setDefaultForeground(SColor.LIME);
+        fallingHandler = new FallingHandler(fallingSLayers);
 
         font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
         smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
@@ -277,11 +278,14 @@ public class Epigon extends Game {
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
         contextSLayers.setBounds(0, 0, contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlaySLayers.setBounds(0, 0, mapSize.pixelWidth(), mapSize.pixelWidth());
+        fallingSLayers.setPosition(0, 0);
         mapSLayers.setPosition(0, 0);
+
         mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
         infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport.setScreenBounds(mapSize.pixelWidth(), 0, contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlayViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
+        fallingViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
 
         cursor = Coord.get(-1, -1);
 
@@ -296,14 +300,14 @@ public class Epigon extends Game {
 
         mapStage.addActor(mapSLayers);
         mapOverlayStage.addActor(mapOverlaySLayers);
+        fallingStage.addActor(fallingSLayers);
         messageStage.addActor(messageSLayers);
         infoStage.addActor(infoSLayers);
         contextStage.addActor(contextSLayers);
 
-
-//        Color backLight = SColor.AMUR_CORK_TREE;
-//        lights = colorCenter.gradient(colorCenter.lerp(RememberedTile.memoryColor, backLight, 0.2), backLight, 12, Interpolation.sineOut); // work from outside color in
-//        lights.addAll(colorCenter.gradient(backLight, SColor.ALICE_BLUE, 64, Interpolation.sineOut));
+        fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight >> 1);
+        finishY = fallingSLayers.worldY(totalDepth);
+        timeToFall = Math.abs(finishY - startingY) * fallDelay / mapSize.cellHeight;
         lightLevels = new float[76];
         float initial = lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
         for (int i = 0; i < 12; i++) {
@@ -326,7 +330,10 @@ public class Epigon extends Game {
         mapSLayers.animationCount = 0;
         creatures.clear();
         handBuilt = new HandBuilt(rng, mixer);
-        
+
+        fovResult = new double[worldWidth][worldHeight];
+        priorFovResult = new double[worldWidth][worldHeight];
+
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
         mapSLayers.addLayer();//next adds at level 3, used for effects
@@ -334,28 +341,70 @@ public class Epigon extends Game {
         for (int i = 0; i < messageCount; i++) {
             messages.add(emptyICS);
         }
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
-        message("Generating world.");
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, fovResult);
+
         worldGenerator = new WorldGenerator();
-        map = worldGenerator.buildWorld(map, handBuilt);
+        contextHandler.message("Have fun!",
+            "You are falling!",
+            style("Bump into statues ([*][/]s[,]) and stuff."),
+            style("Now [/]90% fancier[/]!"),
+            "Use ? for help, or q to quit.",
+            "Use numpad or arrow keys to move.");
 
-        GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
+        initPlayer();
 
+        prepCrawl();
+        putCrawlMap();
+//        prepFall();
+
+        processingCommand = false; // let the player do input
+    }
+
+    private void initPlayer(){
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.VIGOR).set(99.0);
+        player.stats.get(Stat.VIGOR).set(23.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
+        infoHandler.setPlayer(player);
+        mapOverlayHandler.setPlayer(player);
+        fallingHandler.setPlayer(player);
+
+        infoHandler.showPlayerHealthAndArmor();
+    }
+
+    private void prepFall() {
+        message("Falling..... Pres SPACE to continue");
+        int w = World.DIVE_HEADER[0].length(), d = worldDepth;
+        map = worldGenerator.buildDive(w, d, handBuilt);
+
+        // Start out in the horizontal middle and visual a bit down
+        player.location = Coord.get(w / 2, 0); // for... reasons, y is an offset from the camera position
+
+        mode = GameMode.DIVE;
+        mapInput.flush();
+        mapInput.setKeyHandler(fallingKeys);
+        mapInput.setMouse(fallingMouse);
+        fallingHandler.show(map);
+
+        paused = true;
+        nextFall = Instant.now().plusMillis(fallDelay);
+        pausedAt = Instant.now();
+    }
+
+    private void prepCrawl() {
+        message("Generating crawl.");
+        map = worldGenerator.buildWorld(worldWidth, worldHeight, 1, handBuilt)[0];
+
+        GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 3)
-                .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(
-                        mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
-                        GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
-        infoHandler.setPlayer(player);
-        mapOverlayHandler.setPlayer(player);
+            .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(
+            mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
+            GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
         floors.randomScatter(rng, 5);
         for (Coord coord : floors) {
             if (map.contents[coord.x][coord.y].blockage == null) {
@@ -376,24 +425,21 @@ public class Epigon extends Game {
             }
         }
 
-        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
-
         calcFOV(player.location.x, player.location.y);
-
         toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
         toPlayerDijkstra.rng = new RNG(); // random seed, player won't make deterministic choices
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
-        contextHandler.message("Have fun!",
-                "The fates of countless worlds rest on you...",
-                style("Bump into statues ([*][/]s[,]) and stuff."),
-                style("Now [/]90% fancier[/]!"),
-                "Use ? for help, or q to quit.",
-                "Use mouse, numpad, or arrow keys to move.");
-        processingCommand = false; // let the player do input
-        infoHandler.showPlayerHealthAndArmor();
-        putMap();
+        if (player.appearance != null) {
+            mapSLayers.removeGlyph(player.appearance);
+        }
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+
+        mode = GameMode.CRAWL;
+        mapInput.flush();
+        mapInput.setKeyHandler(mapKeys);
+        mapInput.setMouse(mapMouse);
     }
 
     private void runTurn() {
@@ -407,7 +453,7 @@ public class Epigon extends Game {
                 creature.overlayAppearance = null;
             }
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (map.fovResult[c.x][c.y] > 0)) {
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
@@ -421,40 +467,39 @@ public class Epigon extends Game {
                             applyStatChange(player, Stat.VIGOR, amt);
                             amt *= -1; // flip sign for output message
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
-                                if(ao.crit)
-                                    message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with " +
-                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
-                                else
-                                    message(Messaging.transform("The " + creature.name + " slay$ you with " +
-                                        amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                if (ao.crit) {
+                                    message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
+                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                } else {
+                                    message(Messaging.transform("The " + creature.name + " slay$ you with "
+                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                }
                             } else {
-                                if(ao.crit) {
+                                if (ao.crit) {
                                     mapSLayers.wiggle(player.appearance, 0.3f);
-                                    message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for " +
-                                            amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                    message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
+                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                } else {
+                                    message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "
+                                        + amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
                                 }
-                                else
-                                {
-                                    message(Messaging.transform("The " + creature.name + " " + element.verb + " you for " +
-                                            amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
-                                }
-                                if(ao.targetConditioned)
-                                {
-                                    message(Messaging.transform("The " + creature.name + " " +
-                                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @his attack!", creature.name, Messaging.NounTrait.NO_GENDER));
-                                    if(player.overlaySymbol != null) {
-                                        if(player.overlayAppearance != null) mapSLayers.removeGlyph(player.overlayAppearance);
+                                if (ao.targetConditioned) {
+                                    message(Messaging.transform("The " + creature.name + " "
+                                        + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @his attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                    if (player.overlaySymbol != null) {
+                                        if (player.overlayAppearance != null) {
+                                            mapSLayers.removeGlyph(player.overlayAppearance);
+                                        }
                                         player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
                                     }
                                 }
-
                             }
-                        } else
-                        {
-                            if(ao.crit)
+                        } else {
+                            if (ao.crit) {
                                 message("The " + creature.name + " missed you, but just barely.");
-                            else
+                            } else {
                                 message("The " + creature.name + " missed you.");
+                            }
                         }
                     }
                     else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
@@ -594,11 +639,11 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if (map.fovResult[x][y] > 0) {
+                if (fovResult[x][y] > 0) {
                     posrng.move(x, y);
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
@@ -623,19 +668,19 @@ public class Epigon extends Game {
         }
     }
 
-//    private void mixFOV(int checkX, int checkY) {
-//        for (int i = 0; i < priorFovResult.length; i++) {
-//            System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
-//        }
-//        calcFOV(checkX, checkY);
-//        for (int x = 0; x < fovResult.length; x++) {
-//            for (int y = 0; y < fovResult[0].length; y++) {
-//                double found = fovResult[x][y];
-//                fovResult[x][y] = Math.max(found, priorFovResult[x][y]);
-//                priorFovResult[x][y] = found;
-//            }
-//        }
-//    }
+    private void mixFOV(int checkX, int checkY) {
+        for (int i = 0; i < priorFovResult.length; i++) {
+            System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
+        }
+        calcFOV(checkX, checkY);
+        for (int x = 0; x < fovResult.length; x++) {
+            for (int y = 0; y < fovResult[0].length; y++) {
+                double found = fovResult[x][y];
+                fovResult[x][y] = Double.max(found, priorFovResult[x][y]);
+                priorFovResult[x][y] = found;
+            }
+        }
+    }
 
     private void calcDijkstra() {
         toPlayerDijkstra.clearGoals();
@@ -836,7 +881,7 @@ public class Epigon extends Game {
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
-    public void putMap() {
+    public void putCrawlMap() {
         float time = (System.currentTimeMillis() & 0xffffffL) * 0.00125f; // if you want to adjust the speed of flicker, change the multiplier
         long time0 = Noise.longFloor(time);
 
@@ -846,18 +891,16 @@ public class Epigon extends Game {
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                float sightAmount = (float) map.fovResult[x][y];
+                float sightAmount = (float) fovResult[x][y];
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if ((creature = creatures.get(Coord.get(x, y))) != null ) {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
-                        creature.appearance.setPackedColor( 
-                                lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
+                        creature.appearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
                         if(creature.overlayAppearance != null)
-                            creature.overlayAppearance.setPackedColor(
-                                    lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
+                            creature.overlayAppearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();
@@ -895,6 +938,35 @@ public class Epigon extends Game {
         }
     }
 
+    public void showFallingGameOver(){
+        message("");
+        message("");
+        message("");
+        message("");
+        message("You have died.");
+        message("");
+        message("Restart (r) or Quit (q)?");
+
+        mapInput.flush();
+        mapInput.setKeyHandler(fallingGameOverKeys);
+    }
+    public void showFallingWin(){
+        message("You have reached the Dragon's Hoard!");
+        message("On the way, you gathered:");
+        List<String> lines = StringKit.wrap(StringKit.join(", ", player.inventory), messageSize.gridWidth - 2);
+        int start;
+        for (start = 0; start < lines.size() && start < 4; start++) {
+            message(lines.get(start));
+        }
+//        for (; start < 4; start++) {
+//            message("");
+//        }
+        message("Restart (r) or Quit (q)?");
+
+        mapInput.flush();
+        mapInput.setKeyHandler(fallingGameOverKeys);
+    }
+
     @Override
     public void render() {
         super.render();
@@ -903,9 +975,53 @@ public class Epigon extends Game {
         Gdx.gl.glClearColor(unseenColor.r, unseenColor.g, unseenColor.b, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        mapStage.getCamera().position.x = player.appearance.getX();
-        mapStage.getCamera().position.y = player.appearance.getY();
-        putMap();
+        switch (mode) {
+            case CRAWL:
+                // crawl mode needs the camera to move around with the player since the playable crawl map is bigger than the view space
+                mapStage.getCamera().position.x = player.appearance.getX();
+                mapStage.getCamera().position.y = player.appearance.getY();
+                putCrawlMap();
+                break;
+            case DIVE:
+                if(fallingHandler.reachedGoal)
+                {
+                    paused = true;
+                    pausedAt = Instant.now();
+                    showFallingWin();
+                    fallingHandler.reachedGoal = false;
+                    fallingHandler.update();
+                    break;
+                }
+                // this goes here; otherwise the player "skips" abruptly when coming out of pause
+                fallingHandler.setCurrentDepth(fallingSLayers.gridY(fallingStage.getCamera().position.y = MathUtils.lerp(startingY, finishY,
+                        (currentFallDuration + fallDuration) / timeToFall)));
+                if (!paused) {
+                    currentFallDuration = (unpausedAt.until(Instant.now(), ChronoUnit.MILLIS));
+                    if (Instant.now().isAfter(nextInput)) {
+                        fallingHandler.processInput();
+                        nextInput = Instant.now().plusMillis(inputDelay);
+                    }
+                    if (Instant.now().isAfter(nextFall)) {
+                        nextFall = Instant.now().plusMillis(fallDelay);
+                        fallingHandler.fall();
+                    }
+                    infoHandler.updateDisplay();
+
+                    for (Stat s : Stat.values()) {
+                        if (player.stats.get(s).actual() <= 0) {
+                            paused = true;
+                            showFallingGameOver();
+                        }
+                    }
+                } else {
+                    fallDuration += currentFallDuration;
+                    currentFallDuration = 0L;
+                    unpausedAt = Instant.now();
+                    fallingHandler.update();
+                }
+                break;
+        }
+
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
@@ -939,24 +1055,40 @@ public class Epigon extends Game {
         messageViewport.apply(false);
         messageStage.act();
         messageStage.draw();
+        
+        if(mode.equals(GameMode.CRAWL)) {
+            //here we apply the other viewport, which clips a different area while leaving the message area intact.
+            mapViewport.apply(false);
+            mapStage.act();
+            //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
+            batch.setProjectionMatrix(mapStage.getCamera().combined);
+            //then we start a batch and manually draw the stage without having it handle its batch...
+            batch.begin();
+            mapSLayers.font.configureShader(batch);
+            mapStage.getRoot().draw(batch, 1f);
+            //so we can draw the actors independently of the stage while still in the same batch
+            //player.appearance.draw(batch, 1.0f);
+            //we still need to end
+            batch.end();
 
-        //here we apply the other viewport, which clips a different area while leaving the message area intact.
-        mapViewport.apply(false);
-        mapStage.act();
-        //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
-        batch.setProjectionMatrix(mapStage.getCamera().combined);
-        //then we start a batch and manually draw the stage without having it handle its batch...
-        batch.begin();
-        mapSLayers.font.configureShader(batch);
-        mapStage.getRoot().draw(batch, 1f);
-        //so we can draw the actors independently of the stage while still in the same batch
-        //player.appearance.draw(batch, 1.0f);
-        //we still need to end
-        batch.end();
-
-        mapOverlayStage.act();
-        mapOverlayStage.draw();
-
+            mapOverlayStage.act();
+            mapOverlayStage.draw();
+        }
+        else {
+            //here we apply the other viewport, which clips a different area while leaving the message area intact.
+            fallingViewport.apply(false);
+            fallingStage.act();
+            //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
+            batch.setProjectionMatrix(fallingStage.getCamera().combined);
+            //then we start a batch and manually draw the stage without having it handle its batch...
+            batch.begin();
+            fallingSLayers.font.configureShader(batch);
+            fallingStage.getRoot().draw(batch, 1f);
+            //so we can draw the actors independently of the stage while still in the same batch
+            //player.appearance.draw(batch, 1.0f);
+            //we still need to end
+            batch.end(); 
+        }
         //uncomment the upcoming line if you want to see how fast this can run at top speed...
         //for me, tommyettinger, on a laptop with recent integrated graphics, I get about 500 FPS.
         //this needs vsync set to false in DesktopLauncher.
@@ -1010,6 +1142,10 @@ public class Epigon extends Game {
 
         mapOverlayViewport.update(width, height, false);
         mapOverlayViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
+                width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+
+        fallingViewport.update(width, height, false);
+        fallingViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
     }
 
@@ -1078,12 +1214,18 @@ public class Epigon extends Game {
                 case MOVE_UP_RIGHT:
                     scheduleMove(Direction.UP_RIGHT);
                     return;
+                case MOVE_LOWER:
+                    prepFall();
+                    return;
+                case MOVE_HIGHER:
+                    // TODO
+                    return;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
                         .map(d -> player.location.translate(d))
                         .filter(c -> map.inBounds(c))
-                        .filter(c -> map.fovResult[c.x][c.y] > 0)
+                        .filter(c -> fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
                         .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
@@ -1095,7 +1237,7 @@ public class Epigon extends Game {
                     Arrays.stream(Direction.OUTWARDS)
                         .map(d -> player.location.translate(d))
                         .filter(c -> map.inBounds(c))
-                        .filter(c -> map.fovResult[c.x][c.y] > 0)
+                        .filter(c -> fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
                         .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
@@ -1104,9 +1246,9 @@ public class Epigon extends Game {
                     break;
                 case GATHER: // Pick everything nearby up
                     message("Picking up all nearby small things");
-                    for (int i = 0; i < 8; i++) {
-                        Coord c = player.location.translate(Direction.OUTWARDS[i]);
-                        if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
+                    for (Direction dir : Direction.values()) {
+                        Coord c = player.location.translate(dir);
+                        if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
                             EpiTile tile = map.contents[c.x][c.y];
                             ListIterator<Physical> it = tile.contents.listIterator();
                             Physical p;
@@ -1135,7 +1277,7 @@ public class Epigon extends Game {
                     for (Physical dropped : player.unequip(BOTH)) {
                         for (int i = 0, offset = GauntRNG.next(++player.chaos, 3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
-                            if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
+                            if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
                                 map.contents[c.x][c.y].add(dropped);
                                 break;
                             }
@@ -1200,18 +1342,6 @@ public class Epigon extends Game {
                     break;
                 case MOVE_RIGHT:
                     mapOverlayHandler.move(Direction.RIGHT);
-                    break;
-                case MOVE_DOWN_LEFT:
-                    // TODO - keyboard controls in equipment screen
-                    break;
-                case MOVE_DOWN_RIGHT:
-                    // TODO - keyboard controls in equipment screen
-                    break;
-                case MOVE_UP_LEFT:
-                    // TODO - keyboard controls in equipment screen
-                    break;
-                case MOVE_UP_RIGHT:
-                    // TODO - keyboard controls in equipment screen
                     break;
                 case DRAW:
                     equipItem();
@@ -1293,18 +1423,6 @@ public class Epigon extends Game {
                 case MOVE_RIGHT:
                     mapOverlayHandler.move(Direction.RIGHT);
                     break;
-                case MOVE_DOWN_LEFT:
-                    // TODO - keyboard controls in help screen
-                    break;
-                case MOVE_DOWN_RIGHT:
-                    // TODO - keyboard controls in help screen
-                    break;
-                case MOVE_UP_LEFT:
-                    // TODO - keyboard controls in help screen
-                    break;
-                case MOVE_UP_RIGHT:
-                    // TODO - keyboard controls in help screen
-                    break;
                 case INFO_PRIOR:
                     infoHandler.prior();
                     break;
@@ -1328,6 +1446,89 @@ public class Epigon extends Game {
             }
         }
     };
+
+    private final KeyHandler fallingKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            Verb verb = ControlMapping.defaultFallingViewMapping.get(combined);
+            if (verb == null){
+                message("Unknown input for falling mode: " + key);
+                return;
+            }
+            switch (verb) {
+                case MOVE_UP:
+                    if (!paused) {
+                    nextInput = Instant.now().plusMillis(inputDelay);
+                    fallingHandler.move(Direction.UP);
+                    }
+                    break;
+                case MOVE_DOWN:
+                    if (!paused) {
+                    nextInput = Instant.now().plusMillis(inputDelay);
+                    fallingHandler.move(Direction.DOWN);
+                    }
+                    break;
+                case MOVE_LEFT:
+                    if (!paused) {
+                    nextInput = Instant.now().plusMillis(inputDelay);
+                    fallingHandler.move(Direction.LEFT);
+                    }
+                    break;
+                case MOVE_RIGHT:
+                    if (!paused) {
+                    nextInput = Instant.now().plusMillis(inputDelay);
+                    fallingHandler.move(Direction.RIGHT);
+                    }
+                    break;
+                case PAUSE:
+                    paused = !paused;
+                    if (paused) {
+                        pausedAt = Instant.now();
+                        message("You are hovering, have a look around!");
+                    } else { // need to calculate time offsets
+                        long pausedFor = pausedAt.until(Instant.now(), ChronoUnit.MILLIS);
+                        nextFall = nextFall.plusMillis(pausedFor);
+                        message("Falling once more!");
+                    }
+                    break;
+                case SAVE:
+                    // TODO
+                    break;
+                case QUIT:
+                    // TODO
+                    break;
+                default:
+                    message("Can't " + verb.name + " from falling view.");
+                    break;
+            }
+        }
+    };
+
+    private final KeyHandler fallingGameOverKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
+            Verb verb = ControlMapping.defaultFallingViewGameOverMapping.get(combined);
+            if (verb == null){
+                message("Unknown input for falling game over mode: " + key);
+                return;
+            }
+            switch (verb) {
+                case REPLAY:
+                    initPlayer();
+                    prepFall();
+                    break;
+                case QUIT:
+                    Gdx.app.exit();
+                    break;
+                default:
+                    message("Can't " + verb.name + " from falling view.");
+                    break;
+            }
+        }
+    };
+
     private final KeyHandler debugKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
@@ -1367,6 +1568,14 @@ public class Epigon extends Game {
     });
 
     private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            return false; // No-op for now
+        }
+    });
+
+    private final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -1424,7 +1633,7 @@ public class Epigon extends Game {
                 return false;
             }
             
-            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
+            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || fovResult[screenX][screenY] <= 0.0) {
                 toCursor.clear(); // don't show path when mouse moves out of range or view
                 return false;
             }

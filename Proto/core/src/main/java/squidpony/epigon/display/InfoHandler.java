@@ -442,7 +442,7 @@ public class InfoHandler {
     }
 
     private void damage(Coord origin, Color color, long chaos) {
-        fx.addAction(new DamageEffect(GauntRNG.nextFloat(chaos--) * 1.9f +  1.2f, GauntRNG.between(chaos, 2, 4), origin,
+        fx.addAction(new DamageEffect(ThrustAltRNG.determineFloat(chaos--) * 1.9f +  1.2f, GauntRNG.between(chaos, 2, 4), origin,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),

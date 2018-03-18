@@ -5,15 +5,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.data.specific.Physical;
-import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.universe.LiveValue;
 import squidpony.epigon.universe.Stat;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
-import squidpony.squidmath.EnumOrderedSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,45 +64,28 @@ public class ContextHandler {
     private Actor miniMap;
     private int width;
     private int height;
-    private EpiMap epiMap;
     private TextCellFactory miniMapFont;
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
     private EnumOrderedMap<ContextMode, char[][]> cachedTexts = new EnumOrderedMap<>(ContextMode.class);
     private EnumOrderedMap<ContextMode, float[][]> cachedColors = new EnumOrderedMap<>(ContextMode.class);
-    private EnumOrderedSet<ContextMode> cacheIsValid = new EnumOrderedSet<>(ContextMode.class);
+    private EnumOrderedMap<ContextMode, Boolean> cacheIsValid = new EnumOrderedMap<>(ContextMode.class);
     private float defaultFrontColor;
 
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public ContextHandler(SquidLayers layers, SparseLayers mainMap, EpiMap map) {
+    public ContextHandler(SquidLayers layers, SparseLayers mainMap) {
         width = layers.getGridWidth();
         height = layers.getGridHeight();
         back = layers.getBackgroundLayer();
         front = layers.getForegroundLayer();
-        epiMap = map;
         miniMap = new Actor(){
             @Override
             public void draw(Batch batch, float parentAlpha) {
                 super.draw(batch, parentAlpha);
                 float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(), yOff = yo + 1f + mainMap.gridHeight * 3f;
                 //mainMap.font.configureShader(batch);
-                float widthInc = miniMapFont.actualCellWidth, heightInc = -miniMapFont.actualCellHeight;
-                RememberedTile memory;
-                for (int i = 0; i < epiMap.width; i++) {
-                    for (int j = 0; j < epiMap.height; j++) {
-                        if((memory = epiMap.remembered[i][j]) != null)
-                        {
-                            miniMapFont.draw(batch, '\u0000', 
-                                    (epiMap.fovResult[i][j] > 0)
-                                            ? SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_WHITE, 0.25f)
-                                            : SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_BLACK, 0.2f),
-                                    xo + widthInc * i, yOff + heightInc * j);
-
-                        }
-                    }
-                }
-                //mainMap.getLayer(0).draw(batch, miniMapFont, xo, yOff, '\u0000');
+                mainMap.getLayer(0).draw(batch, miniMapFont, xo, yOff, '\u0000');
                 int x, y;
                 ArrayList<TextCellFactory.Glyph> glyphs = mainMap.glyphs;
                 for (int i = 0; i < glyphs.size(); i++) {
@@ -113,14 +93,11 @@ public class ContextHandler {
                     if(glyph == null)
                         continue;
                     //glyph.act(Gdx.graphics.getDeltaTime());
-                    if((x = mainMap.gridX(glyph.getX())) < 0 || x >= mainMap.gridWidth ||
-                            (y = mainMap.gridY(glyph.getY())) < 0 || y >= mainMap.gridHeight ||
+                    if((x = Math.round((glyph.getX() - xo) / 3)) < 0 || x >= mainMap.gridWidth ||
+                            (y = Math.round((glyph.getY() - yOff) / -3 + mainMap.gridHeight)) < 0 || y >= mainMap.gridHeight ||
                             mainMap.backgrounds[x][y] == 0f)
                         continue;
-                    miniMapFont.draw(batch, '\u0000', i == 0
-                            ? -0x1.fffep126F // SColor.CYAN
-                            : -0x1.0049fep125F, // SColor.SCARLET
-                            xo + widthInc * x, yOff + heightInc * y);
+                    miniMapFont.draw(batch, '\u0000', glyph.getPackedColor(), glyph.getX(), glyph.getY());
                 }
             }
         };
@@ -134,7 +111,7 @@ public class ContextHandler {
         for (ContextMode mode : ContextMode.values()) {
             cachedTexts.put(mode, ArrayTools.fill(' ', width, height));
             cachedColors.put(mode, ArrayTools.fill(defaultFrontColor, width, height));
-            cacheIsValid.remove(mode);
+            cacheIsValid.put(mode, Boolean.FALSE);
         }
 
         ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
@@ -214,7 +191,7 @@ public class ContextHandler {
     }
 
     public void invalidateCache(ContextMode mode){
-        cacheIsValid.remove(mode);
+        cacheIsValid.put(mode, Boolean.FALSE);
     }
 
     private void switchTo(ContextMode mode) {
@@ -222,7 +199,7 @@ public class ContextHandler {
             miniMap.setVisible(false);
         }
         contextMode = mode;
-        if (cacheIsValid.contains(mode)) { // map cache is never valid
+        if (cacheIsValid.get(mode)) { // map cache is never valid
             putFromCache();
         } else {
             switch (mode) {
@@ -254,7 +231,7 @@ public class ContextHandler {
             put(1, 3, "Max:   " + lv.max());
             put(1, 4, "Delta: " + lv.delta());
         }
-        cacheIsValid.add(contextMode);
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void contextMiniMap() {
@@ -271,7 +248,7 @@ public class ContextHandler {
             .map(i -> i.name)
             .collect(Collectors.toList())
             .toArray(new String[]{}));
-        cacheIsValid.add(contextMode);
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void tileContents(Coord location, EpiTile tile) {
@@ -292,7 +269,7 @@ public class ContextHandler {
             }
             put(tileDescription.split("\n"));
         }
-        cacheIsValid.add(contextMode);
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
     public void message(CharSequence... text) {
@@ -300,7 +277,7 @@ public class ContextHandler {
         miniMap.setVisible(false);
         clear();
         put(text);
-        cacheIsValid.add(contextMode);
+        cacheIsValid.put(contextMode, Boolean.TRUE);
     }
 
 }

@@ -25,6 +25,9 @@ public class EpiTile {
     public List<Physical> contents = new ArrayList<>();
     public Physical blockage;
 
+    private final float tintColor = dbColors[posrng.next(5)];
+    private final float tintAmount = posrng.nextFloat(0.3f);
+
     /**
      * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
      * fully transparent.
@@ -126,14 +129,15 @@ public class EpiTile {
     public float getForegroundColor() {
         //check in order of preference
         if (blockage != null) {
-            if(blockage.creatureData != null)
-                return SColor.lerpFloatColors(floor.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));//getCreature().color;
-            else
-                return SColor.lerpFloatColors(blockage.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));
-        } else if (!contents.isEmpty()){
+            if (blockage.creatureData != null) {
+                return SColor.lerpFloatColors(getCreature().color, tintColor, tintAmount);
+            } else {
+                return SColor.lerpFloatColors(blockage.color, tintColor, tintAmount);
+            }
+        } else if (!contents.isEmpty()) {
             return contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            return SColor.lerpFloatColors(floor.color, dbColors[posrng.next(5)], posrng.nextFloat(0.3f));
+            return SColor.lerpFloatColors(floor.color, tintColor, tintAmount);
         }
 
         return 0f;

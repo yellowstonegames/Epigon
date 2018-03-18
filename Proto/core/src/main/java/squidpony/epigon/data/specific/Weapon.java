@@ -11,6 +11,7 @@ import squidpony.epigon.universe.Element;
 import squidpony.epigon.universe.Rating;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.ThrustAltRNG;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +99,7 @@ public class Weapon {
     public static Weapon randomWeapon(long state)
     {
         if(!initialized) init();
-        return weapons.getAt(GauntRNG.nextInt(state, weapons.size()));
+        return weapons.getAt(ThrustAltRNG.determineBounded(state, weapons.size()));
     }
     public static OrderedMap<String, Weapon> getPhysicalWeapons()
     {
@@ -113,7 +114,7 @@ public class Weapon {
     public static Weapon randomPhysicalWeapon(long state)
     {
         if(!initialized) init();
-        return physicalWeapons.getAt(GauntRNG.nextInt(state, physicalWeapons.size()));
+        return physicalWeapons.getAt(ThrustAltRNG.determineBounded(state, physicalWeapons.size()));
     }
     public static OrderedMap<String, Weapon> getUnarmedWeapons()
     {
@@ -128,7 +129,7 @@ public class Weapon {
     public static Weapon randomUnarmedWeapon(long state)
     {
         if(!initialized) init();
-        return unarmedWeapons.getAt(GauntRNG.nextInt(state, unarmedWeapons.size()));
+        return unarmedWeapons.getAt(ThrustAltRNG.determineBounded(state, unarmedWeapons.size()));
     }
 
     //public static final Weapon UNARMED = weapons.getAt(0);
