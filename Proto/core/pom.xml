@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.squidpony</groupId>
+        <artifactId>epigon-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../</relativePath>
+    </parent>
+    <artifactId>core</artifactId>
+    <name>core</name>
+
+    <description>Epigon, a gonzo roguelike in development; core logic</description>
+
+    <url>https://github.com/SquidPony/Epigon</url>
+
+    <developers>
+        <developer>
+            <name>Eben Howard ( https://github.com/SquidPony )</name>
+            <email>example@example.com</email>
+        </developer>
+        <developer>
+            <name>Tommy Ettinger ( https://github.com/tommyettinger )</name>
+            <email>example@example.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Unlicensed</name>
+            <comments>We will figure out licensing after we figure out what we're making...</comments>
+        </license>
+    </licenses>
+
+    <inceptionYear>2016</inceptionYear>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.github.SquidPony.SquidLib</groupId>
+            <artifactId>squidlib</artifactId>
+            <version>${squidlib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.SquidPony.SquidLib</groupId>
+            <artifactId>squidlib-extra</artifactId>
+            <version>${squidlib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+    </dependencies>
+
+    <prerequisites>
+        <maven>3.3.0</maven>
+    </prerequisites>
+</project>

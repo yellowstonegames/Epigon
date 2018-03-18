@@ -1,8 +1,8 @@
 package squidpony.epigon.playground.tests;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -825,17 +825,12 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
     }
 
     public static void main(String[] arg) {
-        LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.title = "SquidLib Demo: Detailed World Map";
-        config.width = width * cellWidth;
-        config.height = height * cellHeight;
-        config.foregroundFPS = 60;
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setTitle("SquidLib Demo: Detailed World Map");
+        config.setWindowedMode(width * cellWidth, height * cellHeight);
         //config.fullscreen = true;
-        config.backgroundFPS = 5;
-        config.addIcon("libgdx16.png", Files.FileType.Internal);
-        config.addIcon("libgdx32.png", Files.FileType.Internal);
-        config.addIcon("libgdx64.png", Files.FileType.Internal);
-        config.addIcon("libgdx128.png", Files.FileType.Internal);
-        new LwjglApplication(new ShapedWorldMapDemo(), config);
+        config.setIdleFPS(5);
+        config.setWindowIcon(Files.FileType.Internal, "libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+        new Lwjgl3Application(new ShapedWorldMapDemo(), config);
     }
 }

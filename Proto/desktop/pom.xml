@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.squidpony</groupId>
+        <artifactId>epigon-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../</relativePath>
+    </parent>
+    <artifactId>desktop</artifactId>
+    <name>desktop</name>
+
+    <description>Epigon, a gonzo roguelike in development; desktop application module</description>
+
+    <url>https://github.com/SquidPony/Epigon</url>
+
+    <developers>
+        <developer>
+            <name>Eben Howard ( https://github.com/SquidPony )</name>
+            <email>example@example.com</email>
+        </developer>
+        <developer>
+            <name>Tommy Ettinger ( https://github.com/tommyettinger )</name>
+            <email>example@example.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Unlicensed</name>
+            <comments>We will figure out licensing after we figure out what we're making...</comments>
+        </license>
+    </licenses>
+
+    <inceptionYear>2016</inceptionYear>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.squidpony</groupId>
+            <artifactId>core</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.SquidPony.SquidLib</groupId>
+            <artifactId>squidlib</artifactId>
+            <version>${squidlib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-backend-lwjgl3</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-platform</artifactId>
+            <version>${gdx.version}</version>
+            <classifier>natives-desktop</classifier>
+        </dependency>
+
+    </dependencies>
+
+    <prerequisites>
+        <maven>3.3.0</maven>
+    </prerequisites>
+
+    <issueManagement>
+        <url>https://github.com/SquidPony/Epigon/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+    
+    <scm>
+        <connection>scm:git:git@github.com:SquidPony/Epigon.git</connection>
+        <developerConnection>scm:git:git@github.com:SquidPony/Epigon.git</developerConnection>
+        <url>git@github.com:SquidPony/Epigon.git</url>
+    </scm>
+    <profiles>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+            To sign (only needed for Maven Central), add this argument to the mvn command line, just after mvn...
+            -DperformRelease=true
+            -->
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    <build>
+        <resources>
+            <resource>
+                <directory>assets</directory>
+            </resource>
+        </resources>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <testOutputDirectory>out/test/classes</testOutputDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <excludes>
+                        <exclude>**/emu/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includePom>true</includePom>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.version}</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <debug>false</debug>
+                    <minmemory>256m</minmemory>
+                    <maxmemory>1024m</maxmemory>
+                    <quiet>true</quiet>
+                    <doctitle>${project.name} ${project.version}</doctitle>
+                    <windowtitle>${project.name} ${project.version}</windowtitle>
+                    <splitindex>true</splitindex>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <javadocVersion>${jdk.version}</javadocVersion>
+                    <links>
+                        <!--<link>http://docs.oracle.com/javase/8/docs/api/</link>-->
+                        <link>http://docs.oracle.com/javase/7/docs/api/</link>
+                        <link>http://docs.oracle.com/javase/6/docs/api/</link>
+                        <link>http://docs.oracle.com/javase/1.5.0/docs/api/</link>
+                    </links>
+                    <linksource>true</linksource>
+                    <detectOfflineLinks>false</detectOfflineLinks>
+                    <excludePackageNames>*emu*</excludePackageNames>
+                    <!--<additionalparam>-Xdoclint:none</additionalparam>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <classpathScope>runtime</classpathScope>
+                    <addOutputToClasspath>true</addOutputToClasspath>
+                    <addResourcesToClasspath>true</addResourcesToClasspath>
+                    <mainClass>squidpony.epigon.desktop.DesktopLauncher</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <!-- add Main-Class to manifest file -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>squidpony.epigon.desktop.DesktopLauncher</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
