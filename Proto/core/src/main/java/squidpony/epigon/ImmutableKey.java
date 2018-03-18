@@ -1,7 +1,6 @@
 package squidpony.epigon;
 
 import squidpony.squidmath.CrossHash;
-import squidpony.squidmath.ThrustAltRNG;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public interface ImmutableKey {
      */
     static long precomputeHash(String namespace, long unique)
     {
-        return ThrustAltRNG.determine(CrossHash.hash64(namespace) + unique);
+        return GauntRNG.nextLong(CrossHash.hash64(namespace) + unique);
     }
 
     /**

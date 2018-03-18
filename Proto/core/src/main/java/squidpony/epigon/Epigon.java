@@ -67,14 +67,14 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call ThrustAltRNG-specific methods, mainly skip()
-    public final ThrustAltRNG thrustAltRNG = new ThrustAltRNG(seed);
-    public final StatefulRNG rng = new StatefulRNG(thrustAltRNG);
+    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
+    public final LightRNG lightRNG = new LightRNG(seed);
+    public final StatefulRNG rng = new StatefulRNG(lightRNG);
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final ThrustAltRNG rootChaos = new ThrustAltRNG();
+    public static final LightRNG rootChaos = new LightRNG();
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
@@ -122,8 +122,6 @@ public class Epigon extends Game {
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
-    private double[][] fovResult;
-    private double[][] priorFovResult;
     private OrderedMap<Coord, Physical> creatures = new OrderedMap<>();
     private int autoplayTurns = 0;
     private boolean processingCommand = true;
@@ -181,7 +179,6 @@ public class Epigon extends Game {
         sound = new SoundManager();
         colorCenter = new SquidColorCenter();
 
-        // Set the map size early so things can reference it
         System.out.println(rng.getState());
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
@@ -331,9 +328,6 @@ public class Epigon extends Game {
         creatures.clear();
         handBuilt = new HandBuilt(rng, mixer);
 
-        fovResult = new double[worldWidth][worldHeight];
-        priorFovResult = new double[worldWidth][worldHeight];
-
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
         mapSLayers.addLayer();//next adds at level 3, used for effects
@@ -341,7 +335,6 @@ public class Epigon extends Game {
         for (int i = 0; i < messageCount; i++) {
             messages.add(emptyICS);
         }
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, fovResult);
 
         worldGenerator = new WorldGenerator();
         contextHandler.message("Have fun!",
@@ -379,6 +372,7 @@ public class Epigon extends Game {
         message("Falling..... Pres SPACE to continue");
         int w = World.DIVE_HEADER[0].length(), d = worldDepth;
         map = worldGenerator.buildDive(w, d, handBuilt);
+        contextHandler.setMap(map);
 
         // Start out in the horizontal middle and visual a bit down
         player.location = Coord.get(w / 2, 0); // for... reasons, y is an offset from the camera position
@@ -397,6 +391,8 @@ public class Epigon extends Game {
     private void prepCrawl() {
         message("Generating crawl.");
         map = worldGenerator.buildWorld(worldWidth, worldHeight, 1, handBuilt)[0];
+        contextHandler.setMap(map);
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
 
         GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
         player.location = floors.singleRandom(rng);
@@ -453,7 +449,7 @@ public class Epigon extends Game {
                 creature.overlayAppearance = null;
             }
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (fovResult[c.x][c.y] > 0)) {
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (map.fovResult[c.x][c.y] > 0)) {
                 List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
                 if (path != null && path.size() > 1) {
                     Coord step = path.get(path.size() - 2);
@@ -639,11 +635,11 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        FOV.reuseFOV(map.opacities(), fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if (fovResult[x][y] > 0) {
+                if (map.fovResult[x][y] > 0) {
                     posrng.move(x, y);
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
@@ -664,20 +660,6 @@ public class Epigon extends Game {
                     if(creature.overlayAppearance != null)
                         mapSLayers.removeGlyph(creature.overlayAppearance);
                 }
-            }
-        }
-    }
-
-    private void mixFOV(int checkX, int checkY) {
-        for (int i = 0; i < priorFovResult.length; i++) {
-            System.arraycopy(fovResult[i], 0, priorFovResult[i], 0, priorFovResult[0].length);
-        }
-        calcFOV(checkX, checkY);
-        for (int x = 0; x < fovResult.length; x++) {
-            for (int y = 0; y < fovResult[0].length; y++) {
-                double found = fovResult[x][y];
-                fovResult[x][y] = Double.max(found, priorFovResult[x][y]);
-                priorFovResult[x][y] = found;
             }
         }
     }
@@ -891,7 +873,7 @@ public class Epigon extends Game {
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                float sightAmount = (float) fovResult[x][y];
+                float sightAmount = (float) map.fovResult[x][y];
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
@@ -1055,7 +1037,7 @@ public class Epigon extends Game {
         messageViewport.apply(false);
         messageStage.act();
         messageStage.draw();
-        
+
         if(mode.equals(GameMode.CRAWL)) {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
             mapViewport.apply(false);
@@ -1087,7 +1069,7 @@ public class Epigon extends Game {
             //so we can draw the actors independently of the stage while still in the same batch
             //player.appearance.draw(batch, 1.0f);
             //we still need to end
-            batch.end(); 
+            batch.end();
         }
         //uncomment the upcoming line if you want to see how fast this can run at top speed...
         //for me, tommyettinger, on a laptop with recent integrated graphics, I get about 500 FPS.
@@ -1225,7 +1207,7 @@ public class Epigon extends Game {
                     Arrays.stream(Direction.OUTWARDS)
                         .map(d -> player.location.translate(d))
                         .filter(c -> map.inBounds(c))
-                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .filter(c -> map.fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
                         .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
@@ -1237,7 +1219,7 @@ public class Epigon extends Game {
                     Arrays.stream(Direction.OUTWARDS)
                         .map(d -> player.location.translate(d))
                         .filter(c -> map.inBounds(c))
-                        .filter(c -> fovResult[c.x][c.y] > 0)
+                        .filter(c -> map.fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
                         .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
@@ -1248,7 +1230,7 @@ public class Epigon extends Game {
                     message("Picking up all nearby small things");
                     for (Direction dir : Direction.values()) {
                         Coord c = player.location.translate(dir);
-                        if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
+                        if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
                             EpiTile tile = map.contents[c.x][c.y];
                             ListIterator<Physical> it = tile.contents.listIterator();
                             Physical p;
@@ -1277,7 +1259,7 @@ public class Epigon extends Game {
                     for (Physical dropped : player.unequip(BOTH)) {
                         for (int i = 0, offset = GauntRNG.next(++player.chaos, 3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
-                            if (map.inBounds(c) && fovResult[c.x][c.y] > 0) {
+                            if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
                                 map.contents[c.x][c.y].add(dropped);
                                 break;
                             }
@@ -1632,8 +1614,8 @@ public class Epigon extends Game {
             if (cursor.x == screenX && cursor.y == screenY){
                 return false;
             }
-            
-            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || fovResult[screenX][screenY] <= 0.0) {
+
+            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
                 toCursor.clear(); // don't show path when mouse moves out of range or view
                 return false;
             }
