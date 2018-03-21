@@ -207,7 +207,7 @@ public class Epigon extends Game {
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
 
-        font = DefaultResources.getLeanFamily();
+        font = DefaultResources.getCrispLeanFamily();
         TextCellFactory smallFont = font.copy();
         messageIndex = messageCount;
         messageSLayers = new SquidLayers(
