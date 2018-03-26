@@ -1,0 +1,30 @@
+package squidpony.epigon.data;
+
+/**
+ * List of the possible skills such as Woodchopping, Archery, etc.
+ *
+ * @author Eben Howard - http://squidpony.com
+ */
+public class Skill extends EpiData {
+
+    public Skill parent;
+
+    public Skill(String name) {
+        this.name = name;
+    }
+
+    public Skill(String name, Skill parent) {
+        this.name = name;
+        this.parent = parent;
+    }
+
+    public boolean hasParent(Skill check){
+        if (this == check){
+            return true;
+        }
+        if (parent == null){
+            return false;
+        }
+        return parent.hasParent(check);
+    }
+}
