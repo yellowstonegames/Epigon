@@ -1,0 +1,12 @@
+{
+    "inclusions":[{
+            "name":"abelsonite",
+            "frontColor":"purple_taupe",
+            "backColor":"russet"
+        }, {
+            "name":"abernathyite",
+            "frontColor":"gray",
+            "backColor":"black"
+        }
+    ]
+}
