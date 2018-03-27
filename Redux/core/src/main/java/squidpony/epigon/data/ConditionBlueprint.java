@@ -85,7 +85,7 @@ public class ConditionBlueprint extends EpiData {
     }
     public static OrderedMap<String, ConditionBlueprint> CONDITIONS = OrderedMap.makeMap(
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
-                    ChangeTable.makeCT(CalcStat.PRECISION, '-', 4.0, CalcStat.INFLUENCE, '-', 4.0, CalcStat.CRIT, '-', 2.0), 
+                    ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
                     null, null, null)
 //            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 0, 0, Element.BLUNT, null,
 //                    null,

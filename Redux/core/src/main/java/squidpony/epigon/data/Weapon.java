@@ -137,18 +137,19 @@ public class Weapon {
     {
         rawWeapon = raw;
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
+        final int plus = (int)'+';
         calcStats = ChangeTable.makeCT(
-                CalcStat.PRECISION, '+', raw.precision,
-                CalcStat.DAMAGE, '+', raw.damage,
-                CalcStat.CRIT, '+', raw.crit,
-                CalcStat.INFLUENCE, '+', raw.influence,
-                CalcStat.EVASION, '+', raw.evasion,
-                CalcStat.DEFENSE, '+', raw.defense,
-                CalcStat.LUCK, '+', raw.luck,
-                CalcStat.STEALTH, '+', raw.stealth,
-                CalcStat.RANGE, '+', raw.range,
-                CalcStat.AREA, '+', raw.area,
-                CalcStat.PREPARE, '+', raw.prepare);
+                CalcStat.PRECISION, plus, raw.precision,
+                CalcStat.DAMAGE, plus, raw.damage,
+                CalcStat.CRIT, plus, raw.crit,
+                CalcStat.INFLUENCE, plus, raw.influence,
+                CalcStat.EVASION, plus, raw.evasion,
+                CalcStat.DEFENSE, plus, raw.defense,
+                CalcStat.LUCK, plus, raw.luck,
+                CalcStat.STEALTH, plus, raw.stealth,
+                CalcStat.RANGE, plus, raw.range,
+                CalcStat.AREA, plus, raw.area,
+                CalcStat.PREPARE, plus, raw.prepare);
 //        calcStats[PRECISION] = raw.precision;
 //        calcStats[DAMAGE] = raw.damage;
 //        calcStats[CRIT] = raw.crit;

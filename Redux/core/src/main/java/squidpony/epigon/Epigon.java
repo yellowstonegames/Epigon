@@ -517,8 +517,8 @@ public class Epigon extends Game {
         }
 
         // Update all the stats in motion
-        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-        for (Entry<ImmutableKey, LiveValue> entry : player.stats.entrySet()) {
+        OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+        for (Entry<ConstantKey, LiveValue> entry : player.stats.entrySet()) {
             double amt = entry.getValue().tick();
             if (amt != 0) {
                 changes.put(entry.getKey(), amt);
@@ -552,9 +552,9 @@ public class Epigon extends Game {
         }
     }
 
-    private void applyStatChange(Physical target, Map<ImmutableKey, Double> amounts) {
-        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-        for (Entry<ImmutableKey, LiveValue> entry : target.stats.entrySet()) {
+    private void applyStatChange(Physical target, Map<ConstantKey, Double> amounts) {
+        OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+        for (Entry<ConstantKey, LiveValue> entry : target.stats.entrySet()) {
             Double amount = amounts.get(entry.getKey());
             if (amount != null) {
                 changes.put(entry.getKey(), amount);
@@ -578,7 +578,7 @@ public class Epigon extends Game {
     }
 
     private void applyStatChange(Physical target, Stat stat, double amount) {
-        OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+        OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
         changes.put(stat, amount);
         target.stats.get(stat).addActual(amount);
         for (Stat s : Stat.rolloverProcessOrder) {

@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
@@ -77,9 +77,9 @@ public class Physical extends EpiData {
     private ArrayList<Condition> conditionsToRemove = new ArrayList<>();
 
     // initial stats on instantiation come from required modification
-    public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<ImmutableKey, LiveValue>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ConstantKey, LiveValue> stats = new OrderedMap<ConstantKey, LiveValue>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance);
     public OrderedSet<ChangeTable> statEffects = new OrderedSet<>(8, CrossHash.identityHasher);
-    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ConstantKey, Rating> statProgression = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
     public List<Physical> inventory = new ArrayList<>();
     public List<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
 

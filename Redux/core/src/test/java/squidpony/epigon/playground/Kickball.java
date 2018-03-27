@@ -3,7 +3,7 @@ package squidpony.epigon.playground;
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
 import squidpony.epigon.GauntRNG;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.Formula;
@@ -35,7 +35,7 @@ public class Kickball {
     }
 
     private void testImmutableKeys() {
-        OrderedSet<Material> materials = new OrderedSet<>(ImmutableKey.ImmutableKeyHasher.instance);
+        OrderedSet<Material> materials = new OrderedSet<>(ConstantKey.ConstantKeyHasher.instance);
         materials.addAll(Cloth.values());
         materials.addAll(Hide.values());
         materials.addAll(Inclusion.values());

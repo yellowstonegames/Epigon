@@ -2,8 +2,8 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.GauntRNG;
-import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
@@ -71,7 +71,7 @@ public class InfoHandler {
     private SquidColorCenter colorCenter;
     private Physical player;
     private Physical target;
-    private OrderedMap<ImmutableKey, Double> changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    private OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
 
     public Coord arrowLeft;
     public Coord arrowRight;
@@ -192,7 +192,7 @@ public class InfoHandler {
     }
 
     public void updateDisplay() {
-        updateDisplay(null, new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance));
+        updateDisplay(null, new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance));
         switch (infoMode) {
             case FULL_STATS:
                 infoFullStats(player);
@@ -218,18 +218,18 @@ public class InfoHandler {
      *
      * @param changes a Map of the changes to stats
      */
-    public void updateDisplay(Physical physical, OrderedMap<ImmutableKey, Double> changes) {
-        this.changes = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public void updateDisplay(Physical physical, OrderedMap<ConstantKey, Double> changes) {
+        this.changes.clear();// = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
         switch (infoMode) {
             case FULL_STATS:
                 if (player == physical) {
-                    this.changes = changes;
+                    this.changes.putAll(changes);
                 }
                 infoFullStats(player);
                 break;
             case HEALTH_AND_ARMOR:
                 if (player == physical) {
-                    this.changes = changes;
+                    this.changes.putAll(changes);
                 }
                 infoHealthAndArmor(player);
                 break;
@@ -238,13 +238,13 @@ public class InfoHandler {
                 break;
             case TARGET_FULL_STATS:
                 if (target == physical) {
-                    this.changes = changes;
+                    this.changes.putAll(changes);
                 }
                 infoFullStats(target);
                 break;
             case TARGET_HEALTH_AND_ARMOR:
                 if (target == physical) {
-                    this.changes = changes;
+                    this.changes.putAll(changes);
                 }
                 infoHealthAndArmor(target);
                 break;

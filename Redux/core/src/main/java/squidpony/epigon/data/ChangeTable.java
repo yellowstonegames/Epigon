@@ -1,48 +1,47 @@
 package squidpony.epigon.data;
 
-import com.badlogic.gdx.utils.CharArray;
 import com.badlogic.gdx.utils.FloatArray;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.IntVLA;
 import squidpony.squidmath.OrderedMap;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 /**
  * Created by Tommy Ettinger on 1/23/2018.
  */
-public class ChangeTable implements Iterable<ImmutableKey> {
-    public Arrangement<ImmutableKey> indexer;
+public class ChangeTable implements Iterable<ConstantKey> {
+    public Arrangement<ConstantKey> indexer;
     public FloatArray values;
-    public CharArray changeSymbols;
+    public IntVLA changeSymbols;
     public ChangeTable()
     {
         this(12);
     }
     public ChangeTable(int expectedSize)
     {
-        indexer = new Arrangement<>(expectedSize, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+        indexer = new Arrangement<>(expectedSize, 0.5f, ConstantKey.ConstantKeyHasher.instance);
         values = new FloatArray(expectedSize);
-        changeSymbols = new CharArray(expectedSize);
+        changeSymbols = new IntVLA(expectedSize);
     }
     public ChangeTable(ChangeTable other)
     {
-        indexer = new Arrangement<>(other.size(), 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
+        indexer = new Arrangement<>(other.size(), 0.5f, ConstantKey.ConstantKeyHasher.instance);
         indexer.putAll(other.indexer);
         values = new FloatArray(other.values);
-        changeSymbols = new CharArray(other.changeSymbols);
+        changeSymbols = new IntVLA(other.changeSymbols);
     }
 
     /**
-     * Puts a new triplet of ImmutableKey, char, and long into this ChangeTable. Returns true if everything went normally,
+     * Puts a new triplet of ConstantKey, char, and long into this ChangeTable. Returns true if everything went normally,
      * or false if an existing key was changed (usually a sign of something used incorrectly).
-     * @param key
-     * @param symbol
-     * @param value
+     * @param key a ConstantKey that usually is a stat of a creature or object
+     * @param symbol an int that marks what operation should be performed on the given key; negative means destructive 
+     * @param value how much change to apply with the operation specified by symbol to key
      * @return true if the triplet was added normally, or false if it overwrote an existing triplet
      */
-    public boolean put(ImmutableKey key, char symbol, double value) {
+    public boolean put(ConstantKey key, int symbol, double value) {
         int index = indexer.add(key);
         if (index < 0) {
             changeSymbols.add(symbol);
@@ -73,20 +72,22 @@ public class ChangeTable implements Iterable<ImmutableKey> {
     }
 
     @Override
-    public Iterator<ImmutableKey> iterator() {
+    public Iterator<ConstantKey> iterator() {
         return indexer.iterator();
     }
 
     /**
-     * Edits the existing OrderedMap of ImmutableKey keys to Double values using the changes in this ChangeTable.
-     * @param changing a non-null OrderedMap of ImmutableKey keys to Double values; will be modified
+     * Edits the existing OrderedMap of ConstantKey keys to Double values using the changes in this ChangeTable.
+     * Treats all changes as if they are destructive, which can be useful if non-destructive changes don't need to be
+     * tracked for later removal.
+     * @param changing a non-null OrderedMap of ConstantKey keys to Double values; will be modified
      * @return the parameter this was given, after modifications
      */
-    public OrderedMap<ImmutableKey, Double> changeDoubles(OrderedMap<ImmutableKey, Double> changing)
+    public OrderedMap<ConstantKey, Double> changeDoubles(OrderedMap<ConstantKey, Double> changing)
     {
         int mySize = values.size;
-        ImmutableKey k;
-        char op = '=';
+        ConstantKey k;
+        int op;
         Double e;
         for (int i = 0; i < mySize; i++) {
             k = indexer.keyAt(i);
@@ -96,15 +97,19 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                 switch (op)
                 {
                     case '=':
+                    case ~'=':
                         changing.put(k, (double)values.get(i));
                         break;
                     case '+':
+                    case ~'+':
                         changing.put(k, e + values.get(i));
                         break;
                     case '-':
+                    case ~'-':
                         changing.put(k, e - values.get(i));
                         break;
                     case '*':
+                    case ~'*':
                         changing.put(k, e * values.get(i));
                         break;
                 }
@@ -114,15 +119,19 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                 switch (op)
                 {
                     case '=':
+                    case ~'=':
                         changing.put(k, (double)values.get(i));
                         break;
                     case '+':
+                    case ~'+':
                         changing.put(k, (double)values.get(i));
                         break;
                     case '-':
+                    case ~'-':
                         changing.put(k, -(double)values.get(i));
                         break;
                     case '*':
+                    case ~'*':
                         changing.put(k, 0.0);
                         break;
                 }
@@ -132,17 +141,18 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         return changing;
     }
     /**
-     * Edits the existing OrderedMap of ImmutableKey keys to LiveValue values using the changes in this ChangeTable.
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in this ChangeTable.
      * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
-     * will be ignored without affecting the rest of the changes.
-     * @param changing a non-null OrderedMap of ImmutableKey keys to LiveValue values; will be modified
+     * will be ignored without affecting the rest of the changes. Treats all changes as if they are destructive, which
+     * can be useful if non-destructive changes don't need to be tracked for later removal.
+     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
      * @return the parameter this was given, after modifications
      */
-    public OrderedMap<ImmutableKey, LiveValue> changeLiveValues(OrderedMap<ImmutableKey, LiveValue> changing)
+    public OrderedMap<ConstantKey, LiveValue> changeLiveValues(OrderedMap<ConstantKey, LiveValue> changing)
     {
         int mySize = values.size;
-        ImmutableKey k;
-        char op = '=';
+        ConstantKey k;
+        int op;
         LiveValue e;
         for (int i = 0; i < mySize; i++) {
             k = indexer.keyAt(i);
@@ -152,15 +162,19 @@ public class ChangeTable implements Iterable<ImmutableKey> {
                 switch (op)
                 {
                     case '=':
+                    case ~'=':
                         e.set(values.get(i));
                         break;
                     case '+':
+                    case ~'+':
                         e.addActual(values.get(i));
                         break;
                     case '-':
+                    case ~'-':
                         e.addActual(-values.get(i));
                         break;
                     case '*':
+                    case ~'*':
                         e.multiplyActual(values.get(i));
                         break;
                 }
@@ -169,17 +183,114 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         return changing;
     }
     /**
-     * Edits the existing OrderedMap of ImmutableKey keys to LiveValue values using the changes in this ChangeTable.
-     * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
-     * will be ignored without affecting the rest of the changes.
-     * @param changing a non-null OrderedMap of ImmutableKey keys to LiveValue values; will be modified
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in the given Iterable of
+     * ChangeTable values. If a key is not present in changing but a ChangeTable in tables has an instruction to change
+     * that key, that instruction will be ignored without affecting the other changes. Treats all changes as if they are
+     * destructive, which can be useful if non-destructive changes don't need to be tracked for later removal.
+     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
      * @return the parameter this was given, after modifications
      */
-    public static OrderedMap<ImmutableKey, LiveValue> changeManyLiveValues(OrderedMap<ImmutableKey, LiveValue> changing, Collection<ChangeTable> tables)
+    public static OrderedMap<ConstantKey, LiveValue> changeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
     {
         int originalSize = changing.size();
-        ImmutableKey k;
-        char op = '=';
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case '=':
+                    case ~'=':
+                        v = ct.values.get(index);
+                        break;
+                    case '+':
+                    case ~'+':
+                        v += ct.values.get(index);
+                        break;
+                    case '-':
+                    case ~'-':
+                        v -= ct.values.get(index);
+                        break;
+                    case '*':
+                    case ~'*':
+                        v *= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return changing;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the destructive changes in the
+     * given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+     * non-destructive change; non-destructive changes will be ignored here). If a key is not present in changing but a
+     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+     * the other changes.
+     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+     * @return the parameter this was given, after modifications
+     */
+    public static OrderedMap<ConstantKey, LiveValue> strikeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+    {
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case ~'=':
+                        v = ct.values.get(index);
+                        break;
+                    case ~'+':
+                        v += ct.values.get(index);
+                        break;
+                    case ~'-':
+                        v -= ct.values.get(index);
+                        break;
+                    case ~'*':
+                        v *= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return changing;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the non-destructive changes in
+     * the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+     * non-destructive change; destructive changes will be ignored here). If a key is not present in changing but a
+     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+     * the other changes. The changes applied by this method can be reversed, mostly, by 
+     * {@link #releaseManyLiveValues(OrderedMap, Iterable)}.
+     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+     * @return the parameter this was given, after modifications
+     */
+    public static OrderedMap<ConstantKey, LiveValue> holdManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+    {
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
         LiveValue e;
         int index;
         double v;
@@ -210,6 +321,51 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         }
         return changing;
     }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the reversed non-destructive
+     * changes in the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold"
+     * is a non-destructive change that is reversed by a "release" operation; destructive changes will be ignored here).
+     * If a key is not present in changing but a ChangeTable in tables has an instruction to change that key, that
+     * instruction will be ignored without affecting the other changes.
+     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet; the opposite of its non-destructive instructions will be applied
+     * @return the parameter this was given, after modifications
+     */
+    public static OrderedMap<ConstantKey, LiveValue> releaseManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+    {
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case '=': // not yet sure how non-destructive assignment can even work
+                        //v = ct.values.get(index);
+                        break;
+                    case '+':
+                        v -= ct.values.get(index);
+                        break;
+                    case '-':
+                        v += ct.values.get(index);
+                        break;
+                    case '*':
+                        v /= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return changing;
+    }
 
     public static ChangeTable makeCT(Object... rest)
     {
@@ -220,8 +376,9 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         ChangeTable am = new ChangeTable(rest.length / 3);
         for (int i = 0; i < rest.length - 2; i += 3) {
             try {
-                am.put((ImmutableKey)rest[i], (Character) rest[i + 1], (Double) rest[i+2]);
-            }catch (ClassCastException ignored) {
+                am.put((ConstantKey)rest[i], (Integer) rest[i + 1], (Double) rest[i+2]);
+            }catch (ClassCastException uhh) {
+                uhh.printStackTrace();
             }
         }
         return am;
@@ -235,7 +392,7 @@ public class ChangeTable implements Iterable<ImmutableKey> {
         }
         for (int i = 0; i < rest.length - 2; i += 3) {
             try {
-                put((ImmutableKey)rest[i], (Character) rest[i + 1], (Double) rest[i+2]);
+                put((ConstantKey)rest[i], (Integer) rest[i + 1], (Double) rest[i+2]);
             }catch (ClassCastException ignored) {
             }
         }
