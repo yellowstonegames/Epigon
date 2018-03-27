@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.epigon.data.trait.Interactable;
@@ -84,10 +84,10 @@ public class Modification extends EpiData {
     public List<Condition> optionalConditionsAdditive;
     public List<Condition> optionalConditionsSubtractive;
 
-    public OrderedMap<ImmutableKey, LiveValue> stats = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-    public OrderedMap<ImmutableKey, LiveValueModification> statChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-    public OrderedMap<ImmutableKey, Rating> statProgression = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
-    public OrderedMap<ImmutableKey, RatingValueModification> statProgressionChanges = new OrderedMap<>(ImmutableKey.ImmutableKeyHasher.instance);
+    public OrderedMap<ConstantKey, LiveValue> stats = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+    public OrderedMap<ConstantKey, LiveValueModification> statChanges = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+    public OrderedMap<ConstantKey, Rating> statProgression = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+    public OrderedMap<ConstantKey, RatingValueModification> statProgressionChanges = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
     public OrderedSet<ChangeTable> statEffectsAdditive = new OrderedSet<>(CrossHash.identityHasher);
     public OrderedSet<ChangeTable> statEffectsSubtractive = new OrderedSet<>(CrossHash.identityHasher);
     public List<Physical> inventory;

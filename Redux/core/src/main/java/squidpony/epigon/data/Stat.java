@@ -1,6 +1,6 @@
 package squidpony.epigon.data;
 
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 
 /**
@@ -11,7 +11,7 @@ import squidpony.epigon.Utilities;
  *
  * @author Eben Howard
  */
-public enum Stat implements ImmutableKey {
+public enum Stat implements ConstantKey {
     // Physical Offense
     AIM("AI", "Controls chance of hitting targets with attacks."),
     IMPACT("IM", "Controls how much damage is dealt with attacks."),
@@ -91,7 +91,7 @@ public enum Stat implements ImmutableKey {
         this.nick = nick;
         this.description = description;
         prettyName = Utilities.caps(name(), "_");
-        hash = ImmutableKey.precomputeHash("creature.Stat", ordinal());
+        hash = ConstantKey.precomputeHash("creature.Stat", ordinal());
     }
     public long hash;
     @Override

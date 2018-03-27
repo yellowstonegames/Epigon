@@ -1,7 +1,7 @@
 package squidpony.epigon.combat;
 
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.GauntRNG;
-import squidpony.epigon.ImmutableKey;
 import squidpony.epigon.data.ConditionBlueprint;
 import squidpony.epigon.data.ChangeTable;
 import squidpony.epigon.data.Condition;
@@ -31,9 +31,9 @@ public class ActionOutcome {
     public ActionOutcome()
     {
     }
-    public static final OrderedMap<ImmutableKey, LiveValue> tempActorStats = new OrderedMap<>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance),
-            tempTargetStats = new OrderedMap<>(32, 0.5f, ImmutableKey.ImmutableKeyHasher.instance);
-    public static void deepCopyInto(OrderedMap<ImmutableKey, LiveValue> source, OrderedMap<ImmutableKey, LiveValue> toFill)
+    public static final OrderedMap<ConstantKey, LiveValue> tempActorStats = new OrderedMap<>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance),
+            tempTargetStats = new OrderedMap<>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance);
+    public static void deepCopyInto(OrderedMap<ConstantKey, LiveValue> source, OrderedMap<ConstantKey, LiveValue> toFill)
     {
         final int len = source.size();
         toFill.clear();

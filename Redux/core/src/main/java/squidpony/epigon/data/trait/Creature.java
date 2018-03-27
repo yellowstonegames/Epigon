@@ -28,7 +28,7 @@ public class Creature {
     public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
 
     // TODO - add validity list for slots on a per-creature type (Humanoid, Quadruped) basis
-    // can be done by switching these to OrderedMap of ImmutableKey values, then unifying slots.
+    // can be done by switching these to OrderedMap of ConstantKey values, then unifying slots.
     // validation could be done by calling OrderedMap.keySet().retainAll(validSlots) , I think
     public EnumOrderedMap<JewelrySlot, Physical> jewelry = new EnumOrderedMap<>(JewelrySlot.class);
     public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);

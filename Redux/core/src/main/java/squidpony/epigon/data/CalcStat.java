@@ -1,12 +1,12 @@
 package squidpony.epigon.data;
 
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 
 /**
  * Created by Tommy Ettinger on 12/10/2017.
  */
-public enum CalcStat implements ImmutableKey {
+public enum CalcStat implements ConstantKey {
     PRECISION("PRECISION", ""), DAMAGE("DAMAGE", ""), CRIT("CRIT", ""), INFLUENCE("INFLUENCE", ""),
     EVASION("EVASION", ""), DEFENSE("DEFENSE", ""), STEALTH("STEALTH", ""), LUCK("LUCK", ""),
     RANGE("RANGE", ""), AREA("AREA", ""), PREPARE("PREPARE", "");
@@ -19,7 +19,7 @@ public enum CalcStat implements ImmutableKey {
         this.nick = nick;
         this.description = description;
         prettyName = Utilities.caps(name(), "_");
-        hash = ImmutableKey.precomputeHash("creature.CalcStat", ordinal());
+        hash = ConstantKey.precomputeHash("creature.CalcStat", ordinal());
     }
     public long hash;
     @Override

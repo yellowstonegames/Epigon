@@ -1,7 +1,7 @@
 package squidpony.epigon.data.quality;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -36,7 +36,7 @@ public enum Hide implements Material {
         this.back = back;
         this.value = value;
         this.hardness = hardness;
-        hash = ImmutableKey.precomputeHash("material.Hide", ordinal());
+        hash = ConstantKey.precomputeHash("material.Hide", ordinal());
     }
 
     public long hash;

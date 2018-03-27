@@ -1,7 +1,7 @@
 package squidpony.epigon.data.quality;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.ImmutableKey;
+import squidpony.epigon.ConstantKey;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -126,7 +126,7 @@ public enum Inclusion implements Material {
         this.extrusive = extrusive;
         this.value = value;
         this.hardness = hardness;
-        hash = ImmutableKey.precomputeHash("material.Inclusion", ordinal());
+        hash = ConstantKey.precomputeHash("material.Inclusion", ordinal());
     }
 
     public long hash;
