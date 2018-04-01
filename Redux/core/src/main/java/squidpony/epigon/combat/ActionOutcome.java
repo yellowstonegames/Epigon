@@ -52,30 +52,33 @@ public class ActionOutcome {
         ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(0L) : target.creatureData.weaponChoices.random();
         actor.statEffects.add(ao.actorWeapon.calcStats);
         target.statEffects.add(ao.targetWeapon.calcStats);
-        deepCopyInto(actor.stats, tempActorStats);
-        ChangeTable.changeManyLiveValues(tempActorStats, actor.statEffects);
+        ChangeTable.holdPhysical(actor, actor.statEffects);
         //System.out.println("Attacker is " + actor.name + " with base stats " + actor.stats + " and adjusted stats: " + tempActorStats);
-        deepCopyInto(target.stats, tempTargetStats);
-        ChangeTable.changeManyLiveValues(tempTargetStats, target.statEffects);
+        ChangeTable.holdPhysical(target, target.statEffects);
         //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
-        ao.crit = (20 + 4 * (tempActorStats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() -
-                tempTargetStats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual())) >= GauntRNG.next(r, 9);
-        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + tempActorStats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
-                tempTargetStats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 1, 7);
+        ao.crit = (20 + 4 * (actor.stats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() -
+                target.stats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual())) >= GauntRNG.next(r, 9);
+        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
+                target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 1, 7);
         if(ao.hit)
         {
             ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.randomFloatCurved(r + 2) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +
-                    tempActorStats.getOrDefault(CalcStat.DAMAGE, LiveValue.ZERO).actual())));
+                    actor.stats.getOrDefault(CalcStat.DAMAGE, LiveValue.ZERO).actual())));
             ao.actualDamage = Math.min(0, ao.attemptedDamage -
-                    Noise.fastFloor((NumberTools.randomFloatCurved(r + 3) * 0.3f + 0.35f) * tempTargetStats.getOrDefault(CalcStat.DEFENSE, LiveValue.ZERO).actual()));
-            ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + tempActorStats.getOrDefault(CalcStat.INFLUENCE, LiveValue.ZERO).actual() -
-                    tempTargetStats.getOrDefault(CalcStat.LUCK, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 4, 8);
+                    Noise.fastFloor((NumberTools.randomFloatCurved(r + 3) * 0.3f + 0.35f) * target.stats.getOrDefault(CalcStat.DEFENSE, LiveValue.ZERO).actual()));
+            ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + actor.stats.getOrDefault(CalcStat.INFLUENCE, LiveValue.ZERO).actual() -
+                    target.stats.getOrDefault(CalcStat.LUCK, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 4, 8);
         }
+        ChangeTable.releasePhysical(actor, actor.statEffects);
+        ChangeTable.releasePhysical(target, target.statEffects);
         actor.statEffects.removeLast();
         target.statEffects.removeLast();
         if(ao.targetConditioned)
         {
-            target.conditions.add(new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element));
+            Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element);
+            ChangeTable.strikePhysical(target, c.parent.changes);
+            target.conditions.add(c);
+            
         }
         return ao;
     }

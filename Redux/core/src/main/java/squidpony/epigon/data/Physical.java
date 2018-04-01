@@ -2,6 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
@@ -39,12 +40,15 @@ public class Physical extends EpiData {
 
     // operational bits for live objects
     public Coord location;
-    public boolean attached; // cannot be removed for it's location (or inventory pile) without special means
-    public boolean instantiated;
+    public boolean attached; // cannot be removed from its location (or inventory pile) without special means
     public boolean aware; // knows where the player is
     public boolean wasSeen;
     public TextCellFactory.Glyph appearance; // for things that move, we should use Glyph, which is a kind of Actor
     public TextCellFactory.Glyph overlayAppearance; // mainly for showing status effects over the existing appearance
+    public char symbol;
+    public Character overlaySymbol;
+    public float color;
+    public float overlayColor = 0f; // if == 0f, this will be disregarded by SparseLayers
 
     // backing data
     public Physical parent;
@@ -56,10 +60,6 @@ public class Physical extends EpiData {
 
     public List<String> possibleAliases = new ArrayList<>(); // One of these is picked when instantiated (maybe choice locked by world region?)
 
-    public char symbol;
-    public Character overlaySymbol;
-    public float color;
-    public float overlayColor = 0f; // if == 0f, this will be disregarded by SparseLayers
     public double baseValue;
     public boolean blocking;
 
@@ -254,7 +254,7 @@ public class Physical extends EpiData {
             return;
         }
 
-        Set<Physical> removing = new HashSet<>();
+        UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (WieldSlot ws : slots) {
             Physical p = creatureData.wielded.get(ws);
             if (p != null) {
@@ -290,7 +290,7 @@ public class Physical extends EpiData {
         }
         List<Physical> removed = new ArrayList<>(slots.size());
 
-        Set<Physical> removing = new HashSet<>();
+        UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (WieldSlot ws : slots) {
             Physical p = creatureData.wielded.remove(ws);
             if (p != null) {
@@ -473,5 +473,23 @@ public class Physical extends EpiData {
         return true;
     }
 
-    
+
+    public void disarm() {
+        if (creatureData == null) {
+            System.err.println("Can't disarm the Physical " + name + "; it is not a creature");
+            return;
+        }
+        if(creatureData.wielded.isEmpty())
+            return;
+        Physical p = creatureData.wielded.removeAt(GauntRNG.nextInt(chaos, creatureData.wielded.size()));
+        if (p != null) {
+            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+                if (p.equals(creatureData.wielded.get(subSlot))) {
+                    creatureData.wielded.remove(subSlot);
+                    if (p.weaponData != null)
+                        creatureData.weaponChoices.remove(p.weaponData);
+                }
+            }
+        }
+    }
 }

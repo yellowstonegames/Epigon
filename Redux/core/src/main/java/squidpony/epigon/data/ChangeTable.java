@@ -367,6 +367,288 @@ public class ChangeTable implements Iterable<ConstantKey> {
         return changing;
     }
 
+    /**
+     * Edits the existing Physical using only the destructive changes in the given Iterable of ChangeTable values
+     * ("strike" is used to mean a destructive change, while "hold" is a non-destructive change; non-destructive changes
+     * will be ignored here). The methods in this class that operate on Physical parameters can perform extra operations
+     * on those Physical values, like changing their equipment. If a key is not present in changing but a ChangeTable in
+     * tables has an instruction to change that key, that instruction will be ignored without affecting the others.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param ct a ChangeTable value
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical strikePhysical(Physical physical, ChangeTable ct)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            if ((index = ct.indexer.getInt(k)) < 0)
+                continue;
+            op = ct.changeSymbols.get(index);
+            switch (op) {
+                case ~'=':
+                    v = ct.values.get(index);
+                    break;
+                case ~'+':
+                    v += ct.values.get(index);
+                    break;
+                case ~'-':
+                    v -= ct.values.get(index);
+                    break;
+                case ~'*':
+                    v *= ct.values.get(index);
+                    break;
+                case ~'d':
+                    physical.disarm();
+                    break;
+            }
+
+            e.actual(v);
+        }
+        return physical;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the non-destructive changes in
+     * the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+     * non-destructive change; destructive changes will be ignored here). If a key is not present in changing but a
+     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+     * the other changes. The changes applied by this method can be reversed, mostly, by 
+     * {@link #releasePhysical(Physical, Iterable)}.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param ct a ChangeTable value
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical holdPhysical(Physical physical, ChangeTable ct)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            if ((index = ct.indexer.getInt(k)) < 0)
+                continue;
+            op = ct.changeSymbols.get(index);
+            switch (op) {
+                case '=':
+                    v = ct.values.get(index);
+                    break;
+                case '+':
+                    v += ct.values.get(index);
+                    break;
+                case '-':
+                    v -= ct.values.get(index);
+                    break;
+                case '*':
+                    v *= ct.values.get(index);
+                    break;
+            }
+            e.actual(v);
+        }
+        return physical;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the reversed non-destructive
+     * changes in the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold"
+     * is a non-destructive change that is reversed by a "release" operation; destructive changes will be ignored here).
+     * If a key is not present in changing but a ChangeTable in tables has an instruction to change that key, that
+     * instruction will be ignored without affecting the other changes.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param ct a ChangeTable value; the opposite of its non-destructive instructions will be applied
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical releasePhysical(Physical physical, ChangeTable ct)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+
+            if ((index = ct.indexer.getInt(k)) < 0)
+                continue;
+            op = ct.changeSymbols.get(index);
+            switch (op) {
+                case '=': // not yet sure how non-destructive assignment can even work
+                    //v = ct.values.get(index);
+                    break;
+                case '+':
+                    v -= ct.values.get(index);
+                    break;
+                case '-':
+                    v += ct.values.get(index);
+                    break;
+                case '*':
+                    v /= ct.values.get(index);
+                    break;
+            }
+
+            e.actual(v);
+        }
+        return physical;
+    }
+    /**
+     * Edits the existing Physical using only the destructive changes in the given Iterable of ChangeTable values
+     * ("strike" is used to mean a destructive change, while "hold" is a non-destructive change; non-destructive changes
+     * will be ignored here). The methods in this class that operate on Physical parameters can perform extra operations
+     * on those Physical values, like changing their equipment. If a key is not present in changing but a ChangeTable in
+     * tables has an instruction to change that key, that instruction will be ignored without affecting the others.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical strikePhysical(Physical physical, Iterable<ChangeTable> tables)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case ~'=':
+                        v = ct.values.get(index);
+                        break;
+                    case ~'+':
+                        v += ct.values.get(index);
+                        break;
+                    case ~'-':
+                        v -= ct.values.get(index);
+                        break;
+                    case ~'*':
+                        v *= ct.values.get(index);
+                        break;
+                    case ~'d':
+                        physical.disarm();
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return physical;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the non-destructive changes in
+     * the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+     * non-destructive change; destructive changes will be ignored here). If a key is not present in changing but a
+     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+     * the other changes. The changes applied by this method can be reversed, mostly, by 
+     * {@link #releasePhysical(Physical, Iterable)}.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical holdPhysical(Physical physical, Iterable<ChangeTable> tables)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case '=':
+                        v = ct.values.get(index);
+                        break;
+                    case '+':
+                        v += ct.values.get(index);
+                        break;
+                    case '-':
+                        v -= ct.values.get(index);
+                        break;
+                    case '*':
+                        v *= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return physical;
+    }
+    /**
+     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the reversed non-destructive
+     * changes in the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold"
+     * is a non-destructive change that is reversed by a "release" operation; destructive changes will be ignored here).
+     * If a key is not present in changing but a ChangeTable in tables has an instruction to change that key, that
+     * instruction will be ignored without affecting the other changes.
+     * @param physical a Physical that will be modified, including by some operations that do nothing on plain Maps
+     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet; the opposite of its non-destructive instructions will be applied
+     * @return the parameter this was given, after modifications
+     */
+    public static Physical releasePhysical(Physical physical, Iterable<ChangeTable> tables)
+    {
+        OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
+        int originalSize = changing.size();
+        ConstantKey k;
+        int op;
+        LiveValue e;
+        int index;
+        double v;
+        for (int i = 0; i < originalSize; i++) {
+            k = changing.keyAt(i);
+            e = changing.getAt(i);
+            v = e.actual();
+            for (ChangeTable ct : tables) {
+                if ((index = ct.indexer.getInt(k)) < 0)
+                    continue;
+                op = ct.changeSymbols.get(index);
+                switch (op) {
+                    case '=': // not yet sure how non-destructive assignment can even work
+                        //v = ct.values.get(index);
+                        break;
+                    case '+':
+                        v -= ct.values.get(index);
+                        break;
+                    case '-':
+                        v += ct.values.get(index);
+                        break;
+                    case '*':
+                        v /= ct.values.get(index);
+                        break;
+                }
+            }
+            e.actual(v);
+        }
+        return physical;
+    }
+
     public static ChangeTable makeCT(Object... rest)
     {
         if(rest == null || rest.length < 3)

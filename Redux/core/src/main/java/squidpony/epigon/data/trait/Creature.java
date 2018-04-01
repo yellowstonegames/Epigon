@@ -7,10 +7,8 @@ import squidpony.epigon.data.slot.OverArmorSlot;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A specific creature in the world.
@@ -22,9 +20,9 @@ public class Creature {
     public Creature parent;
     public OrderedMap<Skill, Rating> skills = new OrderedMap<>();
     public OrderedMap<Skill, Rating> skillProgression = new OrderedMap<>();
-    public Set<Ability> abilities = new HashSet<>();
+    public OrderedSet<Ability> abilities = new OrderedSet<>();
 
-    public Set<Recipe> knownRecipes = new HashSet<>();
+    public OrderedSet<Recipe> knownRecipes = new OrderedSet<>();
     public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
 
     // TODO - add validity list for slots on a per-creature type (Humanoid, Quadruped) basis
