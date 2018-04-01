@@ -618,10 +618,10 @@ public class RecipeMixer {
                 });
 
             if (modification.abilities != null) {
-                physical.creatureData.abilities = new HashSet<>(modification.abilities);
+                physical.creatureData.abilities = new OrderedSet<>(modification.abilities);
             }
             if(physical.creatureData.abilities == null && (modification.abilitiesAdditive != null || modification.abilitiesSubtractive != null))
-                physical.creatureData.abilities = new HashSet<>();
+                physical.creatureData.abilities = new OrderedSet<>();
 
             if (modification.abilitiesAdditive != null) {
                 physical.creatureData.abilities.addAll(modification.abilitiesAdditive);

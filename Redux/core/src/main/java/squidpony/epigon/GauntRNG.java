@@ -36,8 +36,8 @@ public final class GauntRNG {
         return (int)determine(state);
     }
     
-    public static int nextInt(long state, int bits) {
-        return determineBounded(state, bits);
+    public static int nextInt(long state, int bound) {
+        return determineBounded(state, bound);
     }
     
     public static float nextFloat(long state)
