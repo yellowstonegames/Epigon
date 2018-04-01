@@ -14,23 +14,17 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
-import squidpony.epigon.data.WeightedTableWrapper;
-import squidpony.epigon.data.ConditionBlueprint;
+import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.Weapon;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
-import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.*;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.data.quality.Element;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
@@ -355,10 +349,12 @@ public class Epigon extends Game {
 
     private void initPlayer(){
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.VIGOR).set(23.0);
-        player.stats.get(Stat.HUNGER).delta(-0.1);
+        player.stats.get(Stat.VIGOR).set(99.0);
+        //player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
+        player.stats.get(CalcStat.LUCK).actual(0.0);
+        player.stats.get(CalcStat.EVASION).actual(0.0);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
         infoHandler.setPlayer(player);
