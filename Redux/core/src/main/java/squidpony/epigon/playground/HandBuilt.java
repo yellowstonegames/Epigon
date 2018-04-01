@@ -394,7 +394,7 @@ public class HandBuilt {
         liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         liven.large = true;
         for(Stat s : Stat.bases) {
-            LiveValueModification lvm = new LiveValueModification((rng.minIntOf(32, 3) >> 2) + 1);
+            LiveValueModification lvm = new LiveValueModification(9); // 32, 3
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {
@@ -404,9 +404,11 @@ public class HandBuilt {
 
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
+        liven.statChanges.put(Stat.POTENCY, new LiveValueModification(50));
         liven.creature = new Creature();
         liven.creature.weaponChoices = new ProbabilityTable<>(++chaos);
-        liven.creature.weaponChoices.add(Weapon.randomWeapon(++chaos), 4);
+        liven.creature.weaponChoices.add(Weapon.getWeapons().get("cape"), 4);
+        //liven.creature.weaponChoices.add(Weapon.randomWeapon(++chaos), 4);
         liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
         return liven;
     }

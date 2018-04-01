@@ -14,7 +14,7 @@ import java.util.Iterator;
 public class ChangeTable implements Iterable<ConstantKey> {
     public Arrangement<ConstantKey> indexer;
     public FloatArray values;
-    public IntVLA changeSymbols;
+    public IntVLA changeSymbols, unrelatedSymbols;
     public ChangeTable()
     {
         this(12);
@@ -24,6 +24,7 @@ public class ChangeTable implements Iterable<ConstantKey> {
         indexer = new Arrangement<>(expectedSize, 0.5f, ConstantKey.ConstantKeyHasher.instance);
         values = new FloatArray(expectedSize);
         changeSymbols = new IntVLA(expectedSize);
+        unrelatedSymbols = new IntVLA(4);
     }
     public ChangeTable(ChangeTable other)
     {
@@ -31,6 +32,7 @@ public class ChangeTable implements Iterable<ConstantKey> {
         indexer.putAll(other.indexer);
         values = new FloatArray(other.values);
         changeSymbols = new IntVLA(other.changeSymbols);
+        unrelatedSymbols = new IntVLA(other.unrelatedSymbols);
     }
 
     /**
@@ -42,6 +44,11 @@ public class ChangeTable implements Iterable<ConstantKey> {
      * @return true if the triplet was added normally, or false if it overwrote an existing triplet
      */
     public boolean put(ConstantKey key, int symbol, double value) {
+        if(key == null)
+        {
+            unrelatedSymbols.add(symbol);
+            return true;
+        }
         int index = indexer.add(key);
         if (index < 0) {
             changeSymbols.add(symbol);
@@ -61,6 +68,7 @@ public class ChangeTable implements Iterable<ConstantKey> {
         indexer.clear();
         values.clear();
         changeSymbols.clear();
+        unrelatedSymbols.clear();
     }
 
     public int size() {
@@ -406,13 +414,17 @@ public class ChangeTable implements Iterable<ConstantKey> {
                 case ~'*':
                     v *= ct.values.get(index);
                     break;
+            }
+            e.actual(v);
+        }         
+        for (int i = 0; i < ct.unrelatedSymbols.size; i++) {
+            switch (ct.unrelatedSymbols.get(i)) {
                 case ~'d':
                     physical.disarm();
                     break;
             }
-
-            e.actual(v);
         }
+
         return physical;
     }
     /**
@@ -546,12 +558,19 @@ public class ChangeTable implements Iterable<ConstantKey> {
                     case ~'*':
                         v *= ct.values.get(index);
                         break;
+                }
+            }
+            e.actual(v);
+        }
+        for(ChangeTable ct : tables) {
+            for (int i = 0; i < ct.unrelatedSymbols.size; i++) {
+                switch (ct.unrelatedSymbols.get(i))
+                {
                     case ~'d':
                         physical.disarm();
                         break;
                 }
             }
-            e.actual(v);
         }
         return physical;
     }
@@ -658,7 +677,10 @@ public class ChangeTable implements Iterable<ConstantKey> {
         ChangeTable am = new ChangeTable(rest.length / 3);
         for (int i = 0; i < rest.length - 2; i += 3) {
             try {
-                am.put((ConstantKey)rest[i], (Integer) rest[i + 1], (Double) rest[i+2]);
+                if(rest[i] == null)
+                    am.put(null, (Integer) rest[i + 1], (Double) rest[i+2]);
+                else 
+                    am.put((ConstantKey)rest[i], (Integer) rest[i + 1], (Double) rest[i+2]);
             }catch (ClassCastException uhh) {
                 uhh.printStackTrace();
             }

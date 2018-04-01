@@ -87,8 +87,8 @@ public class ConditionBlueprint extends EpiData {
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
                     null, null, null)
-//            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 0, 0, Element.BLUNT, null,
-//                    null,
-//                    null, Maker.makeUOS(new Modification()), null)
+            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 0, 0, Element.BLUNT, null,
+                    ChangeTable.makeCT(null, ~'d', 4.0),
+                    null, null, null)
     );
 }
