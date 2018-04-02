@@ -58,8 +58,11 @@ public class ActionOutcome {
         //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
         ao.crit = (20 + 4 * (actor.stats.getOrDefault(CalcStat.CRIT, LiveValue.ZERO).actual() -
                 target.stats.getOrDefault(CalcStat.STEALTH, LiveValue.ZERO).actual())) >= GauntRNG.next(r, 9);
-        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
-                target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 1, 7);
+        double actorPrecision = actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual(),
+                targetEvasion = target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual();
+        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actorPrecision - targetEvasion)) >= GauntRNG.next(r + 1, 7);
+//        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
+//                target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 1, 7);
         if(ao.hit)
         {
             ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.randomFloatCurved(r + 2) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +

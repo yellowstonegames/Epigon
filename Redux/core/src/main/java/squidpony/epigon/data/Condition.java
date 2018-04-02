@@ -44,7 +44,7 @@ public class Condition extends EpiData {
             wearOff();
         }
         attachedTo = attachTo;
-        RecipeMixer.applyModification(attachedTo, parent.modification);
+        //RecipeMixer.applyModification(attachedTo, parent.modification);
         if(parent.overlaySymbol != null) {
             attachedTo.overlaySymbol = parent.overlaySymbol;
             attachedTo.overlayColor = overrideElement == null ? -0x1.0101p126F : overrideElement.floatColor; // SColor.GRAY

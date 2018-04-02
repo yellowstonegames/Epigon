@@ -490,6 +490,7 @@ public class Physical extends EpiData {
                         creatureData.weaponChoices.remove(p.weaponData);
                 }
             }
+            addToInventory(p);
         }
     }
 }

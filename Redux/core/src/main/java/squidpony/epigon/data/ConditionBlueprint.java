@@ -34,7 +34,6 @@ public class ConditionBlueprint extends EpiData {
     public Element baseElement;
     public Character overlaySymbol;
     public String verb;
-    public Modification modification;
     public ChangeTable changes;
     public List<Modification> tickEffects = new ArrayList<>();
     public List<Modification> wearOffEffects = new ArrayList<>();//what happens when it wears off
@@ -53,7 +52,6 @@ public class ConditionBlueprint extends EpiData {
         this.period = period;
         this.baseElement = baseElement;
         this.overlaySymbol = overlay;
-        this.modification = new Modification();
         this.changes = changes;
         if(onTick != null)
             tickEffects.addAll(onTick);
