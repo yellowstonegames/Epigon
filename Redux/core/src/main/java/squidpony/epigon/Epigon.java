@@ -112,7 +112,7 @@ public class Epigon extends Game {
     private InfoHandler infoHandler;
     private FallingHandler fallingHandler;
     private GreasedRegion blocked;
-    private DijkstraMap toPlayerDijkstra;
+    private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
@@ -350,11 +350,9 @@ public class Epigon extends Game {
     private void initPlayer(){
         player = mixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(99.0);
-        //player.stats.get(Stat.HUNGER).delta(-0.1);
+        player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
-        player.stats.get(CalcStat.LUCK).actual(0.0);
-        player.stats.get(CalcStat.EVASION).actual(0.0);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
 
         infoHandler.setPlayer(player);
@@ -418,8 +416,11 @@ public class Epigon extends Game {
         }
 
         calcFOV(player.location.x, player.location.y);
-        toPlayerDijkstra = new DijkstraMap(map.simpleChars(), DijkstraMap.Measurement.EUCLIDEAN);
-        toPlayerDijkstra.rng = new RNG(); // random seed, player won't make deterministic choices
+        char[][] simple = map.simpleChars();
+        RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
+        toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
+        monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
+                
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -436,6 +437,7 @@ public class Epigon extends Game {
 
     private void runTurn() {
         int size = creatures.size();
+        Set<Coord> creaturePositions = creatures.keySet();
         for (int i = 0; i < size; i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
@@ -446,9 +448,9 @@ public class Epigon extends Game {
             }
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (map.fovResult[c.x][c.y] > 0)) {
-                List<Coord> path = toPlayerDijkstra.findPathPreScanned(c);
-                if (path != null && path.size() > 1) {
-                    Coord step = path.get(path.size() - 2);
+                List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, player.location);
+                if (path != null && !path.isEmpty()) {
+                    Coord step = path.get(0);
                     if(player.location.x == step.x && player.location.y == step.y)
                     {
                         mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
@@ -477,7 +479,7 @@ public class Epigon extends Game {
                                 }
                                 if (ao.targetConditioned) {
                                     message(Messaging.transform("The " + creature.name + " "
-                                        + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @his attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                        + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
                                     if (player.overlaySymbol != null) {
                                         if (player.overlayAppearance != null) {
                                             mapSLayers.removeGlyph(player.overlayAppearance);
@@ -663,6 +665,8 @@ public class Epigon extends Game {
     private void calcDijkstra() {
         toPlayerDijkstra.clearGoals();
         toPlayerDijkstra.resetMap();
+        monsterDijkstra.clearGoals();
+        monsterDijkstra.resetMap();
         toPlayerDijkstra.setGoal(player.location);
         toPlayerDijkstra.scan(blocked);
     }

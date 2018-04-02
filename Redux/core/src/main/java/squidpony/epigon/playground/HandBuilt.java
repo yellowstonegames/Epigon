@@ -394,7 +394,7 @@ public class HandBuilt {
         liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
         liven.large = true;
         for(Stat s : Stat.bases) {
-            LiveValueModification lvm = new LiveValueModification(9); // 32, 3
+            LiveValueModification lvm = new LiveValueModification((rng.next(2) + rng.next(2) + rng.next(1)) + 2); // 0-3 + 0-3 + 0-1 == 0-7 biased centrally
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {
