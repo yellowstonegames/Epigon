@@ -2,6 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
+import squidpony.epigon.Prefs;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Rating;
@@ -14,7 +15,6 @@ import squidpony.squidmath.OrderedMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import squidpony.epigon.Prefs;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -557,15 +557,15 @@ public class MapOverlayHandler {
             quantWidth = (int)(Math.log10(quantity)) +3; // digits in quantity plus 'x' plus space
             allowedWidth -= quantWidth; // log10 gives us the number of digits - 1 in base 10
         }
-
-        int length = p.name.length();
+        String name = p.mainMaterial == null ? p.name : p.name + " ⟪H⟫" + p.mainMaterial.getHardness();  
+        int length = name.length();
         if (length > allowedWidth && quantWidth < 1) {
-            return p.name.substring(0, allowedWidth - 1) + "…";
+            return name.substring(0, allowedWidth - 1) + "…";
         } else if (length > allowedWidth) {
-            return p.name.substring(0, allowedWidth - quantWidth - 1) + "…"; // leave room for the eventual quantity presentation
+            return name.substring(0, allowedWidth - quantWidth - 1) + "…"; // leave room for the eventual quantity presentation
         }
 
-        return p.name;
+        return name;
     }
 
     private int getDisplayQuantity(Physical p) {

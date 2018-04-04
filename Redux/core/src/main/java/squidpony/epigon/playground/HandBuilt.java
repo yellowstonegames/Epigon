@@ -267,11 +267,11 @@ public class HandBuilt {
         playerBlueprint.creatureData = cb;
 
         // Put on some clothes
-        Physical hat = mixer.mix(hatRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LINEN)), Collections.emptyList()).get(0);
+        Physical hat = RecipeMixer.mix(hatRecipe, Cloth.LINEN).get(0);
         hat.rarity = Rating.SUPERB;
         hat.color = SColor.FOREST_GREEN.toFloatBits();
         cb.clothing.put(ClothingSlot.HEAD, hat);
-        Physical shirt = mixer.mix(shirtRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.VELVET)), Collections.emptyList()).get(0);
+        Physical shirt = RecipeMixer.mix(shirtRecipe, Cloth.VELVET).get(0);
         shirt.rarity = Rating.TYPICAL;
         shirt.color = SColor.CW_PALE_JADE.toFloatBits();
         cb.clothing.put(ClothingSlot.TORSO, shirt);
@@ -279,9 +279,9 @@ public class HandBuilt {
         cb.clothing.put(ClothingSlot.RIGHT_SHOULDER, shirt);
         cb.clothing.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
-        Physical pants = mixer.mix(pantsRecipe, Collections.singletonList(mixer.buildMaterial(Cloth.LEATHER)), Collections.emptyList()).get(0);
+        Physical pants = RecipeMixer.mix(pantsRecipe, Cloth.DENIM).get(0); // jeans, why not
         pants.rarity = Rating.SLIGHT;
-        pants.color = SColor.WISTERIA.toFloatBits();
+        pants.color = SColor.CW_DRAB_AZURE.toFloatBits(); // blue jeans
         cb.clothing.put(ClothingSlot.WAIST, pants);
         cb.clothing.put(ClothingSlot.LEFT_UPPER_LEG, pants);
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_LEG, pants);

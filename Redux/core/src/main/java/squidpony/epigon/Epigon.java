@@ -348,7 +348,7 @@ public class Epigon extends Game {
     }
 
     private void initPlayer(){
-        player = mixer.buildPhysical(handBuilt.playerBlueprint);
+        player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(99.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
@@ -392,21 +392,21 @@ public class Epigon extends Game {
         player.location = floors.singleRandom(rng);
         floors.remove(player.location);
         floors.copy().randomScatter(rng, 3)
-            .forEach(c -> map.contents[c.x][c.y].add(mixer.applyModification(
+            .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
             mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
             GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
         floors.randomScatter(rng, 5);
         for (Coord coord : floors) {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = mixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
-                mixer.applyModification(p, handBuilt.makeAlive());
+                RecipeMixer.applyModification(p, handBuilt.makeAlive());
                 if (SColor.saturationOfFloat(p.color) < 0.8f) {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
                         0.8f,
                         SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
                 }
-                Physical pMeat = mixer.buildPhysical(p);
-                mixer.applyModification(pMeat, handBuilt.makeMeats());
+                Physical pMeat = RecipeMixer.buildPhysical(p);
+                RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
                 WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.chaos, pMeat, 1.0, 2, 4);
                 p.physicalDrops.add(pt);
                 p.location = coord;
@@ -770,7 +770,7 @@ public class Epigon extends Game {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
                                 .map(table -> {
                                     int quantity = table.quantity();
-                                    Physical p = mixer.buildPhysical(table.random());
+                                    Physical p = RecipeMixer.buildPhysical(table.random());
                                     if (p.groupingData != null) {
                                         p.groupingData.quantity += quantity;
                                     } else {
@@ -790,7 +790,7 @@ public class Epigon extends Game {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
                                 .map(table -> {
                                     int quantity = table.quantity();
-                                    Physical p = mixer.buildPhysical(table.random());
+                                    Physical p = RecipeMixer.buildPhysical(table.random());
                                     if (p.groupingData != null) {
                                         p.groupingData.quantity += quantity;
                                     } else {
@@ -1210,7 +1210,7 @@ public class Epigon extends Game {
                         .filter(c -> map.fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-                        .forEach(p -> mixer.applyModification(p, handBuilt.openDoor));
+                        .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
@@ -1222,7 +1222,7 @@ public class Epigon extends Game {
                         .filter(c -> map.fovResult[c.x][c.y] > 0)
                         .flatMap(c -> map.contents[c.x][c.y].contents.stream())
                         .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-                        .forEach(p -> mixer.applyModification(p, handBuilt.closeDoor));
+                        .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
@@ -1345,7 +1345,7 @@ public class Epigon extends Game {
                         mapOverlayHandler.updateDisplay();
                     } else if (selected.countsAs(handBuilt.rawMeat)) {
                         player.removeFromInventory(selected);
-                        List<Physical> steaks = mixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
+                        List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
                         message("Made " + steaks.size() + " steaks.");
