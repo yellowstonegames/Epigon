@@ -5,12 +5,8 @@ import squidpony.DataConverter;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
+import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
-import squidpony.epigon.data.Formula;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Rating;
-import squidpony.epigon.data.Stat;
 import squidpony.squidmath.OrderedSet;
 
 import java.util.Arrays;
@@ -50,7 +46,7 @@ public class Kickball {
     }
     private void testFormulas() {
         HandBuilt handBuilt = new HandBuilt();
-        Physical source = handBuilt.mixer.buildPhysical(handBuilt.playerBlueprint);
+        Physical source = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
         Physical target = handBuilt.mixer.buildPhysical(Inclusion.ANDALUSITE);
         source.stats.put(Stat.AIM, new LiveValue(52.5));
         target.stats.put(Stat.DODGE, new LiveValue(52));

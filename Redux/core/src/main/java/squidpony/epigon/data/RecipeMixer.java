@@ -68,11 +68,11 @@ public class RecipeMixer {
         return recipe;
     }
 
-    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
+    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
         return mix(recipe, consumed, catalyst, rootChaos.nextLong());
     }
 
-    public List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, long state) {
+    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, long state) {
         List<Physical> result = new ArrayList<>();
         long prevState = rootChaos.getState();
         rootChaos.setState(state);
@@ -97,11 +97,47 @@ public class RecipeMixer {
         return result;
     }
 
+    public static List<Physical> mix(Recipe recipe, Material material) {
+        return mix(recipe, material, rootChaos.nextLong());
+    }
+
+    public static List<Physical> mix(Recipe recipe, Material material, long state) {
+        List<Physical> result = new ArrayList<>();
+        long prevState = rootChaos.getState();
+        rootChaos.setState(state);
+        for (int i = 0; i < recipe.result.size(); i++) {
+            Physical physical = buildPhysical(recipe.result.keyAt(i));
+            
+            Modification materialMod = new Modification();
+            materialMod.baseValueMultiplier = material.getValue() * 0.01;
+            materialMod.color = material.getMaterialColor();
+            materialMod.possiblePrefix = Collections.singletonList(material.toString());
+            LiveValueModification lvm = new LiveValueModification();
+            lvm.baseOverwrite = material.getHardness() * 0.01;
+            lvm.actualOverwrite = material.getHardness() * 0.01;
+            materialMod.statChanges.put(Stat.STRUCTURE, lvm);
+            applyModification(physical, materialMod);
+            physical.mainMaterial = material;
+
+            physical.stats.values().forEach(lv -> lv.actual(lv.base()));// Make sure actual is set to base value on first creation
+            physical.calculateStats();
+            if(physical.groupingData != null) {
+                for (int j = 0; j < physical.groupingData.quantity; j++) {
+                    result.add(physical);
+                }
+            }
+            else
+                result.add(physical);
+        }
+        rootChaos.setState(prevState);
+        return result;
+    }
+
     public Physical buildWeapon(Weapon weapon, long state)
     {
         OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
         Material mat = materials.getAt(GauntRNG.nextInt(state--, materials.size()));
-        return mix(createRecipe(weapon.recipeBlueprint), Collections.emptyList(), Collections.singletonList(buildMaterial(mat)), state).get(0);
+        return mix(createRecipe(weapon.recipeBlueprint), mat, state).get(0);
     }
 
     public Physical buildPhysical(Stone stone) {
@@ -187,15 +223,15 @@ public class RecipeMixer {
         blueprint.symbol = material.getGlyph();
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness() * 0.01));
 
-        Modification inclusionMod = new Modification();
-        inclusionMod.baseValueMultiplier = material.getValue() * 0.01;
-        inclusionMod.color = material.getMaterialColor();
-        inclusionMod.possiblePrefix = Collections.singletonList(material.toString());
+        Modification materialMod = new Modification();
+        materialMod.baseValueMultiplier = material.getValue() * 0.01;
+        materialMod.color = material.getMaterialColor();
+        materialMod.possiblePrefix = Collections.singletonList(material.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = material.getHardness() * 0.01;
         lvm.actualOverwrite = material.getHardness() * 0.01;
-        inclusionMod.statChanges.put(Stat.STRUCTURE, lvm);
-        blueprint.whenUsedAsMaterial.add(inclusionMod);
+        materialMod.statChanges.put(Stat.STRUCTURE, lvm);
+        blueprint.whenUsedAsMaterial.add(materialMod);
 
         return blueprint;
     }
@@ -303,6 +339,10 @@ public class RecipeMixer {
         if (blueprint.interactableData != null) {
             physical.interactableData = new ArrayList<>(blueprint.interactableData);
         }
+        
+        if(blueprint.mainMaterial != null)
+            physical.mainMaterial = blueprint.mainMaterial;
+        
         // TODO - add rest of mixins
 
         // finally work any modifications

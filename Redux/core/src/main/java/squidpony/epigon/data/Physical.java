@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.Element;
+import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
@@ -65,7 +66,7 @@ public class Physical extends EpiData {
 
     public float lightEmitted;
     public LiveValue lightEmittedStrength;
-
+    
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
     public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
@@ -115,6 +116,8 @@ public class Physical extends EpiData {
 
     public Creature creatureData;
 
+    public Material mainMaterial;
+    
     public Ammunition ammunitionData;
     public Container containerData;
     public Grouping groupingData;

@@ -173,13 +173,13 @@ public class WorldGenerator {
                         case '+':
                             Stone stone = tile.floor.terrainData.stone;
                             adding = mixer.buildPhysical(stone);
-                            List<Physical> adds = mixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
+                            List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
                             Physical door = adds.get(0);
-                            mixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
+                            RecipeMixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
                             tile.add(door);
                             break;
                         default:
-                            tile.floor = mixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
+                            tile.floor = RecipeMixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
                             tile.floor.symbol = eMap.altSymbolOf(c);
                             tile.floor.color = eMap.colorOf(c);
                             tile.floor.name = "modified " + c;
@@ -198,8 +198,8 @@ public class WorldGenerator {
             return wall;
         }
 
-        wall = mixer.buildPhysical(mixer.buildPhysical(stone));
-        mixer.applyModification(wall, handBuilt.makeWall);
+        wall = RecipeMixer.buildPhysical(mixer.buildPhysical(stone));
+        RecipeMixer.applyModification(wall, handBuilt.makeWall);
         walls.put(stone, wall);
         return wall;
     }
@@ -210,7 +210,7 @@ public class WorldGenerator {
             return floor;
         }
 
-        floor = mixer.buildPhysical(mixer.buildPhysical(stone));
+        floor = RecipeMixer.buildPhysical(mixer.buildPhysical(stone));
         floor.name = stone.toString() + " floor";
         floors.put(stone, floor);
         return floor;
