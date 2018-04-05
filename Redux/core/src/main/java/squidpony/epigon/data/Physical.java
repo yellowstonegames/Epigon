@@ -477,13 +477,13 @@ public class Physical extends EpiData {
     }
 
 
-    public void disarm() {
+    public String disarm() {
         if (creatureData == null) {
             System.err.println("Can't disarm the Physical " + name + "; it is not a creature");
-            return;
+            return "";
         }
         if(creatureData.wielded.isEmpty())
-            return;
+            return "";
         Physical p = creatureData.wielded.removeAt(GauntRNG.nextInt(chaos, creatureData.wielded.size()));
         if (p != null) {
             for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
@@ -494,6 +494,36 @@ public class Physical extends EpiData {
                 }
             }
             addToInventory(p);
+            return "The " + p.name + " falls to the floor!";
         }
+        return "";
+    }
+
+    public String sunder(double power) {
+        if (creatureData == null) {
+            System.err.println("Can't sunder the equipment of Physical " + name + "; it is not a creature");
+            return "";
+        }
+        if(creatureData.wielded.isEmpty())
+            return "";
+        int pos = GauntRNG.nextInt(chaos++, creatureData.wielded.size());
+        Physical p = creatureData.wielded.getAt(pos);
+        if (p != null) {
+            if(p.mainMaterial == null || p.mainMaterial.getHardness() > GauntRNG.nextDouble(chaos++, power * 500))
+                return ""; // didn't break anything
+            creatureData.wielded.removeAt(pos);
+            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+                if (p.equals(creatureData.wielded.get(subSlot))) {
+                    creatureData.wielded.remove(subSlot);
+                    if (p.weaponData != null)
+                        creatureData.weaponChoices.remove(p.weaponData);
+                }
+            }
+            Physical p2 = RecipeMixer.buildMaterial(p.mainMaterial);
+            p2.rarity = p.rarity;
+            addToInventory(p2);
+            return "The " + p.name + " breaks beyond repair!";
+        }
+        return "";
     }
 }

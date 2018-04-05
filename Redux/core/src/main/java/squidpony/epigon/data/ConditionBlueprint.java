@@ -88,5 +88,7 @@ public class ConditionBlueprint extends EpiData {
             , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, null,
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
                     null, null, null)
+            , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, null, ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
+                    null, null, null)
     );
 }

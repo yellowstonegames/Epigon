@@ -407,9 +407,9 @@ public class HandBuilt {
         liven.statChanges.put(Stat.POTENCY, new LiveValueModification(50));
         liven.creature = new Creature();
         liven.creature.weaponChoices = new ProbabilityTable<>(++chaos);
-        liven.creature.weaponChoices.add(Weapon.getWeapons().get("cape"), 4);
+        liven.creature.weaponChoices.add(Weapon.getWeapons().get("acid magic"), 4);
         //liven.creature.weaponChoices.add(Weapon.randomWeapon(++chaos), 4);
-        liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 1.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 2.0);
+        liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 4.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 8.0);
         return liven;
     }
     

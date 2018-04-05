@@ -422,6 +422,12 @@ public class ChangeTable implements Iterable<ConstantKey> {
                 case ~'d':
                     physical.disarm();
                     break;
+                case ~'s':
+                    physical.sunder(4.0);
+                    break;
+                case ~'S':
+                    physical.sunder(8.0);
+                    break;
             }
         }
 
@@ -568,6 +574,12 @@ public class ChangeTable implements Iterable<ConstantKey> {
                 {
                     case ~'d':
                         physical.disarm();
+                        break;
+                    case ~'s':
+                        physical.sunder(4.0);
+                        break;
+                    case ~'S':
+                        physical.sunder(8.0);
                         break;
                 }
             }
