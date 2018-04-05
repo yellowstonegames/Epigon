@@ -44,6 +44,12 @@ public final class GauntRNG {
     {
         return determineFloat(state);
     }
+    
+    public static double nextDouble(long state) { return determineDouble(state); }
+    
+    public static double nextDouble(long state, double bound) {
+        return determineDouble(state) * bound;
+    }
     /**
      * Returns a value from an even distribution from min (inclusive) to max
      * (exclusive).

@@ -557,7 +557,7 @@ public class MapOverlayHandler {
             quantWidth = (int)(Math.log10(quantity)) +3; // digits in quantity plus 'x' plus space
             allowedWidth -= quantWidth; // log10 gives us the number of digits - 1 in base 10
         }
-        String name = p.mainMaterial == null ? p.name : p.name + " ⟪H⟫" + p.mainMaterial.getHardness();  
+        String name = p.mainMaterial == null ? p.name : p.name + " Ⓗ" + p.mainMaterial.getHardness();  
         int length = name.length();
         if (length > allowedWidth && quantWidth < 1) {
             return name.substring(0, allowedWidth - 1) + "…";

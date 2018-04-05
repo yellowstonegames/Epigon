@@ -32,9 +32,7 @@ import static squidpony.epigon.Epigon.rootChaos;
 public class RecipeMixer {
 
     public List<RecipeBlueprint> recipes;
-
-    private Map<Material, Physical> materials = new HashMap<>();
-
+    
     public RecipeMixer()
     {
     }
@@ -133,20 +131,16 @@ public class RecipeMixer {
         return result;
     }
 
-    public Physical buildWeapon(Weapon weapon, long state)
+    public static Physical buildWeapon(Weapon weapon, long state)
     {
         OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
         Material mat = materials.getAt(GauntRNG.nextInt(state--, materials.size()));
         return mix(createRecipe(weapon.recipeBlueprint), mat, state).get(0);
     }
 
-    public Physical buildPhysical(Stone stone) {
-        Physical blueprint = materials.get(stone);
-        if (blueprint != null) {
-            return blueprint;
-        }
+    public static Physical buildPhysical(Stone stone) {
 
-        blueprint = new Physical();
+        Physical blueprint = new Physical();
         blueprint.color = stone.front.toFloatBits();
         blueprint.name = stone.toString();
         blueprint.baseValue = stone.value;
@@ -172,17 +166,11 @@ public class RecipeMixer {
         terrain.sedimentary = stone.sedimentary;
         blueprint.terrainData = terrain;
 
-        materials.put(stone, blueprint);
         return blueprint;
     }
 
-    public Physical buildPhysical(Inclusion inclusion) {
-        Physical blueprint = materials.get(inclusion);
-        if (blueprint != null) {
-            return blueprint;
-        }
-
-        blueprint = new Physical();
+    public static Physical buildPhysical(Inclusion inclusion) {
+        Physical blueprint = new Physical();
         blueprint.color = inclusion.front.toFloatBits();
         blueprint.name = inclusion.toString();
         blueprint.baseValue = inclusion.value;
@@ -210,17 +198,13 @@ public class RecipeMixer {
         return blueprint;
     }
 
-    public Physical buildMaterial(Material material) {
-        Physical blueprint = materials.get(material);
-        if (blueprint != null) {
-            return blueprint;
-        }
-
-        blueprint = new Physical();
+    public static Physical buildMaterial(Material material) {
+        Physical blueprint = new Physical();
         blueprint.color = material.getMaterialColor().toFloatBits();
-        blueprint.name = material.toString();
+        blueprint.name = "Bit of " + material.toString();
         blueprint.baseValue = material.getValue();
         blueprint.symbol = material.getGlyph();
+        blueprint.mainMaterial = material;
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness() * 0.01));
 
         Modification materialMod = new Modification();
