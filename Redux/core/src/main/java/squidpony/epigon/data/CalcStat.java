@@ -21,7 +21,7 @@ public enum CalcStat implements ConstantKey {
         prettyName = Utilities.caps(name(), "_");
         hash = ConstantKey.precomputeHash("creature.CalcStat", ordinal());
     }
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

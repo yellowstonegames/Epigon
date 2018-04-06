@@ -68,7 +68,7 @@ public class Epigon extends Game {
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final LightRNG rootChaos = new LightRNG();//14000000000L to test MSDF vs. SDF fonts
+    public static final LightRNG rootChaos = new LightRNG(111L);//14000000000L to test MSDF vs. SDF fonts
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
@@ -693,7 +693,10 @@ public class Epigon extends Game {
     }
     public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
             LEFT = Collections.singletonList(WieldSlot.LEFT_HAND),
-            BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND);
+            BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND),
+            HEAD = Collections.singletonList(WieldSlot.HEAD),
+            NECK = Collections.singletonList(WieldSlot.NECK),
+            FEET = Collections.singletonList(WieldSlot.FEET);
 
     private void equipItem(Physical item) {
 //        if(player.statEffects.contains(player.weaponData.calcStats))
@@ -708,11 +711,24 @@ public class Epigon extends Game {
             case 0:
                 player.creatureData.weaponChoices.add(item.weaponData, 1);
                 break;
-            default:
+            case 3:
+                if(!player.creatureData.wielded.containsKey(WieldSlot.HEAD))
+                    player.equip(item, HEAD);
+                break;
+            case 4:
+                if(!player.creatureData.wielded.containsKey(WieldSlot.NECK))
+                    player.equip(item, NECK);
+                break;
+            case 5:
+                if(!player.creatureData.wielded.containsKey(WieldSlot.FEET))
+                    player.equip(item, FEET);
+                break;
+            case 1:
                 if(!player.creatureData.wielded.containsKey(WieldSlot.RIGHT_HAND))
                     player.equip(item, RIGHT);
                 else
                     player.equip(item, LEFT);
+                break;
         }
     }
 
