@@ -152,7 +152,7 @@ public enum Stone implements Material {
         hash = ConstantKey.precomputeHash("material.Stone", ordinal());
     }
 
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

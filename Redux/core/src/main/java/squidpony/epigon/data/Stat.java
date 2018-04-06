@@ -93,7 +93,7 @@ public enum Stat implements ConstantKey {
         prettyName = Utilities.caps(name(), "_");
         hash = ConstantKey.precomputeHash("creature.Stat", ordinal());
     }
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

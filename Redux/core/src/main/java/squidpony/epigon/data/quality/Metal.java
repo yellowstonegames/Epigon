@@ -42,7 +42,7 @@ public enum Metal implements Material {
         hash = ConstantKey.precomputeHash("material.Metal", ordinal());
     }
 
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

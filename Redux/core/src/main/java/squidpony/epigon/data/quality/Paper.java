@@ -39,7 +39,7 @@ public enum Paper implements Material {
         hash = ConstantKey.precomputeHash("material.Paper", ordinal());
     }
 
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

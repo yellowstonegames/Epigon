@@ -129,7 +129,7 @@ public enum Inclusion implements Material {
         hash = ConstantKey.precomputeHash("material.Inclusion", ordinal());
     }
 
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;

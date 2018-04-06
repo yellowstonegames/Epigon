@@ -36,7 +36,7 @@ public enum Cloth implements Material {
         this.hardness = hardness;
         hash = ConstantKey.precomputeHash("material.Cloth", ordinal());
     }
-    public long hash;
+    public final long hash;
     @Override
     public long hash64() {
         return hash;
