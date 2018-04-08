@@ -5,6 +5,7 @@ import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.data.quality.Element;
+import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 
@@ -19,14 +20,14 @@ import static squidpony.epigon.data.Physical.basePhysical;
  */
 public class Weapon {
     public static final int HANDS = 11;
-    public static final int KIND = 0, USAGE = 1, SHAPE = 2, PATH = 3;
     public RawWeapon rawWeapon;
     public int hands = 1;
     public Physical blueprint;
     public RecipeBlueprint recipeBlueprint;
     public ChangeTable calcStats;
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
-    public String[] qualities = new String[4];
+    //public String[] qualities = new String[4];
+    public int kind, usage, shape, path;
     public String[] materialTypes, training;
     public WeightedTableWrapper<Element> elements;
     public static final OrderedMap<String, OrderedSet<Material>> makes = OrderedMap.makeMap(
@@ -41,6 +42,19 @@ public class Weapon {
             "Metal|Stone", new OrderedSet<>(Metal.values()),
             "Hide|Metal|Wood", new OrderedSet<>(Hide.values())
     );
+    
+    // various constants to make sense of kinds, usages, shapes, and paths instead of using Strings (compile-checked)
+    public static final int
+            MELEE = 0, RANGED = 1, IMPLEMENT = 2, UNARMED = 3, MAGIC = 4, 
+            REPEAT = 0, PROJECTILE = 1, THROWN = 2, 
+            MULTI = 0, BEAM = 1, SWEEP = 2, WAVE = 3, THROUGH = 4, 
+            STRAIGHT = 0, ARC = 1;
+    // for if you need to get a string from one of the above constants, and also to read the TSV contents
+    public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic"), 
+            usages = Maker.makeArrange("Repeat", "Projectile", "Thrown"),
+            shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Through"),
+            paths = Maker.makeArrange("Straight", "Arc");
+    
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
@@ -161,10 +175,10 @@ public class Weapon {
 //        calcStats[RANGE] = raw.range;
 //        calcStats[AREA] = raw.area;
 //        calcStats[PREPARE] = raw.prepare;
-        qualities[KIND] = raw.kind;
-        qualities[USAGE] = raw.usage;
-        qualities[SHAPE] = raw.shape;
-        qualities[PATH] = raw.path;
+        kind = kinds.getInt(raw.kind);
+        usage = kinds.getInt(raw.usage);
+        shape = kinds.getInt(raw.shape);
+        path = kinds.getInt(raw.path);
         hands = raw.hands;
         groups.add(raw.group1);
         groups.add(raw.group2);
@@ -185,7 +199,10 @@ public class Weapon {
     {
         blueprint = Physical.makeBasic(toCopy.rawWeapon.name, toCopy.rawWeapon.glyph, -0x1.81818p126F);
         calcStats = new ChangeTable(toCopy.calcStats);
-        System.arraycopy(toCopy.qualities, 0, qualities, 0, 4);
+        kind = toCopy.kind;
+        usage = toCopy.usage;
+        shape = toCopy.shape;
+        path = toCopy.path;
         materialTypes = Arrays.copyOf(toCopy.materialTypes, toCopy.materialTypes.length);
         training = Arrays.copyOf(toCopy.training, toCopy.training.length);
         hands = toCopy.hands;
