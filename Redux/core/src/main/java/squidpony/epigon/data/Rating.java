@@ -2,6 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.Arrangement;
 
 /**
  * This enum represents a rating of none to high, in order, for use in skills and any other relative
@@ -15,6 +16,7 @@ public enum Rating {
     //0     1       2        3     4     5       6        7
     NONE, SLIGHT, TYPICAL, GOOD, HIGH, SUPERB, AMAZING, ULTIMATE;
 
+    public static final Arrangement<Rating> allRatings = new Arrangement<>(values());
     public String asAdverb() {
         switch (this) {
             case NONE:

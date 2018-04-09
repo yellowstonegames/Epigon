@@ -429,13 +429,13 @@ public class InfoHandler {
 
     private void showSkills(int offset, Physical physical) {
         int widestSkillSize = physical.creatureData.skills.keySet().stream()
-            .mapToInt(s -> s.name.length())
+            .mapToInt(s -> s.toString().length())
             .max()
             .getAsInt();
         int y = 0;
         for (Entry<Skill, Rating> entry : physical.creatureData.skills.entrySet()) {
             Color color = entry.getValue().color();
-            put(1, y + offset, Utilities.caps(entry.getKey().name));
+            put(1, y + offset, Utilities.caps(entry.getKey().toString()));
             put(widestSkillSize + 2, y + offset, Utilities.caps(entry.getValue().toString()), color);
             y++;
         }

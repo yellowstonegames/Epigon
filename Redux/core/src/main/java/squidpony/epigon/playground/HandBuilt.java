@@ -63,47 +63,47 @@ public class HandBuilt {
     public Recipe steakRecipe;
 
     // Cooking skills
-    public Skill cooking = new Skill("cooking");
-    public Skill baking = new Skill("baking", cooking);
-    public Skill frying = new Skill("frying", cooking);
-    public Skill boiling = new Skill("boiling", cooking);
-    public Skill foodPrep = new Skill("food prep", cooking);
-    public Skill foodChopping = new Skill("food chopping", foodPrep);
-    public Skill foodMixing = new Skill("food mixing", foodPrep);
-    public Skill canning = new Skill("canning", cooking);
-    public Skill foodDrying = new Skill("food drying", cooking);
-
-    // Gathering skills
-    public Skill gathering = new Skill("gathering");
-    public Skill butchering = new Skill("butchering", gathering);
-    public Skill farming = new Skill("farming", gathering);
-    public Skill fishing = new Skill("fishing", gathering);
-    public Skill herbalism = new Skill("herbalism", gathering);
-    public Skill hunting = new Skill("hunting", gathering);
-    public Skill mining = new Skill("mining", gathering);
-    public Skill woodcutting = new Skill("wood cutting", gathering);
-    public Skill treeFellingAx = new Skill("tree felling (ax)", gathering);
-    public Skill treeFellingSaw = new Skill("tree felling (saw)", gathering);
-
-    // Base combat skills - NOTE: when shown, combat skills should indicate that they are combat oriented (so "fan" is clear that it's fighting with fans)
-    public Skill combat = new Skill("combat");
-    public Skill armedCombat = new Skill("armed combat", combat);
-    public Skill unarmedCombat = new Skill("unarmed combat", combat);
-    public Skill combatDefense = new Skill("combat defense", combat);
-
-    // Armed combat skills
-    public Skill ax = new Skill("ax", armedCombat);
-    public Skill smallAx = new Skill("ax (small)", ax);
-    public Skill largeAx = new Skill("ax (large)", ax);
-    public Skill fist = new Skill("fist", unarmedCombat);
-    public Skill fan = new Skill("fan", fist);
-    public Skill glove = new Skill("glove", fist);
-    public Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
-    public Skill punchBlade = new Skill("punch blade", fist);
-    public Skill flexible = new Skill("flexible", armedCombat);
-    public Skill whip = new Skill("whip", flexible);
-    public Skill hammer = new Skill("hammer", armedCombat);
-    public Skill smallClub = new Skill("club (small)", hammer);
+//    public Skill cooking = new Skill("cooking");
+//    public Skill baking = new Skill("baking", cooking);
+//    public Skill frying = new Skill("frying", cooking);
+//    public Skill boiling = new Skill("boiling", cooking);
+//    public Skill foodPrep = new Skill("food prep", cooking);
+//    public Skill foodChopping = new Skill("food chopping", foodPrep);
+//    public Skill foodMixing = new Skill("food mixing", foodPrep);
+//    public Skill canning = new Skill("canning", cooking);
+//    public Skill foodDrying = new Skill("food drying", cooking);
+//
+//    // Gathering skills
+//    public Skill gathering = new Skill("gathering");
+//    public Skill butchering = new Skill("butchering", gathering);
+//    public Skill farming = new Skill("farming", gathering);
+//    public Skill fishing = new Skill("fishing", gathering);
+//    public Skill herbalism = new Skill("herbalism", gathering);
+//    public Skill hunting = new Skill("hunting", gathering);
+//    public Skill mining = new Skill("mining", gathering);
+//    public Skill woodcutting = new Skill("wood cutting", gathering);
+//    public Skill treeFellingAx = new Skill("tree felling (ax)", gathering);
+//    public Skill treeFellingSaw = new Skill("tree felling (saw)", gathering);
+//
+//    // Base combat skills - NOTE: when shown, combat skills should indicate that they are combat oriented (so "fan" is clear that it's fighting with fans)
+//    public Skill combat = new Skill("combat");
+//    public Skill armedCombat = new Skill("armed combat", combat);
+//    public Skill unarmedCombat = new Skill("unarmed combat", combat);
+//    public Skill combatDefense = new Skill("combat defense", combat);
+//
+//    // Armed combat skills
+//    public Skill ax = new Skill("ax", armedCombat);
+//    public Skill smallAx = new Skill("ax (small)", ax);
+//    public Skill largeAx = new Skill("ax (large)", ax);
+//    public Skill fist = new Skill("fist", unarmedCombat);
+//    public Skill fan = new Skill("fan", fist);
+//    public Skill glove = new Skill("glove", fist);
+//    public Skill knuckle = new Skill("knuckle", fist); // TODO - this might just be punch (why did I have them both on the design doc?)
+//    public Skill punchBlade = new Skill("punch blade", fist);
+//    public Skill flexible = new Skill("flexible", armedCombat);
+//    public Skill whip = new Skill("whip", flexible);
+//    public Skill hammer = new Skill("hammer", armedCombat);
+//    public Skill smallClub = new Skill("club (small)", hammer);
 
     public Ability unarmedStrike;
     public Ability armedStrike;
@@ -168,7 +168,7 @@ public class HandBuilt {
         cookSteak = new Ability();
         cookSteak.name = "cook steak";
         cookSteak.maxTargets = 1;
-        cookSteak.mustHaveSkillRatings.put(cooking, Rating.TYPICAL);
+        cookSteak.mustHaveSkillRatings.put(Skill.COOKING, Rating.TYPICAL);
         cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(rawMeat, 1));
         cookSteak.validTargets.add(rawMeat);
     }
@@ -195,16 +195,16 @@ public class HandBuilt {
         chef.initialStatRequirements.put(Stat.AIM, 1.0);
         chef.initialStatRequirements.put(Stat.CREATIVITY, 2.0);
         chef.initialStatRequirements.put(Stat.IMPACT, 1.0);
-        chef.initialSkillRequirements.put(cooking, Rating.SLIGHT);
+        chef.initialSkillRequirements.put(Skill.COOKING, Rating.SLIGHT);
 
         Modification mod = new Modification();
-        mod.skillChanges.put(cooking, rvmSkill(Rating.GOOD));
-        mod.skillChanges.put(baking, rvmSkill(Rating.SLIGHT));
-        mod.skillChanges.put(frying, rvmSkill(Rating.SLIGHT));
-        mod.skillChanges.put(boiling, rvmSkill(Rating.SLIGHT));
-        mod.skillChanges.put(foodPrep, rvmSkill(Rating.SLIGHT));
-        mod.skillChanges.put(foodChopping, rvmSkill(Rating.SLIGHT));
-        mod.skillChanges.put(foodMixing, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.COOKING, rvmSkill(Rating.GOOD));
+        mod.skillChanges.put(Skill.BAKING, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.FRYING, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.BOILING, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.FOOD_PREP, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.FOOD_CHOPPING, rvmSkill(Rating.SLIGHT));
+        mod.skillChanges.put(Skill.FOOD_MIXING, rvmSkill(Rating.SLIGHT));
         mod.abilitiesAdditive = new ArrayList<>();
         mod.abilitiesAdditive.add(cookSteak);
 
@@ -212,9 +212,9 @@ public class HandBuilt {
         chef.improvements.put(Rating.SLIGHT, mod);
 
         mod = new Modification();
-        mod.skillChanges.put(baking, rvmSkill(1, Rating.HIGH));
-        mod.skillChanges.put(foodChopping, rvmSkill(1, Rating.SUPERB));
-        mod.skillChanges.put(foodMixing, rvmSkill(1, Rating.HIGH));
+        mod.skillChanges.put(Skill.BAKING, rvmSkill(1, Rating.HIGH));
+        mod.skillChanges.put(Skill.FOOD_CHOPPING, rvmSkill(1, Rating.SUPERB));
+        mod.skillChanges.put(Skill.FOOD_MIXING, rvmSkill(1, Rating.HIGH));
 
         mod.name = "chef typical";
         chef.improvements.put(Rating.TYPICAL, mod);
@@ -287,7 +287,10 @@ public class HandBuilt {
         cb.clothing.put(ClothingSlot.RIGHT_UPPER_LEG, pants);
 
         cb.skills = new OrderedMap<>();
-        cb.skills.put(unarmedCombat, Rating.HIGH);
+        int[] ordering = rng.randomOrdering(Skill.combatSkills.size());
+        for (int i = 0; i < 5; i++) {
+            cb.skills.put(Skill.combatSkills.keyAt(ordering[i]), Rating.allRatings.keyAt(i+1));
+        }
 
         // make sure the player has prereqs for chef
         for (Entry<Stat, Double> entry : chef.initialStatRequirements.entrySet()) {
@@ -302,7 +305,7 @@ public class HandBuilt {
             }
         }
 
-        cb.skills.put(cooking, Rating.TYPICAL);
+        cb.skills.put(Skill.COOKING, Rating.TYPICAL);
         Weapon unarmed = Weapon.randomUnarmedWeapon(++chaos).copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
