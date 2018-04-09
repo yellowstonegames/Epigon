@@ -104,7 +104,7 @@ public class Utilities {
         return sb.toString();
     }
     public static String caps(final CharSequence original,
-                                    final CharSequence oldDelimiter) {
+                              final CharSequence oldDelimiter) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -131,6 +131,21 @@ public class Utilities {
         }
         return sb.toString();
     }
+    public static String lower(final CharSequence original,
+                              final CharSequence oldDelimiter) {
+        if (original == null || original.length() <= 0) {
+            return "";
+        }
+        sb.setLength(0);
+        capitalizeMatcher.setTarget(original);
+        while (capitalizeMatcher.find()) {
+            capitalizeMatcher.getGroup(1, sb, 1); // mode 1 is case-insensitive, which lower-cases result
+            capitalizeMatcher.getGroup(2, sb, 1); // mode 1 is case-insensitive, which lower-cases result
+            sb.append(capitalizeMatcher.group(3).replace(oldDelimiter, " "));
+        }
+        return sb.toString();
+    }
+
 //    public static String caps(String input, String delimiter) {
 //        if (input == null || input.isEmpty()) {
 //            return input;
