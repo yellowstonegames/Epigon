@@ -8,13 +8,51 @@ import java.util.Collections;
 import java.util.List;
 
 import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
-import static squidpony.squidmath.LightRNG.*;
 
 /**
  * Created by Tommy Ettinger on 1/4/2018.
  */
 public final class GauntRNG {
 
+    /**
+     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}
+     * @param state any long
+     * @return a pseudo-random long determined from state
+     */
+    public static long determine(long state) { return ((state = ((state *= 0x6C8E9CF570932BD5L) ^ state >>> 25) * 0x352E9CF570932BDDL) ^ (state << 22 | state >>> 42) ^ (state << 47 | state >>> 17)); }
+
+    public static int determineBounded(long state, final int bound)
+    {
+        return (int)((bound * (((state = ((state *= 0x6C8E9CF570932BD5L) ^ state >>> 25) * 0x352E9CF570932BDDL) ^ (state << 22 | state >>> 42) ^ (state << 47 | state >>> 17)) & 0x7FFFFFFFL)) >> 31);
+    }
+
+    /**
+     * Returns a random float that is deterministic based on state; if state is the same on two calls to this, this will
+     * return the same float. This is expected to be called with a changing variable, e.g. {@code determine(++state)},
+     * where the increment for state should be odd but otherwise doesn't really matter. This multiplies state by
+     * {@code 0x9E3779B97F4A7C15L} within this method, so using a small increment won't be much different from using a
+     * very large one, as long as it is odd. The period is 2 to the 64 if you increment or decrement by 1, but there are
+     * only 2 to the 30 possible floats between 0 and 1.
+     * @param state a variable that should be different every time you want a different random result;
+     *              using {@code determine(++state)} is recommended to go forwards or {@code determine(--state)} to
+     *              generate numbers in reverse order
+     * @return a pseudo-random float between 0f (inclusive) and 1f (exclusive), determined by {@code state}
+     */
+    public static float determineFloat(long state) { return (((state = ((state *= 0x6C8E9CF570932BD5L) ^ state >>> 25) * 0x352E9CF570932BDDL) ^ (state << 22 | state >>> 42) ^ (state << 47 | state >>> 17)) & 0xFFFFFF) * 0x1p-24f; }
+
+    /**
+     * Returns a random double that is deterministic based on state; if state is the same on two calls to this, this
+     * will return the same float. This is expected to be called with a changing variable, e.g.
+     * {@code determine(++state)}, where the increment for state should be odd but otherwise doesn't really matter. This
+     * multiplies state by {@code 0x9E3779B97F4A7C15L} within this method, so using a small increment won't be much
+     * different from using a very large one, as long as it is odd. The period is 2 to the 64 if you increment or
+     * decrement by 1, but there are only 2 to the 62 possible doubles between 0 and 1.
+     * @param state a variable that should be different every time you want a different random result;
+     *              using {@code determine(++state)} is recommended to go forwards or {@code determine(--state)} to
+     *              generate numbers in reverse order
+     * @return a pseudo-random double between 0.0 (inclusive) and 1.0 (exclusive), determined by {@code state}
+     */
+    public static double determineDouble(long state) { return (((state = ((state *= 0x6C8E9CF570932BD5L) ^ state >>> 25) * 0x352E9CF570932BDDL) ^ (state << 22 | state >>> 42) ^ (state << 47 | state >>> 17)) & 0x1FFFFFFFFFFFFFL) * 0x1p-53; }
 
     /**
      * Gets a random number with at most the given amount of bits; call with {@code ++state}.
