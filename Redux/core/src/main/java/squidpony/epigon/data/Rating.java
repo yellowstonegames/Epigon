@@ -3,6 +3,7 @@ package squidpony.epigon.data;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.MathExtras;
 
 /**
  * This enum represents a rating of none to high, in order, for use in skills and any other relative
@@ -43,15 +44,15 @@ public enum Rating {
     public Color color() {
         switch (this) {
             case SLIGHT:
-                return SColor.CW_PALE_ORANGE; // Medium grey
+                return SColor.CW_PALE_ORANGE; // Tan/beige
             case TYPICAL:
-                return SColor.CW_PALE_JADE; // White
+                return SColor.CW_PALE_JADE; // Whitish-green
             case GOOD:
-                return SColor.EMERALD; // Green
+                return SColor.EMERALD; // Deeper green
             case HIGH:
                 return SColor.CW_AZURE; // Blue
             case SUPERB:
-                return SColor.CW_PURPLE; // Purple
+                return SColor.CW_LIGHT_INDIGO; // Purple
             case AMAZING:
                 return SColor.PUMPKIN; // Orange
             case ULTIMATE:
@@ -104,7 +105,6 @@ public enum Rating {
             case SUPERB:
                 return AMAZING;
             case AMAZING:
-                return ULTIMATE;
             case ULTIMATE:
                 return ULTIMATE;
             default:
@@ -125,23 +125,13 @@ public enum Rating {
             return rvm.overwriteIncrease.greaterThan(this) ? rvm.overwriteIncrease : this;
         }
 
-        Rating rating = this;
         if (rvm.deltaLevel != null) {
-            int changes = 0;
-            if (rvm.deltaLevel > 0) {
-                while (rating.lessThan(rvm.deltaMax) && changes < rvm.deltaLevel) {
-                    rating = rating.increase();
-                    changes++;
-                }
-            } else if (rvm.deltaLevel < 0) {
-
-                while (rating.greaterThan(rvm.deltaMin) && changes < rvm.deltaLevel * -1) {
-                    rating = rating.decrease();
-                    changes++;
-                }
-            }
+            return allRatings.keyAt(MathExtras.clamp(
+                    ordinal() + rvm.deltaLevel,
+                    Math.max(0, rvm.deltaMin.ordinal()),
+                    Math.min(7, rvm.deltaMax.ordinal())));
         }
-        return rating;
+        return this;
     }
 
     public boolean greaterThan(Rating other) {
@@ -151,7 +141,7 @@ public enum Rating {
     public boolean lessThan(Rating other) {
         return this.ordinal() < other.ordinal();
     }
-
+    
     @Override
     public String toString() {
         return this.name().toLowerCase();
