@@ -3,6 +3,7 @@ package squidpony.epigon.data;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.OrderedSet;
 
 /**
  * List of the possible skills such as Woodchopping, Archery, etc.
@@ -12,18 +13,22 @@ import squidpony.squidmath.Arrangement;
 public enum Skill implements ConstantKey {
     COOKING, BAKING(COOKING), FRYING(COOKING), BOILING(COOKING),
     CANNING(COOKING), FOOD_DRYING(COOKING),
-    FOOD_PREP(COOKING), FOOD_CHOPPING(FOOD_PREP), FOOD_MIXING(FOOD_PREP),
+    FOOD_PREP(COOKING), FOOD_CHOPPING(FOOD_PREP), FOOD_MIXING(FOOD_PREP), GARNISHING(FOOD_PREP),
+    BREWING(COOKING), CHEESEMAKING(COOKING),
     
     GATHERING, HERBALISM(GATHERING), POISON_SEEKING(HERBALISM),
     LUMBERJACKING(GATHERING), MINING(GATHERING), PROSPECTING(MINING),
-    HUNTING(GATHERING), TRAPPING(HUNTING), FISHING(HUNTING), TRACKING(HUNTING),
     
-    FARMING, HERDING(FARMING), EXOTIC_HERDING(HERDING), BUTCHERING(FARMING),
+    HUNTING, TRAPPING(HUNTING), FISHING(HUNTING), TRACKING(HUNTING),
+    BUTCHERING(HUNTING), TANNING(BUTCHERING),
+
+    FARMING, HERDING(FARMING), EXOTIC_HERDING(HERDING), DAIRY_FARMING(HERDING), SHEARING(HERDING),
     AGRICULTURE(FARMING), CROP_PRESERVATION(AGRICULTURE), COMPOSTING(AGRICULTURE), CROP_SELECTION(AGRICULTURE),
     
     COMBAT,
-    ASSASSIN(COMBAT), BRAWLER(COMBAT), BRUTE(COMBAT), DERVISH(COMBAT), DUELIST(COMBAT),
-    GUARDIAN(COMBAT), HUNTER(COMBAT), JESTER(COMBAT), MARKSMAN(COMBAT), SWORDSMAN(COMBAT), 
+    WEAPONRY(COMBAT),
+    ASSASSIN(WEAPONRY), BRAWLER(WEAPONRY), BRUTE(WEAPONRY), DERVISH(WEAPONRY), DUELIST(WEAPONRY),
+    GUARDIAN(WEAPONRY), HUNTER(WEAPONRY), JESTER(WEAPONRY), MARKSMAN(WEAPONRY), SWORDSMAN(WEAPONRY), 
     MAGIC(COMBAT),
     SEER(MAGIC), SHAMAN(MAGIC), PRIEST(MAGIC), DIABOLIST(MAGIC), WIZARD(MAGIC), SORCERER(MAGIC);
 
@@ -49,6 +54,7 @@ public enum Skill implements ConstantKey {
 //    ;
     private final String prettyName;
     private final Skill parent;
+    private final OrderedSet<Skill> parentChain;
 
     Skill() {
         this(null);
@@ -58,6 +64,12 @@ public enum Skill implements ConstantKey {
         prettyName = Utilities.lower(name(), "_");
         hash = ConstantKey.precomputeHash("creature.Skill", ordinal());
         this.parent = parent;
+        parentChain = new OrderedSet<>(3, ConstantKeyHasher.instance);
+        while (parent != null)
+        {
+            parentChain.add(parent);
+            parent = parent.parent;
+        }
     }
     public final long hash;
     @Override
@@ -94,5 +106,25 @@ public enum Skill implements ConstantKey {
 
     public Skill getParent() {
         return parent;
+    }
+
+    /**
+     * Returns true if this Skill has parentSkill as a possibly-indirect ancestor, or false otherwise.
+     * @param parentSkill a Skill that could be a parent, grandparent, etc. of this Skill
+     * @return true if this Skill descends from parentSkill, directly or indirectly; false otherwise
+     */
+    public boolean descendsFrom(Skill parentSkill)
+    {
+        return parentChain.contains(parentSkill);
+    }
+
+    /**
+     * Returns the approximate level of how specific this Skill is, measured by how many more-general ancestors it has.
+     * Top-level Skills have specificity 0.
+     * @return how specific this Skill is, from 0 to any positive int (though probably no higher than 5 or so)
+     */
+    public int specificity()
+    {
+        return parentChain.size();
     }
 }
