@@ -486,11 +486,11 @@ public class Physical extends EpiData {
             return "";
         Physical p = creatureData.wielded.removeAt(GauntRNG.nextInt(chaos, creatureData.wielded.size()));
         if (p != null) {
+            if (p.weaponData != null)
+                creatureData.weaponChoices.remove(p.weaponData);
             for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
-                    if (p.weaponData != null)
-                        creatureData.weaponChoices.remove(p.weaponData);
                 }
             }
             addToInventory(p);
@@ -511,12 +511,12 @@ public class Physical extends EpiData {
         if (p != null) {
             if(p.mainMaterial == null || p.mainMaterial.getHardness() > GauntRNG.nextDouble(chaos++, power * 500))
                 return ""; // didn't break anything
+            if (p.weaponData != null)
+                creatureData.weaponChoices.remove(p.weaponData);
             creatureData.wielded.removeAt(pos);
             for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
-                    if (p.weaponData != null)
-                        creatureData.weaponChoices.remove(p.weaponData);
                 }
             }
             Physical p2 = RecipeMixer.buildMaterial(p.mainMaterial);
