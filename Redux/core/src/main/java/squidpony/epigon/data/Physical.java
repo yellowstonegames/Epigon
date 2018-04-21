@@ -418,6 +418,11 @@ public class Physical extends EpiData {
             else calc.addActual(current * 0.5);
         }
     }
+    
+    public double actualStat(ConstantKey stat)
+    {
+        return stats.getOrDefault(stat, LiveValue.ZERO).actual();
+    }
 
     @Override
     public int hashCode() {
