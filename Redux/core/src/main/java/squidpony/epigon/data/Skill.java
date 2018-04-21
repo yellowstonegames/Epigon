@@ -3,6 +3,8 @@ package squidpony.epigon.data;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.Hashers;
+import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 
 /**
@@ -55,7 +57,6 @@ public enum Skill implements ConstantKey {
     private final String prettyName;
     private final Skill parent;
     private final OrderedSet<Skill> parentChain;
-
     Skill() {
         this(null);
     }
@@ -103,6 +104,12 @@ public enum Skill implements ConstantKey {
             , DIABOLIST
             , WIZARD
             , SORCERER}, ConstantKeyHasher.instance);
+    public static final OrderedMap<String, Skill> skillsByName = new OrderedMap<>(all.length, Hashers.caseInsensitiveStringHasher);
+    static {
+        for (Skill a : all) {
+            skillsByName.put(a.prettyName, a);
+        }
+    }
 
     public Skill getParent() {
         return parent;

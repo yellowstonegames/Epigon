@@ -6,6 +6,7 @@ import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawWeapon;
 import squidpony.epigon.data.quality.Element;
 import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.Hashers;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 
@@ -29,6 +30,7 @@ public class Weapon {
     //public String[] qualities = new String[4];
     public int kind, usage, shape, path;
     public String[] materialTypes, training;
+    public Skill[] skills;
     public WeightedTableWrapper<Element> elements;
     public static final OrderedMap<String, OrderedSet<Material>> makes = OrderedMap.makeMap(
             "Stone", new OrderedSet<>(Stone.values()),
@@ -58,7 +60,7 @@ public class Weapon {
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
-    public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2),
+    public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2, Hashers.caseInsensitiveStringHasher),
     cultures = new OrderedMap<>(24);
     private static boolean initialized = false;
     public static void init() {
@@ -176,9 +178,9 @@ public class Weapon {
 //        calcStats[AREA] = raw.area;
 //        calcStats[PREPARE] = raw.prepare;
         kind = kinds.getInt(raw.kind);
-        usage = kinds.getInt(raw.usage);
-        shape = kinds.getInt(raw.shape);
-        path = kinds.getInt(raw.path);
+        usage = usages.getInt(raw.usage);
+        shape = shapes.getInt(raw.shape);
+        path = paths.getInt(raw.path);
         hands = raw.hands;
         groups.add(raw.group1);
         groups.add(raw.group2);
@@ -189,6 +191,12 @@ public class Weapon {
         elements = new WeightedTableWrapper<>(blueprint.chaos, new Element[]{Element.valueOf(raw.type1), Element.valueOf(raw.type2)}, new double[]{3, 2});
         materialTypes = raw.materials;
         training = raw.training;
+        if(training != null) {
+            skills = new Skill[training.length];
+            for (int i = 0; i < training.length; i++) {
+                skills[i] = Skill.skillsByName.get(training[i]);
+            }
+        }
         blueprint.weaponData = this;
         blueprint.rarity = Rating.values()[GauntRNG.between(++blueprint.chaos, 1, 8)];
         recipeBlueprint = new RecipeBlueprint();
@@ -205,6 +213,7 @@ public class Weapon {
         path = toCopy.path;
         materialTypes = Arrays.copyOf(toCopy.materialTypes, toCopy.materialTypes.length);
         training = Arrays.copyOf(toCopy.training, toCopy.training.length);
+        skills = Arrays.copyOf(toCopy.skills, toCopy.skills.length);
         hands = toCopy.hands;
         groups.addAll(toCopy.groups);
         maneuvers.addAll(toCopy.maneuvers);
