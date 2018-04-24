@@ -281,20 +281,26 @@ public class InfoHandler {
             // Equipped items
             Physical equippedRight = physical.creatureData.wielded.get(WieldSlot.RIGHT_HAND);
             Physical equippedLeft = physical.creatureData.wielded.get(WieldSlot.LEFT_HAND);
+            Weapon currentWeapon;
+            //₩
             put(3, yOffset + 0, "RH:");
-            if (equippedRight != null) {
-                put(8, yOffset + 0, equippedRight.name, equippedRight.rarity.color());
+            if (equippedRight != null && (currentWeapon = equippedRight.weaponData) != null) {
+                put(8, yOffset + 0, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon), 
+                        equippedRight.rarity.color());
             } else {
                 put(8, yOffset + 0, "empty", Rating.NONE.color());
             }
 
             put(3, yOffset + 1, "LH:");
-            if (equippedLeft != null) {
-                put(8, yOffset + 1, equippedLeft.name, equippedLeft.rarity.color());
+            if (equippedLeft != null && (currentWeapon = equippedLeft.weaponData) != null) {
+                put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
+                        equippedLeft.rarity.color());
             } else {
                 put(8, yOffset + 1, "empty", Rating.NONE.color());
             }
-            put(3, yOffset + 2, "Fighting unarmed using " + physical.creatureData.weaponChoices.items().first().rawWeapon.name);
+            currentWeapon = physical.creatureData.weaponChoices.items().first();
+            put(3, yOffset + 2, "Fighting unarmed using " + currentWeapon.rawWeapon.name + " ₩" +
+                    physical.creatureData.skillWithWeapon(currentWeapon));
         }
     }
 

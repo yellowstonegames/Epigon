@@ -36,6 +36,16 @@ public class Creature {
 
     public ProbabilityTable<Weapon> weaponChoices;
 
+    public int skillWithWeapon(Weapon w)
+    {
+        int skill = 1;
+        for (int i = 0; i < w.skills.length; i++) {
+            skill += skills.getOrDefault(w.skills[i], Rating.NONE).ordinal();
+        }
+        return skill;
+
+    }
+    
     // Runtime values
     public boolean aware;//has noticed the player
 

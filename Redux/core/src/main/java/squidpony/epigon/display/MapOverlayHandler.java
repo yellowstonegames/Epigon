@@ -138,15 +138,17 @@ public class MapOverlayHandler {
     }
 
     private void put(int x, int y, String s) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx));
-        }
+//        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
+//            put(sx + x, y, s.charAt(sx));
+//        }
+        layers.put(x, y, s, layers.defaultPackedForeground, 0f);
     }
 
     private void put(int x, int y, String s, Color color) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx), color);
-        }
+//        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
+//            put(sx + x, y, s.charAt(sx), color);
+//        }
+        layers.put(x, y, s, color);
     }
 
     private void put(int x, int y, char c) {
@@ -557,7 +559,9 @@ public class MapOverlayHandler {
             quantWidth = (int)(Math.log10(quantity)) +3; // digits in quantity plus 'x' plus space
             allowedWidth -= quantWidth; // log10 gives us the number of digits - 1 in base 10
         }
-        String name = p.mainMaterial == null ? p.name : p.name + " Ⓗ" + p.mainMaterial.getHardness();  
+        //.creatureData.skillWithWeapon(currentWeapon)
+        String name = p.mainMaterial == null ? p.name : p.weaponData == null ? p.name
+                : p.name + " ₩" + player.creatureData.skillWithWeapon(p.weaponData);  
         int length = name.length();
         if (length > allowedWidth && quantWidth < 1) {
             return name.substring(0, allowedWidth - 1) + "…";
