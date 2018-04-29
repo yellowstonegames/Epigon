@@ -52,6 +52,16 @@ public class Epigon extends Game {
 
     private enum GameMode {
         DIVE, CRAWL;
+        private final String name;
+
+        GameMode() {
+            name = Utilities.caps(name(), "_", " ");
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
@@ -88,9 +98,12 @@ public class Epigon extends Game {
     private SquidLayers messageSLayers;
     private SparseLayers fallingSLayers;
 
+    private InputSpecialMultiplexer multiplexer;
     private SquidInput mapInput;
     private SquidInput contextInput;
     private SquidInput infoInput;
+    private SquidInput debugInput;
+    private SquidInput fallbackInput;
     private Color bgColor, unseenColor;
     private float bgColorFloat, unseenColorFloat, unseenCreatureColorFloat;
     private List<Coord> toCursor;
@@ -287,7 +300,10 @@ public class Epigon extends Game {
         mapInput = new SquidInput(mapKeys, mapMouse);
         contextInput = new SquidInput(contextMouse);
         infoInput = new SquidInput(infoMouse);
-        Gdx.input.setInputProcessor(new InputMultiplexer(mapStage, messageStage, mapInput, contextInput, infoInput));
+        debugInput = new SquidInput(debugKeys);
+        fallbackInput = new SquidInput(fallbackKeys);
+        multiplexer = new InputSpecialMultiplexer(mapStage, messageStage, mapInput, contextInput, infoInput, debugInput, fallbackInput);
+        Gdx.input.setInputProcessor(multiplexer);
 
         mapStage.addActor(mapSLayers);
         mapOverlayStage.addActor(mapOverlaySLayers);
@@ -1019,7 +1035,7 @@ public class Epigon extends Game {
                 }
                 break;
         }
-
+        multiplexer.processedInput = false;
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
@@ -1039,6 +1055,10 @@ public class Epigon extends Game {
         } else if (infoInput.hasNext()) {
             infoInput.next();
             infoHandler.updateDisplay();
+        } else if (debugInput.hasNext()) {
+            debugInput.next();
+        } else if (fallbackInput.hasNext()) {
+            fallbackInput.next();
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
@@ -1176,48 +1196,50 @@ public class Epigon extends Game {
     private final KeyHandler mapKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput)
+                return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            if(combined == (0x60000 | SquidInput.BACKSPACE))
+            if(combined == (0x60000 | SquidInput.BACKSPACE)) // ctrl-shift-backspace
             {
+                multiplexer.processedInput = true;
                 startGame();
                 return;
             }
             Verb verb = ControlMapping.defaultMapViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input for map mode: " + key);
                 return;
             }
             switch (verb) {
                 case MOVE_DOWN:
                     scheduleMove(Direction.DOWN);
-                    return;
+                    break;
                 case MOVE_UP:
                     scheduleMove(Direction.UP);
-                    return;
+                    break;
                 case MOVE_LEFT:
                     scheduleMove(Direction.LEFT);
-                    return;
+                    break;
                 case MOVE_RIGHT:
                     scheduleMove(Direction.RIGHT);
-                    return;
+                    break;
                 case MOVE_DOWN_LEFT:
                     scheduleMove(Direction.DOWN_LEFT);
-                    return;
+                    break;
                 case MOVE_DOWN_RIGHT:
                     scheduleMove(Direction.DOWN_RIGHT);
-                    return;
+                    break;
                 case MOVE_UP_LEFT:
                     scheduleMove(Direction.UP_LEFT);
-                    return;
+                    break;
                 case MOVE_UP_RIGHT:
                     scheduleMove(Direction.UP_RIGHT);
-                    return;
+                    break;
                 case MOVE_LOWER:
                     prepFall();
-                    return;
+                    break;
                 case MOVE_HIGHER:
                     // TODO
-                    return;
+                    break;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
@@ -1306,11 +1328,12 @@ public class Epigon extends Game {
                     return;
                 case WAIT:
                     scheduleMove(Direction.NONE);
-                    return;
+                    break;
                 default:
-                    message("Can't " + verb.name + " from main view.");
+                    //message("Can't " + verb.name + " from main view.");
                     return;
             }
+            multiplexer.processedInput = true;
 
             // check if the turn clock needs to run
             if (verb.isAction()){
@@ -1318,14 +1341,64 @@ public class Epigon extends Game {
             }
         }
     };
+    
+    private final KeyHandler fallbackKeys = new KeyHandler() {
+        @Override
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            Verb verb;
+            String m;
+            if(multiplexer.processedInput)
+                return;
+            if(mapOverlaySLayers.isVisible()) {
+                switch (mapOverlayHandler.getMode()) {
+                    case HELP:
+                        verb = ControlMapping.defaultHelpViewMapping.get(
+                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        m = "help";
+                        break;
+                    case CRAFTING:
+                        verb = ControlMapping.defaultEquipmentViewMapping.get(
+                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        m = "crafting";
+                        break;
+                    default:
+                        verb = ControlMapping.defaultEquipmentViewMapping.get(
+                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        m = "equipment";
+                        break;
+                }
+            }
+            else
+            {
+                switch (mode)
+                {
+                    case DIVE:
+                        verb = ControlMapping.defaultFallingViewMapping.get(
+                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        m = "dive";
+                        break;
+                    default:
+                        verb = ControlMapping.defaultMapViewMapping.get(
+                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        m = "map";
+                        break;
+                }
+            }
+            if (verb == null) {
+                message("Unknown input for " + m + " mode: " + key);
+            } else
+                message("Can't " + verb.name + " from " + m + " mode.");
+        }
+    };
 
     private final KeyHandler equipmentKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultEquipmentViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input for equipment mode: " + key);
+                //message("Unknown input for equipment mode: " + key);
                 return;
             }
             switch (verb) {
@@ -1393,19 +1466,21 @@ public class Epigon extends Game {
                     mapOverlayHandler.hide();
                     break;
                 default:
-                    message("Can't " + verb.name + " from equipment view.");
-                    break;
+                    //message("Can't " + verb.name + " from equipment view.");
+                    return; // note, this will not change processedInput
             }
+            multiplexer.processedInput = true;
         }
     };
 
     private final KeyHandler helpKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultHelpViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input for help mode: " + key);
+                //message("Unknown input for help mode: " + key);
                 return;
             }
             switch (verb) {
@@ -1439,19 +1514,21 @@ public class Epigon extends Game {
                     mapOverlayHandler.hide();
                     break;
                 default:
-                    message("Can't " + verb.name + " from help view.");
-                    break;
+                    //message("Can't " + verb.name + " from help view.");
+                    return;
             }
+            multiplexer.processedInput = true;
         }
     };
 
     private final KeyHandler fallingKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultFallingViewMapping.get(combined);
             if (verb == null){
-                message("Unknown input for falling mode: " + key);
+                //message("Unknown input for falling mode: " + key);
                 return;
             }
             switch (verb) {
@@ -1494,18 +1571,20 @@ public class Epigon extends Game {
                     // TODO
                     break;
                 case QUIT:
-                    // TODO
+                    Gdx.app.exit();
                     break;
                 default:
-                    message("Can't " + verb.name + " from falling view.");
-                    break;
+                    //message("Can't " + verb.name + " from falling view.");
+                    return;
             }
+            multiplexer.processedInput = true;
         }
     };
 
     private final KeyHandler fallingGameOverKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.defaultFallingViewGameOverMapping.get(combined);
             if (verb == null){
@@ -1521,15 +1600,17 @@ public class Epigon extends Game {
                     Gdx.app.exit();
                     break;
                 default:
-                    message("Can't " + verb.name + " from falling view.");
-                    break;
+                    //message("Can't " + verb.name + " from falling view.");
+                    return;
             }
+            multiplexer.processedInput = true;
         }
     };
 
     private final KeyHandler debugKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             switch (key) {
                 case 'x':
                     fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
@@ -1552,8 +1633,10 @@ public class Epigon extends Game {
                 case '+':
                     fxHandler.layeredSparkle(player.location, 8, Radius.CIRCLE);
                     break;
-
+                default:
+                    return;
             }
+            multiplexer.processedInput = true;
         }
     };
 
@@ -1681,7 +1764,7 @@ public class Epigon extends Game {
             mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InputAdapter() {
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            System.out.println("info: " + screenX + ", " + screenY);
+            //System.out.println("info: " + screenX + ", " + screenY);
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (screenX == infoHandler.arrowLeft.x && screenY == infoHandler.arrowLeft.y) {

@@ -424,7 +424,6 @@ public class InfoHandler {
                     endX = temp;
                     color = SColor.CW_RED;
                 }
-                //System.out.println(stats[s].toString() + ": " + change + " " + startX + ", " + endX);
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
                     damage(Coord.get(x, s + offset), color, physical.chaos += 2);

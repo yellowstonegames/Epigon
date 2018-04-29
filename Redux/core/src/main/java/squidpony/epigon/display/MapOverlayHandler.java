@@ -32,27 +32,20 @@ public class MapOverlayHandler {
             name = Utilities.caps(name(), "_", " ");
         }
 
-        private int position() {
-            for (int i = 0; i < values().length; i++) {
-                if (values()[i] == this) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        public PrimaryMode next() {
-            return values()[(position() + 1) % values().length];
-        }
-
-        public PrimaryMode prior() {
-            return values()[(position() + (values().length - 1)) % values().length];
-        }
-
         @Override
         public String toString() {
             return name;
         }
+        
+        public PrimaryMode next() {
+            return ALL[(ordinal() + 1) % ALL.length];
+        }
+
+        public PrimaryMode prior() {
+            return ALL[(ordinal() + (ALL.length - 1)) % ALL.length];
+        }
+        
+        public static PrimaryMode[] ALL = values();
     }
 
     private SColor headingColor = SColor.CW_BLUE;
