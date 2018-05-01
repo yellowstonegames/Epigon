@@ -49,14 +49,13 @@ public class Weapon {
     public static final int
             MELEE = 0, RANGED = 1, IMPLEMENT = 2, UNARMED = 3, MAGIC = 4, 
             REPEAT = 0, PROJECTILE = 1, THROWN = 2, 
-            MULTI = 0, BEAM = 1, SWEEP = 2, WAVE = 3, THROUGH = 4, 
+            MULTI = 0, BEAM = 1, SWEEP = 2, WAVE = 3, BURST = 4, THROUGH = 5, 
             STRAIGHT = 0, ARC = 1;
     // for if you need to get a string from one of the above constants, and also to read the TSV contents
     public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic"), 
             usages = Maker.makeArrange("Repeat", "Projectile", "Thrown"),
-            shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Through"),
+            shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Burst", "Through"),
             paths = Maker.makeArrange("Straight", "Arc");
-    
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
@@ -153,7 +152,7 @@ public class Weapon {
     {
         rawWeapon = raw;
         blueprint = Physical.makeBasic(raw.name, raw.glyph, -0x1.81818p126F);
-        final int plus = (int)'+';
+        final Integer plus = (int)'+';
         calcStats = ChangeTable.makeCT(
                 CalcStat.PRECISION, plus, raw.precision,
                 CalcStat.DAMAGE, plus, raw.damage,

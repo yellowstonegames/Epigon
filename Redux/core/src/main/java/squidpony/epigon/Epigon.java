@@ -124,7 +124,7 @@ public class Epigon extends Game {
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
     private FallingHandler fallingHandler;
-    private GreasedRegion blocked;
+    private GreasedRegion blocked, floors;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private Coord cursor;
     private Physical player;
@@ -404,17 +404,18 @@ public class Epigon extends Game {
         contextHandler.setMap(map);
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
 
-        GreasedRegion floors = new GreasedRegion(map.opacities(), 0.999);
-        player.location = floors.singleRandom(rng);
-        floors.remove(player.location);
-        floors.copy().randomScatter(rng, 3)
+        floors = new GreasedRegion(map.opacities(), 0.999);
+        GreasedRegion floors2 = floors.copy();
+        player.location = floors2.singleRandom(rng);
+        floors2.remove(player.location);
+        floors2.copy().randomScatter(rng, 3)
             .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-            mixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
+            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
             GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
-        floors.randomScatter(rng, 5);
-        for (Coord coord : floors) {
+        floors2.randomScatter(rng, 5);
+        for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
-                Physical p = mixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
+                Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 RecipeMixer.applyModification(p, handBuilt.makeAlive());
                 if (SColor.saturationOfFloat(p.color) < 0.8f) {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
@@ -469,11 +470,11 @@ public class Epigon extends Game {
                     Coord step = path.get(0);
                     if(player.location.x == step.x && player.location.y == step.y)
                     {
-                        mapSLayers.bump(creature.appearance, c.toGoTo(player.location), 0.13f);
                         ActionOutcome ao = ActionOutcome.attack(creature, player);
+                        Element element = ao.element;
+                        fxHandler.attackEffect(creature, player, c.toGoTo(player.location), ao);
                         if (ao.hit) {
                             int amt = ao.actualDamage >> 1;
-                            Element element = ao.actorWeapon.elements.random();
                             applyStatChange(player, Stat.VIGOR, amt);
                             amt *= -1; // flip sign for output message
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
@@ -752,7 +753,7 @@ public class Epigon extends Game {
     {
         awaitedMoves.add(player.location.translate(dir));
     }
-
+    
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
@@ -786,10 +787,11 @@ public class Epigon extends Game {
             if (thing != null) {
                 awaitedMoves.clear(); // don't keep moving if something hit
                 toCursor.clear();
-                mapSLayers.bump(player.appearance, dir, 0.145f);
                 ActionOutcome ao = ActionOutcome.attack(player, thing);
+                Element element = ao.element;
+                fxHandler.attackEffect(player, thing, dir, ao);
+                //mapSLayers.bump(player.appearance, dir, 0.145f);
                 if (ao.hit) {
-                    Element element = ao.actorWeapon.elements.random();
                     applyStatChange(thing, Stat.VIGOR, ao.actualDamage);
                     if (thing.stats.get(Stat.VIGOR).actual() <= 0) {
                         mapSLayers.removeGlyph(thing.appearance);
@@ -1035,7 +1037,6 @@ public class Epigon extends Game {
                 }
                 break;
         }
-        multiplexer.processedInput = false;
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
@@ -1196,8 +1197,7 @@ public class Epigon extends Game {
     private final KeyHandler mapKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput)
-                return;
+            if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             if(combined == (0x60000 | SquidInput.BACKSPACE)) // ctrl-shift-backspace
             {
@@ -1345,10 +1345,9 @@ public class Epigon extends Game {
     private final KeyHandler fallbackKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+            if(multiplexer.processedInput) return;
             Verb verb;
             String m;
-            if(multiplexer.processedInput)
-                return;
             if(mapOverlaySLayers.isVisible()) {
                 switch (mapOverlayHandler.getMode()) {
                     case HELP:
@@ -1620,7 +1619,7 @@ public class Epigon extends Game {
                     fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
                     break;
                 case 'z':
-                    fxHandler.staticStorm(player.location, Element.ICE, 7, Radius.CIRCLE);
+                    fxHandler.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
                     break;
                 case 'Z':
                     for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
