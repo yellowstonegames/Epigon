@@ -302,7 +302,7 @@ public class Epigon extends Game {
         infoInput = new SquidInput(infoMouse);
         debugInput = new SquidInput(debugKeys);
         fallbackInput = new SquidInput(fallbackKeys);
-        multiplexer = new InputSpecialMultiplexer(mapStage, messageStage, mapInput, contextInput, infoInput, debugInput, fallbackInput);
+        multiplexer = new InputSpecialMultiplexer(mapInput, contextInput, infoInput, debugInput, fallbackInput); //mapStage, messageStage, 
         Gdx.input.setInputProcessor(multiplexer);
 
         mapStage.addActor(mapSLayers);
@@ -1047,19 +1047,9 @@ public class Epigon extends Game {
                 move(Direction.toGoTo(player.location, m));
                 infoHandler.updateDisplay();
             }
-        } else if (mapInput.hasNext()) {// if we are waiting for the player's input and get input, process it.
-            mapInput.next();
-            infoHandler.updateDisplay();
-        } else if (contextInput.hasNext()) {
-            contextInput.next();
-            infoHandler.updateDisplay();
-        } else if (infoInput.hasNext()) {
-            infoInput.next();
-            infoHandler.updateDisplay();
-        } else if (debugInput.hasNext()) {
-            debugInput.next();
-        } else if (fallbackInput.hasNext()) {
-            fallbackInput.next();
+        } else
+        {
+            multiplexer.process();
         }
 
         // the order here matters. We apply multiple viewports at different times to clip different areas.
@@ -1334,7 +1324,7 @@ public class Epigon extends Game {
                     return;
             }
             multiplexer.processedInput = true;
-
+            infoHandler.updateDisplay();
             // check if the turn clock needs to run
             if (verb.isAction()){
                 runTurn();
@@ -1469,6 +1459,7 @@ public class Epigon extends Game {
                     return; // note, this will not change processedInput
             }
             multiplexer.processedInput = true;
+            infoHandler.updateDisplay();
         }
     };
 
@@ -1517,6 +1508,7 @@ public class Epigon extends Game {
                     return;
             }
             multiplexer.processedInput = true;
+            infoHandler.updateDisplay();
         }
     };
 
