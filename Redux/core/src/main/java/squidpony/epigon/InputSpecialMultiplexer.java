@@ -1,19 +1,25 @@
 package squidpony.epigon;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import squidpony.squidgrid.gui.gdx.SquidInput;
 
 /** An {@link InputProcessor} that delegates to an ordered list of other InputProcessors. Delegation for an event stops if a
  * processor returns true, which indicates that the event was handled.
  * @author Nathan Sweet */
 public class InputSpecialMultiplexer implements InputProcessor {
     public boolean processedInput = false;
-    private InputProcessor[] processors;
+    private SquidInput[] processors;
+    private long lastKeyTime = -1000000L;
+    private int lastKeyCode = -1;
+    public long repeatGapMillis = 220L;
 
     public InputSpecialMultiplexer() {
-        processors = new InputProcessor[0];
+        processors = new SquidInput[0];
     }
 
-    public InputSpecialMultiplexer(InputProcessor... processors) {
+    public InputSpecialMultiplexer(SquidInput... processors) {
         this.processors = processors;
     }
 
@@ -24,16 +30,10 @@ public class InputSpecialMultiplexer implements InputProcessor {
         return processors.length;
     }
 
-    public void setProcessors(InputProcessor... processors) {
-        this.processors = processors;
-    }
-
-    public InputProcessor[] getProcessors() {
-        return processors;
-    }
-
     public boolean keyDown(int keycode) {
         processedInput = false;
+        lastKeyTime = System.currentTimeMillis();
+        lastKeyCode = keycode;
         for (int i = 0, n = processors.length; i < n; i++)
             if (processors[i].keyDown(keycode) || processedInput) return true;
         return false;
@@ -85,4 +85,32 @@ public class InputSpecialMultiplexer implements InputProcessor {
         return false;
     }
     
+    public void process()
+    {
+        if(Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)
+                && !Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)
+                && !Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)
+                && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)
+                && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)
+                && !Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)
+                && !Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT)
+                && lastKeyCode >= 0
+                && System.currentTimeMillis() - lastKeyTime > repeatGapMillis // defaults to 220 ms
+                )
+        {
+            processedInput = false;
+            lastKeyTime = System.currentTimeMillis();
+            for (int i = 0, n = processors.length; i < n; i++)
+                if (processors[i].keyDown(lastKeyCode) || processedInput) return;
+        }
+        else 
+        {
+            for (int i = 0, n = processors.length; i < n; i++)
+            {
+                if(processors[i].hasNext())
+                    processors[i].next();
+            }
+        }
+
+    }
 }
