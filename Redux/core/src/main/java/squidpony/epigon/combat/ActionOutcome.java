@@ -1,12 +1,10 @@
 package squidpony.epigon.combat;
 
-import squidpony.epigon.ConstantKey;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Element;
 import squidpony.squidmath.Noise;
 import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.OrderedMap;
 
 /**
  * Handles the specific result of one event in a combat, such as whether a sword swing hit, how much damage it did, if
@@ -24,16 +22,6 @@ public class ActionOutcome {
     public String actorCondition, targetCondition;
     public ActionOutcome()
     {
-    }
-    public static final OrderedMap<ConstantKey, LiveValue> tempActorStats = new OrderedMap<>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance),
-            tempTargetStats = new OrderedMap<>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance);
-    public static void deepCopyInto(OrderedMap<ConstantKey, LiveValue> source, OrderedMap<ConstantKey, LiveValue> toFill)
-    {
-        final int len = source.size();
-        toFill.clear();
-        for (int i = 0; i < len; i++) {
-            toFill.put(source.keyAt(i), new LiveValue(source.getAt(i)));
-        }
     }
     public static ActionOutcome attack(Physical actor, Physical target)
     {

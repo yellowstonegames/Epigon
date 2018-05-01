@@ -5,14 +5,13 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.epigon.Utilities;
+import squidpony.epigon.combat.ActionOutcome;
+import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.quality.Element;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.PanelEffect;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SparseLayers;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.*;
 
 import java.util.List;
@@ -52,16 +51,16 @@ public class FxHandler {
             origin, size,
             rng.nextDouble(360.0),
             radius,
-            Maker.makeList(colorCenter.saturate(element.color, 0.3),
+            colorCenter.saturate(element.color, 0.3),
                 colorCenter.light(colorCenter.saturate(element.color, 0.15)),
                 colorCenter.lightest(element.color),
                 colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
                 colorCenter.desaturate(element.color, 0.3),
                 colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
-                colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f))));
+                colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f)));
     }
 
-    public void staticStorm(Coord origin, Element element, int size, Radius radius) {
+    public void fritz(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new DustEffect(1f, viable.refill(seen, 0.001, 999.0), origin, size, radius,
             Maker.makeList(colorCenter.saturate(element.color, 0.3),
                 colorCenter.light(colorCenter.saturate(element.color, 0.15)),
@@ -171,7 +170,7 @@ public class FxHandler {
         protected void update(float percent) {
             float pathPercent = path.length * percent;
             int pathIndex = Math.min(path.length - 1, Math.round(pathPercent));
-            pathPercent %= 1; // get just the fractional part
+            pathPercent %= 1f; // get just the fractional part
             Coord c = path[pathIndex];
             String lines;
 
@@ -292,13 +291,13 @@ public class FxHandler {
             affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
         }
 
-        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, List<? extends Color> coloring) {
+        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, Color... coloring) {
             this(duration, valid, center, distance, angle, radius);
-            if (colors.length != coloring.size()) {
-                colors = new float[coloring.size()];
+            if (colors.length != coloring.length) {
+                colors = new float[coloring.length];
             }
             for (int i = 0; i < colors.length; i++) {
-                colors[i] = coloring.get(i).toFloatBits();
+                colors[i] = coloring[i].toFloatBits();
             }
         }
 
@@ -379,7 +378,7 @@ public class FxHandler {
             int len = affected.size();
             Coord c;
             float f, color;
-            int idx, seed = System.identityHashCode(this), seed2 = seed;
+            int idx, seed = System.identityHashCode(this);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
@@ -401,7 +400,96 @@ public class FxHandler {
                 }
             }
         }
+    }
+    
+    public class GibberishEffect2 extends PanelEffect.GibberishEffect
+    {
+        /**
+         * Constructs an ExplosionEffect with explicit settings for most fields but also an alternate group of Color
+         * objects that it will use to color the explosion instead of using fiery/smoke colors.
+         *
+         * @param duration  the duration of this PanelEffect in seconds, as a float
+         * @param valid     the valid cells that can be changed by this PanelEffect, as a GreasedRegion
+         * @param center    the center of the explosion
+         * @param radius    the radius of the explosion, in cells
+         */
+        public GibberishEffect2(float duration, GreasedRegion valid, Coord center, int radius, Element element) {
+            super(fx, duration, valid, center, radius, Maker.makeList(
+                    colorCenter.saturate(element.color, 0.3),
+                    colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                    colorCenter.lightest(element.color),
+                    colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                    colorCenter.desaturate(element.color, 0.3),
+                    colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
+                    colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f)));
+        }
+        public GibberishEffect2(float duration, GreasedRegion valid, Coord center, int radius, Element element, char[] altChars) {
+            super(fx, duration, valid, center, radius, Maker.makeList(
+                    colorCenter.saturate(element.color, 0.3),
+                    colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                    colorCenter.lightest(element.color),
+                    colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                    colorCenter.desaturate(element.color, 0.3),
+                    colorCenter.dim(colorCenter.desaturate(element.color, 0.45)).sub(0, 0, 0, 0.35f),
+                    colorCenter.dimmer(colorCenter.desaturate(element.color, 0.6)).sub(0, 0, 0, 0.85f)), altChars);
+        }
+        @Override
+        protected void update(float percent) {
+            int len = affected.size();
+            Coord c;
+            float f, color;
+            int idx, seed = System.identityHashCode(this), clen = choices.length;
+            final long tick = ThrustAltRNG.determine((System.currentTimeMillis() >>> 7) * seed);
+            for (int i = 0; i < len; i++) {
+                c = affected.get(i);
+                if(lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
+                    continue;
+                f = (float)SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                        * 0.17f + percent * 1.2f;
+                if(f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4)
+                    continue;
+                idx = (int) (f * colors.length);
+                if(idx >= colors.length - 1)
+                    color = SColor.lerpFloatColors(colors[colors.length-1], NumberTools.setSelectedByte(colors[colors.length-1], 3, (byte)0), (Math.min(0.99f, f) * colors.length) % 1f);
+                else
+                    color = SColor.lerpFloatColors(colors[idx], colors[idx+1], (f * colors.length) % 1f);
+                fx.put(c.x, c.y, choices[ThrustAltRNG.determineBounded(tick + i, clen)], color, 0f, 3);
+            }
+        }
 
+    }
+    
+    private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
+    public void attackEffect(Physical attacker, Physical target, Direction dir, ActionOutcome ao)
+    {
+        if(ao.element == null)
+        {
+            fx.bump(attacker.appearance, dir, 0.145f);
+        }
+        else
+        {
+            switch (ao.element)
+            {
+                case FIRE:
+                    fx.addAction(new PanelEffect.ExplosionEffect(fx, 0.45f, viable.refill(seen, 0.001, 999), target.location, 1));
+                    break;
+                case LIGHTNING:
+                    fx.addAction(new GibberishEffect2(0.45f, viable.refill(seen, 0.001, 999), target.location, 1, ao.element));
+                    break;
+                case SLASHING:
+                    fx.addAction(new GibberishEffect2(0.35f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element, SLASHING_CHARS));
+                    break;
+                case PIERCING:
+                    fx.summon(attacker.location.x, attacker.location.y, target.location.x, target.location.y, Utilities.arrowsFor(dir).charAt(0), ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.35f);
+                    break;
+                case BLUNT:
+                    fx.bump(attacker.appearance, dir, 0.35f);
+                    break;
+                default:
+                    fx.tint(target.appearance, ao.element.floatColor, 0.5f);
+                    break;
+            }
+        }
     }
 
 }

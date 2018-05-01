@@ -84,4 +84,5 @@ public class InputSpecialMultiplexer implements InputProcessor {
             if (processors[i].scrolled(amount)) return true;
         return false;
     }
+    
 }
