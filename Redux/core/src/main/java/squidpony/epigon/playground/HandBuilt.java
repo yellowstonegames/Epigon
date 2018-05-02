@@ -307,7 +307,8 @@ public class HandBuilt {
         }
 
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
-        Weapon unarmed = Weapon.randomUnarmedWeapon(++chaos).copy();
+        //Weapon unarmed = Weapon.randomUnarmedWeapon(++chaos).copy();
+        Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
         String culture = GauntRNG.getRandomElement(++chaos, unarmed.rawWeapon.culture);

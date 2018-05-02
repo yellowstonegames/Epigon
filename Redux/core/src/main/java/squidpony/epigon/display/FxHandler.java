@@ -439,7 +439,7 @@ public class FxHandler {
             Coord c;
             float f, color;
             int idx, seed = System.identityHashCode(this), clen = choices.length;
-            final long tick = ThrustAltRNG.determine((System.currentTimeMillis() >>> 7) * seed);
+            final long tick = ThrustAltRNG.determine((System.currentTimeMillis() >>> 8) * seed);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
                 if(lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
@@ -471,22 +471,22 @@ public class FxHandler {
             switch (ao.element)
             {
                 case FIRE:
-                    fx.addAction(new PanelEffect.ExplosionEffect(fx, 0.45f, viable.refill(seen, 0.001, 999), target.location, 1));
+                    fx.addAction(new PanelEffect.ExplosionEffect(fx, 0.55f, viable.refill(seen, 0.001, 999), target.location, 0));
                     break;
                 case LIGHTNING:
-                    fx.addAction(new GibberishEffect2(0.45f, viable.refill(seen, 0.001, 999), target.location, 1, ao.element));
+                    fx.addAction(new GibberishEffect2(0.55f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element));
                     break;
                 case SLASHING:
-                    fx.addAction(new GibberishEffect2(0.35f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element, SLASHING_CHARS));
+                    fx.addAction(new GibberishEffect2(0.5f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element, SLASHING_CHARS));
                     break;
                 case PIERCING:
-                    fx.summon(attacker.location.x, attacker.location.y, target.location.x, target.location.y, Utilities.arrowsFor(dir).charAt(0), ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.35f);
+                    fx.summon(attacker.location.x, attacker.location.y, target.location.x, target.location.y, Utilities.arrowsFor(dir).charAt(0), ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.425f);
                     break;
                 case BLUNT:
                     fx.bump(attacker.appearance, dir, 0.35f);
                     break;
                 default:
-                    fx.tint(target.appearance, ao.element.floatColor, 0.5f);
+                    fx.tint(target.appearance, ao.element.floatColor, 0.65f);
                     break;
             }
         }

@@ -6,14 +6,42 @@ import squidpony.squidmath.NumberTools;
 
 import java.util.Collections;
 import java.util.List;
-
-import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
 import static squidpony.squidmath.LightRNG.*;
+import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
 /**
  * Created by Tommy Ettinger on 1/4/2018.
  */
 public final class GauntRNG {
 
+//    public static void main(String[] args)
+//    {
+//        for (long i = 1000000000000L; i < 1000000000080L; i++) {
+//            System.out.println(determine(i));
+//        }
+//    }
+
+//    /**
+//     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}.
+//     * Acts like SplitMix64 but instead of adding a large value to state every time (which needs a multiplication here),
+//     * it uses a random left-xorshift (similar to the random right-xorshift used in PCG-Random) by at least 8 bits of
+//     * distance, followed by multiply, store, right-xorshift, multiply, store, and return right-xorshift. This needs one
+//     * less multiplication but changes a fixed xorshift to a random one, which may be a good trade here.
+//     * @param state any long
+//     * @return a pseudo-random long determined from state
+//     */
+//    public static long determine(long state) {
+//        return ((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25);
+//    }
+//    public static int determineBounded(long state, final int bound) {
+//        return (int)((bound * (((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25) & 0x7FFFFFFFL)) >> 31);
+//    }
+//    public static float determineFloat(long state) {
+//        return (((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
+//    }
+//    public static double determineDouble(long state) {
+//        return (((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+//    }
+    
 //    /**
 //     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}.
 //     * Combines a XOR of state with two bitwise rotations of state by fixed amounts, multiplies, uses a random xorshift
