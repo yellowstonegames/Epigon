@@ -164,7 +164,7 @@ public class Epigon extends Game {
         int smallH = 22;
         int cellW = 15;
         int cellH = 28;
-        int bottomH = 6;
+        int bottomH = 8;
         mapSize = new PanelSize(bigW, bigH, cellW, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
         infoSize = new PanelSize(smallW, smallH * 7 / 4, 7, 16);
