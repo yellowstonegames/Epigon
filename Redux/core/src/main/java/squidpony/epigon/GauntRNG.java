@@ -6,7 +6,7 @@ import squidpony.squidmath.NumberTools;
 
 import java.util.Collections;
 import java.util.List;
-import static squidpony.squidmath.LightRNG.*;
+//import static squidpony.squidmath.LightRNG.*;
 import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
 /**
  * Created by Tommy Ettinger on 1/4/2018.
@@ -20,27 +20,43 @@ public final class GauntRNG {
 //        }
 //    }
 
-//    /**
-//     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}.
-//     * Acts like SplitMix64 but instead of adding a large value to state every time (which needs a multiplication here),
-//     * it uses a random left-xorshift (similar to the random right-xorshift used in PCG-Random) by at least 8 bits of
-//     * distance, followed by multiply, store, right-xorshift, multiply, store, and return right-xorshift. This needs one
-//     * less multiplication but changes a fixed xorshift to a random one, which may be a good trade here.
-//     * @param state any long
-//     * @return a pseudo-random long determined from state
-//     */
-//    public static long determine(long state) {
-//        return ((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25);
-//    }
-//    public static int determineBounded(long state, final int bound) {
-//        return (int)((bound * (((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25) & 0x7FFFFFFFL)) >> 31);
-//    }
-//    public static float determineFloat(long state) {
-//        return (((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
-//    }
-//    public static double determineDouble(long state) {
-//        return (((state = ((state = (state ^ (state << (state | 8L))) * 0x6C8E9CF570932BD5L) ^ state >>> 24) * 0xAEF17502108EF2D9L) ^ state >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
-//    }
+    /**
+     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}.
+     * It's really, really weird that this generator does so well. All of its steps are reversible, like LightRNG but
+     * unlike ThrustAltRNG. One of those reversible steps is, loosely speaking, {@code a ^ rotate(a, i) ^ rotate(a, j)},
+     * where rotate is {@link Long#rotateLeft(long, int)}, which as a group is only reversible if the total number of
+     * XOR operations in that step is an even number. If the above code with two rotated "a" values is used, the effect
+     * it has on quality is minimal, about as much as a single xorshift ({@code a ^ (a >>> i)}). But when four rotations
+     * of "a" are used, the quality becomes drastically better using only a multiplication before (or an increment by a
+     * large odd number), a multiplication after the xor-rotations, and one xorshift at the end. This seems to perform
+     * well speed-wise because rotation is an SSE intrinsic that the JVM can use, and it needs less multiplications than
+     * LightRNG. Even if an intrinsic rotation is one operation, it still uses a lot of them, but the compiler may be
+     * doing a good job at figuring out dependencies between bits (might be the processor too). Quality-wise, I don't
+     * know why this is doing so well. In PractRand testing, this passes at least 16TB, which is good, with only one
+     * (very) minor anomaly, which is excellent. There's currently no reason to expect it will fail at 32TB, though it
+     * is possible; if it passes 32TB PractRand considers that a success.
+     * @param state any long; if given 0 will return 0
+     * @return a pseudo-random long determined from state
+     */
+    public static long determine(final long state) {
+        final long z = state * 0x9E3779B97F4A7C15L;
+        final long y = (z ^ (z << 13 | z >>> 51) ^ (z << 31 | z >>> 33) ^ (z << 41 | z >>> 23) ^ (z << 59 | z >>> 5)) * 0x6C8E9CF570932BD3L;
+        return y ^ y >>> 26;
+    }
+    public static int determineBounded(final long state, final int bound) {
+        final long z = state * 0x9E3779B97F4A7C15L;
+        final long y = (z ^ (z << 13 | z >>> 51) ^ (z << 31 | z >>> 33) ^ (z << 41 | z >>> 23) ^ (z << 59 | z >>> 5)) * 0x6C8E9CF570932BD3L;
+        return (int)((bound * ((y ^ y >>> 26) & 0xFFFFFFFFL)) >> 32);
+    }
+    public static float determineFloat(final long state) {
+        final long z = state * 0x9E3779B97F4A7C15L;
+        return (((z ^ (z << 13 | z >>> 51) ^ (z << 31 | z >>> 33) ^ (z << 41 | z >>> 23) ^ (z << 59 | z >>> 5)) * 0x6C8E9CF570932BD3L) >>> 40) * 0x1p-24f;
+    }
+    public static double determineDouble(final long state) {
+        final long z = state * 0x9E3779B97F4A7C15L;
+        final long y = (z ^ (z << 13 | z >>> 51) ^ (z << 31 | z >>> 33) ^ (z << 41 | z >>> 23) ^ (z << 59 | z >>> 5)) * 0x6C8E9CF570932BD3L;
+        return ((y ^ y >>> 26) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+    }
     
 //    /**
 //     * Experimental; if this doesn't work somehow, switch to {@link squidpony.squidmath.LightRNG#determine(long)}.
