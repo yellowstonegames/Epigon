@@ -24,6 +24,8 @@ public enum Verb {
     INTERACT("Generic interaction with world environment. Catch-all for anything not covered by specific verb."),
     EQUIP("Manualy pick an object to equip from inside the inventory view."),
     EQUIPMENT("Open a screen to see your items and equip or use them."),
+    MESSAGE_PRIOR("Cycles the message area (lower left box on the Main View) to show one earlier message, if any."),
+    MESSAGE_NEXT("Cycles the message area (lower left box on the Main View) to show one later message, if any."),
     MOVE_DOWN,
     MOVE_DOWN_LEFT,
     MOVE_DOWN_RIGHT,
@@ -34,7 +36,7 @@ public enum Verb {
     MOVE_UP_LEFT,
     MOVE_UP_RIGHT,
     MOVE_LOWER("Down in 3D space; foot-wards."),
-    OPEN("For doors only, \"Interact\" should be used for containers."), // If INTERAXCT is changed this also needs to change
+    OPEN("For doors only, \"Interact\" should be used for containers."), // If INTERACT is changed this also needs to change
     PAUSE("Hold it a minute!"),
     QUIT("Leave the game."),
     REPLAY("Start the game again after ending."),

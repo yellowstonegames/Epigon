@@ -110,7 +110,7 @@ public class Epigon extends Game {
     private TextCellFactory font;
 
     // Set up the text display portions
-    private List<IColoredString<Color>> messages = new ArrayList<>();
+    private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
 
     private ControlMapping currentMapping;
@@ -342,7 +342,7 @@ public class Epigon extends Game {
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
         mapSLayers.addLayer();//next adds at level 3, used for effects
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
-        for (int i = 0; i < messageCount; i++) {
+        for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
         }
 
@@ -640,13 +640,35 @@ public class Epigon extends Game {
         layers.put(0, h - 1, '└', borderColor, background);
         layers.put(w - 1, h - 1, '┘', borderColor, background);
     }
+    
+    public void updateMessages()
+    {
+        clearAndBorder(messageSLayers, SColor.APRICOT, unseenColor);
+        for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
+            messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
+        }
+    }
+
+    /**
+     * 
+     * @param amount negative to scroll to previous messages, positive for later messages
+     */
+    private void scrollMessages(int amount)
+    {
+        messageIndex = MathExtras.clamp(messageIndex + amount, messageCount, messages.size() - 1);
+        updateMessages();
+    }
 
     private void message(String text) {
-        clearAndBorder(messageSLayers, SColor.APRICOT, unseenColor);
+        messageIndex = Math.max(messages.size(), messageCount);
+        messages.add(GDXMarkup.instance.colorString("[]"+text));
+        updateMessages();
+        /*
         messages.set(messageIndex++ % messageCount, GDXMarkup.instance.colorString("[]"+text));
         for (int i = messageIndex % messageCount, c = 0; c < messageCount; i = (i + 1) % messageCount, c++) {
             messageSLayers.getForegroundLayer().put(1, 1 + c, messages.get(i));
         }
+         */
     }
 
     private void calcFOV(int checkX, int checkY) {
@@ -1306,6 +1328,12 @@ public class Epigon extends Game {
                 case INFO_NEXT:
                     infoHandler.next();
                     break;
+                case MESSAGE_PRIOR:
+                    scrollMessages(-1);
+                    break;
+                case MESSAGE_NEXT:
+                    scrollMessages(1);
+                    break;
                 case HELP:
                     mapOverlayHandler.setMode(PrimaryMode.HELP);
                     mapInput.setKeyHandler(helpKeys);
@@ -1431,6 +1459,12 @@ public class Epigon extends Game {
                         message("No interaction for " + selected.name);
                     }
                     break;
+                case MESSAGE_PRIOR:
+                    scrollMessages(-1);
+                    break;
+                case MESSAGE_NEXT:
+                    scrollMessages(1);
+                    break;
                 case CONTEXT_PRIOR:
                     contextHandler.prior();
                     break;
@@ -1485,6 +1519,18 @@ public class Epigon extends Game {
                     break;
                 case MOVE_RIGHT:
                     mapOverlayHandler.move(Direction.RIGHT);
+                    break;
+                case MESSAGE_PRIOR:
+                    scrollMessages(-1);
+                    break;
+                case MESSAGE_NEXT:
+                    scrollMessages(1);
+                    break;
+                case CONTEXT_PRIOR:
+                    contextHandler.prior();
+                    break;
+                case CONTEXT_NEXT:
+                    contextHandler.next();
                     break;
                 case INFO_PRIOR:
                     infoHandler.prior();
