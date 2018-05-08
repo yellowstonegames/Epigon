@@ -1217,8 +1217,8 @@ public class Epigon extends Game {
                 startGame();
                 return;
             }
-            Verb verb = ControlMapping.defaultMapViewMapping.get(combined);
-            if (verb == null){
+            Verb verb = ControlMapping.allMappings.get(combined);
+            if (!ControlMapping.defaultMapViewMapping.contains(verb)){
                 return;
             }
             switch (verb) {
@@ -1364,23 +1364,20 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if(multiplexer.processedInput) return;
-            Verb verb;
+            Verb verb = ControlMapping.allMappings.get(SquidInput.combineModifiers(key, alt, ctrl, shift));
             String m;
             if(mapOverlaySLayers.isVisible()) {
                 switch (mapOverlayHandler.getMode()) {
                     case HELP:
-                        verb = ControlMapping.defaultHelpViewMapping.get(
-                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        if(!ControlMapping.defaultHelpViewMapping.contains(verb)) verb = null;
                         m = "help";
                         break;
                     case CRAFTING:
-                        verb = ControlMapping.defaultEquipmentViewMapping.get(
-                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        if(!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
                         m = "crafting";
                         break;
                     default:
-                        verb = ControlMapping.defaultEquipmentViewMapping.get(
-                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        if(!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
                         m = "equipment";
                         break;
                 }
@@ -1390,13 +1387,11 @@ public class Epigon extends Game {
                 switch (mode)
                 {
                     case DIVE:
-                        verb = ControlMapping.defaultFallingViewMapping.get(
-                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        if(!ControlMapping.defaultFallingViewMapping.contains(verb)) verb = null;
                         m = "dive";
                         break;
                     default:
-                        verb = ControlMapping.defaultMapViewMapping.get(
-                                SquidInput.combineModifiers(key, alt, ctrl, shift));
+                        if(!ControlMapping.defaultMapViewMapping.contains(verb)) verb = null;
                         m = "map";
                         break;
                 }
@@ -1413,9 +1408,8 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.defaultEquipmentViewMapping.get(combined);
-            if (verb == null){
-                //message("Unknown input for equipment mode: " + key);
+            Verb verb = ControlMapping.allMappings.get(combined);
+            if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)){
                 return;
             }
             switch (verb) {
@@ -1483,7 +1477,7 @@ public class Epigon extends Game {
                     mapInput.setMouse(helpMouse);
                     break;
                 case EQUIPMENT:
-                case UI_CLOSE_WINDOW:
+                case CLOSE_SCREEN:
                     mapInput.setKeyHandler(mapKeys);
                     mapInput.setMouse(mapMouse);
                     mapOverlayHandler.hide();
@@ -1502,9 +1496,8 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.defaultHelpViewMapping.get(combined);
-            if (verb == null){
-                //message("Unknown input for help mode: " + key);
+            Verb verb = ControlMapping.allMappings.get(combined);
+            if (!ControlMapping.defaultHelpViewMapping.contains(verb)){
                 return;
             }
             switch (verb) {
@@ -1544,7 +1537,7 @@ public class Epigon extends Game {
                     mapInput.setMouse(equipmentMouse);
                     break;
                 case HELP:
-                case UI_CLOSE_WINDOW:
+                case CLOSE_SCREEN:
                     mapInput.setKeyHandler(mapKeys);
                     mapInput.setMouse(mapMouse);
                     mapOverlayHandler.hide();
@@ -1563,9 +1556,8 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.defaultFallingViewMapping.get(combined);
-            if (verb == null){
-                //message("Unknown input for falling mode: " + key);
+            Verb verb = ControlMapping.allMappings.get(combined);
+            if (!ControlMapping.defaultFallingViewMapping.contains(verb)){
                 return;
             }
             switch (verb) {
@@ -1623,13 +1615,12 @@ public class Epigon extends Game {
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if(multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.defaultFallingViewGameOverMapping.get(combined);
-            if (verb == null){
-                message("Unknown input for falling game over mode: " + key);
+            Verb verb = ControlMapping.allMappings.get(combined);
+            if (!ControlMapping.defaultFallingViewGameOverMapping.contains(verb)){
                 return;
             }
             switch (verb) {
-                case REPLAY:
+                case TRY_AGAIN:
                     initPlayer();
                     prepFall();
                     break;
