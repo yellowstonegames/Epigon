@@ -35,12 +35,12 @@
     <inceptionYear>2016</inceptionYear>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.version>3.6.1</maven.compiler.version>
-        <maven.javadoc.version>2.10.4</maven.javadoc.version>
-        <maven.resources.version>2.7</maven.resources.version>
+        <maven.compiler.version>3.7.0</maven.compiler.version>
+        <maven.javadoc.version>3.0.0</maven.javadoc.version>
+        <maven.resources.version>3.1.0</maven.resources.version>
         <maven.source.version>3.0.1</maven.source.version>
         <maven.gpg.version>1.6</maven.gpg.version>
-        <jdk.version>1.9</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <junit.version>4.11</junit.version>
         <squidlib.version>411d1b6840</squidlib.version>
         <gdx.version>1.9.8</gdx.version>
@@ -59,10 +59,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-    <prerequisites>
-        <maven>3.3.0</maven>
-    </prerequisites>
 
     <issueManagement>
         <url>https://github.com/SquidPony/Epigon/issues</url>

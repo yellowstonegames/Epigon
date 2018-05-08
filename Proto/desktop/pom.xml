@@ -70,12 +70,7 @@
             <version>${gdx.version}</version>
             <classifier>natives-desktop</classifier>
         </dependency>
-
     </dependencies>
-
-    <prerequisites>
-        <maven>3.3.0</maven>
-    </prerequisites>
 
     <issueManagement>
         <url>https://github.com/SquidPony/Epigon/issues</url>
@@ -231,7 +226,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.1</version>
                 <executions>
                     <!-- Run shade goal on package phase -->
                     <execution>
