@@ -311,13 +311,13 @@ public class HandBuilt {
         Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
-        String culture = GauntRNG.getRandomElement(++chaos, unarmed.rawWeapon.culture);
+        String culture = playerBlueprint.getRandomElement(unarmed.rawWeapon.culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
-            playerBlueprint.inventory.add(mixer.buildWeapon(possibleItems.get(i).copy(), ++chaos));
+            playerBlueprint.inventory.add(RecipeMixer.buildWeapon(possibleItems.get(i).copy(), playerBlueprint));
         }
         // and one weapon from some other group
-        playerBlueprint.inventory.add(mixer.buildWeapon(Weapon.randomPhysicalWeapon(++chaos).copy(), chaos));
+        playerBlueprint.inventory.add(RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(playerBlueprint).copy(), playerBlueprint));
         mixer.addProfession(chef, playerBlueprint);
     }
 

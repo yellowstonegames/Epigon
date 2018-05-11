@@ -2,11 +2,11 @@ package squidpony.epigon.playground;
 
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
-import squidpony.epigon.GauntRNG;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
+import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedSet;
 
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public class Kickball {
     private Physical makePhysicalFromStone(Stone stone) {
         Physical pb = new Physical();
         pb.name = stone.toString();
-        pb.color = GauntRNG.toRandomizedFloat(stone.front, pb.chaos += 3, 0.05f, 0f, 0.15f);
+        pb.color = SColor.toRandomizedFloat(stone.front, pb, 0.05f, 0f, 0.15f);
 
         return pb;
     }

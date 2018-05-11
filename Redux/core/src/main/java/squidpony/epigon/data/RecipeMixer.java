@@ -1,21 +1,26 @@
 package squidpony.epigon.data;
 
-import squidpony.epigon.GauntRNG;
-import squidpony.epigon.data.quality.*;
+import squidpony.epigon.data.quality.Inclusion;
+import squidpony.epigon.data.quality.Material;
+import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.slot.JewelrySlot;
 import squidpony.epigon.data.slot.OverArmorSlot;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.*;
+import squidpony.squidmath.IRNG;
+import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.UnorderedSet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static squidpony.epigon.Epigon.rootChaos;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -46,7 +51,7 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalConsumed != null && !blueprint.optionalConsumed.isEmpty()) {
-            int idx = GauntRNG.nextInt(rootChaos.nextLong(), blueprint.optionalConsumed.size());
+            int idx = recipe.nextInt(blueprint.optionalConsumed.size());
             recipe.consumed.merge(blueprint.optionalConsumed.keyAt(idx), blueprint.optionalConsumed.getAt(idx), Integer::sum);
         }
 
@@ -54,26 +59,22 @@ public class RecipeMixer {
 
         // TODO - flesh out into larger grabbing of optionals
         if (blueprint.optionalCatalyst != null && !blueprint.optionalCatalyst.isEmpty()) {
-            int idx = GauntRNG.nextInt(rootChaos.nextLong(), blueprint.optionalCatalyst.size());
+            int idx = recipe.nextInt(blueprint.optionalCatalyst.size());
             recipe.catalyst.merge(blueprint.optionalCatalyst.keyAt(idx), blueprint.optionalCatalyst.getAt(idx), Integer::sum);
         }
 
-        recipe.result = new OrderedMap<>();
-
         // TODO - modify results based on chosen optionals
-        recipe.result.putAll(blueprint.result);
+        recipe.result = new OrderedMap<>(blueprint.result);
 
         return recipe;
     }
 
     public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
-        return mix(recipe, consumed, catalyst, rootChaos.nextLong());
+        return mix(recipe, consumed, catalyst, recipe);
     }
 
-    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, long state) {
+    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, IRNG rng) {
         List<Physical> result = new ArrayList<>();
-        long prevState = rootChaos.getState();
-        rootChaos.setState(state);
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
             Stream.of(consumed.stream(), catalyst.stream())
@@ -91,18 +92,15 @@ public class RecipeMixer {
             else
                 result.add(physical);
         }
-        rootChaos.setState(prevState);
         return result;
     }
 
     public static List<Physical> mix(Recipe recipe, Material material) {
-        return mix(recipe, material, rootChaos.nextLong());
+        return mix(recipe, material, recipe);
     }
 
-    public static List<Physical> mix(Recipe recipe, Material material, long state) {
+    public static List<Physical> mix(Recipe recipe, Material material, IRNG rng) {
         List<Physical> result = new ArrayList<>();
-        long prevState = rootChaos.getState();
-        rootChaos.setState(state);
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
             
@@ -127,15 +125,14 @@ public class RecipeMixer {
             else
                 result.add(physical);
         }
-        rootChaos.setState(prevState);
         return result;
     }
 
-    public static Physical buildWeapon(Weapon weapon, long state)
+    public static Physical buildWeapon(Weapon weapon, IRNG rng)
     {
         OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
-        Material mat = materials.getAt(GauntRNG.nextInt(state--, materials.size()));
-        return mix(createRecipe(weapon.recipeBlueprint), mat, state).get(0);
+        Material mat = materials.randomItem(rng);
+        return mix(createRecipe(weapon.recipeBlueprint), mat, rng).get(0);
     }
 
     public static Physical buildPhysical(Stone stone) {
@@ -270,7 +267,7 @@ public class RecipeMixer {
 
         List<String> possibleNames = new ArrayList<>(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
-        physical.name = GauntRNG.getRandomElement(++physical.chaos, possibleNames);
+        physical.name = physical.getRandomElement(possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
 
         if (!blueprint.countsAs.isEmpty()) {
@@ -282,7 +279,7 @@ public class RecipeMixer {
         physical.buildingBlock = blueprint.buildingBlock;
 
         physical.symbol = blueprint.symbol;
-        physical.color = blueprint.color == 0f ? GauntRNG.toRandomizedFloat(SColor.GRAY, ++physical.chaos, 1f, 0.1f, 0.15f) : blueprint.color;
+        physical.color = blueprint.color == 0f ? SColor.toRandomizedFloat(SColor.GRAY, physical, 1f, 0.1f, 0.15f) : blueprint.color;
         physical.baseValue = blueprint.baseValue;
         physical.blocking = blueprint.blocking;
 
@@ -334,8 +331,8 @@ public class RecipeMixer {
             applyModification(physical, m);
         }
 
-        int count = GauntRNG.nextInt(++physical.chaos, blueprint.optionalModifications.size());
-        int[] ints = GauntRNG.randomOrdering(physical.chaos += count - 1, count);
+        int count = physical.nextInt(blueprint.optionalModifications.size());
+        int[] ints = physical.randomOrdering(count);
         for (int i = 0; i < count; i++) {
             applyModification(physical, blueprint.optionalModifications.get(ints[i]));
         }
@@ -421,7 +418,7 @@ public class RecipeMixer {
 
         int count = modification.possiblePrefix.size() + modification.possibleSuffix.size();
         if (count > 0) {
-            int i = GauntRNG.nextInt(++physical.chaos, count);
+            int i = physical.nextInt(count);
             if (i < modification.possiblePrefix.size()) {
                 physical.name = modification.possiblePrefix.get(i) + " " + physical.name;
             } else {
@@ -487,7 +484,7 @@ public class RecipeMixer {
         }
 
         if (modification.color != null) {
-            physical.color = GauntRNG.toRandomizedFloat(modification.color, physical.chaos + 1, 0.05f, 0f, 0.15f);
+            physical.color = SColor.toRandomizedFloat(modification.color, physical, 0.05f, 0f, 0.15f);
         }
         if((modification.symbol != null || modification.color != null) && physical.appearance != null)
         {
@@ -496,7 +493,7 @@ public class RecipeMixer {
         }
 
         if (modification.overlayColor != null) {
-            physical.overlayColor = GauntRNG.toRandomizedFloat(modification.overlayColor, physical.chaos + 2, 0.05f, 0f, 0.15f);
+            physical.overlayColor = SColor.toRandomizedFloat(modification.overlayColor, physical, 0.05f, 0f, 0.15f);
         }
         if (modification.overlaySymbol != null) {
             physical.overlaySymbol = modification.overlaySymbol;

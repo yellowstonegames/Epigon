@@ -1,6 +1,5 @@
 package squidpony.epigon.combat;
 
-import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Element;
 import squidpony.squidmath.Noise;
@@ -26,12 +25,11 @@ public class ActionOutcome {
     public static ActionOutcome attack(Physical actor, Physical target)
     {
         ActionOutcome ao = new ActionOutcome();
-        long r = GauntRNG.nextLong(++actor.chaos);
-        ao.actorWeapon = actor.creatureData == null ? Weapon.randomUnarmedWeapon(r - 3L) : actor.creatureData.weaponChoices.random();
-        int index = ao.actorWeapon.elements.table.random(r - 1);
+        ao.actorWeapon = actor.creatureData == null ? Weapon.randomUnarmedWeapon(actor) : actor.creatureData.weaponChoices.random();
+        int index = ao.actorWeapon.elements.table.random(actor.nextLong());
         ao.element = ao.actorWeapon.elements.items.get(index);
-        ao.targetCondition = index < ao.actorWeapon.statuses.size() ? ao.actorWeapon.statuses.get(index) : GauntRNG.getRandomElement(r - 2, ao.actorWeapon.statuses);
-        ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(r - 4L) : target.creatureData.weaponChoices.random();
+        ao.targetCondition = index < ao.actorWeapon.statuses.size() ? ao.actorWeapon.statuses.get(index) : actor.getRandomElement(ao.actorWeapon.statuses);
+        ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(actor) : target.creatureData.weaponChoices.random();
         int actorSkill = 1, targetSkill = 1;
         if(actor.creatureData != null)
         {
@@ -52,20 +50,20 @@ public class ActionOutcome {
         ChangeTable.holdPhysical(target, target.statEffects);
         //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
         
-        ao.crit = (5 + (actor.actualStat(CalcStat.CRIT) - target.actualStat(CalcStat.STEALTH))) >= GauntRNG.nextInt(r, 50);
+        ao.crit = (5 + (actor.actualStat(CalcStat.CRIT) - target.actualStat(CalcStat.STEALTH))) >= actor.nextInt(50);
         double actorPrecision = actor.actualStat(CalcStat.PRECISION) + actorSkill,
                 targetEvasion = target.actualStat(CalcStat.EVASION) + targetSkill;
-        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actorPrecision - targetEvasion)) >= GauntRNG.next(r + 1, 7);
+        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actorPrecision - targetEvasion)) >= actor.next(7);
 //        ao.hit = (67 + 5 * ((ao.crit ? 2 : 0) + actor.stats.getOrDefault(CalcStat.PRECISION, LiveValue.ZERO).actual() -
 //                target.stats.getOrDefault(CalcStat.EVASION, LiveValue.ZERO).actual())) >= GauntRNG.next(r + 1, 7);
         if(ao.hit)
         {
-            ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.randomFloatCurved(r + 2) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +
+            ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.4f - 0.45f) * ((ao.crit ? 2 : 1) +
                     actor.actualStat(CalcStat.DAMAGE) + actorSkill)));
             ao.actualDamage = Math.min(0, ao.attemptedDamage -
-                    Noise.fastFloor((NumberTools.randomFloatCurved(r + 3) * 0.3f + 0.35f) * (target.actualStat(CalcStat.DEFENSE) +  targetSkill)));
+                    Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.3f + 0.35f) * (target.actualStat(CalcStat.DEFENSE) +  targetSkill)));
             ao.targetConditioned = (35 + 5 * ((ao.crit ? 1 : 0) + actor.actualStat(CalcStat.INFLUENCE) + actorSkill -
-                    target.actualStat(CalcStat.LUCK) - targetSkill)) >= GauntRNG.next(r + 4, 8);
+                    target.actualStat(CalcStat.LUCK) - targetSkill)) >= actor.next(8);
         }
         ChangeTable.releasePhysical(actor, actor.statEffects);
         ChangeTable.releasePhysical(target, target.statEffects);

@@ -2,7 +2,6 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -490,7 +489,7 @@ public class Physical extends EpiData {
         }
         if(creatureData.wielded.isEmpty())
             return "";
-        Physical p = creatureData.wielded.removeAt(GauntRNG.nextInt(chaos, creatureData.wielded.size()));
+        Physical p = creatureData.wielded.removeAt(nextInt(creatureData.wielded.size()));
         if (p != null) {
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
@@ -512,10 +511,10 @@ public class Physical extends EpiData {
         }
         if(creatureData.wielded.isEmpty())
             return "";
-        int pos = GauntRNG.nextInt(chaos++, creatureData.wielded.size());
+        int pos = nextInt(creatureData.wielded.size());
         Physical p = creatureData.wielded.getAt(pos);
         if (p != null) {
-            if(p.mainMaterial == null || p.mainMaterial.getHardness() > GauntRNG.nextDouble(chaos++, power * 500))
+            if(p.mainMaterial == null || p.mainMaterial.getHardness() > nextDouble(power * 500))
                 return ""; // didn't break anything
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
