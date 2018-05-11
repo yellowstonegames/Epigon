@@ -71,14 +71,12 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    // this is separated from the StatefulRNG so you can still call LightRNG-specific methods, mainly skip()
-    public final LightRNG lightRNG = new LightRNG(seed);
-    public final StatefulRNG rng = new StatefulRNG(lightRNG);
+    public final StatefulRNG rng = new StatefulRNG(new LinnormRNG(seed));
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final LightRNG rootChaos = new LightRNG();//14000000000L to test MSDF vs. SDF fonts
+    public static final LinnormRNG rootChaos = new LinnormRNG();
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
