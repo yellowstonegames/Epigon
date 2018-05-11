@@ -408,8 +408,8 @@ public class Epigon extends Game {
         floors2.remove(player.location);
         floors2.copy().randomScatter(rng, 3)
             .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(++player.chaos).copy(), player.chaos),
-            GauntRNG.getRandomElement(++player.chaos, Element.allEnergy).weaponModification())));
+            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
+            player.getRandomElement(Element.allEnergy).weaponModification())));
         floors2.randomScatter(rng, 5);
         for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
@@ -712,7 +712,7 @@ public class Epigon extends Game {
         if (player.inventory.isEmpty()) {
             message("Nothing equippable found.");
         } else {
-            GauntRNG.shuffleInPlace(player.chaos += player.inventory.size() - 1, player.inventory);
+            player.shuffleInPlace(player.inventory);
             for (int i = 0; i < player.inventory.size(); i++) {
                 Physical chosen = player.inventory.get(i);
                 if(chosen.weaponData != null)
@@ -834,8 +834,8 @@ public class Epigon extends Game {
                                 })
                                 .forEach(item -> {
                                     map.contents[newX][newY].add(item);
-                                    if (map.resistances[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)] < 0.9) {
-                                        map.contents[newX + GauntRNG.between(player.chaos + 10, -1, 2)][newY + GauntRNG.between(player.chaos + 11, -1, 2)].add(item);
+                                    if (map.resistances[newX + player.between(-1, 2)][newY + player.between(-1, 2)] < 0.9) {
+                                        map.contents[newX + player.between(-1, 2)][newY + player.between(-1, 2)].add(item);
                                     }
                                 });
                             mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
@@ -1305,7 +1305,7 @@ public class Epigon extends Game {
                 case DROP:
                     message("Dropping all held items");
                     for (Physical dropped : player.unequip(BOTH)) {
-                        for (int i = 0, offset = GauntRNG.next(++player.chaos, 3); i < 8; i++) {
+                        for (int i = 0, offset = player.next(3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
                             if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
                                 map.contents[c.x][c.y].add(dropped);

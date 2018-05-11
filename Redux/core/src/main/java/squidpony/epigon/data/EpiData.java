@@ -28,6 +28,11 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
         idHash = (uniqueIntGen += 0x632BE5AB);
         chaos = rootChaos.nextLong();
     }
+    public EpiData(final String name)
+    {
+        this();
+        this.name = name;
+    }
 
     /**
      * Get up to 32 bits (inclusive) of random output; the int this produces
@@ -37,7 +42,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a random number that fits in the specified number of bits
      */
     @Override
-    public int next(int bits) {
+    public final int next(int bits) {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
         z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
         return (int)(z ^ z >>> 25) >>> (32 - bits);
@@ -49,7 +54,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a 32-bit random int.
      */
     @Override
-    public int nextInt() {
+    public final int nextInt() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
         z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
         return (int)(z ^ z >>> 25);
@@ -61,7 +66,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a 64-bit random long.
      */
     @Override
-    public long nextLong() {
+    public final long nextLong() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
         z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
         return (z ^ z >>> 25);
@@ -72,7 +77,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a random boolean.
      */
     @Override
-    public boolean nextBoolean() {
+    public final boolean nextBoolean() {
         final long z = (chaos = chaos * 0x41C64E6DL + 1L);
         return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L) < 0;
     }
@@ -88,7 +93,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a double between 0.0 (inclusive) and 0.9999999999999999 (inclusive)
      */
     @Override
-    public double nextDouble() {
+    public final double nextDouble() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
         z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
         return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
@@ -100,7 +105,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a float between 0f (inclusive) and 0.99999994f (inclusive)
      */
     @Override
-    public float nextFloat() {
+    public final float nextFloat() {
         final long z = (chaos = chaos * 0x41C64E6DL + 1L);
         return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }

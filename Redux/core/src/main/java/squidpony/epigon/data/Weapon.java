@@ -4,11 +4,7 @@ import squidpony.Maker;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawWeapon;
-import squidpony.epigon.data.quality.Element;
-import squidpony.squidmath.Arrangement;
-import squidpony.squidmath.Hashers;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,10 +98,16 @@ public class Weapon {
     }
 
     /**
-     * Call with {@code ++state}.
-     * @param state must be called with {@code ++state}.
+     * Gets a random weapon with the given IRNG.
+     * @param rng an IRNG, which is expected to be an EpiData much of the time
      * @return a random weapon, which may be tangible or unarmed
      */
+    public static Weapon randomWeapon(IRNG rng)
+    {
+        if(!initialized) init();
+        return weapons.randomValue(rng);
+    }
+    
     public static Weapon randomWeapon(long state)
     {
         if(!initialized) init();
@@ -117,14 +119,14 @@ public class Weapon {
         return physicalWeapons;
     }
     /**
-     * Call with {@code ++state}.
-     * @param state must be called with {@code ++state}.
+     * Gets a random tangible weapon with the given IRNG.
+     * @param rng an IRNG, which is expected to be an EpiData much of the time
      * @return a random tangible weapon
      */
-    public static Weapon randomPhysicalWeapon(long state)
+    public static Weapon randomPhysicalWeapon(IRNG rng)
     {
         if(!initialized) init();
-        return physicalWeapons.getAt(GauntRNG.nextInt(state, physicalWeapons.size()));
+        return physicalWeapons.randomValue(rng);
     }
     public static OrderedMap<String, Weapon> getUnarmedWeapons()
     {
@@ -132,14 +134,14 @@ public class Weapon {
         return unarmedWeapons;
     }
     /**
-     * Call with {@code ++state}.
-     * @param state must be called with {@code ++state}.
+     * Gets a random unarmed weapon with the given IRNG.
+     * @param rng an IRNG, which is expected to be an EpiData much of the time
      * @return a random unarmed weapon
      */
-    public static Weapon randomUnarmedWeapon(long state)
+    public static Weapon randomUnarmedWeapon(IRNG rng)
     {
         if(!initialized) init();
-        return unarmedWeapons.getAt(GauntRNG.nextInt(state, unarmedWeapons.size()));
+        return unarmedWeapons.randomValue(rng);
     }
 
     //public static final Weapon UNARMED = weapons.getAt(0);
@@ -197,7 +199,7 @@ public class Weapon {
             }
         }
         blueprint.weaponData = this;
-        blueprint.rarity = Rating.values()[GauntRNG.between(++blueprint.chaos, 1, 8)];
+        blueprint.rarity = Rating.values()[blueprint.between(1, 8)];
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);

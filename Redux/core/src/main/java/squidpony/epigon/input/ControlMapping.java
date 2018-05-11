@@ -77,7 +77,6 @@ public class ControlMapping {
             GET,
             GATHER,
             HELP,
-            HELP,
             INTERACT,
             DRAW,
             DROP,
@@ -93,19 +92,11 @@ public class ControlMapping {
             MOVE_UP_RIGHT,
             MOVE_DOWN_LEFT,
             MOVE_DOWN_RIGHT,
-            MESSAGE_PRIOR,
-            MESSAGE_NEXT,
-            MOVE_LEFT,
-            MOVE_DOWN,
-            MOVE_UP,
-            MOVE_RIGHT,
-            MOVE_UP_LEFT,
-            MOVE_UP_RIGHT,
-            MOVE_DOWN_LEFT,
-            MOVE_DOWN_RIGHT,
             WAIT,
             MOVE_HIGHER,
             MOVE_LOWER,
+            MESSAGE_PRIOR,
+            MESSAGE_NEXT,
             CONTEXT_PRIOR,
             CONTEXT_NEXT,
             INFO_PRIOR,
@@ -113,8 +104,6 @@ public class ControlMapping {
             OPEN,
             SHUT,
             SAVE,
-            SAVE,
-            QUIT,
             QUIT,
             CLOSE_SCREEN
     );
@@ -125,7 +114,6 @@ public class ControlMapping {
             CONSUME_WEIRDLY, // ctrl-c to eat the delicious soap
             EQUIPMENT, // acts the same as closing the window while open
             FIRE,
-            HELP,
             HELP,
             INTERACT,
             DRAW,
@@ -147,7 +135,6 @@ public class ControlMapping {
             CONTEXT_NEXT,
             INFO_PRIOR,
             INFO_NEXT,
-            QUIT,
             QUIT,
             CLOSE_SCREEN
     );
@@ -170,7 +157,6 @@ public class ControlMapping {
             MOVE_HIGHER,
             MOVE_LOWER,
             QUIT,
-            QUIT,
             CLOSE_SCREEN
     );
     public static final UnorderedSet<Verb> defaultFallingViewMapping = Maker.makeUOS(
@@ -185,16 +171,10 @@ public class ControlMapping {
             PAUSE,
             SAVE,
             SAVE,
-            QUIT,
-            QUIT,
             QUIT
     );
     public static final UnorderedSet<Verb> defaultFallingViewGameOverMapping = Maker.makeUOS(
             TRY_AGAIN,
-            TRY_AGAIN,
-            QUIT,
-            QUIT,
-            QUIT,
             QUIT
     );
 }

@@ -3,7 +3,6 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.GauntRNG;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
@@ -426,7 +425,7 @@ public class InfoHandler {
                 }
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
-                    damage(Coord.get(x, s + offset), color, physical.chaos += 2);
+                    damage(Coord.get(x, s + offset), color, physical);
                 }
             }
         }
@@ -446,8 +445,8 @@ public class InfoHandler {
         }
     }
 
-    private void damage(Coord origin, Color color, long chaos) {
-        fx.addAction(new DamageEffect(GauntRNG.nextFloat(chaos--) * 1.9f +  1.2f, GauntRNG.between(chaos, 2, 4), origin,
+    private void damage(Coord origin, Color color, IRNG rng) {
+        fx.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), origin,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
