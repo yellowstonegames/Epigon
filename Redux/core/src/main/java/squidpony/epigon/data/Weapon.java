@@ -189,7 +189,7 @@ public class Weapon {
         maneuvers.add(raw.maneuver2);
         statuses.add(raw.status1);
         statuses.add(raw.status2);
-        elements = new WeightedTableWrapper<>(blueprint.chaos, new Element[]{Element.valueOf(raw.type1), Element.valueOf(raw.type2)}, new double[]{3, 2});
+        elements = new WeightedTableWrapper<>(blueprint.nextLong(), new Element[]{Element.valueOf(raw.type1), Element.valueOf(raw.type2)}, new double[]{3, 2});
         materialTypes = raw.materials;
         training = raw.training;
         if(training != null) {
@@ -223,7 +223,7 @@ public class Weapon {
         rawWeapon = toCopy.rawWeapon;
         blueprint.weaponData = this;
         while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
-            blueprint.rarity = GauntRNG.getRandomElement(++blueprint.chaos, Rating.values());
+            blueprint.rarity = blueprint.getRandomElement(Rating.values());
         }
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);

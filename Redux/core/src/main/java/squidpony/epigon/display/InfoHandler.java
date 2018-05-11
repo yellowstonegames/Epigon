@@ -425,7 +425,7 @@ public class InfoHandler {
                 }
                 for (int x = startX; x <= endX; x++) {
                     //front.summon(x, s + offset, x, change > 0 ? s + offset - 1 : s + offset + 1, rng.getRandomElement(sparkles), color, SColor.TRANSPARENT, 800f, 1f);
-                    damage(Coord.get(x, s + offset), color, physical);
+                    damage(x, s + offset, color, physical);
                 }
             }
         }
@@ -445,8 +445,8 @@ public class InfoHandler {
         }
     }
 
-    private void damage(Coord origin, Color color, IRNG rng) {
-        fx.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), origin,
+    private void damage(int originX, int originY, Color color, IRNG rng) {
+        fx.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), originX, originY,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
@@ -464,35 +464,36 @@ public class InfoHandler {
 
         public int cycles;
         public float[] colors;
-        public Coord c;
+        public int x, y;
 
-        public DamageEffect(float duration, int cycles, Coord center, float[] coloring) {
+        public DamageEffect(float duration, int cycles, int centerX, int centerY, float[] coloring) {
             super(front, duration);
             this.cycles = cycles;
-            c = center;
+            x = centerX;
+            y = centerY;
             colors = coloring;
         }
 
         @Override
         protected void end() {
             super.end();
-            fxBack.clear(c.x, c.y);
-            fx.clear(c.x, c.y);
+            fxBack.clear(x, y);
+            fx.clear(x, y);
         }
 
         @Override
         protected void update(float percent) {
             float f, color;
             int idx, seed = System.identityHashCode(this);
-            f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
+            f = (float) WhirlingNoise.noise(x * 1.5, y * 1.5, percent * 0.015, seed) * 0.125f + 0.126f + percent * 0.875f;
             idx = (int) (f * colors.length);
             if (idx >= colors.length - 1) {
                 color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            fxBack.put(c.x, c.y, '█', SColor.translucentColor(back.getDefaultForegroundColor().toFloatBits(), 0.5f));
-            fx.put(c.x, c.y, Utilities.sparkles.charAt((int) Math.floor(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color);
+            fxBack.put(x, y, '█', SColor.translucentColor(back.getDefaultForegroundColor().toFloatBits(), 0.5f));
+            fx.put(x, y, Utilities.sparkles.charAt((int)(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color);
         }
     }
 }

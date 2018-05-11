@@ -12,10 +12,7 @@ import squidpony.epigon.data.trait.Creature;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.data.trait.Profession;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.ProbabilityTable;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,13 +110,13 @@ public class HandBuilt {
 
     public HandBuilt()
     {
-        this(new StatefulRNG(), new RecipeMixer());
+        this(new RecipeMixer());
     }
 
-    public HandBuilt(StatefulRNG rng, RecipeMixer mixer) {
+    public HandBuilt(RecipeMixer mixer) {
 //        this.rng = rng.copy();
         chaos = rootChaos.nextLong();
-        this.rng = new StatefulRNG(chaos);
+        this.rng = new StatefulRNG(new LinnormRNG(chaos));
         this.mixer = mixer;
         baseOpenDoor = new Physical();
         baseClosedDoor = new Physical();
@@ -227,7 +224,7 @@ public class HandBuilt {
         playerBlueprint.description = "It's you!";
         //playerBlueprint.notes = "Voted most likely to die in Adventurer's Middle School.";
         playerBlueprint.symbol = '@';
-        playerBlueprint.color = SColor.BRIGHT_PINK.toFloatBits();
+        playerBlueprint.color = playerBlueprint.getRandomElement(SColor.COLOR_WHEEL_PALETTE_BRIGHT).toFloatBits();
         playerBlueprint.blocking = true;
         playerBlueprint.unique = true;
         playerBlueprint.attached = true;
@@ -307,8 +304,8 @@ public class HandBuilt {
         }
 
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
-        //Weapon unarmed = Weapon.randomUnarmedWeapon(++chaos).copy();
-        Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
+        Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
+        //Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
         String culture = playerBlueprint.getRandomElement(unarmed.rawWeapon.culture);
