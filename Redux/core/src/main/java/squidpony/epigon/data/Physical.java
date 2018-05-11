@@ -132,6 +132,7 @@ public class Physical extends EpiData {
     public Terrain terrainData;
 
     public Physical() {
+        super();
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
         chaos = rootChaos.nextLong();
