@@ -11,8 +11,6 @@ import squidpony.squidmath.*;
 
 import java.util.*;
 
-import static squidpony.epigon.Epigon.rootChaos;
-
 /**
  * Base class for all instantiated physical objects in the world.
  *
@@ -35,9 +33,7 @@ public class Physical extends EpiData {
     }
     public static final int PRECISION = 0, DAMAGE = 1, CRIT = 2, INFLUENCE = 3,
             EVASION = 4, DEFENSE = 5, STEALTH = 6, LUCK = 7, RANGE = 8, AREA= 9, PREPARE = 10;
-
-    public long chaos;
-
+    
     // operational bits for live objects
     public Coord location;
     public boolean attached; // cannot be removed from its location (or inventory pile) without special means
@@ -134,7 +130,6 @@ public class Physical extends EpiData {
         super();
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
-        chaos = rootChaos.nextLong();
     }
     public static Physical makeBasic(String name, char symbol, Color color)
     {

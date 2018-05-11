@@ -2,6 +2,7 @@ package squidpony.epigon.mapping;
 
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.LinnormRNG;
 import squidpony.squidmath.StatefulRNG;
 
 import static squidpony.epigon.Epigon.rootChaos;
@@ -28,7 +29,7 @@ public class EpiMap {
         this.width = width;
         this.height = height;
         fovResult = new double[width][height];
-        chaos = new StatefulRNG(rootChaos.nextLong());
+        chaos = new StatefulRNG(new LinnormRNG(rootChaos.nextLong()));
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
         resistances = new double[width][height];

@@ -2,7 +2,7 @@ package squidpony.epigon.data;
 
 import squidpony.StringKit;
 import squidpony.squidmath.AbstractRNG;
-import squidpony.squidmath.IRNG;
+import squidpony.squidmath.LinnormRNG;
 import squidpony.squidmath.StatefulRNG;
 
 import java.io.Serializable;
@@ -119,8 +119,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      * @return a copy of this IRNG
      */
     @Override
-    public IRNG copy() {
-        return new StatefulRNG(chaos);
+    public StatefulRNG copy() {
+        return new StatefulRNG(new LinnormRNG(chaos));
     }
 
     /**

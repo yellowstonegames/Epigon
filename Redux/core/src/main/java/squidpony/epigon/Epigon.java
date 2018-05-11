@@ -172,7 +172,7 @@ public class Epigon extends Game {
 
     public Epigon() {
         mixer = new RecipeMixer();
-        handBuilt = new HandBuilt(rng, mixer);
+        handBuilt = new HandBuilt(mixer);
         Weapon.init();
     }
 
@@ -334,7 +334,7 @@ public class Epigon extends Game {
         mapSLayers.glyphs.clear();
         mapSLayers.animationCount = 0;
         creatures.clear();
-        handBuilt = new HandBuilt(rng, mixer);
+        handBuilt = new HandBuilt(mixer);
 
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
@@ -422,7 +422,7 @@ public class Epigon extends Game {
                 }
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
-                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.chaos, pMeat, 1.0, 2, 4);
+                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), pMeat, 1.0, 2, 4);
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
@@ -858,10 +858,10 @@ public class Epigon extends Game {
                         }
                     } else {
                         String amtText = String.valueOf(-ao.actualDamage);
-                        int startX = newX - (amtText.length() >> 1);
-                        for (int i = 0; i < amtText.length(); i++, startX++) {
-                            mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
-                        }
+//                        int startX = newX - (amtText.length() >> 1);
+//                        for (int i = 0; i < amtText.length(); i++, startX++) {
+//                            mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
+//                        }
                         if(ao.crit)
                         {
                             mapSLayers.wiggle(thing.appearance, 0.3f);

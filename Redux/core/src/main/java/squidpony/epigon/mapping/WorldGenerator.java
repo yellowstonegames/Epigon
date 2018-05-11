@@ -89,7 +89,7 @@ public class WorldGenerator {
             centerGap = Math.max(centerGap, gapSize / 2 + 1); // make sure it's not off the left side
             centerGap = Math.min(centerGap, width - gapSize / 2 - 1); // make sure it's not off the right side
         }
-        rng = new StatefulRNG(handBuilt.rng.nextLong() ^ seed3);
+        rng = new StatefulRNG(new LinnormRNG(handBuilt.rng.nextLong() ^ seed3));
         safeSpots.retract(2).randomScatter(rng, 8);
 
         RecipeMixer recipeMixer = new RecipeMixer();

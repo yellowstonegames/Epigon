@@ -34,7 +34,7 @@ public class FxHandler {
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
     double[][] seen;
-    private StatefulRNG rng = new StatefulRNG();
+    private StatefulRNG rng = new StatefulRNG(new LinnormRNG());
 
     public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
@@ -134,7 +134,7 @@ public class FxHandler {
         protected void update(float percent) {
             float f, color;
             int idx, seed = System.identityHashCode(this);
-            f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
+            f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
             idx = (int) (f * colors.length);
             if (idx >= colors.length - 1) {
                 color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
@@ -227,7 +227,7 @@ public class FxHandler {
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
                 }
-                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
+                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
                     * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
@@ -319,7 +319,7 @@ public class FxHandler {
                 {
                     continue;
                 }
-                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
                     * 0.17f + percent * 1.2f;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
@@ -384,7 +384,7 @@ public class FxHandler {
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
                 }
-                f = (float) SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
+                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
                     * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
@@ -439,12 +439,12 @@ public class FxHandler {
             Coord c;
             float f, color;
             int idx, seed = System.identityHashCode(this), clen = choices.length;
-            final long tick = ThrustAltRNG.determine((System.currentTimeMillis() >>> 8) * seed);
+            final long tick = LightRNG.determine((System.currentTimeMillis() >>> 8) * seed);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
                 if(lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
-                f = (float)SeededNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                f = (float)WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
                         * 0.17f + percent * 1.2f;
                 if(f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4)
                     continue;
@@ -453,7 +453,7 @@ public class FxHandler {
                     color = SColor.lerpFloatColors(colors[colors.length-1], NumberTools.setSelectedByte(colors[colors.length-1], 3, (byte)0), (Math.min(0.99f, f) * colors.length) % 1f);
                 else
                     color = SColor.lerpFloatColors(colors[idx], colors[idx+1], (f * colors.length) % 1f);
-                fx.put(c.x, c.y, choices[ThrustAltRNG.determineBounded(tick + i, clen)], color, 0f, 3);
+                fx.put(c.x, c.y, choices[LightRNG.determineBounded(tick + i, clen)], color, 0f, 3);
             }
         }
 
@@ -462,9 +462,10 @@ public class FxHandler {
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
     public void attackEffect(Physical attacker, Physical target, Direction dir, ActionOutcome ao)
     {
+        fx.clear(2);
         if(ao.element == null)
         {
-            fx.bump(attacker.appearance, dir, 0.145f);
+            fx.bump(attacker.appearance, dir, 0.35f);
         }
         else
         {
@@ -472,15 +473,30 @@ public class FxHandler {
             {
                 case FIRE:
                     fx.addAction(new PanelEffect.ExplosionEffect(fx, 0.55f, viable.refill(seen, 0.001, 999), target.location, 0));
+                    fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, 'ˁ', SColor.floatGet(0x595652BB), SColor.floatGet(0x59565200), 0.525f);
                     break;
                 case LIGHTNING:
                     fx.addAction(new GibberishEffect2(0.55f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element));
+                    break;
+                case TEMPORAL:
+                    fx.tint(target.appearance, ao.element.floatColor, 0.5f);
+                case EARTH:
+                    fx.wiggle(target.appearance, 0.5f);
+                    break;
+                case WATER:
+                    fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, '~', ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.525f);
+                    break;
+                case ACID:
+                    fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, '✘', ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.525f);
+                    break;
+                case CAUSTIC:
+                    fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, '○', ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.525f);
                     break;
                 case SLASHING:
                     fx.addAction(new GibberishEffect2(0.5f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element, SLASHING_CHARS));
                     break;
                 case PIERCING:
-                    fx.summon(attacker.location.x, attacker.location.y, target.location.x, target.location.y, Utilities.arrowsFor(dir).charAt(0), ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.425f);
+                    fx.summon(attacker.location.x, attacker.location.y, target.location.x, target.location.y, Utilities.arrowsFor(dir).charAt(0), ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.475f);
                     break;
                 case BLUNT:
                     fx.bump(attacker.appearance, dir, 0.35f);

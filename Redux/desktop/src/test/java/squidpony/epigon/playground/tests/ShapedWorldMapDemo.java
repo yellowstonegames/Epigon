@@ -604,7 +604,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
         view = new StretchViewport(width*cellWidth, height*cellHeight);
         stage = new Stage(view, batch);
         seed = 0xDEBACL;
-        rng = new StatefulRNG(seed);
+        rng = new StatefulRNG(new LinnormRNG(seed));
         world = new ShapedMap(seed, width, height, WhirlingNoise.instance, 0.7);
         //cloudNoise = new Noise.Turbulent4D(WhirlingNoise.instance, new Noise.Ridged4D(SeededNoise.instance, 2, 3.7), 3, 5.9);
         cloudNoise = new Noise.Layered4D(WhirlingNoise.instance, 2, 3.2);
