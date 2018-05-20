@@ -216,62 +216,62 @@ public class Epigon extends Game {
         TextCellFactory smallFont = font.copy();
         messageIndex = messageCount;
         messageSLayers = new SquidLayers(
-            messageSize.gridWidth,
-            messageSize.gridHeight,
-            messageSize.cellWidth,
-            messageSize.cellHeight,
-            font);
+                messageSize.gridWidth,
+                messageSize.gridHeight,
+                messageSize.cellWidth,
+                messageSize.cellHeight,
+                font);
 
         infoSLayers = new SquidLayers(
-            infoSize.gridWidth,
-            infoSize.gridHeight,
-            infoSize.cellWidth,
-            infoSize.cellHeight,
-            smallFont);
+                infoSize.gridWidth,
+                infoSize.gridHeight,
+                infoSize.cellWidth,
+                infoSize.cellHeight,
+                smallFont);
         infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SquidLayers(
-            contextSize.gridWidth,
-            contextSize.gridHeight,
-            contextSize.cellWidth,
-            contextSize.cellHeight,
-            smallFont);
+                contextSize.gridWidth,
+                contextSize.gridHeight,
+                contextSize.cellWidth,
+                contextSize.cellHeight,
+                smallFont);
         contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
         contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
-            worldWidth,
-            worldHeight,
-            mapSize.cellWidth,
-            mapSize.cellHeight,
-            font);
+                worldWidth,
+                worldHeight,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                font);
 
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers);
 
         mapOverlaySLayers = new SparseLayers(
-            mapSize.gridWidth,
-            mapSize.gridHeight,
-            mapSize.cellWidth,
-            mapSize.cellHeight,
-            font);
+                mapSize.gridWidth,
+                mapSize.gridHeight,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                font);
         mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         fallingSLayers = new SparseLayers(
-            worldWidth,
-            totalDepth,
-            mapSize.cellWidth,
-            mapSize.cellHeight,
-            font);
+                worldWidth,
+                totalDepth,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                font);
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
         fallingSLayers.setDefaultForeground(SColor.LIME);
         fallingHandler = new FallingHandler(fallingSLayers);
 
-        font.tweakWidth(mapSize.cellWidth * 1.125f).tweakHeight(mapSize.cellHeight * 1.07f).initBySize();
-        smallFont.tweakWidth(infoSize.cellWidth * 1.125f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
+        font.tweakWidth(mapSize.cellWidth * 1.075f).tweakHeight(mapSize.cellHeight * 1.1f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.075f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
@@ -319,7 +319,7 @@ public class Epigon extends Game {
             lightLevels[i] = lerpFloatColors(initial, -0x1.7583e6p125F, Interpolation.sineOut.apply(i / 12f)); // AMUR_CORK_TREE again
         }
         for (int i = 0; i < 64; i++) {
-            lightLevels[12 + i] = lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F,  Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
+            lightLevels[12 + i] = lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F, Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
         }
 
         startGame();
@@ -346,11 +346,11 @@ public class Epigon extends Game {
 
         worldGenerator = new WorldGenerator();
         contextHandler.message("Have fun!",
-            "You are falling!",
-            style("Bump into statues ([*][/]s[,]) and stuff."),
-            style("Now [/]90% fancier[/]!"),
-            "Use ? for help, or q to quit.",
-            "Use numpad or arrow keys to move.");
+                "You are falling!",
+                style("Bump into statues ([*][/]s[,]) and stuff."),
+                style("Now [/]90% fancier[/]!"),
+                "Use ? for help, or q to quit.",
+                "Use numpad or arrow keys to move.");
 
         initPlayer();
 
@@ -361,7 +361,7 @@ public class Epigon extends Game {
         processingCommand = false; // let the player do input
     }
 
-    private void initPlayer(){
+    private void initPlayer() {
         player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(99.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
@@ -407,9 +407,9 @@ public class Epigon extends Game {
         player.location = floors2.singleRandom(rng);
         floors2.remove(player.location);
         floors2.copy().randomScatter(rng, 3)
-            .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
-            player.getRandomElement(Element.allEnergy).weaponModification())));
+                .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
+                        RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
+                        player.getRandomElement(Element.allEnergy).weaponModification())));
         floors2.randomScatter(rng, 5);
         for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
@@ -417,8 +417,8 @@ public class Epigon extends Game {
                 RecipeMixer.applyModification(p, handBuilt.makeAlive());
                 if (SColor.saturationOfFloat(p.color) < 0.8f) {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
-                        0.8f,
-                        SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
+                            0.8f,
+                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
                 }
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
@@ -435,7 +435,7 @@ public class Epigon extends Game {
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
-                
+
         blocked = new GreasedRegion(map.width, map.height);
         calcDijkstra();
 
@@ -456,8 +456,7 @@ public class Epigon extends Game {
         for (int i = 0; i < size; i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
-            if(creature.overlaySymbol == null)
-            {
+            if (creature.overlaySymbol == null) {
                 mapSLayers.removeGlyph(creature.overlayAppearance);
                 creature.overlayAppearance = null;
             }
@@ -466,8 +465,7 @@ public class Epigon extends Game {
                 List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, player.location);
                 if (path != null && !path.isEmpty()) {
                     Coord step = path.get(0);
-                    if(player.location.x == step.x && player.location.y == step.y)
-                    {
+                    if (player.location.x == step.x && player.location.y == step.y) {
                         ActionOutcome ao = ActionOutcome.attack(creature, player);
                         Element element = ao.element;
                         fxHandler.attackEffect(creature, player, c.toGoTo(player.location), ao);
@@ -478,23 +476,23 @@ public class Epigon extends Game {
                             if (player.stats.get(Stat.VIGOR).actual() <= 0) {
                                 if (ao.crit) {
                                     message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
-                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                 } else {
                                     message(Messaging.transform("The " + creature.name + " slay$ you with "
-                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                 }
                             } else {
                                 if (ao.crit) {
                                     mapSLayers.wiggle(player.appearance, 0.3f);
                                     message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
-                                        + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                 } else {
                                     message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "
-                                        + amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                            + amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
                                 }
                                 if (ao.targetConditioned) {
                                     message(Messaging.transform("The " + creature.name + " "
-                                        + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                            + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
                                     if (player.overlaySymbol != null) {
                                         if (player.overlayAppearance != null) {
                                             mapSLayers.removeGlyph(player.overlayAppearance);
@@ -510,19 +508,18 @@ public class Epigon extends Game {
                                 message("The " + creature.name + " missed you.");
                             }
                         }
-                    }
-                    else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
+                    } else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
                         map.contents[c.x][c.y].remove(creature);
                         if (creature.appearance == null) {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
-                            if(creature.overlaySymbol != null)
+                            if (creature.overlaySymbol != null)
                                 creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
                         }
                         creatures.alterAt(i, step);
                         creature.location = step;
                         map.contents[step.x][step.y].add(creature);
                         mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
-                        if(creature.overlayAppearance != null)
+                        if (creature.overlayAppearance != null)
                             mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                     }
                 }
@@ -576,7 +573,7 @@ public class Epigon extends Game {
         }
         for (Stat s : Stat.rolloverProcessOrder) {
             LiveValue lv = target.stats.get(s);
-            if (lv == null){
+            if (lv == null) {
                 continue; // doesn't have this stat so skip it
             }
             double val = lv.actual();
@@ -596,7 +593,7 @@ public class Epigon extends Game {
         target.stats.get(stat).addActual(amount);
         for (Stat s : Stat.rolloverProcessOrder) {
             LiveValue lv = target.stats.get(s);
-            if (lv == null){
+            if (lv == null) {
                 continue; // doesn't have this stat so skip it
             }
             double val = lv.actual();
@@ -638,9 +635,8 @@ public class Epigon extends Game {
         layers.put(0, h - 1, '└', borderColor, background);
         layers.put(w - 1, h - 1, '┘', borderColor, background);
     }
-    
-    public void updateMessages()
-    {
+
+    public void updateMessages() {
         clearAndBorder(messageSLayers, SColor.APRICOT, unseenColor);
         for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
             messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
@@ -648,18 +644,16 @@ public class Epigon extends Game {
     }
 
     /**
-     * 
      * @param amount negative to scroll to previous messages, positive for later messages
      */
-    private void scrollMessages(int amount)
-    {
+    private void scrollMessages(int amount) {
         messageIndex = MathExtras.clamp(messageIndex + amount, messageCount, messages.size() - 1);
         updateMessages();
     }
 
     private void message(String text) {
         messageIndex = Math.max(messages.size(), messageCount);
-        messages.add(GDXMarkup.instance.colorString("[]"+text));
+        messages.add(GDXMarkup.instance.colorString("[]" + text));
         updateMessages();
         /*
         messages.set(messageIndex++ % messageCount, GDXMarkup.instance.colorString("[]"+text));
@@ -686,13 +680,13 @@ public class Epigon extends Game {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
                         else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
-                            if(creature.overlayAppearance != null)
+                            if (creature.overlayAppearance != null)
                                 mapSLayers.glyphs.add(creature.overlayAppearance);
                         }
                     }
                 } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
-                    if(creature.overlayAppearance != null)
+                    if (creature.overlayAppearance != null)
                         mapSLayers.removeGlyph(creature.overlayAppearance);
                 }
             }
@@ -715,8 +709,7 @@ public class Epigon extends Game {
             player.shuffleInPlace(player.inventory);
             for (int i = 0; i < player.inventory.size(); i++) {
                 Physical chosen = player.inventory.get(i);
-                if(chosen.weaponData != null)
-                {
+                if (chosen.weaponData != null) {
                     equipItem(chosen);
                     return;
                 }
@@ -728,6 +721,7 @@ public class Epigon extends Game {
 
         }
     }
+
     public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
             LEFT = Collections.singletonList(WieldSlot.LEFT_HAND),
             BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND),
@@ -740,8 +734,7 @@ public class Epigon extends Game {
 //            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
 //        else
 //            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
-        switch (item.weaponData.hands)
-        {
+        switch (item.weaponData.hands) {
             case 2:
                 player.equip(item, BOTH);
                 break;
@@ -749,19 +742,19 @@ public class Epigon extends Game {
                 player.creatureData.weaponChoices.add(item.weaponData, 1);
                 break;
             case 3:
-                if(!player.creatureData.wielded.containsKey(WieldSlot.HEAD))
+                if (!player.creatureData.wielded.containsKey(WieldSlot.HEAD))
                     player.equip(item, HEAD);
                 break;
             case 4:
-                if(!player.creatureData.wielded.containsKey(WieldSlot.NECK))
+                if (!player.creatureData.wielded.containsKey(WieldSlot.NECK))
                     player.equip(item, NECK);
                 break;
             case 5:
-                if(!player.creatureData.wielded.containsKey(WieldSlot.FEET))
+                if (!player.creatureData.wielded.containsKey(WieldSlot.FEET))
                     player.equip(item, FEET);
                 break;
             case 1:
-                if(!player.creatureData.wielded.containsKey(WieldSlot.RIGHT_HAND))
+                if (!player.creatureData.wielded.containsKey(WieldSlot.RIGHT_HAND))
                     player.equip(item, RIGHT);
                 else
                     player.equip(item, LEFT);
@@ -769,18 +762,16 @@ public class Epigon extends Game {
         }
     }
 
-    private void scheduleMove(Direction dir)
-    {
+    private void scheduleMove(Direction dir) {
         awaitedMoves.add(player.location.translate(dir));
     }
-    
+
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
     private void move(Direction dir) {
         player.update();
-        if(player.overlaySymbol == null)
-        {
+        if (player.overlaySymbol == null) {
             mapSLayers.removeGlyph(player.overlayAppearance);
             player.overlayAppearance = null;
         }
@@ -798,7 +789,7 @@ public class Epigon extends Game {
                 calcDijkstra();
                 runTurn();
             });
-            if(player.overlayAppearance != null)
+            if (player.overlayAppearance != null)
                 mapSLayers.slide(player.overlayAppearance, player.location.x, player.location.y, newX, newY, 0.145f, null);
             player.location = newPos;
             sound.playFootstep();
@@ -822,37 +813,37 @@ public class Epigon extends Game {
                         map.contents[newX][newY].remove(thing);
                         if (ao.crit) {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                .map(table -> {
-                                    int quantity = table.quantity();
-                                    Physical p = RecipeMixer.buildPhysical(table.random());
-                                    if (p.groupingData != null) {
-                                        p.groupingData.quantity += quantity;
-                                    } else {
-                                        p.groupingData = new Grouping(quantity);
-                                    }
-                                    return p;
-                                })
-                                .forEach(item -> {
-                                    map.contents[newX][newY].add(item);
-                                    if (map.resistances[newX + player.between(-1, 2)][newY + player.between(-1, 2)] < 0.9) {
-                                        map.contents[newX + player.between(-1, 2)][newY + player.between(-1, 2)].add(item);
-                                    }
-                                });
+                                    .map(table -> {
+                                        int quantity = table.quantity();
+                                        Physical p = RecipeMixer.buildPhysical(table.random());
+                                        if (p.groupingData != null) {
+                                            p.groupingData.quantity += quantity;
+                                        } else {
+                                            p.groupingData = new Grouping(quantity);
+                                        }
+                                        return p;
+                                    })
+                                    .forEach(item -> {
+                                        map.contents[newX][newY].add(item);
+                                        if (map.resistances[newX + player.between(-1, 2)][newY + player.between(-1, 2)] < 0.9) {
+                                            map.contents[newX + player.between(-1, 2)][newY + player.between(-1, 2)].add(item);
+                                        }
+                                    });
                             mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                             message("You [Blood]brutally[] defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                         } else {
                             Stream.concat(thing.physicalDrops.stream(), thing.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                .map(table -> {
-                                    int quantity = table.quantity();
-                                    Physical p = RecipeMixer.buildPhysical(table.random());
-                                    if (p.groupingData != null) {
-                                        p.groupingData.quantity += quantity;
-                                    } else {
-                                        p.groupingData = new Grouping(quantity);
-                                    }
-                                    return p;
-                                })
-                                .forEach(item -> map.contents[newX][newY].add(item));
+                                    .map(table -> {
+                                        int quantity = table.quantity();
+                                        Physical p = RecipeMixer.buildPhysical(table.random());
+                                        if (p.groupingData != null) {
+                                            p.groupingData.quantity += quantity;
+                                        } else {
+                                            p.groupingData = new Grouping(quantity);
+                                        }
+                                        return p;
+                                    })
+                                    .forEach(item -> map.contents[newX][newY].add(item));
                             mapSLayers.burst(newX, newY, 1, Radius.CIRCLE, thing.appearance.shown, thing.color, SColor.translucentColor(thing.color, 0f), 1);
                             message("You defeat the " + thing.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                         }
@@ -862,23 +853,19 @@ public class Epigon extends Game {
 //                        for (int i = 0; i < amtText.length(); i++, startX++) {
 //                            mapSLayers.summon(startX, newY, startX + 1, newY - 1, amtText.charAt(i), element.floatColor, SColor.translucentColor(element.floatColor, 0f), 1f);
 //                        }
-                        if(ao.crit)
-                        {
+                        if (ao.crit) {
                             mapSLayers.wiggle(thing.appearance, 0.3f);
                             message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + thing.name + " for " +
                                     amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                        }
-                        else
-                        {
+                        } else {
                             message(Messaging.transform("You " + element.verb + " the " + thing.name + " for " +
                                     amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         }
-                        if(ao.targetConditioned)
-                        {
+                        if (ao.targetConditioned) {
                             message(Messaging.transform("You " +
                                     ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
                                     " the " + thing.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                            if(thing.overlaySymbol != null) {
+                            if (thing.overlaySymbol != null) {
                                 if (thing.overlayAppearance != null) mapSLayers.removeGlyph(thing.overlayAppearance);
                                 thing.overlayAppearance = mapSLayers.glyph(thing.overlaySymbol, thing.overlayColor, newX, newY);
                             }
@@ -907,7 +894,7 @@ public class Epigon extends Game {
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
         lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
-        int n = (int)(lightAmount * lightLevels.length);
+        int n = (int) (lightAmount * lightLevels.length);
         n = Math.min(Math.max(n, 0), lightLevels.length - 1);
         //float back = lightLevels[n]; // background gets both lit and faded to memory
         //mapSLayers.put(x, y, c, front, back); // "light" theme
@@ -932,10 +919,10 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     // sightAmount should only be 1.0 if the player is standing in that cell, currently
-                    if ((creature = creatures.get(Coord.get(x, y))) != null ) {
+                    if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
                         creature.appearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
-                        if(creature.overlayAppearance != null)
+                        if (creature.overlayAppearance != null)
                             creature.overlayAppearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
@@ -963,18 +950,18 @@ public class Epigon extends Game {
         for (int i = 0; i < toCursor.size(); i++) {
             Coord c = toCursor.get(i);
             Direction dir;
-            if (i == toCursor.size() - 1){
+            if (i == toCursor.size() - 1) {
                 dir = Direction.NONE; // last spot shouldn't have arrow
             } else if (i == 0) {
                 dir = Direction.toGoTo(player.location, c);
-            }else {
+            } else {
                 dir = Direction.toGoTo(toCursor.get(i - 1), c);
             }
             mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE, null, 2);
         }
     }
 
-    public void showFallingGameOver(){
+    public void showFallingGameOver() {
         message("");
         message("");
         message("");
@@ -986,7 +973,8 @@ public class Epigon extends Game {
         mapInput.flush();
         mapInput.setKeyHandler(fallingGameOverKeys);
     }
-    public void showFallingWin(){
+
+    public void showFallingWin() {
         message("You have reached the Dragon's Hoard!");
         message("On the way, you gathered:");
         List<String> lines = StringKit.wrap(StringKit.join(", ", player.inventory), messageSize.gridWidth - 2);
@@ -1019,8 +1007,7 @@ public class Epigon extends Game {
                 putCrawlMap();
                 break;
             case DIVE:
-                if(fallingHandler.reachedGoal)
-                {
+                if (fallingHandler.reachedGoal) {
                     paused = true;
                     pausedAt = Instant.now();
                     showFallingWin();
@@ -1062,13 +1049,12 @@ public class Epigon extends Game {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!mapSLayers.hasActiveAnimations()) {
                 Coord m = awaitedMoves.remove(0);
-                if(!toCursor.isEmpty())
+                if (!toCursor.isEmpty())
                     toCursor.remove(0);
                 move(Direction.toGoTo(player.location, m));
                 infoHandler.updateDisplay();
             }
-        } else
-        {
+        } else {
             multiplexer.process();
         }
 
@@ -1085,7 +1071,7 @@ public class Epigon extends Game {
         messageStage.act();
         messageStage.draw();
 
-        if(mode.equals(GameMode.CRAWL)) {
+        if (mode.equals(GameMode.CRAWL)) {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
             mapViewport.apply(false);
             mapStage.act();
@@ -1102,8 +1088,7 @@ public class Epigon extends Game {
 
             mapOverlayStage.act();
             mapOverlayStage.draw();
-        }
-        else {
+        } else {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
             fallingViewport.apply(false);
             fallingStage.act();
@@ -1138,32 +1123,33 @@ public class Epigon extends Game {
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
         mapMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-            mapSize.gridWidth, mapSize.gridHeight,
-            (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
-            (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
+                mapSize.gridWidth, mapSize.gridHeight,
+                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
         equipmentMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-            mapSize.gridWidth, mapSize.gridHeight,
-            (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
-            (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
+                mapSize.gridWidth, mapSize.gridHeight,
+                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
+                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
         contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
-            contextSize.gridWidth, contextSize.gridHeight,
-            -(int) (messageSLayers.getRight()),
-            -(int) (infoSLayers.getTop() + infoSize.cellHeight * currentZoomY));
+                contextSize.gridWidth, contextSize.gridHeight,
+                (contextSize.gridWidth & 1) * (int) (contextSize.cellWidth * currentZoomX * 0.5f) - (int) (messageSLayers.getRight()),
+                (contextSize.gridHeight & 1) * (int) (contextSize.cellHeight * currentZoomY * 0.5f) - (int) (infoSLayers.getTop() + infoSize.cellHeight * currentZoomY));
         infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
-            infoSize.gridWidth, infoSize.gridHeight,
-            -(int) (messageSLayers.getRight()), -(int)(infoSize.cellHeight * currentZoomY));
-
+                infoSize.gridWidth, infoSize.gridHeight,
+                (infoSize.gridWidth & 1) * (int) (infoSize.cellWidth * currentZoomX * 0.5f) - (int) (messageSLayers.getRight()),
+                (~infoSize.gridHeight & 1) * (int) (infoSize.cellHeight * currentZoomY * -0.5f));
+// - (int) (infoSize.cellHeight * currentZoomY)
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
-            (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
+                (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
 
         infoViewport.update(width, height, false);
         infoViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()),
-            (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
+                (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
 
         messageViewport.update(width, height, false);
         messageViewport.setScreenBounds(0, 0,
-            (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
+                (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
 
         mapViewport.update(width, height, false);
         mapViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
@@ -1207,16 +1193,16 @@ public class Epigon extends Game {
     private final KeyHandler mapKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            if(combined == (0x60000 | SquidInput.BACKSPACE)) // ctrl-shift-backspace
+            if (combined == (0x60000 | SquidInput.BACKSPACE)) // ctrl-shift-backspace
             {
                 multiplexer.processedInput = true;
                 startGame();
                 return;
             }
             Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultMapViewMapping.contains(verb)){
+            if (!ControlMapping.defaultMapViewMapping.contains(verb)) {
                 return;
             }
             switch (verb) {
@@ -1253,24 +1239,24 @@ public class Epigon extends Game {
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
-                        .map(d -> player.location.translate(d))
-                        .filter(c -> map.inBounds(c))
-                        .filter(c -> map.fovResult[c.x][c.y] > 0)
-                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                        .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-                        .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
+                            .map(d -> player.location.translate(d))
+                            .filter(c -> map.inBounds(c))
+                            .filter(c -> map.fovResult[c.x][c.y] > 0)
+                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                            .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
+                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
                 case SHUT: // Close all the doors nearby
                     message("Closing nearby doors");
                     Arrays.stream(Direction.OUTWARDS)
-                        .map(d -> player.location.translate(d))
-                        .filter(c -> map.inBounds(c))
-                        .filter(c -> map.fovResult[c.x][c.y] > 0)
-                        .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                        .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-                        .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
+                            .map(d -> player.location.translate(d))
+                            .filter(c -> map.inBounds(c))
+                            .filter(c -> map.fovResult[c.x][c.y] > 0)
+                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
@@ -1352,44 +1338,41 @@ public class Epigon extends Game {
             multiplexer.processedInput = true;
             infoHandler.updateDisplay();
             // check if the turn clock needs to run
-            if (verb.isAction()){
+            if (verb.isAction()) {
                 runTurn();
             }
         }
     };
-    
+
     private final KeyHandler fallbackKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             Verb verb = ControlMapping.allMappings.get(SquidInput.combineModifiers(key, alt, ctrl, shift));
             String m;
-            if(mapOverlaySLayers.isVisible()) {
+            if (mapOverlaySLayers.isVisible()) {
                 switch (mapOverlayHandler.getMode()) {
                     case HELP:
-                        if(!ControlMapping.defaultHelpViewMapping.contains(verb)) verb = null;
+                        if (!ControlMapping.defaultHelpViewMapping.contains(verb)) verb = null;
                         m = "help";
                         break;
                     case CRAFTING:
-                        if(!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
+                        if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
                         m = "crafting";
                         break;
                     default:
-                        if(!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
+                        if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
                         m = "equipment";
                         break;
                 }
-            }
-            else
-            {
-                switch (mode)
-                {
+            } else {
+                switch (mode) {
                     case DIVE:
-                        if(!ControlMapping.defaultFallingViewMapping.contains(verb)) verb = null;
+                        if (!ControlMapping.defaultFallingViewMapping.contains(verb)) verb = null;
                         m = "dive";
                         break;
                     default:
-                        if(!ControlMapping.defaultMapViewMapping.contains(verb)) verb = null;
+                        if (!ControlMapping.defaultMapViewMapping.contains(verb)) verb = null;
                         m = "map";
                         break;
                 }
@@ -1404,10 +1387,10 @@ public class Epigon extends Game {
     private final KeyHandler equipmentKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)){
+            if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) {
                 return;
             }
             switch (verb) {
@@ -1431,11 +1414,11 @@ public class Epigon extends Game {
                     Physical selected = mapOverlayHandler.getSelected();
                     if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
                         message("Interactions for " + selected.name + ": " + selected.interactableData
-                            .stream()
-                            .map(interact -> interact.phrasing)
-                            .collect(Collectors.joining(", ")));
+                                .stream()
+                                .map(interact -> interact.phrasing)
+                                .collect(Collectors.joining(", ")));
                         Interactable interaction = selected.interactableData.get(0);
-                        if (interaction.consumes){
+                        if (interaction.consumes) {
                             player.removeFromInventory(selected);
                         }
                         interaction.actorModifications.forEach(mod -> RecipeMixer.applyModification(player, mod));
@@ -1492,10 +1475,10 @@ public class Epigon extends Game {
     private final KeyHandler helpKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultHelpViewMapping.contains(verb)){
+            if (!ControlMapping.defaultHelpViewMapping.contains(verb)) {
                 return;
             }
             switch (verb) {
@@ -1552,35 +1535,35 @@ public class Epigon extends Game {
     private final KeyHandler fallingKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultFallingViewMapping.contains(verb)){
+            if (!ControlMapping.defaultFallingViewMapping.contains(verb)) {
                 return;
             }
             switch (verb) {
                 case MOVE_UP:
                     if (!paused) {
-                    nextInput = Instant.now().plusMillis(inputDelay);
-                    fallingHandler.move(Direction.UP);
+                        nextInput = Instant.now().plusMillis(inputDelay);
+                        fallingHandler.move(Direction.UP);
                     }
                     break;
                 case MOVE_DOWN:
                     if (!paused) {
-                    nextInput = Instant.now().plusMillis(inputDelay);
-                    fallingHandler.move(Direction.DOWN);
+                        nextInput = Instant.now().plusMillis(inputDelay);
+                        fallingHandler.move(Direction.DOWN);
                     }
                     break;
                 case MOVE_LEFT:
                     if (!paused) {
-                    nextInput = Instant.now().plusMillis(inputDelay);
-                    fallingHandler.move(Direction.LEFT);
+                        nextInput = Instant.now().plusMillis(inputDelay);
+                        fallingHandler.move(Direction.LEFT);
                     }
                     break;
                 case MOVE_RIGHT:
                     if (!paused) {
-                    nextInput = Instant.now().plusMillis(inputDelay);
-                    fallingHandler.move(Direction.RIGHT);
+                        nextInput = Instant.now().plusMillis(inputDelay);
+                        fallingHandler.move(Direction.RIGHT);
                     }
                     break;
                 case PAUSE:
@@ -1611,10 +1594,10 @@ public class Epigon extends Game {
     private final KeyHandler fallingGameOverKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
             Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultFallingViewGameOverMapping.contains(verb)){
+            if (!ControlMapping.defaultFallingViewGameOverMapping.contains(verb)) {
                 return;
             }
             switch (verb) {
@@ -1636,7 +1619,7 @@ public class Epigon extends Game {
     private final KeyHandler debugKeys = new KeyHandler() {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if(multiplexer.processedInput) return;
+            if (multiplexer.processedInput) return;
             switch (key) {
                 case 'x':
                     fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
@@ -1736,7 +1719,7 @@ public class Epigon extends Game {
             screenY += player.location.y - (mapSize.gridHeight >> 1);
 
             // Check if the cursor didn't move in grid space
-            if (cursor.x == screenX && cursor.y == screenY){
+            if (cursor.x == screenX && cursor.y == screenY) {
                 return false;
             }
 

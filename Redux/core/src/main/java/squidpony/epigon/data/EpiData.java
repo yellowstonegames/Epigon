@@ -44,8 +44,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final int next(int bits) {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (int)(z ^ z >>> 25) >>> (32 - bits);
+        z = (z ^ z >>> 32) * 0xAEF17502108EF2D9L;
+        return (int)(z ^ z >>> 30) >>> (32 - bits);
     }
 
     /**
@@ -56,8 +56,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final int nextInt() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (int)(z ^ z >>> 25);
+        z = (z ^ z >>> 32) * 0xAEF17502108EF2D9L;
+        return (int)(z ^ z >>> 30);
     }
 
     /**
@@ -68,8 +68,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final long nextLong() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (z ^ z >>> 25);
+        z = (z ^ z >>> 32) * 0xAEF17502108EF2D9L;
+        return (z ^ z >>> 30);
     }
 
     /**
@@ -79,7 +79,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final boolean nextBoolean() {
         final long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L) < 0;
+        return ((z ^ z >>> 32) * 0xAEF17502108EF2D9L) < 0;
     }
 
     /**
@@ -95,8 +95,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final double nextDouble() {
         long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+        z = (z ^ z >>> 32) * 0xAEF17502108EF2D9L;
+        return ((z ^ z >>> 30) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
     }
 
     /**
@@ -107,7 +107,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final float nextFloat() {
         final long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
+        return ((z ^ z >>> 32) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }
 
     /**
