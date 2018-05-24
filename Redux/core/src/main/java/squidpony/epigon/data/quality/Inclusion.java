@@ -62,6 +62,7 @@ public enum Inclusion implements Material {
     HACKMANITE(SColor.LIGHT_PINK, SColor.DARK_PINK, false, false, false, true, 600),
     HELIODOR(SColor.GOLDEN_YELLOW, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
     IOLITE(SColor.SLATE_GRAY, SColor.PIGMENT_BLUE, true, false, true, false, 180),
+    JACINTH(SColor.CW_LIGHT_APRICOT, SColor.APRICOT, true, false, false, false, 7000, 6870), // mythological gem
     JADEITE(SColor.KELLY_GREEN, SColor.PEACH_ORANGE, true, false, false, false, 180),
     JASPER(SColor.FIREBRICK, SColor.ORANGE_RED, true, true, true, true, 75),
     JET(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100),
