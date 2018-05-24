@@ -1407,7 +1407,7 @@ public class Epigon extends Game {
                     mapOverlayHandler.move(Direction.RIGHT);
                     break;
                 case DRAW:
-                    equipItem();
+                    equipItem(mapOverlayHandler.getSelected());
                     mapOverlayHandler.updateDisplay();
                     break;
                 case INTERACT:

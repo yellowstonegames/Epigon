@@ -27,8 +27,8 @@ task debug(dependsOn: classes, type: JavaExec) {
 }
 
 task dist(type: Jar) {
-    from files(sourceSets.main.output.getClassesDir())
-    from files(sourceSets.main.output.getResourcesDir())
+    from files(sourceSets.main.java.outputDir)
+    from files(sourceSets.main.output.resourcesDir)
     from { configurations.compile.collect { zipTree(it) } }
     from files(project.assetsDir);
     archiveName "Epigon-${version}.jar"
