@@ -11,7 +11,10 @@ import squidpony.epigon.data.quality.Element;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.PanelEffect;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.*;
 
 import java.util.List;
@@ -90,12 +93,16 @@ public class FxHandler {
     public void line(Coord origin, Coord end, Element element) {
         Coord[] path = Bresenham.line2D_(origin, end);
         fx.addAction(new LineEffect(path.length * 0.2f, path,
-            colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 32)));
+                colorCenter.gradient(element.color, colorCenter.lightest(element.color), 32)));
+    }
+    public void line(Coord[] path, Element element) {
+        fx.addAction(new LineEffect(path.length * 0.2f, path,
+                colorCenter.gradient(element.color, colorCenter.lightest(element.color), 32)));
     }
 
     public void zapBoom(Coord origin, Coord end, Element element) {
         Coord[] path = Bresenham.line2D_(origin, end);
-        List<Color> colors = colorCenter.zigzagGradient(element.color, colorCenter.lightest(element.color), 6);
+        List<Color> colors = colorCenter.gradient(element.color, colorCenter.lightest(element.color), 6);
         fx.addAction(
             Actions.sequence(
                 new LineEffect(path.length * 0.06f, path, colors),
@@ -460,8 +467,9 @@ public class FxHandler {
     }
     
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
-    public void attackEffect(Physical attacker, Physical target, Direction dir, ActionOutcome ao)
+    public void attackEffect(Physical attacker, Physical target, ActionOutcome ao)
     {
+        Direction dir = Direction.getDirection(target.location.x - attacker.location.x, target.location.y - attacker.location.y);
         fx.clear(2);
         if(ao.element == null)
         {
