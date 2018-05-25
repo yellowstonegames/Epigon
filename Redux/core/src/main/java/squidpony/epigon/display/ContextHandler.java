@@ -309,7 +309,7 @@ public class ContextHandler {
         if (tile != null) {
             String tileDescription = "[" + x + ", " + y + "] ";
             if (tile.floor != null) {
-                tileDescription += tile.floor.name + " floor";
+                tileDescription += tile.floor.name;
             } else {
                 tileDescription += "empty space";
             }
