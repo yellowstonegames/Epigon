@@ -279,7 +279,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = mixer.buildPhysical(rng.getRandomElement(Stone.values()));
+                    blueprint = getFloor(rng.getRandomElement(Stone.values()));
                 }
             }
 
