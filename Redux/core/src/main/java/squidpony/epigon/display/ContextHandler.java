@@ -209,8 +209,8 @@ public class ContextHandler {
     }
 
     private void put(int x, int y, char c, float color) {
-        front.put(x, y, c);
         if (x >= 0 && x < width && y >= 0 && y < height) {
+            front.put(x, y, c);
             cachedTexts.get(contextMode)[x][y] = c;
             cachedColors.get(contextMode)[x][y] = color;
         }
@@ -262,7 +262,7 @@ public class ContextHandler {
                     contextStatDetails(null, null);
                     break;
                 case TILE_CONTENTS:
-                    tileContents(null, null);
+                    tileContents(0, 0, null);
             }
         }
     }
@@ -301,25 +301,27 @@ public class ContextHandler {
         cacheIsValid.add(contextMode);
     }
 
-    public void tileContents(Coord location, EpiTile tile) {
-        contextMode = ContextMode.TILE_CONTENTS;
-        if (miniMap != null) {
-            miniMap.setVisible(false);
+    public void tileContents(int x, int y, EpiTile tile) {
+        if (contextMode != ContextMode.TILE_CONTENTS) {
+            return;
         }
         clear();
-        if (location != null && tile != null) {
-            String tileDescription = "[" + location.x + ", " + location.y + "] ";
+        if (tile != null) {
+            String tileDescription = "[" + x + ", " + y + "] ";
             if (tile.floor != null) {
                 tileDescription += tile.floor.name + " floor";
             } else {
                 tileDescription += "empty space";
             }
-            if (!tile.contents.isEmpty()) {
-                tileDescription = tile.contents.stream()
-                    .map(p -> p.name)
-                    .collect(Collectors.joining("\n", tileDescription + "\n", ""));
+            put(1, 1, tileDescription);
+            for (int i = 0; i < tile.contents.size(); i++) {
+                put(1, 2 + i, tile.contents.get(i).name); 
             }
-            put(tileDescription.split("\n"));
+            Physical c = tile.getCreature();
+            if(c != null)
+            {
+                put(1, 2 + tile.contents.size(), c.name);
+            }
         }
         cacheIsValid.add(contextMode);
     }

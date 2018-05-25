@@ -43,10 +43,25 @@ public class Weapon {
     
     // various constants to make sense of kinds, usages, shapes, and paths instead of using Strings (compile-checked)
     public static final int
-            MELEE = 0, RANGED = 1, IMPLEMENT = 2, UNARMED = 3, MAGIC = 4, 
-            REPEAT = 0, PROJECTILE = 1, THROWN = 2, 
-            MULTI = 0, BEAM = 1, SWEEP = 2, WAVE = 3, BURST = 4, THROUGH = 5, 
-            STRAIGHT = 0, ARC = 1;
+            MELEE = 0,     // + 2 DAMAGE
+            RANGED = 1,    // + 1 RANGE
+            IMPLEMENT = 2, // + 2 INFLUENCE
+            UNARMED = 3,   // + 1 STEALTH
+            MAGIC = 4,     // + 1 PRECISION
+    
+            REPEAT = 0, 
+            PROJECTILE = 1, 
+            THROWN = 2, 
+    
+            MULTI = 0,     // gives a 1/16 chance to double an attack per AREA
+            BEAM = 1,      // affects 1 cell beyond the initial target per AREA
+            SWEEP = 2,     // affects 1 cell clockwise and counterclockwise from the target per AREA 
+            WAVE = 3,      // affects a 60 degree cone with length = AREA + RANGE, accuracy penalty
+            BURST = 4,     // affects a (AREA * 2 + 1) side-length square at up to RANGE distance, accuracy penalty 
+            THROUGH = 5,   // can attempt to target even ignoring AREA obstacles in the way 
+    
+            STRAIGHT = 0,  // aims at the first thing in a line
+            ARC = 1;       // aims at the target unless it is adjacent, then it cannot target
     // for if you need to get a string from one of the above constants, and also to read the TSV contents
     public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic"), 
             usages = Maker.makeArrange("Repeat", "Projectile", "Thrown"),
