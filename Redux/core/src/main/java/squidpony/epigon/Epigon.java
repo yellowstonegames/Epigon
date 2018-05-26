@@ -466,46 +466,48 @@ public class Epigon extends Game {
                 if (path != null && !path.isEmpty()) {
                     Coord step = path.get(0);
                     if (player.location.x == step.x && player.location.y == step.y) {
-                        ActionOutcome ao = ActionOutcome.attack(creature, player);
-                        Element element = ao.element;
-                        fxHandler.attackEffect(creature, player, ao);
-                        if (ao.hit) {
-                            int amt = ao.actualDamage >> 1;
-                            applyStatChange(player, Stat.VIGOR, amt);
-                            amt *= -1; // flip sign for output message
-                            if (player.stats.get(Stat.VIGOR).actual() <= 0) {
-                                if (ao.crit) {
-                                    message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
-                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                        ArrayList<ActionOutcome> aos = ActionOutcome.attack(creature, player);
+                        for(ActionOutcome ao : aos) {
+                            Element element = ao.element;
+                            fxHandler.attackEffect(creature, player, ao);
+                            if (ao.hit) {
+                                int amt = ao.actualDamage >> 1;
+                                applyStatChange(player, Stat.VIGOR, amt);
+                                amt *= -1; // flip sign for output message
+                                if (player.stats.get(Stat.VIGOR).actual() <= 0) {
+                                    if (ao.crit) {
+                                        message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
+                                                + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                    } else {
+                                        message(Messaging.transform("The " + creature.name + " slay$ you with "
+                                                + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                    }
                                 } else {
-                                    message(Messaging.transform("The " + creature.name + " slay$ you with "
-                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
-                                }
-                            } else {
-                                if (ao.crit) {
-                                    mapSLayers.wiggle(player.appearance, 0.3f);
-                                    message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
-                                            + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
-                                } else {
-                                    message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "
-                                            + amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
-                                }
-                                if (ao.targetConditioned) {
-                                    message(Messaging.transform("The " + creature.name + " "
-                                            + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
-                                    if (player.overlaySymbol != null) {
-                                        if (player.overlayAppearance != null) {
-                                            mapSLayers.removeGlyph(player.overlayAppearance);
+                                    if (ao.crit) {
+                                        mapSLayers.wiggle(player.appearance, 0.3f);
+                                        message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
+                                                + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
+                                    } else {
+                                        message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "
+                                                + amt + " " + element.styledName + " damage!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                    }
+                                    if (ao.targetConditioned) {
+                                        message(Messaging.transform("The " + creature.name + " "
+                                                + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                        if (player.overlaySymbol != null) {
+                                            if (player.overlayAppearance != null) {
+                                                mapSLayers.removeGlyph(player.overlayAppearance);
+                                            }
+                                            player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
                                         }
-                                        player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
                                     }
                                 }
-                            }
-                        } else {
-                            if (ao.crit) {
-                                message("The " + creature.name + " missed you, but just barely.");
                             } else {
-                                message("The " + creature.name + " missed you.");
+                                if (ao.crit) {
+                                    message("The " + creature.name + " missed you, but just barely.");
+                                } else {
+                                    message("The " + creature.name + " missed you.");
+                                }
                             }
                         }
                     } else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
@@ -769,79 +771,80 @@ public class Epigon extends Game {
     private void attack(Physical target)
     {
         int targetX = target.location.x, targetY = target.location.y;
-        ActionOutcome ao = ActionOutcome.attack(player, target);
-        Element element = ao.element;
-        fxHandler.attackEffect(player, target, ao);
-        //mapSLayers.bump(player.appearance, dir, 0.145f);
-        if (ao.hit) {
-            applyStatChange(target, Stat.VIGOR, ao.actualDamage);
-            if (target.stats.get(Stat.VIGOR).actual() <= 0) {
-                mapSLayers.removeGlyph(target.appearance);
-                if (target.overlayAppearance != null) {
-                    mapSLayers.removeGlyph(target.overlayAppearance);
-                }
-                creatures.remove(target.location);
-                map.contents[targetX][targetY].remove(target);
-                if (ao.crit) {
-                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                            .map(table -> {
-                                int quantity = table.quantity();
-                                Physical p = RecipeMixer.buildPhysical(table.random());
-                                if (p.groupingData != null) {
-                                    p.groupingData.quantity += quantity;
-                                } else {
-                                    p.groupingData = new Grouping(quantity);
-                                }
-                                return p;
-                            })
-                            .forEach(item -> {
-                                map.contents[targetX][targetY].add(item);
-                                if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
-                                    map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
-                                }
-                            });
-                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
-                    message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+        ArrayList<ActionOutcome> aos = ActionOutcome.attack(player, target);
+        for(ActionOutcome ao : aos) {
+            Element element = ao.element;
+            fxHandler.attackEffect(player, target, ao);
+            //mapSLayers.bump(player.appearance, dir, 0.145f);
+            if (ao.hit) {
+                applyStatChange(target, Stat.VIGOR, ao.actualDamage);
+                if (target.stats.get(Stat.VIGOR).actual() <= 0) {
+                    mapSLayers.removeGlyph(target.appearance);
+                    if (target.overlayAppearance != null) {
+                        mapSLayers.removeGlyph(target.overlayAppearance);
+                    }
+                    creatures.remove(target.location);
+                    map.contents[targetX][targetY].remove(target);
+                    if (ao.crit) {
+                        Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                                .map(table -> {
+                                    int quantity = table.quantity();
+                                    Physical p = RecipeMixer.buildPhysical(table.random());
+                                    if (p.groupingData != null) {
+                                        p.groupingData.quantity += quantity;
+                                    } else {
+                                        p.groupingData = new Grouping(quantity);
+                                    }
+                                    return p;
+                                })
+                                .forEach(item -> {
+                                    map.contents[targetX][targetY].add(item);
+                                    if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
+                                        map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
+                                    }
+                                });
+                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                        message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                    } else {
+                        Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                                .map(table -> {
+                                    int quantity = table.quantity();
+                                    Physical p = RecipeMixer.buildPhysical(table.random());
+                                    if (p.groupingData != null) {
+                                        p.groupingData.quantity += quantity;
+                                    } else {
+                                        p.groupingData = new Grouping(quantity);
+                                    }
+                                    return p;
+                                })
+                                .forEach(item -> map.contents[targetX][targetY].add(item));
+                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                        message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                    }
                 } else {
-                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                            .map(table -> {
-                                int quantity = table.quantity();
-                                Physical p = RecipeMixer.buildPhysical(table.random());
-                                if (p.groupingData != null) {
-                                    p.groupingData.quantity += quantity;
-                                } else {
-                                    p.groupingData = new Grouping(quantity);
-                                }
-                                return p;
-                            })
-                            .forEach(item -> map.contents[targetX][targetY].add(item));
-                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
-                    message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
-                }
-            } else {
-                String amtText = String.valueOf(-ao.actualDamage);
-                if (ao.crit) {
-                    mapSLayers.wiggle(target.appearance, 0.3f);
-                    message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
-                            amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                } else {
-                    message(Messaging.transform("You " + element.verb + " the " + target.name + " for " +
-                            amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                }
-                if (ao.targetConditioned) {
-                    message(Messaging.transform("You " +
-                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
-                            " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                    if (target.overlaySymbol != null) {
-                        if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);
-                        target.overlayAppearance = mapSLayers.glyph(target.overlaySymbol, target.overlayColor, targetX, targetY);
+                    String amtText = String.valueOf(-ao.actualDamage);
+                    if (ao.crit) {
+                        mapSLayers.wiggle(target.appearance, 0.3f);
+                        message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
+                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                    } else {
+                        message(Messaging.transform("You " + element.verb + " the " + target.name + " for " +
+                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                    }
+                    if (ao.targetConditioned) {
+                        message(Messaging.transform("You " +
+                                ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
+                                " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        if (target.overlaySymbol != null) {
+                            if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);
+                            target.overlayAppearance = mapSLayers.glyph(target.overlaySymbol, target.overlayColor, targetX, targetY);
+                        }
                     }
                 }
+            } else {
+                message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
             }
-        } else {
-            message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
         }
-
     }
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
