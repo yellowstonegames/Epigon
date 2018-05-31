@@ -40,6 +40,14 @@ public class HandBuilt {
     public Modification openDoor;
     public Modification closeDoor;
 
+    public Physical upStairBlueprint, downStairBlueprint;
+//    public Physical baseUpStair;
+//    public Physical baseDownStair;
+
+    public Recipe upStairRecipe;
+    public Recipe downStairRecipe;
+
+
     public Physical playerBlueprint;
 
     public Recipe hatRecipe;
@@ -148,6 +156,7 @@ public class HandBuilt {
         initItems();
         initPlayer();
         initDoors();
+        initStairs();
 
         makeWall = new Modification();
         Collections.addAll(makeWall.possiblePrefix, "solid", "shaped");
@@ -346,6 +355,37 @@ public class HandBuilt {
         doorRecipeBlueprint.result.put(doorBlueprint, 1);
 
         doorRecipe = RecipeMixer.createRecipe(doorRecipeBlueprint);
+    }
+
+    private void initStairs() {
+        upStairBlueprint = new Physical();
+        upStairBlueprint.name = "stairs up";
+        upStairBlueprint.symbol = '≥';
+        upStairBlueprint.color = SColor.GOLDEN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        upStairBlueprint.generic = true;
+        upStairBlueprint.attached = true;
+        upStairBlueprint.blocking = false;
+
+        RecipeBlueprint upStairRecipeBlueprint;
+        upStairRecipeBlueprint = new RecipeBlueprint();
+        upStairRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
+        upStairRecipeBlueprint.result.put(upStairBlueprint, 1);
+        upStairRecipe = RecipeMixer.createRecipe(upStairRecipeBlueprint);
+
+        downStairBlueprint = new Physical();
+        downStairBlueprint.name = "stairs down";
+        downStairBlueprint.symbol = '≤';
+        downStairBlueprint.color = SColor.GOLDEN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        downStairBlueprint.generic = true;
+        downStairBlueprint.attached = true;
+        downStairBlueprint.blocking = false;
+        
+        RecipeBlueprint downStairRecipeBlueprint;
+        downStairRecipeBlueprint = new RecipeBlueprint();
+        downStairRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
+        downStairRecipeBlueprint.result.put(downStairBlueprint, 1);
+        downStairRecipe = RecipeMixer.createRecipe(downStairRecipeBlueprint);
+
     }
 
     private void initItems() {
