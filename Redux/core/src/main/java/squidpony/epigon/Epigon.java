@@ -22,7 +22,11 @@ import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
-import squidpony.epigon.mapping.*;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.RememberedTile;
+import squidpony.epigon.mapping.World;
+import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -115,6 +119,7 @@ public class Epigon extends Game {
 
     // World
     private WorldGenerator worldGenerator;
+    private EpiMap[] world;
     private EpiMap map;
     private int depth;
     private FxHandler fxHandler;
@@ -152,8 +157,8 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 100;
-        worldHeight = 50;
+        worldWidth = 60;
+        worldHeight = 60;
         worldDepth = 300;
         totalDepth = worldDepth + World.DIVE_HEADER.length;
         int bigW = World.DIVE_HEADER[0].length() + 2;
@@ -261,7 +266,7 @@ public class Epigon extends Game {
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         fallingSLayers = new SparseLayers(
-                worldWidth,
+                100, // weird because falling uses a different view
                 totalDepth,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
@@ -346,7 +351,6 @@ public class Epigon extends Game {
 
         worldGenerator = new WorldGenerator();
         contextHandler.message("Have fun!",
-                "You are falling!",
                 style("Bump into statues ([*][/]s[,]) and stuff."),
                 style("Now [/]90% fancier[/]!"),
                 "Use ? for help, or q to quit.",
@@ -384,9 +388,10 @@ public class Epigon extends Game {
 
         // Start out in the horizontal middle and visual a bit down
         player.location = Coord.get(w / 2, 0); // for... reasons, y is an offset from the camera position
-
+        fallDuration = 0;
         mode = GameMode.DIVE;
         mapInput.flush();
+        mapInput.setRepeatGap(Long.MAX_VALUE);
         mapInput.setKeyHandler(fallingKeys);
         mapInput.setMouse(fallingMouse);
         fallingHandler.show(map);
@@ -398,7 +403,8 @@ public class Epigon extends Game {
 
     private void prepCrawl() {
         message("Generating crawl.");
-        map = worldGenerator.buildWorld(worldWidth, worldHeight, 1, handBuilt)[0];
+        world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
+        map = world[0];
         contextHandler.setMap(map);
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
 
@@ -446,6 +452,7 @@ public class Epigon extends Game {
 
         mode = GameMode.CRAWL;
         mapInput.flush();
+        mapInput.setRepeatGap(220);
         mapInput.setKeyHandler(mapKeys);
         mapInput.setMouse(mapMouse);
     }
@@ -974,7 +981,7 @@ public class Epigon extends Game {
         message("");
         message("You have died.");
         message("");
-        message("Restart (r) or Quit (q)?");
+        message("Try Again (t) or Quit (Shift-Q)?");
 
         mapInput.flush();
         mapInput.setKeyHandler(fallingGameOverKeys);
@@ -991,7 +998,7 @@ public class Epigon extends Game {
 //        for (; start < 4; start++) {
 //            message("");
 //        }
-        message("Restart (r) or Quit (q)?");
+        message("Try Again (t) or Quit (Shift-Q)?");
 
         mapInput.flush();
         mapInput.setKeyHandler(fallingGameOverKeys);

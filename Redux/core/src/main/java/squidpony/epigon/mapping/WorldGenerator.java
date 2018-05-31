@@ -1,14 +1,14 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.mapping.FlowingCaveGenerator;
-import squidpony.squidgrid.mapping.styled.TilesetType;
+import squidpony.squidgrid.mapping.DungeonGenerator;
+import squidpony.squidgrid.mapping.SerpentMapGenerator;
 import squidpony.squidmath.*;
 
 import java.util.*;
@@ -31,7 +31,7 @@ public class WorldGenerator {
 
     public EpiMap buildDive(int width, int depth, HandBuilt handBuilt) {
 
-        world = buildWorld(width, 1, depth, handBuilt);
+        world = buildWorld(width, 6, depth, handBuilt);
 
         this.width = width;
         this.height = depth + World.DIVE_HEADER.length;
@@ -97,7 +97,7 @@ public class WorldGenerator {
         Physical[] contents = new Physical[inclusions.length + 1];
         double[] weights = new double[inclusions.length + 1];
         for (int i = 0; i < inclusions.length; i++){
-            Physical gem = recipeMixer.buildPhysical(inclusions[i]);
+            Physical gem = RecipeMixer.buildPhysical(inclusions[i]);
             gem.symbol = '♦';
             contents[i] = gem;
             weights[i] = rng.between(1.0, 3.0);
@@ -155,9 +155,22 @@ public class WorldGenerator {
 
         EpiTile tile;
         Physical adding;
-        for (EpiMap eMap : world) {
-            FlowingCaveGenerator flow = new FlowingCaveGenerator(width, height, rng.getRandomElement(TilesetType.values()), rng);
-            char[][] simpleChars = flow.generate();
+        GreasedRegion[] floorWorld = new GreasedRegion[depth];
+        GreasedRegion tmp = new GreasedRegion(width, height);
+        for (int e = 0; e < depth; e++) {
+            EpiMap eMap = world[e];
+//            FlowingCaveGenerator flow = new FlowingCaveGenerator(width, height, TilesetType.DEFAULT_DUNGEON, rng);
+            DungeonGenerator gen = new DungeonGenerator(width, height, rng);
+            SerpentMapGenerator serpent = new SerpentMapGenerator(width, height, rng, 0.2);
+            serpent.putWalledBoxRoomCarvers(4);
+            serpent.putWalledRoundRoomCarvers(2);
+            serpent.putCaveCarvers(1);
+            char[][] simpleChars = gen.generate(serpent.generate());
+            floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
+//            Coord stairs = gen.stairsDown;
+//            simpleChars[stairs.x][stairs.y] = '≤';
+//            stairs = gen.stairsUp;
+//            simpleChars[stairs.x][stairs.y] = '≥';
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     char c = simpleChars[x][y];
@@ -172,7 +185,7 @@ public class WorldGenerator {
                             break;
                         case '+':
                             Stone stone = tile.floor.terrainData.stone;
-                            adding = mixer.buildPhysical(stone);
+                            adding = RecipeMixer.buildPhysical(stone);
                             List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
                             Physical door = adds.get(0);
                             RecipeMixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
@@ -188,6 +201,44 @@ public class WorldGenerator {
                 }
             }
         }
+        for (int e = 0; e < depth-1; e++) {
+            EpiMap eMap = world[e];
+            EpiMap nextMap = world[e+1];
+            tmp.remake(floorWorld[e]).and(floorWorld[e+1]).mixedRandomRegion(0.05, 4, rng.nextLong());
+            for(Coord c : tmp)
+            {
+                tile = eMap.contents[c.x][c.y];
+                Stone stone = tile.floor.terrainData.stone;
+                adding = RecipeMixer.buildPhysical(stone);
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+
+                tile = nextMap.contents[c.x][c.y];
+                stone = tile.floor.terrainData.stone;
+                adding = RecipeMixer.buildPhysical(stone);
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+            }
+            floorWorld[e].andNot(tmp);
+            floorWorld[e+1].andNot(tmp);
+        }
+        for (int e = 1; e < depth; e++) {
+            EpiMap eMap = world[e];
+            EpiMap prevMap = world[e-1];
+            tmp.remake(floorWorld[e]).and(floorWorld[e-1]).mixedRandomRegion(0.05, 4, rng.nextLong());
+            for(Coord c : tmp)
+            {
+                tile = eMap.contents[c.x][c.y];
+                Stone stone = tile.floor.terrainData.stone;
+                adding = RecipeMixer.buildPhysical(stone);
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+
+                tile = prevMap.contents[c.x][c.y];
+                stone = tile.floor.terrainData.stone;
+                adding = RecipeMixer.buildPhysical(stone);
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+            }
+            floorWorld[e].andNot(tmp);
+            floorWorld[e-1].andNot(tmp);
+        }
 
         return world;
     }
@@ -198,7 +249,7 @@ public class WorldGenerator {
             return wall;
         }
 
-        wall = RecipeMixer.buildPhysical(mixer.buildPhysical(stone));
+        wall = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
         RecipeMixer.applyModification(wall, handBuilt.makeWall);
         walls.put(stone, wall);
         return wall;
@@ -210,7 +261,7 @@ public class WorldGenerator {
             return floor;
         }
 
-        floor = RecipeMixer.buildPhysical(mixer.buildPhysical(stone));
+        floor = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
         floor.name = stone.toString() + " floor";
         floors.put(stone, floor);
         return floor;

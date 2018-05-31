@@ -58,6 +58,7 @@ public class ControlMapping {
             (int) '}' | CAPS, INFO_NEXT,
             (int) 'o', OPEN,
             (int) 's', SHUT,
+            (int) ' ', PAUSE,
             (int) 'S' | CAPS, SAVE,
             (int) 'S' | CTRL, SAVE,
             (int) 'T' | CAPS, TRY_AGAIN,
