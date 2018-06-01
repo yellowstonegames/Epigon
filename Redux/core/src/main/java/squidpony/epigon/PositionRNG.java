@@ -1,7 +1,5 @@
 package squidpony.epigon;
 
-import squidpony.squidmath.NumberTools;
-
 /**
  * Created by Tommy Ettinger on 12/25/2017.
  */
@@ -12,13 +10,18 @@ public final class PositionRNG
 
     private static long hash2(long x, long y)
     {
-        x += 0x6C8E9CD570932BD5L; // increase weight, usually
-        y -= 0x6C8E9CD570932BD5L;
-        x ^= x << 13;
-        y ^= y << 33;
-        x ^= x >>> 7;
-        y ^= y << 14;
-        return ((x ^ x << 17) + (y ^ y >>> 23)) * 0x352E9CF570932BDDL; // multiply to reduce binary rank issue
+//        x += 0x6C8E9CD570932BD5L; // increase weight, usually
+//        y -= 0x6C8E9CD570932BD5L;
+//        x ^= x << 13;
+//        y ^= y << 33;
+//        x ^= x >>> 7;
+//        y ^= y << 14;
+//        return ((x ^ x << 17) + (y ^ y >>> 23)) * 0x352E9CF570932BDDL; // multiply to reduce binary rank issue
+        x = (x * 0x41C64E6DL + (y ^ 0x369DEA0F31A53F85L));
+        y = (y * 0x41C64E6DL + (x ^ 0xF83F4291DB34BB19L));
+        x += (y ^ y >>> 27) * 0xAEF17502108EF2D9L;
+        y -= (x ^ x >>> 27) * 0xAEF17502108EF2D9L;
+        return y ^ y >>> 25;
     }
 
 //    /**
@@ -55,7 +58,7 @@ public final class PositionRNG
     public final void move(long x, long y)
     {
         stream = hash2(x, y) | 1L;
-        state = hash2(stream * x + y, stream * y + x) ^ stream;
+        state = 0L;
     }
     public final void move(long seed, long x, long y)
     {
@@ -64,15 +67,15 @@ public final class PositionRNG
     }
 
     public final int next(final int bits) {
-        final long z = (state = state * 0x5851F42D4C957F2DL + stream);
-        final long result = ((z >>> ((z >>> 59) + 5)) ^ z) * 0xAEF17502108EF2D9L;
-        return (int)(((result >>> 43) ^ result) >>> (64 - bits));
+        long z = (state = state * 0x41C64E6DL + stream);
+        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        return (int)(z ^ z >>> 25) >>> (32 - bits);
     }
 
     public final long nextLong() {
-        final long z = (state = state * 0x5851F42D4C957F2DL + stream);
-        final long result = ((z >>> ((z >>> 59) + 5)) ^ z) * 0xAEF17502108EF2D9L;
-        return ((result >>> 43) ^ result);
+        long z = (state = state * 0x41C64E6DL + stream);
+        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        return (z ^ z >>> 25);
     }
 
     public PositionRNG copy() {
@@ -80,9 +83,13 @@ public final class PositionRNG
     }
 
     public final float nextFloat() {
-        return NumberTools.formFloat((int)nextLong());
+        long z = (state = state * 0x41C64E6DL + stream);
+        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        return (z >>> 40) * 0x1p-24f;
     }
     public final float nextFloat(final float bound) {
-        return bound * NumberTools.formFloat((int)nextLong());
+        long z = (state = state * 0x41C64E6DL + stream);
+        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        return (z >>> 40) * 0x1p-24f * bound;
     }
 }
