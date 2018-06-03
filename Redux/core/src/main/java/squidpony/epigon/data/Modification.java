@@ -48,8 +48,8 @@ public class Modification extends EpiData {
     public Boolean unique;
     public Boolean buildingBlock;
 
-    public Character symbol;
-    public Character overlaySymbol;
+    public char symbol = '\uffff';
+    public char overlaySymbol = '\uffff';
     public Color color;
     public Color overlayColor;
 

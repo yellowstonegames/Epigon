@@ -32,7 +32,7 @@ public class ConditionBlueprint extends EpiData {
     public int duration;//how many turns until it wears off -- 0 means it lasts until removed some other way
     public int period;//how often ticks trigger -- 0 means it's constant, 1 means once per round, 2 means every other round, etc.
     public Element baseElement;
-    public Character overlaySymbol;
+    public char overlaySymbol = '\uffff';
     public String verb;
     public ChangeTable changes;
     public List<Modification> tickEffects = new ArrayList<>();
@@ -42,7 +42,7 @@ public class ConditionBlueprint extends EpiData {
     public Set<ConditionBlueprint> immunizes = new UnorderedSet<>();//can't exist at the same time, old one prevents the new one from being applies
     public Set<ConditionBlueprint> suppresses = new UnorderedSet<>();//can both exist, but only newest one has effect
 
-    public ConditionBlueprint(String name, String verb, int duration, int period, Element baseElement, Character overlay, ChangeTable changes,
+    public ConditionBlueprint(String name, String verb, int duration, int period, Element baseElement, char overlay, ChangeTable changes,
                               Collection<Modification> onTick, Collection<Modification> onWearOff, Collection<Modification> onCancel)
     {
         super();
@@ -85,10 +85,10 @@ public class ConditionBlueprint extends EpiData {
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
                     null, null, null)
-            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, null,
+            , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
                     null, null, null)
-            , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, null, ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
+            , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff', ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
                     null, null, null)
     );
 }

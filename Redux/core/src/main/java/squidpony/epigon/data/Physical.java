@@ -42,7 +42,7 @@ public class Physical extends EpiData {
     public TextCellFactory.Glyph appearance; // for things that move, we should use Glyph, which is a kind of Actor
     public TextCellFactory.Glyph overlayAppearance; // mainly for showing status effects over the existing appearance
     public char symbol;
-    public Character overlaySymbol;
+    public char overlaySymbol = '\uffff';
     public float color;
     public float overlayColor = 0f; // if == 0f, this will be disregarded by SparseLayers
 

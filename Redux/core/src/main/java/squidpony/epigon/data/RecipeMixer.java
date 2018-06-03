@@ -479,14 +479,14 @@ public class RecipeMixer {
             physical.buildingBlock = modification.buildingBlock;
         }
 
-        if (modification.symbol != null) {
+        if (modification.symbol != '\uffff') {
             physical.symbol = modification.symbol;
         }
 
         if (modification.color != null) {
             physical.color = SColor.toRandomizedFloat(modification.color, physical, 0.05f, 0f, 0.15f);
         }
-        if((modification.symbol != null || modification.color != null) && physical.appearance != null)
+        if((modification.symbol != '\uffff' || modification.color != null) && physical.appearance != null)
         {
             physical.appearance.setPackedColor(physical.color);
             physical.appearance.shown = physical.symbol;
@@ -495,10 +495,10 @@ public class RecipeMixer {
         if (modification.overlayColor != null) {
             physical.overlayColor = SColor.toRandomizedFloat(modification.overlayColor, physical, 0.05f, 0f, 0.15f);
         }
-        if (modification.overlaySymbol != null) {
+        if (modification.overlaySymbol != '\uffff') {
             physical.overlaySymbol = modification.overlaySymbol;
         }
-        if(modification.overlaySymbol != null || modification.overlayColor != null && physical.overlayAppearance != null)
+        if(modification.overlaySymbol != '\uffff' || modification.overlayColor != null && physical.overlayAppearance != null)
         {
             physical.overlayAppearance.setPackedColor(physical.overlayColor);
             physical.overlayAppearance.shown = physical.overlaySymbol;

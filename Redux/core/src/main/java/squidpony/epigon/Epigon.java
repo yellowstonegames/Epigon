@@ -188,6 +188,7 @@ public class Epigon extends Game {
         System.out.println("Loading sound manager.");
         sound = new SoundManager();
         colorCenter = new SquidColorCenter();
+        colorCenter.granularity = 2;
 
         System.out.println(rng.getState());
 
@@ -463,7 +464,7 @@ public class Epigon extends Game {
         for (int i = 0; i < size; i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
-            if (creature.overlaySymbol == null) {
+            if (creature.overlaySymbol == '\uffff') {
                 mapSLayers.removeGlyph(creature.overlayAppearance);
                 creature.overlayAppearance = null;
             }
@@ -501,7 +502,7 @@ public class Epigon extends Game {
                                     if (ao.targetConditioned) {
                                         message(Messaging.transform("The " + creature.name + " "
                                                 + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
-                                        if (player.overlaySymbol != null) {
+                                        if (player.overlaySymbol != '\uffff') {
                                             if (player.overlayAppearance != null) {
                                                 mapSLayers.removeGlyph(player.overlayAppearance);
                                             }
@@ -521,7 +522,7 @@ public class Epigon extends Game {
                         map.contents[c.x][c.y].remove(creature);
                         if (creature.appearance == null) {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
-                            if (creature.overlaySymbol != null)
+                            if (creature.overlaySymbol != '\uffff')
                                 creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
                         }
                         creatures.alterAt(i, step);
@@ -842,7 +843,7 @@ public class Epigon extends Game {
                         message(Messaging.transform("You " +
                                 ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
                                 " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                        if (target.overlaySymbol != null) {
+                        if (target.overlaySymbol != '\uffff') {
                             if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);
                             target.overlayAppearance = mapSLayers.glyph(target.overlaySymbol, target.overlayColor, targetX, targetY);
                         }
@@ -858,7 +859,7 @@ public class Epigon extends Game {
      */
     private void move(Direction dir) {
         player.update();
-        if (player.overlaySymbol == null) {
+        if (player.overlaySymbol == '\uffff') {
             mapSLayers.removeGlyph(player.overlayAppearance);
             player.overlayAppearance = null;
         }
@@ -1702,7 +1703,7 @@ public class Epigon extends Game {
                     if (awaitedMoves.isEmpty()) {
                         if (toCursor.isEmpty()) {
                             cursor = Coord.get(screenX, screenY);
-                            toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
+                            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
                             if (!toCursor.isEmpty()) {
                                 toCursor.remove(0); // Remove cell you're in from list
                             }
@@ -1751,7 +1752,8 @@ public class Epigon extends Game {
             }
             contextHandler.tileContents(screenX, screenY, map.contents[screenX][screenY]);
             cursor = Coord.get(screenX, screenY);
-            toCursor = toPlayerDijkstra.findPathPreScanned(cursor);
+            toCursor.clear();
+            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
             if (!toCursor.isEmpty()) {
                 toCursor.remove(0);
             }

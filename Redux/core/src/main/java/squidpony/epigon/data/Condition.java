@@ -45,7 +45,7 @@ public class Condition extends EpiData {
         }
         attachedTo = attachTo;
         //RecipeMixer.applyModification(attachedTo, parent.modification);
-        if(parent.overlaySymbol != null) {
+        if(parent.overlaySymbol != '\uffff') {
             attachedTo.overlaySymbol = parent.overlaySymbol;
             attachedTo.overlayColor = overrideElement == null ? -0x1.0101p126F : overrideElement.floatColor; // SColor.GRAY
         }
@@ -71,7 +71,7 @@ public class Condition extends EpiData {
         }
         if(parent.changes != null)
             attachedTo.statEffects.remove(parent.changes);
-        attachedTo.overlaySymbol = null;
+        attachedTo.overlaySymbol = '\uffff';
         attachedTo = null;
         return true;
     }
