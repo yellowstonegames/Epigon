@@ -198,6 +198,12 @@ public class ContextHandler {
         }
     }
 
+    private void put(List<Physical> ps) {
+        for (int y = 0; y < ps.size() && y < height - 2; y++) {
+            put(1, y + 1, ps.get(y).name);
+        }
+    }
+
     private void put(int x, int y, CharSequence s) {
         for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
             put(sx + x, y, s.charAt(sx));
@@ -294,10 +300,7 @@ public class ContextHandler {
         contextMode = ContextMode.INVENTORY;
         miniMap.setVisible(false);
         clear();
-        put(inventory.stream()
-            .map(i -> i.name)
-            .collect(Collectors.toList())
-            .toArray(new String[]{}));
+        put(inventory);
         cacheIsValid.add(contextMode);
     }
 

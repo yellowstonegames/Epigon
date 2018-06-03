@@ -433,7 +433,7 @@ public class HandBuilt {
     public Modification makeAlive() {
         Modification liven = new Modification();
         liven.possiblePrefix = Arrays.asList("living", "animated");
-        liven.symbol = 's' | Epigon.BOLD | Epigon.ITALIC;
+        liven.symbol = ((char)('s' | Epigon.BOLD | Epigon.ITALIC));
         liven.large = true;
         for(Stat s : Stat.bases) {
             LiveValueModification lvm = new LiveValueModification((rng.next(2) + rng.next(2) + rng.next(1)) + 2); // 0-3 + 0-3 + 0-1 == 0-7 biased centrally
