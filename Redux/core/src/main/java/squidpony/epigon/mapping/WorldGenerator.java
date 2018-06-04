@@ -204,7 +204,9 @@ public class WorldGenerator {
         for (int e = 0; e < depth-1; e++) {
             EpiMap eMap = world[e];
             EpiMap nextMap = world[e+1];
-            tmp.remake(floorWorld[e]).and(floorWorld[e+1]).mixedRandomRegion(0.05, 4, rng.nextLong());
+            tmp.remake(floorWorld[e]).and(floorWorld[e+1]).randomScatter(rng, 21, 4);
+            eMap.downStairPositions.or(tmp);
+            nextMap.upStairPositions.or(tmp);
             for(Coord c : tmp)
             {
                 tile = eMap.contents[c.x][c.y];
@@ -223,18 +225,20 @@ public class WorldGenerator {
         for (int e = 1; e < depth; e++) {
             EpiMap eMap = world[e];
             EpiMap prevMap = world[e-1];
-            tmp.remake(floorWorld[e]).and(floorWorld[e-1]).mixedRandomRegion(0.05, 4, rng.nextLong());
+            tmp.remake(floorWorld[e]).and(floorWorld[e-1]).randomScatter(rng, 21, 4);
+            eMap.upStairPositions.or(tmp);
+            prevMap.downStairPositions.or(tmp);
             for(Coord c : tmp)
             {
                 tile = eMap.contents[c.x][c.y];
                 Stone stone = tile.floor.terrainData.stone;
                 adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
 
                 tile = prevMap.contents[c.x][c.y];
                 stone = tile.floor.terrainData.stone;
                 adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e-1].andNot(tmp);

@@ -25,9 +25,15 @@ public class EpiTile {
     public List<Physical> contents = new ArrayList<>();
     public Physical blockage;
 
-    private final float tintColor = dbColors[posrng.next(5)];
-    private final float tintAmount = posrng.nextFloat(0.3f);
-
+    private final float tintColor;
+    private final float tintAmount;
+    
+    public EpiTile()
+    {
+        tintColor = dbColors[posrng.next(5)];
+        tintAmount = posrng.nextFloat(0.3f);
+    }
+    
     /**
      * Returns the total combined opacity of this cell, with 1.0 being fully opaque and 0.0 being
      * fully transparent.

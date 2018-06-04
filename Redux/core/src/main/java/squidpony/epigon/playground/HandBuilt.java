@@ -360,7 +360,7 @@ public class HandBuilt {
     private void initStairs() {
         upStairBlueprint = new Physical();
         upStairBlueprint.name = "stairs up";
-        upStairBlueprint.symbol = '≥';
+        upStairBlueprint.symbol = '≤';
         upStairBlueprint.color = SColor.GOLDEN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
         upStairBlueprint.generic = true;
         upStairBlueprint.attached = true;
@@ -374,8 +374,8 @@ public class HandBuilt {
 
         downStairBlueprint = new Physical();
         downStairBlueprint.name = "stairs down";
-        downStairBlueprint.symbol = '≤';
-        downStairBlueprint.color = SColor.GOLDEN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        downStairBlueprint.symbol = '≥';
+        downStairBlueprint.color = SColor.GOLDEN_FALLEN_LEAVES.toRandomizedFloat(rng, 0.08f, 0.04f, 0.1f);
         downStairBlueprint.generic = true;
         downStairBlueprint.attached = true;
         downStairBlueprint.blocking = false;

@@ -132,7 +132,7 @@ public class Epigon extends Game {
     private Coord cursor;
     private Physical player;
     private ArrayList<Coord> awaitedMoves;
-    private OrderedMap<Coord, Physical> creatures = new OrderedMap<>();
+    private OrderedMap<Coord, Physical> creatures;
     private int autoplayTurns = 0;
     private boolean processingCommand = true;
 
@@ -339,7 +339,6 @@ public class Epigon extends Game {
         mapSLayers.clear();
         mapSLayers.glyphs.clear();
         mapSLayers.animationCount = 0;
-        creatures.clear();
         handBuilt = new HandBuilt(mixer);
 
         mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
@@ -401,18 +400,13 @@ public class Epigon extends Game {
         nextFall = Instant.now().plusMillis(fallDelay);
         pausedAt = Instant.now();
     }
-
-    private void prepCrawl() {
-        message("Generating crawl.");
-        world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
-        map = world[0];
-        contextHandler.setMap(map);
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
-
-        floors = new GreasedRegion(map.opacities(), 0.999);
+    
+    private Coord setupLevel(int depth)
+    {
+        map = world[depth];
+        floors.refill(map.opacities(), 0.999);
         GreasedRegion floors2 = floors.copy();
-        player.location = floors2.singleRandom(rng);
-        floors2.remove(player.location);
+        floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
         floors2.copy().randomScatter(rng, 3)
                 .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
                         RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
@@ -433,18 +427,31 @@ public class Epigon extends Game {
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
-                creatures.put(coord, p);
+                map.creatures.put(coord, p);
             }
         }
 
-        calcFOV(player.location.x, player.location.y);
-        char[][] simple = map.simpleChars();
+        return floors2.notAnd(floors).andNot(map.downStairPositions).andNot(map.upStairPositions).singleRandom(rng);
+    }
+    
+    private void prepCrawl() {
+        message("Generating crawl.");
+        world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
+        depth = 0;
+        map = world[depth];
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
+        floors = new GreasedRegion(map.width, map.height);
+        for (int i = world.length - 1; i > 0; i--) {
+            setupLevel(i);
+        }
+        player.location = setupLevel(0);
+        char[][] simple = new char[map.width][map.height];
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
 
         blocked = new GreasedRegion(map.width, map.height);
-        calcDijkstra();
+        changeLevel(0);
 
         if (player.appearance != null) {
             mapSLayers.removeGlyph(player.appearance);
@@ -456,6 +463,25 @@ public class Epigon extends Game {
         mapInput.setRepeatGap(220);
         mapInput.setKeyHandler(mapKeys);
         mapInput.setMouse(mapMouse);
+    }
+    
+    private void changeLevel(int level)
+    {
+        depth = level;
+        map = world[depth];
+        mapSLayers.clear();
+        for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
+            mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
+        }
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+        contextHandler.setMap(map);
+        fxHandler.seen = map.fovResult;
+        creatures = map.creatures;
+        calcFOV(player.location.x, player.location.y);
+        char[][] simple = map.simpleChars();
+        toPlayerDijkstra.initialize(simple);
+        monsterDijkstra.initialize(simple);
+        calcDijkstra();
     }
 
     private void runTurn() {
@@ -1245,10 +1271,15 @@ public class Epigon extends Game {
                     scheduleMove(Direction.UP_RIGHT);
                     break;
                 case MOVE_LOWER:
-                    prepFall();
+                    // up '≤', down '≥'
+                    if(map.contents[player.location.x][player.location.y].getSymbol() == '≥')
+                        changeLevel(++depth);
+                    //prepFall();
                     break;
                 case MOVE_HIGHER:
-                    // TODO
+                    // up '≤', down '≥'
+                    if(map.contents[player.location.x][player.location.y].getSymbol() == '≤')
+                        changeLevel(--depth);
                     break;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");

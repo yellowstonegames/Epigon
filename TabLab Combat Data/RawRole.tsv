@@ -1,5 +1,5 @@
 name	description	training	signature
-Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	You enter an area with a large bonus to Crit and Stealth, but this bonus is reduced as Zone Tension rises.
+Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	You enter an area with a large bonus to Crit and Stealth, but this bonus decreases as Zone Tension rises.
 Brawler	A disciplined fighter who trains in both hand-to-hand combat and with various weapons.	Martial Arts	Each time you attack an enemy, you have a small chance to repeat that attack immediately.
 Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality	Each time you take damage, there is a moderate chance that you enter a Power Burst.
 Dervish	A deadly dancer in battle who sprints between skirmishes with an unpredictable weapon.	Whirling Death	Your attacks have a small bonus to Area, and this bonus increases slowly as Zone Tension rises.
@@ -9,11 +9,11 @@ Hunter	A tireless tracker who stalks prey through the wild before striking with 
 Jester	A cackling comedian who gauges his foes at a distance before hurling an arsenal of thrown weapons.	Hurling	On odd-numbered rounds, you have a low chance to enter a Power Burst; this chance rises as Zone Tension rises.
 Marksman	A quiet, calm sniper who is skilled with all forms of projectile weaponry, and uses it to great effect.	Marksmanship	Your attacks have a moderate bonus to Range, but this bonus decreases slowly as Zone Tension rises.
 Swordsman	A humble warrior who seeks a balanced approach to mastering the blade.	Swordplay	As Zone Tension rises, you gain a very small bonus to all stats.
-Seer	A wise wielder of Mystic powers who can sense impending danger; fortune smiles on him.	Mystic	When you first enter an area, you gain a bonus to Luck based on how many enemies are present then.
+Seer	A wise wielder of Mystic powers who can sense impending danger; fortune smiles on him.	Mystic	You take a small penalty to a random stat, and gain a moderate bonus to a random stat, each turn.
 Shaman	A protector of nature who can commune with spirits of the land to gain Primal powers.	Primal	You recover from ailments in half the time it normally takes.
 Priest	A devoted servant of a god who gains Blessed power through prayer and the support of a church.	Blessed	When an enemy inflicts an ailment on you, you gain a moderate bonus to Damage and Defense.
 Diabolist	A rogue magician who seeks out Occult power everywhere he can, signing deals with devils regularly.	Occult	You enter an area with a small penalty to Influence and Crit that becomes a large bonus as Zone Tension rises.
-Wizard	A learned sage who has studied magic deeply, evoking Arcane powers with gestures and words.	Arcane	You have a moderate chance to halve all bonuses on enemies you hit, but this chance shrinks as Zone Tension rises.
+Wizard	A learned sage who has studied magic deeply, evoking Arcane powers with gestures and words.	Arcane	Your attacks have a large bonus to Area, but this bonus decreases as Zone Tension rises.
 Sorcerer	An intuitive practitioner of Fundamental magic, channeling elemental energy through his body.	Sorcery	When an enemy critically hits you, you have a moderate chance to enter a Power Burst.
 			
 			A Power Burst is a 2-turn period where a character has doubled Precision, Damage, Crit, and Influence.

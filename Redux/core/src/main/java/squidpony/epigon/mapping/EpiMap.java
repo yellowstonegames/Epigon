@@ -1,9 +1,8 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.data.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.LinnormRNG;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import static squidpony.epigon.Epigon.rootChaos;
 
@@ -24,7 +23,9 @@ public class EpiMap {
     public RememberedTile[][] remembered;
     public double[][] resistances;
     public double[][] fovResult;
+    public GreasedRegion downStairPositions, upStairPositions;
     public StatefulRNG chaos;
+    public OrderedMap<Coord, Physical> creatures;
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
@@ -33,6 +34,9 @@ public class EpiMap {
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
         resistances = new double[width][height];
+        downStairPositions = new GreasedRegion(width, height);
+        upStairPositions = new GreasedRegion(width, height);
+        creatures = new OrderedMap<>();
     }
 
     public EpiMap() {
