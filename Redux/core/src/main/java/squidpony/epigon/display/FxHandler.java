@@ -36,7 +36,7 @@ public class FxHandler {
     private int height;
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
-    double[][] seen;
+    public double[][] seen;
     private StatefulRNG rng = new StatefulRNG(new LinnormRNG());
 
     public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
