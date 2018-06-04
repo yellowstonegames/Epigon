@@ -518,7 +518,7 @@ public class Epigon extends Game {
                                     }
                                 } else {
                                     if (ao.crit) {
-                                        mapSLayers.wiggle(player.appearance, 0.3f);
+                                        mapSLayers.wiggle(player.appearance, 0.4f);
                                         message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
@@ -858,7 +858,8 @@ public class Epigon extends Game {
                 } else {
                     String amtText = String.valueOf(-ao.actualDamage);
                     if (ao.crit) {
-                        mapSLayers.wiggle(target.appearance, 0.3f);
+                        mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
+                                mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
                         message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
                                 amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                     } else {

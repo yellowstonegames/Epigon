@@ -465,7 +465,7 @@ public class FxHandler {
         }
 
     }
-    
+
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
     public void attackEffect(Physical attacker, Physical target, ActionOutcome ao)
     {
@@ -489,7 +489,8 @@ public class FxHandler {
                 case TEMPORAL:
                     fx.tint(target.appearance, ao.element.floatColor, 0.5f);
                 case EARTH:
-                    fx.wiggle(target.appearance, 0.5f);
+                    fx.wiggle(0f, target.appearance, 0.5f, () -> target.appearance.setPosition(
+                            fx.worldX(target.location.x), fx.worldY(target.location.y)));
                     break;
                 case WATER:
                     fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, '~', ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.525f);
