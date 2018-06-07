@@ -416,10 +416,10 @@ public class Epigon extends Game {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 RecipeMixer.applyModification(p, handBuilt.makeAlive());
-                if (SColor.saturationOfFloat(p.color) < 0.8f) {
+                if (SColor.valueOfFloat(p.color) < 0.7f) {
                     p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
-                            0.8f,
-                            SColor.valueOfFloat(p.color), SColor.alphaOfFloat(p.color) * 0x1.011p-8f);
+                            SColor.saturationOfFloat(p.color),
+                            0.7f, SColor.alphaOfFloatF(p.color));
                 }
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());

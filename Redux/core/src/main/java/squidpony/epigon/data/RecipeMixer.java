@@ -9,10 +9,7 @@ import squidpony.epigon.data.slot.OverArmorSlot;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.IRNG;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.OrderedSet;
-import squidpony.squidmath.UnorderedSet;
+import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -103,7 +100,8 @@ public class RecipeMixer {
         List<Physical> result = new ArrayList<>();
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
-            
+            if(rng != recipe)
+                System.out.printf("physical: %s with color 0x%08X\r\n", physical.name, Integer.reverseBytes(NumberTools.floatToIntBits(physical.color)));
             Modification materialMod = new Modification();
             materialMod.baseValueMultiplier = material.getValue() * 0.01;
             materialMod.color = material.getMaterialColor();
@@ -112,6 +110,8 @@ public class RecipeMixer {
             lvm.baseOverwrite = material.getHardness() * 0.01;
             lvm.actualOverwrite = material.getHardness() * 0.01;
             materialMod.statChanges.put(Stat.STRUCTURE, lvm);
+            if(rng != recipe)
+                System.out.printf("material: %s with color 0x%08X\r\n", material.toString(), Integer.reverseBytes(materialMod.color.toIntBits()));
             applyModification(physical, materialMod);
             physical.mainMaterial = material;
 
@@ -124,6 +124,10 @@ public class RecipeMixer {
             }
             else
                 result.add(physical);
+
+            if(rng != recipe)
+                System.out.printf("physical: %s with color 0x%08X\r\n\r\n", physical.name, Integer.reverseBytes(NumberTools.floatToIntBits(physical.color)));
+
         }
         return result;
     }

@@ -156,9 +156,18 @@ public class MapOverlayHandler {
         layers.put(x, y, c, color);
     }
 
+    private void putWithPhysicalColor(int x, int y, Physical p) {
+        String display = getDisplayString(p);
+        layers.put(x, y, display, SColor.toEditedFloat(p.color, 0f, 0f, (1.0f - SColor.lumaOfFloat(p.color)) * 0.4f, 1f), 0f);
+        int quantity = getDisplayQuantity(p);
+        if (quantity > 1) {
+            put(x + display.length() + 1, y, "x" + quantity);
+        }
+    }
+
     private void putWithRarityColor(int x, int y, Physical p) {
         String display = getDisplayString(p);
-        put(x, y, display, p.rarity.color());
+        layers.put(x, y, display, p.rarity.color());
         int quantity = getDisplayQuantity(p);
         if (quantity > 1) {
             put(x + display.length() + 1, y, "x" + quantity);
@@ -410,7 +419,7 @@ public class MapOverlayHandler {
             leftSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
@@ -426,7 +435,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
@@ -440,7 +449,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
@@ -454,7 +463,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
@@ -468,7 +477,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
@@ -482,7 +491,7 @@ public class MapOverlayHandler {
             rightSelectables.add(select);
             selectables.put(select, p);
             x += 2;
-            putWithRarityColor(x, y, p);
+            putWithPhysicalColor(x, y, p);
             y++;
         }
 
