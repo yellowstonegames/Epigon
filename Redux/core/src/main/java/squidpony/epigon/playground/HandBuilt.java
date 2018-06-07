@@ -132,6 +132,9 @@ public class HandBuilt {
         nan = new Physical();
         nan.name = "nan";
         nan.description = "currency of power";
+        nan.color = SColor.DB_PLATINUM.toFloatBits();
+        nan.symbol = 'ᶯ';
+        nan.blocking = false;
 
         money = new Physical();
         money.name = "Gold Coin";
@@ -142,13 +145,13 @@ public class HandBuilt {
         baseFood = new Physical();
         baseFood.name = "fūd";
         baseFood.description = "base food item";
-        baseFood.symbol = '%';
+        baseFood.symbol = '℉';
         baseFood.color = SColor.AMBER_DYE.toFloatBits();
 
         rawMeat = new Physical();
         rawMeat.name = "meat";
         rawMeat.description = "chunk of something";
-        rawMeat.symbol = '%';
+        rawMeat.symbol = 'ₘ';
         rawMeat.color = SColor.DB_FAWN.toFloatBits();
 
         initAbilities();
@@ -259,8 +262,8 @@ public class HandBuilt {
             playerBlueprint.statProgression.put(s, rating);
         }
         for (Stat s : Stat.senses) {
-            Rating rating = Rating.GOOD;
-            LiveValue lv = new LiveValue(Formula.senseForLevel(1, rating));
+            Rating rating = Rating.NONE;
+            LiveValue lv = new LiveValue(9);
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
@@ -276,11 +279,11 @@ public class HandBuilt {
         // Put on some clothes
         Physical hat = RecipeMixer.mix(hatRecipe, Cloth.LINEN).get(0);
         hat.rarity = Rating.SUPERB;
-        hat.color = SColor.FOREST_GREEN.toFloatBits();
+        hat.color = SColor.DARK_SPRING_GREEN.toFloatBits();
         cb.clothing.put(ClothingSlot.HEAD, hat);
         Physical shirt = RecipeMixer.mix(shirtRecipe, Cloth.VELVET).get(0);
         shirt.rarity = Rating.TYPICAL;
-        shirt.color = SColor.CW_PALE_JADE.toFloatBits();
+        shirt.color = SColor.CW_FADED_JADE.toFloatBits();
         cb.clothing.put(ClothingSlot.TORSO, shirt);
         cb.clothing.put(ClothingSlot.LEFT_SHOULDER, shirt);
         cb.clothing.put(ClothingSlot.RIGHT_SHOULDER, shirt);
@@ -390,14 +393,14 @@ public class HandBuilt {
 
     private void initItems() {
         swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '(');
-        hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), '^');
-        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'ҭ');
-        pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), ')');
+        hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), 'ʍ');
+        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'τ');
+        pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), '∏');
 
         // Steak
         Physical pb = new Physical();
         pb.name = "steak";
-        pb.symbol = '%';
+        pb.symbol = 'ᴤ';
         pb.color = SColor.DB_MUD.toFloatBits();
         pb.countsAs.add(baseFood);
 
@@ -440,13 +443,12 @@ public class HandBuilt {
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {
-            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 18);
+            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 18); // 12 to 24, biased on 18
             liven.statChanges.put(s, lvm);
         }
-
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));
         liven.statChanges.put(Stat.SIGHT, new LiveValueModification(9));
-        liven.statChanges.put(Stat.POTENCY, new LiveValueModification(50));
+        liven.statChanges.put(Stat.SANITY, new LiveValueModification(50));
         liven.creature = new Creature();
         liven.creature.weaponChoices = new ProbabilityTable<>(++chaos);
         //liven.creature.weaponChoices.add(Weapon.getWeapons().get("acid magic"), 4);
@@ -457,9 +459,9 @@ public class HandBuilt {
     
     public Modification makeMeats(){
         Modification meaten = new Modification();
-        meaten.possibleSuffix = Arrays.asList("meat");
-        meaten.countsAs = Maker.makeUOS(rawMeat);
-        meaten.symbol = '%';
+        meaten.possibleSuffix = Collections.singletonList("meat");
+        meaten.countsAs = Collections.singleton(rawMeat);
+        meaten.symbol = 'ₘ';
         meaten.large = false;
         meaten.removeCreature = true;
         meaten.statChanges.put(Stat.MOBILITY, new LiveValueModification(0));
