@@ -2,7 +2,6 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.MathExtras;
 
 /**
@@ -17,7 +16,7 @@ public enum Rating {
     //0     1       2        3     4     5       6        7
     NONE, SLIGHT, TYPICAL, GOOD, HIGH, SUPERB, AMAZING, ULTIMATE;
 
-    public static final Arrangement<Rating> allRatings = new Arrangement<>(values());
+    public static final Rating[] allRatings = values();
     public String asAdverb() {
         switch (this) {
             case NONE:
@@ -126,10 +125,10 @@ public enum Rating {
         }
 
         if (rvm.deltaLevel != null) {
-            return allRatings.keyAt(MathExtras.clamp(
+            return allRatings[MathExtras.clamp(
                     ordinal() + rvm.deltaLevel,
                     Math.max(0, rvm.deltaMin.ordinal()),
-                    Math.min(7, rvm.deltaMax.ordinal())));
+                    Math.min(7, rvm.deltaMax.ordinal()))];
         }
         return this;
     }

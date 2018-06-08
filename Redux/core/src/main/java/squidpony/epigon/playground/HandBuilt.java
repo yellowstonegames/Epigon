@@ -293,13 +293,13 @@ public class HandBuilt {
         pants.rarity = Rating.SLIGHT;
         pants.color = SColor.CW_DRAB_AZURE.toFloatBits(); // blue jeans
         cb.clothing.put(ClothingSlot.WAIST, pants);
-        cb.clothing.put(ClothingSlot.LEFT_UPPER_LEG, pants);
-        cb.clothing.put(ClothingSlot.RIGHT_UPPER_LEG, pants);
+        cb.clothing.put(ClothingSlot.LEFT_LEG, pants);
+        cb.clothing.put(ClothingSlot.RIGHT_LEG, pants);
 
         cb.skills = new OrderedMap<>();
         int[] ordering = rng.randomOrdering(Skill.combatSkills.size());
         for (int i = 0; i < 5; i++) {
-            cb.skills.put(Skill.combatSkills.keyAt(ordering[i]), Rating.allRatings.keyAt(i+1));
+            cb.skills.put(Skill.combatSkills.keyAt(ordering[i]), Rating.allRatings[i+1]);
         }
 
         // make sure the player has prereqs for chef
@@ -438,12 +438,13 @@ public class HandBuilt {
         liven.possiblePrefix = Arrays.asList("living", "animated");
         liven.symbol = ((char)('s' | Epigon.BOLD | Epigon.ITALIC));
         liven.large = true;
+
         for(Stat s : Stat.bases) {
             LiveValueModification lvm = new LiveValueModification((rng.next(2) + rng.next(2) + rng.next(1)) + 2); // 0-3 + 0-3 + 0-1 == 0-7 biased centrally
             liven.statChanges.put(s, lvm);
         }
         for(Stat s : Stat.healths) {
-            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 6 + 18); // 12 to 24, biased on 18
+            LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 8 + 20); // 12 to 28, biased on 20
             liven.statChanges.put(s, lvm);
         }
         liven.statChanges.put(Stat.MOBILITY, new LiveValueModification(100));

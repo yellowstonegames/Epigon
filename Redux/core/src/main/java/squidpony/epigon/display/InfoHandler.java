@@ -6,7 +6,6 @@ import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
-import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.*;
@@ -278,22 +277,22 @@ public class InfoHandler {
             yOffset += ClothingSlot.height + 4;
 
             // Equipped items
-            Physical equippedRight = physical.creatureData.wielded.get(WieldSlot.RIGHT_HAND);
-            Physical equippedLeft = physical.creatureData.wielded.get(WieldSlot.LEFT_HAND);
+            Physical equippedRight = physical.creatureData.wielded.get(ClothingSlot.RIGHT_HAND);
+            Physical equippedLeft = physical.creatureData.wielded.get(ClothingSlot.LEFT_HAND);
             Weapon currentWeapon;
             //₩
-            put(3, yOffset + 0, "RH:");
+            put(3, yOffset, "RH:");
             if (equippedRight != null && (currentWeapon = equippedRight.weaponData) != null) {
-                put(8, yOffset + 0, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon), 
-                        equippedRight.rarity.color());
+                front.put(8, yOffset, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
+                        Utilities.progressiveLighten(equippedRight.color));
             } else {
-                put(8, yOffset + 0, "empty", Rating.NONE.color());
+                put(8, yOffset, "empty", Rating.NONE.color());
             }
 
             put(3, yOffset + 1, "LH:");
             if (equippedLeft != null && (currentWeapon = equippedLeft.weaponData) != null) {
-                put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
-                        equippedLeft.rarity.color());
+                front.put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
+                        Utilities.progressiveLighten(equippedLeft.color));
             } else {
                 put(8, yOffset + 1, "empty", Rating.NONE.color());
             }
