@@ -9,7 +9,7 @@ import squidpony.epigon.Utilities;
 public enum CalcStat implements ConstantKey {
     PRECISION("PRECISION", ""), DAMAGE("DAMAGE", ""), CRIT("CRIT", ""), INFLUENCE("INFLUENCE", ""),
     EVASION("EVASION", ""), DEFENSE("DEFENSE", ""), STEALTH("STEALTH", ""), LUCK("LUCK", ""),
-    RANGE("RANGE", ""), AREA("AREA", ""), PREPARE("PREPARE", "");
+    RANGE("RANGE", ""), AREA("AREA", ""), QUICKNESS("QUICKNESS", "");
 
     private final String nick;
     private final String description;

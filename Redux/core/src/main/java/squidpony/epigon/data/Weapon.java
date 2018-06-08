@@ -181,7 +181,7 @@ public class Weapon {
                 CalcStat.STEALTH, plus, raw.stealth,
                 CalcStat.RANGE, plus, raw.range,
                 CalcStat.AREA, plus, raw.area,
-                CalcStat.PREPARE, plus, raw.prepare);
+                CalcStat.QUICKNESS, plus, raw.quickness);
 //        calcStats[PRECISION] = raw.precision;
 //        calcStats[DAMAGE] = raw.damage;
 //        calcStats[CRIT] = raw.crit;
@@ -192,7 +192,7 @@ public class Weapon {
 //        calcStats[STEALTH] = raw.stealth;
 //        calcStats[RANGE] = raw.range;
 //        calcStats[AREA] = raw.area;
-//        calcStats[PREPARE] = raw.prepare;
+//        calcStats[QUICKNESS] = raw.quickness;
         kind = kinds.getInt(raw.kind);
         usage = usages.getInt(raw.usage);
         shape = shapes.getInt(raw.shape);

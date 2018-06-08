@@ -4,7 +4,6 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 
@@ -20,4 +19,5 @@ hs_err_pid*
 *.*#
 
 **/target/
-Proto/desktop/dependency-reduced-pom.xml
+**/dependency-reduced-pom.xml
+**/gradle-wrapper.jar

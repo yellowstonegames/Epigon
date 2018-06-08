@@ -29,7 +29,7 @@ public enum WieldSlot implements ConstantKey {
 
     @Override
     public String toString() {
-        return Utilities.caps(name(), "_");
+        return Utilities.lower(name(), "_");
     }
     public static final WieldSlot[] ALL = values();
 }

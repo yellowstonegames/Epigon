@@ -1,5 +1,7 @@
 package squidpony.epigon.data.slot;
 
+import squidpony.epigon.ConstantKey;
+import squidpony.epigon.Utilities;
 import squidpony.squidmath.Coord;
 
 import java.util.Arrays;
@@ -8,18 +10,18 @@ import java.util.stream.Collectors;
 /**
  * The areas where things can be worn.
  */
-public enum ClothingSlot {
+public enum ClothingSlot implements BodySlot {
     /*
     ˬ
-    Ὼ
+    ◯   //Ὼ
   ╭┬╨┬╮
-  ││#││
+  ││▒││
   ╽╞═╡╽
    │ │
    ┙ ┕
      */
     HEAD("ˬ", 2, 0),
-    FACE("Ὼ", 2, 1),
+    FACE("◯", 2, 1),
     NECK("╨", 2, 2),
     LEFT_SHOULDER("┬", 1, 2),
     RIGHT_SHOULDER("┬", 3, 2),
@@ -31,10 +33,10 @@ public enum ClothingSlot {
     //RIGHT_WRIST(" ", 2, 0),
     LEFT_HAND("╽", 0, 4),
     RIGHT_HAND("╽", 4, 4),
-    TORSO("│#│", 1, 3),
+    TORSO("│▒│", 1, 3),
     WAIST("╞═╡", 1, 4),
-    LEFT_UPPER_LEG("│", 1, 5),
-    RIGHT_UPPER_LEG("│", 3, 5),
+    LEFT_LEG("│", 1, 5),
+    RIGHT_LEG("│", 3, 5),
     //LEFT_LOWER_LEG(" ", 2, 0),
     //RIGHT_LOWER_LEG(" ", 2, 0),
     //LEFT_ANKLE(" ", 2, 0),
@@ -43,14 +45,35 @@ public enum ClothingSlot {
     RIGHT_FOOT("┕", 3, 6);
 
     public static final int width = 5;
-    public static final int height = 6;
+    public static final int height = 7;
 
     public String drawn;
     public Coord location;
 
-    private ClothingSlot(String drawn, int x, int y) {
+    ClothingSlot(String drawn, int x, int y) {
         this.drawn = drawn;
         location = Coord.get(x, y);
+        hash = ConstantKey.precomputeHash("slot.clothing", ordinal());
+    }
+    public final long hash;
+    @Override
+    public long hash64() {
+        return hash;
+    }
+    @Override
+    public int hash32() {
+        return (int)(hash & 0xFFFFFFFFL);
+    }
+
+    @Override
+    public String toString() {
+        return Utilities.lower(name(), "_");
+    }
+    public static final ClothingSlot[] ALL = values();
+
+    @Override
+    public Coord getLocation() {
+        return location;
     }
 
     /**

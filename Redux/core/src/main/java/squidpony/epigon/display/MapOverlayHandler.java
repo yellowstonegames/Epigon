@@ -158,7 +158,7 @@ public class MapOverlayHandler {
 
     private void putWithPhysicalColor(int x, int y, Physical p) {
         String display = getDisplayString(p);
-        layers.put(x, y, display, SColor.toEditedFloat(p.color, 0f, 0f, (1.0f - SColor.lumaOfFloat(p.color)) * 0.4f, 1f), 0f);
+        layers.put(x, y, display, Utilities.progressiveLighten(p.color), 0f);
         int quantity = getDisplayQuantity(p);
         if (quantity > 1) {
             put(x + display.length() + 1, y, "x" + quantity);

@@ -1,6 +1,9 @@
 package squidpony.epigon;
 
-import com.badlogic.gdx.*;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,21 +18,18 @@ import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
+import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Inclusion;
+import squidpony.epigon.data.slot.BodySlot;
+import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.RememberedTile;
-import squidpony.epigon.mapping.World;
-import squidpony.epigon.mapping.WorldGenerator;
+import squidpony.epigon.mapping.*;
 import squidpony.epigon.playground.HandBuilt;
-import squidpony.epigon.data.quality.Element;
-import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -758,12 +758,12 @@ public class Epigon extends Game {
         }
     }
 
-    public static final List<WieldSlot> RIGHT = Collections.singletonList(WieldSlot.RIGHT_HAND),
-            LEFT = Collections.singletonList(WieldSlot.LEFT_HAND),
-            BOTH = Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND),
-            HEAD = Collections.singletonList(WieldSlot.HEAD),
-            NECK = Collections.singletonList(WieldSlot.NECK),
-            FEET = Collections.singletonList(WieldSlot.FEET);
+    public static final List<BodySlot> RIGHT = Collections.singletonList(ClothingSlot.RIGHT_HAND),
+            LEFT = Collections.singletonList(ClothingSlot.LEFT_HAND),
+            BOTH = Arrays.asList(ClothingSlot.RIGHT_HAND, ClothingSlot.LEFT_HAND),
+            HEAD = Collections.singletonList(ClothingSlot.HEAD),
+            NECK = Collections.singletonList(ClothingSlot.NECK),
+            FEET = Arrays.asList(ClothingSlot.LEFT_FOOT, ClothingSlot.RIGHT_FOOT);
 
     private void equipItem(Physical item) {
 //        if(player.statEffects.contains(player.weaponData.calcStats))
@@ -778,19 +778,19 @@ public class Epigon extends Game {
                 player.creatureData.weaponChoices.add(item.weaponData, 1);
                 break;
             case 3:
-                if (!player.creatureData.wielded.containsKey(WieldSlot.HEAD))
+                if (!player.creatureData.wielded.containsKey(ClothingSlot.HEAD))
                     player.equip(item, HEAD);
                 break;
             case 4:
-                if (!player.creatureData.wielded.containsKey(WieldSlot.NECK))
+                if (!player.creatureData.wielded.containsKey(ClothingSlot.NECK))
                     player.equip(item, NECK);
                 break;
             case 5:
-                if (!player.creatureData.wielded.containsKey(WieldSlot.FEET))
+                if (!player.creatureData.wielded.containsKey(ClothingSlot.LEFT_FOOT) && !player.creatureData.wielded.containsKey(ClothingSlot.RIGHT_FOOT))
                     player.equip(item, FEET);
                 break;
             case 1:
-                if (!player.creatureData.wielded.containsKey(WieldSlot.RIGHT_HAND))
+                if (!player.creatureData.wielded.containsKey(ClothingSlot.RIGHT_HAND))
                     player.equip(item, RIGHT);
                 else
                     player.equip(item, LEFT);

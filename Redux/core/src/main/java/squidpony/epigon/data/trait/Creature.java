@@ -1,10 +1,8 @@
 package squidpony.epigon.data.trait;
 
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.*;
-import squidpony.epigon.data.slot.ClothingSlot;
-import squidpony.epigon.data.slot.JewelrySlot;
-import squidpony.epigon.data.slot.OverArmorSlot;
-import squidpony.epigon.data.slot.WieldSlot;
+import squidpony.epigon.data.slot.*;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
@@ -32,7 +30,7 @@ public class Creature {
     public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);
     public EnumOrderedMap<ClothingSlot, Physical> armor = new EnumOrderedMap<>(ClothingSlot.class);
     public EnumOrderedMap<OverArmorSlot, Physical> overArmor = new EnumOrderedMap<>(OverArmorSlot.class);
-    public EnumOrderedMap<WieldSlot, Physical> wielded = new EnumOrderedMap<>(WieldSlot.class);
+    public OrderedMap<BodySlot, Physical> wielded = new OrderedMap<>(20, 0.7f, ConstantKey.ConstantKeyHasher.instance);
 
     public ProbabilityTable<Weapon> weaponChoices;
 

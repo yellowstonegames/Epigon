@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
-import squidpony.epigon.data.slot.WieldSlot;
+import squidpony.epigon.data.slot.BodySlot;
+import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
@@ -241,7 +242,7 @@ public class Physical extends EpiData {
      * @param item The item to equip
      * @param slots All the slots that will be filled when the item is equipped
      */
-    public void equip(Physical item, List<WieldSlot> slots) {
+    public void equip(Physical item, List<BodySlot> slots) {
         if (creatureData == null) {
             System.err.println("Can't equip " + item.name + " on " + name);
             return;
@@ -253,7 +254,7 @@ public class Physical extends EpiData {
         }
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
-        for (WieldSlot ws : slots) {
+        for (BodySlot ws : slots) {
             Physical p = creatureData.wielded.get(ws);
             if (p != null) {
                 removing.add(p);
@@ -266,7 +267,7 @@ public class Physical extends EpiData {
 
         for (Physical p : removing) {
             inventory.add(p);
-            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
                 }
@@ -281,7 +282,7 @@ public class Physical extends EpiData {
      * @param slots All the slots that will be filled when the item is equipped
      * @return a List of the items that were unequipped
      */
-    public List<Physical> unequip(List<WieldSlot> slots) {
+    public List<Physical> unequip(List<BodySlot> slots) {
         if (creatureData == null) {
             System.err.println("Can't unequip from the Physical " + name + "; it is not a creature");
             return Collections.emptyList();
@@ -289,7 +290,7 @@ public class Physical extends EpiData {
         List<Physical> removed = new ArrayList<>(slots.size());
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
-        for (WieldSlot ws : slots) {
+        for (BodySlot ws : slots) {
             Physical p = creatureData.wielded.remove(ws);
             if (p != null) {
                 removing.add(p);
@@ -298,7 +299,7 @@ public class Physical extends EpiData {
 
         for (Physical p : removing) {
             removed.add(p);
-            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out mult-handed unequips
+            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
                     if(p.weaponData != null)
@@ -488,7 +489,7 @@ public class Physical extends EpiData {
         if (p != null) {
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
-            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
                 }
@@ -514,7 +515,7 @@ public class Physical extends EpiData {
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
             creatureData.wielded.removeAt(pos);
-            for (WieldSlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.wielded.get(subSlot))) {
                     creatureData.wielded.remove(subSlot);
                 }
