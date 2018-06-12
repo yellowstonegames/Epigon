@@ -247,11 +247,11 @@ public class Physical extends EpiData {
             System.err.println("Can't equip " + item.name + " on " + name);
             return;
         }
-
-        if (!inventory.remove(item)) {
-            System.err.println(name + " does not have " + item.name);
-            return;
-        }
+        inventory.remove(item);
+//        if (!inventory.remove(item)) {
+//            System.err.println(name + " does not have " + item.name);
+//            return;
+//        }
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (BodySlot ws : slots) {
@@ -272,6 +272,42 @@ public class Physical extends EpiData {
                     creatureData.wielded.remove(subSlot);
                 }
             }
+        }
+    }
+    public static final List<BodySlot> RIGHT = Collections.singletonList(ClothingSlot.RIGHT_HAND),
+            LEFT = Collections.singletonList(ClothingSlot.LEFT_HAND),
+            BOTH = Arrays.asList(ClothingSlot.RIGHT_HAND, ClothingSlot.LEFT_HAND),
+            HEAD = Collections.singletonList(ClothingSlot.HEAD),
+            NECK = Collections.singletonList(ClothingSlot.NECK),
+            FEET = Arrays.asList(ClothingSlot.LEFT_FOOT, ClothingSlot.RIGHT_FOOT);
+
+    public void equipItem(Physical item) {
+        switch (item.weaponData.hands) {
+            case 2:
+                equip(item, BOTH);
+                break;
+            case 0:
+                creatureData.weaponChoices.add(item.weaponData, 1);
+                break;
+            case 3:
+                if (!creatureData.wielded.containsKey(ClothingSlot.HEAD))
+                    equip(item, HEAD);
+                break;
+            case 4:
+                if (!creatureData.wielded.containsKey(ClothingSlot.NECK))
+                    equip(item, NECK);
+                break;
+            case 5:
+                if (!creatureData.wielded.containsKey(ClothingSlot.LEFT_FOOT) &&
+                        !creatureData.wielded.containsKey(ClothingSlot.RIGHT_FOOT))
+                    equip(item, FEET);
+                break;
+            case 1:
+                if (!creatureData.wielded.containsKey(ClothingSlot.RIGHT_HAND))
+                    equip(item, RIGHT);
+                else
+                    equip(item, LEFT);
+                break;
         }
     }
 

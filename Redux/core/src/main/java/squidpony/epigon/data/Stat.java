@@ -73,7 +73,9 @@ public enum Stat implements ConstantKey {
 
     public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, CREATIVITY, KNOWLEDGE, APPEARANCE, DEVOTION, AUTHORITY};
 
-    public static final Stat[] healths = {VIGOR, ENDURANCE, SPIRIT, INTELLECT, CHARM, SANITY};
+    public static final Stat[] oldHealths = {VIGOR, ENDURANCE, SPIRIT, INTELLECT, CHARM, SANITY};
+
+    public static final Stat[] healths = {VIGOR, ENDURANCE, SPIRIT, SANITY};
 
     public static final Stat[] needs = {HUNGER, THIRST, REST, SLEEP};
 
@@ -81,7 +83,7 @@ public enum Stat implements ConstantKey {
 
     public static final Stat[] utilities = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
 
-    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, CHARM, INTELLECT, SPIRIT, ENDURANCE};
+    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, /*CHARM, INTELLECT,*/ SPIRIT, ENDURANCE};
 
     private final String nick;
     private final String description;
@@ -128,20 +130,45 @@ public enum Stat implements ConstantKey {
             case INTELLECT:
                 return SPIRIT;
             case CHARM:
-                return INTELLECT;
+                return SPIRIT;
             case HUNGER:
                 return ENDURANCE;
             case THIRST:
                 return ENDURANCE;
             case REST:
-                return INTELLECT;
-            case SLEEP:
                 return SANITY;
+            case SLEEP:
+                return SPIRIT;
             case SANITY:
-                return CHARM;
+                return SPIRIT;
             default:
                 return null;
         }
+//        switch (this) {
+//            case VIGOR:
+//                return null;//creature is dead if no life force remains
+//            case ENDURANCE:
+//                return VIGOR;
+//            case SPIRIT:
+//                return ENDURANCE;
+//            case INTELLECT:
+//                return SPIRIT;
+//            case CHARM:
+//                return INTELLECT;
+//            case HUNGER:
+//                return ENDURANCE;
+//            case THIRST:
+//                return ENDURANCE;
+//            case REST:
+//                return INTELLECT;
+//            case SLEEP:
+//                return SANITY;
+//            case SANITY:
+//                return CHARM;
+//            default:
+//                return null;
+//        }
+
     }
 
     @Override

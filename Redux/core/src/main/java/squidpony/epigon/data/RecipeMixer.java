@@ -1,10 +1,12 @@
 package squidpony.epigon.data;
 
+import com.badlogic.gdx.graphics.Colors;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.quality.Stone;
-import squidpony.epigon.data.slot.*;
+import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.trait.*;
+import squidpony.squidgrid.gui.gdx.GDXMarkup;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
 
@@ -12,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -371,36 +372,60 @@ public class RecipeMixer {
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
 
-        for (Entry<ClothingSlot, Physical> entry : other.armor.entrySet()){
-            if (entry.getValue() != null){
-                creature.armor.put(entry.getKey(), buildPhysical(entry.getValue()));
-            }
-        }
-
-        for (Entry<ClothingSlot, Physical> entry : other.clothing.entrySet()){
-            if (entry.getValue() != null){
-                creature.clothing.put(entry.getKey(), buildPhysical(entry.getValue()));
-            }
-        }
         for (int i = other.wielded.size() - 1; i >= 0; i--) {
             Physical p = other.wielded.getAt(i);
             if(p != null)
                 creature.wielded.put(other.wielded.keyAt(i), buildPhysical(p));
         }
-        for (Entry<JewelrySlot, Physical> entry : other.jewelry.entrySet()){
-            if (entry.getValue() != null){
-                creature.jewelry.put(entry.getKey(), buildPhysical(entry.getValue()));
-            }
-        }
-
-        for (Entry<OverArmorSlot, Physical> entry : other.overArmor.entrySet()){
-            if (entry.getValue() != null){
-                creature.overArmor.put(entry.getKey(), buildPhysical(entry.getValue()));
-            }
-        }
         creature.weaponChoices = other.weaponChoices.copy();
 
         return creature;
+    }
+    public static Physical buildCreature(RawCreature raw) {
+        Physical blueprint = new Physical();
+        blueprint.color = Colors.get(raw.color).toFloatBits();
+        blueprint.name = raw.name;
+        blueprint.blocking = true;
+        switch (raw.symbol.length())
+        {
+            case 2: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0),
+                    raw.symbol.charAt(1) == '*', raw.symbol.charAt(1) == '/');
+            break;
+            case 3: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0), true, true);
+            break;
+            default: blueprint.symbol = raw.symbol.charAt(0);             
+            break;
+        }
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(raw.vigor * 5.0));
+        blueprint.stats.put(Stat.VIGOR, new LiveValue(raw.vigor));
+        blueprint.stats.put(Stat.ENDURANCE, new LiveValue(raw.endurance));
+        blueprint.stats.put(Stat.SPIRIT, new LiveValue(raw.spirit));
+        blueprint.stats.put(Stat.SANITY, new LiveValue(raw.sanity));
+        blueprint.stats.put(CalcStat.PRECISION, new LiveValue(raw.precision));
+        blueprint.stats.put(CalcStat.DAMAGE, new LiveValue(raw.damage));
+        blueprint.stats.put(CalcStat.CRIT, new LiveValue(raw.crit));
+        blueprint.stats.put(CalcStat.INFLUENCE, new LiveValue(raw.influence));
+        blueprint.stats.put(CalcStat.EVASION, new LiveValue(raw.evasion));
+        blueprint.stats.put(CalcStat.DEFENSE, new LiveValue(raw.defense));
+        blueprint.stats.put(CalcStat.LUCK, new LiveValue(raw.luck));
+        blueprint.stats.put(CalcStat.STEALTH, new LiveValue(raw.stealth));
+        blueprint.stats.put(CalcStat.RANGE, new LiveValue(raw.range));
+        blueprint.stats.put(CalcStat.AREA, new LiveValue(raw.area));
+        blueprint.stats.put(CalcStat.QUICKNESS, new LiveValue(raw.quickness));
+        
+        blueprint.stats.put(Stat.MOBILITY, new LiveValue(100));
+        blueprint.stats.put(Stat.SIGHT, new LiveValue(9));
+        blueprint.creatureData = new Creature();
+        for (int i = 0; i < raw.training.size(); i++) {
+            blueprint.creatureData.skills.put(Skill.skillsByName.get(((OrderedMap<String, Integer>)raw.training).keyAt(i)),
+                    Rating.allRatings[((OrderedMap<String, Integer>)raw.training).getAt(i)]);
+        }
+        blueprint.creatureData.weaponChoices = new ProbabilityTable<>(blueprint.nextLong());
+        blueprint.weaponData = Weapon.getWeapons().get(raw.baseWeapon.name);
+        for (int i = 0, idx = blueprint.nextInt(raw.weapons.length); i < raw.weapons.length; i++, idx = (idx+1)%raw.weapons.length) {
+            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get(raw.weapons[idx].name), blueprint));
+        }
+        return blueprint;
     }
 
     /**
