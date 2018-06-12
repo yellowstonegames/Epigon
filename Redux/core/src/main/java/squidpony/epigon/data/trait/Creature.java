@@ -2,8 +2,7 @@ package squidpony.epigon.data.trait;
 
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.*;
-import squidpony.epigon.data.slot.*;
-import squidpony.squidmath.EnumOrderedMap;
+import squidpony.epigon.data.slot.BodySlot;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
@@ -24,12 +23,7 @@ public class Creature {
     public OrderedMap<Profession, Rating> professions = new OrderedMap<>();
 
     // TODO - add validity list for slots on a per-creature type (Humanoid, Quadruped) basis
-    // can be done by switching these to OrderedMap of ConstantKey values, then unifying slots.
     // validation could be done by calling OrderedMap.keySet().retainAll(validSlots) , I think
-    public EnumOrderedMap<JewelrySlot, Physical> jewelry = new EnumOrderedMap<>(JewelrySlot.class);
-    public EnumOrderedMap<ClothingSlot, Physical> clothing = new EnumOrderedMap<>(ClothingSlot.class);
-    public EnumOrderedMap<ClothingSlot, Physical> armor = new EnumOrderedMap<>(ClothingSlot.class);
-    public EnumOrderedMap<OverArmorSlot, Physical> overArmor = new EnumOrderedMap<>(OverArmorSlot.class);
     public OrderedMap<BodySlot, Physical> wielded = new OrderedMap<>(20, 0.7f, ConstantKey.ConstantKeyHasher.instance);
 
     public ProbabilityTable<Weapon> weaponChoices;

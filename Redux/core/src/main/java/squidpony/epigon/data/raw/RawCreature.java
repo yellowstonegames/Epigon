@@ -1,22 +1,26 @@
 package squidpony.epigon.data.raw;
 
-import static squidpony.squidmath.OrderedMap.makeMap;
+import squidpony.squidmath.NumberTools;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-import squidpony.squidmath.NumberTools;
+
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 public class RawCreature implements Serializable {
   public static final long serialVersionUID = 1L;
 
   public static final RawCreature[] ENTRIES = new RawCreature[] {
-    new RawCreature("goblin nincompoop", "The laughingstock of other goblins, who themselves are the laughingstock of everyone else.", "ģ/", "CW Drab Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("carving knife"), RawWeapon.get("sickle"), RawWeapon.get("sling")}, 2, 1, 3, 4, 3, 1, 2, 6, 0, 0, 6, makeMap("hunter", 1, "swordsman", 1), new String[] {"Mobyuld"}),
-    new RawCreature("goblin delinquent", "The toughest goblin... of a group of the weakest goblins. Possibly a threat, maybe? To a toy poodle?", "ɠ*", "CW Flush Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("section staff"), RawWeapon.get("meteor flail"), RawWeapon.get("staff sling")}, 3, 2, 3, 4, 3, 2, 2, 5, 0, 0, 5, makeMap("jester", 1, "brawler", 2), new String[] {"Mobyuld"}),
+    new RawCreature("goblin nincompoop", "The laughingstock of other goblins, who themselves are the laughingstock of everyone else.", "ģ/", "CW Drab Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("carving knife"), RawWeapon.get("sickle"), RawWeapon.get("sling")}, 2, 1, 3, 4, 3, 1, 2, 6, 0, 0, 6, 1, 1, 1, 5, makeMap("hunter", 1, "swordsman", 1), new String[] {"Mobyuld"}),
+    new RawCreature("goblin delinquent", "The toughest goblin... of a group of the weakest goblins. Possibly a threat, maybe? To a toy poodle?", "ɠ*", "CW Flush Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("section staff"), RawWeapon.get("meteor flail"), RawWeapon.get("staff sling")}, 3, 2, 3, 4, 3, 2, 2, 5, 0, 0, 5, 2, 2, 1, 5, makeMap("jester", 1, "brawler", 2), new String[] {"Mobyuld"}),
+    new RawCreature("hobgoblin grunt", "Bigger than the average human, but a little lacking in the creative thinking department. Seems to like taking orders.", "ġ", "CW Faded Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("khopesh"), RawWeapon.get("heavy shield"), RawWeapon.get("hammer")}, 5, 6, 2, 1, 2, 4, 0, 6, 0, 0, 4, 5, 5, 1, 6, makeMap("brute", 2, "guardian", 1), new String[] {"Mobyuld"}),
+    new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}),
   };
 
   public static final Map<String, RawCreature> MAPPING = makeMap(
-  "goblin nincompoop", ENTRIES[0], "goblin delinquent", ENTRIES[1]);
+  "goblin nincompoop", ENTRIES[0], "goblin delinquent", ENTRIES[1], "hobgoblin grunt",
+  ENTRIES[2], "hobgoblin captain", ENTRIES[3]);
 
   public String name;
 
@@ -52,6 +56,14 @@ public class RawCreature implements Serializable {
 
   public double quickness;
 
+  public double vigor;
+
+  public double endurance;
+
+  public double spirit;
+
+  public double sanity;
+
   public Map<String, Integer> training;
 
   public String[] culture;
@@ -62,7 +74,8 @@ public class RawCreature implements Serializable {
   public RawCreature(String name, String description, String symbol, String color,
       RawWeapon baseWeapon, RawWeapon[] weapons, double precision, double damage, double crit,
       double influence, double evasion, double defense, double luck, double stealth, double range,
-      double area, double quickness, Map<String, Integer> training, String[] culture) {
+      double area, double quickness, double vigor, double endurance, double spirit, double sanity,
+      Map<String, Integer> training, String[] culture) {
     this.name = name;
     this.description = description;
     this.symbol = symbol;
@@ -80,6 +93,10 @@ public class RawCreature implements Serializable {
     this.range = range;
     this.area = area;
     this.quickness = quickness;
+    this.vigor = vigor;
+    this.endurance = endurance;
+    this.spirit = spirit;
+    this.sanity = sanity;
     this.training = training;
     this.culture = culture;
   }
@@ -122,6 +139,10 @@ public class RawCreature implements Serializable {
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(range));
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(area));
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(quickness));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(vigor));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(endurance));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(spirit));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(sanity));
     result += (a ^= 0x8329C6EB9E6AD3E3L * hashBasic(training));
     innerR = 0x9E3779B97F4A7C94L;
     innerA = 0x632BE59BD9B4E019L;
@@ -167,6 +188,10 @@ public class RawCreature implements Serializable {
     if (range != other.range) return false;
     if (area != other.area) return false;
     if (quickness != other.quickness) return false;
+    if (vigor != other.vigor) return false;
+    if (endurance != other.endurance) return false;
+    if (spirit != other.spirit) return false;
+    if (sanity != other.sanity) return false;
     if (training != null ? !training.equals(other.training) : other.training != null) return false;
     if(!stringArrayEquals(culture, other.culture)) return false;
     return true;

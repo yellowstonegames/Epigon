@@ -308,16 +308,16 @@ public class InfoHandler {
         int titleOffset = startY;
 
         int x = 3;
-        for (ClothingSlot cs : ClothingSlot.values()) {
-            Physical p = data.armor.get(cs);
+        for (ClothingSlot cs : ClothingSlot.ALL) {
+            Physical p = data.wielded.get(cs);
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
         }
-        put(x, titleOffset, "Armor");
+        put(x, titleOffset, "Worn");
         put(x, titleOffset + 1, "Rarity");
 
         x += ClothingSlot.width + 4;
-        for (ClothingSlot cs : ClothingSlot.values()) {
-            Physical p = data.armor.get(cs);
+        for (ClothingSlot cs : ClothingSlot.ALL) {
+            Physical p = data.wielded.get(cs);
             Color color = Rating.NONE.color();
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
@@ -327,30 +327,7 @@ public class InfoHandler {
             }
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
         }
-        put(x, titleOffset, "Armor");
-        put(x, titleOffset + 1, "Health");
-
-        x += ClothingSlot.width + 4;
-        for (ClothingSlot cs : ClothingSlot.values()) {
-            Physical p = data.clothing.get(cs);
-            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
-        }
-        put(x, titleOffset, "Clothes");
-        put(x, titleOffset + 1, "Rarity");
-
-        x += ClothingSlot.width + 4;
-        for (ClothingSlot cs : ClothingSlot.values()) {
-            Physical p = data.clothing.get(cs);
-            Color color = Rating.NONE.color();
-            if (p != null) {
-                LiveValue lv = p.stats.get(Stat.STRUCTURE);
-                if (lv != null) {
-                    color = percentColor(lv.actual(), lv.base());
-                }
-            }
-            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
-        }
-        put(x, titleOffset, "Clothes");
+        put(x, titleOffset, "Worn");
         put(x, titleOffset + 1, "Health");
     }
 

@@ -6,6 +6,9 @@ import squidpony.epigon.Prefs;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Rating;
+import squidpony.epigon.data.slot.ClothingSlot;
+import squidpony.epigon.data.slot.JewelrySlot;
+import squidpony.epigon.data.slot.OverArmorSlot;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
@@ -14,7 +17,6 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -426,73 +428,79 @@ public class MapOverlayHandler {
         // Right half
         y = 1;
         int xOffset = halfWidth + 1;
-        put(xOffset, y, "Wielded Equipment", headingColor);
+        put(xOffset, y, "Wielded Weapons", headingColor);
         y++;
-        for (Physical p : player.creatureData.wielded.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset + 1;
-            put(x, y, p.symbol, p.color);
-            Coord select = Coord.get(x - 1, y);
-            rightSelectables.add(select);
-            selectables.put(select, p);
-            x += 2;
-            putWithPhysicalColor(x, y, p);
-            y++;
+        for (int i = 0; i < player.creatureData.wielded.size(); i++) {
+            Physical p;
+            if((p = player.creatureData.wielded.getAt(i)) != null && p.weaponData != null)
+            {
+                int x = xOffset + 1;
+                put(x, y, p.symbol, p.color);
+                Coord select = Coord.get(x - 1, y);
+                rightSelectables.add(select);
+                selectables.put(select, p);
+                x += 2;
+                putWithPhysicalColor(x, y, p);
+                y++;
+            }
         }
 
+
         y++;
-        put(xOffset, y, "Worn Armor", headingColor);
+        put(xOffset, y, "Worn Clothing and Armor", headingColor);
         y++;
-        for (Physical p : player.creatureData.armor.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset + 1;
-            put(x, y, p.symbol, p.color);
-            Coord select = Coord.get(x - 1, y);
-            rightSelectables.add(select);
-            selectables.put(select, p);
-            x += 2;
-            putWithPhysicalColor(x, y, p);
-            y++;
+        for(ClothingSlot js : ClothingSlot.ALL)
+        {
+            Physical p;
+            if((p = player.creatureData.wielded.get(js)) != null)
+            {
+                int x = xOffset + 1;
+                put(x, y, p.symbol, p.color);
+                Coord select = Coord.get(x - 1, y);
+                rightSelectables.add(select);
+                selectables.put(select, p);
+                x += 2;
+                putWithPhysicalColor(x, y, p);
+                y++;
+            }
         }
 
         y++;
         put(xOffset, y, "Worn Over Armor", headingColor);
         y++;
-        for (Physical p : player.creatureData.overArmor.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset + 1;
-            put(x, y, p.symbol, p.color);
-            Coord select = Coord.get(x - 1, y);
-            rightSelectables.add(select);
-            selectables.put(select, p);
-            x += 2;
-            putWithPhysicalColor(x, y, p);
-            y++;
-        }
-
-        y++;
-        put(xOffset, y, "Worn Clothing", headingColor);
-        y++;
-        for (Physical p : player.creatureData.clothing.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset + 1;
-            put(x, y, p.symbol, p.color);
-            Coord select = Coord.get(x - 1, y);
-            rightSelectables.add(select);
-            selectables.put(select, p);
-            x += 2;
-            putWithPhysicalColor(x, y, p);
-            y++;
+        for(OverArmorSlot js : OverArmorSlot.ALL)
+        {
+            Physical p;
+            if((p = player.creatureData.wielded.get(js)) != null)
+            {
+                int x = xOffset + 1;
+                put(x, y, p.symbol, p.color);
+                Coord select = Coord.get(x - 1, y);
+                rightSelectables.add(select);
+                selectables.put(select, p);
+                x += 2;
+                putWithPhysicalColor(x, y, p);
+                y++;
+            }
         }
 
         y++;
         put(xOffset, y, "Worn Jewelry", headingColor);
         y++;
-        for (Physical p : player.creatureData.jewelry.values().stream().distinct().collect(Collectors.toList())) {
-            int x = xOffset + 1;
-            put(x, y, p.symbol, p.color);
-            Coord select = Coord.get(x - 1, y);
-            rightSelectables.add(select);
-            selectables.put(select, p);
-            x += 2;
-            putWithPhysicalColor(x, y, p);
-            y++;
+        for(JewelrySlot js : JewelrySlot.ALL)
+        {
+            Physical p;
+            if((p = player.creatureData.wielded.get(js)) != null)
+            {
+                int x = xOffset + 1;
+                put(x, y, p.symbol, p.color);
+                Coord select = Coord.get(x - 1, y);
+                rightSelectables.add(select);
+                selectables.put(select, p);
+                x += 2;
+                putWithPhysicalColor(x, y, p);
+                y++;
+            }
         }
 
         if (selectables.isEmpty()) {

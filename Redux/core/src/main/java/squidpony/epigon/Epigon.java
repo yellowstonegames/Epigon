@@ -19,8 +19,7 @@ import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Element;
-import squidpony.epigon.data.quality.Inclusion;
-import squidpony.epigon.data.slot.BodySlot;
+import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
@@ -46,6 +45,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static squidpony.epigon.data.Physical.*;
 import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
 
 /**
@@ -414,16 +414,24 @@ public class Epigon extends Game {
         floors2.randomScatter(rng, 5);
         for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
-                Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
-                RecipeMixer.applyModification(p, handBuilt.makeAlive());
-                if (SColor.valueOfFloat(p.color) < 0.7f) {
-                    p.color = SColor.floatGetHSV(SColor.hueOfFloat(p.color),
-                            SColor.saturationOfFloat(p.color),
-                            0.7f, SColor.alphaOfFloatF(p.color));
-                }
+                //Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
+                //RecipeMixer.applyModification(p, handBuilt.makeAlive());
+                Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[rootChaos.nextInt(RawCreature.ENTRIES.length)]);
+                p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
-                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), pMeat, 1.0, 2, 4);
+                Physical[] held = new Physical[p.creatureData.wielded.size()+1];
+                p.creatureData.wielded.values().toArray(held);
+                held[held.length-1]=pMeat;
+                double[] weights = new double[held.length];
+                Arrays.fill(weights, 1.0);
+                weights[held.length-1] = 3.0;
+                int[] mins = new int[held.length], maxes = new int[held.length];
+                Arrays.fill(mins, 1);
+                Arrays.fill(maxes, 1);
+                mins[held.length-1] = 2;
+                maxes[held.length-1] = 4;
+                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), held, weights, mins, maxes);
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
@@ -757,14 +765,7 @@ public class Epigon extends Game {
 
         }
     }
-
-    public static final List<BodySlot> RIGHT = Collections.singletonList(ClothingSlot.RIGHT_HAND),
-            LEFT = Collections.singletonList(ClothingSlot.LEFT_HAND),
-            BOTH = Arrays.asList(ClothingSlot.RIGHT_HAND, ClothingSlot.LEFT_HAND),
-            HEAD = Collections.singletonList(ClothingSlot.HEAD),
-            NECK = Collections.singletonList(ClothingSlot.NECK),
-            FEET = Arrays.asList(ClothingSlot.LEFT_FOOT, ClothingSlot.RIGHT_FOOT);
-
+    
     private void equipItem(Physical item) {
 //        if(player.statEffects.contains(player.weaponData.calcStats))
 //            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
