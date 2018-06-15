@@ -420,8 +420,8 @@ public class Epigon extends Game {
                 p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
-                Physical[] held = new Physical[p.creatureData.wielded.size()+1];
-                p.creatureData.wielded.values().toArray(held);
+                Physical[] held = new Physical[p.creatureData.equippedDistinct.size()+1];
+                p.creatureData.equippedDistinct.toArray(held);
                 held[held.length-1]=pMeat;
                 double[] weights = new double[held.length];
                 Arrays.fill(weights, 1.0);
@@ -779,19 +779,19 @@ public class Epigon extends Game {
                 player.creatureData.weaponChoices.add(item.weaponData, 1);
                 break;
             case 3:
-                if (!player.creatureData.wielded.containsKey(ClothingSlot.HEAD))
+                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
                     player.equip(item, HEAD);
                 break;
             case 4:
-                if (!player.creatureData.wielded.containsKey(ClothingSlot.NECK))
+                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
                     player.equip(item, NECK);
                 break;
             case 5:
-                if (!player.creatureData.wielded.containsKey(ClothingSlot.LEFT_FOOT) && !player.creatureData.wielded.containsKey(ClothingSlot.RIGHT_FOOT))
+                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) && !player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
                     player.equip(item, FEET);
                 break;
             case 1:
-                if (!player.creatureData.wielded.containsKey(ClothingSlot.RIGHT_HAND))
+                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
                     player.equip(item, RIGHT);
                 else
                     player.equip(item, LEFT);

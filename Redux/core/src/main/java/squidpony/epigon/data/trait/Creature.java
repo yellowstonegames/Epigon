@@ -24,8 +24,8 @@ public class Creature {
 
     // TODO - add validity list for slots on a per-creature type (Humanoid, Quadruped) basis
     // validation could be done by calling OrderedMap.keySet().retainAll(validSlots) , I think
-    public OrderedMap<BodySlot, Physical> wielded = new OrderedMap<>(20, 0.7f, ConstantKey.ConstantKeyHasher.instance);
-
+    public OrderedMap<BodySlot, Physical> equippedBySlot = new OrderedMap<>(20, 0.7f, ConstantKey.ConstantKeyHasher.instance);
+    public OrderedSet<Physical> equippedDistinct = new OrderedSet<>(20, 0.7f);
     public ProbabilityTable<Weapon> weaponChoices;
 
     public int skillWithWeapon(Weapon w)
@@ -35,7 +35,6 @@ public class Creature {
             skill += skills.getOrDefault(w.skills[i], Rating.NONE).ordinal();
         }
         return skill;
-
     }
     
     // Runtime values

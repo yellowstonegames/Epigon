@@ -277,8 +277,8 @@ public class InfoHandler {
             yOffset += ClothingSlot.height + 4;
 
             // Equipped items
-            Physical equippedRight = physical.creatureData.wielded.get(ClothingSlot.RIGHT_HAND);
-            Physical equippedLeft = physical.creatureData.wielded.get(ClothingSlot.LEFT_HAND);
+            Physical equippedRight = physical.creatureData.equippedBySlot.get(ClothingSlot.RIGHT_HAND);
+            Physical equippedLeft = physical.creatureData.equippedBySlot.get(ClothingSlot.LEFT_HAND);
             Weapon currentWeapon;
             //₩
             put(3, yOffset, "RH:");
@@ -309,7 +309,7 @@ public class InfoHandler {
 
         int x = 3;
         for (ClothingSlot cs : ClothingSlot.ALL) {
-            Physical p = data.wielded.get(cs);
+            Physical p = data.equippedBySlot.get(cs);
             put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, p == null ? Rating.NONE.color() : p.rarity.color());
         }
         put(x, titleOffset, "Worn");
@@ -317,7 +317,7 @@ public class InfoHandler {
 
         x += ClothingSlot.width + 4;
         for (ClothingSlot cs : ClothingSlot.ALL) {
-            Physical p = data.wielded.get(cs);
+            Physical p = data.equippedBySlot.get(cs);
             Color color = Rating.NONE.color();
             if (p != null) {
                 LiveValue lv = p.stats.get(Stat.STRUCTURE);
