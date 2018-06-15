@@ -255,21 +255,25 @@ public class Physical extends EpiData {
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (BodySlot ws : slots) {
-            Physical p = creatureData.wielded.get(ws);
+            Physical p = creatureData.equippedBySlot.get(ws);
             if (p != null) {
                 removing.add(p);
                 creatureData.weaponChoices.remove(p.weaponData);
             }
             if(!item.equals(p))
                 creatureData.weaponChoices.add(item.weaponData, 2);
-            creatureData.wielded.put(ws, item);
+            creatureData.equippedBySlot.put(ws, item);
+            creatureData.equippedDistinct.add(item);
+
         }
 
         for (Physical p : removing) {
             inventory.add(p);
+            creatureData.equippedDistinct.remove(p);
+
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.wielded.get(subSlot))) {
-                    creatureData.wielded.remove(subSlot);
+                if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
+                    creatureData.equippedBySlot.remove(subSlot);
                 }
             }
         }
@@ -288,22 +292,23 @@ public class Physical extends EpiData {
                 break;
             case 0:
                 creatureData.weaponChoices.add(item.weaponData, 1);
+                creatureData.equippedDistinct.add(item);
                 break;
             case 3:
-                if (!creatureData.wielded.containsKey(ClothingSlot.HEAD))
+                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
                     equip(item, HEAD);
                 break;
             case 4:
-                if (!creatureData.wielded.containsKey(ClothingSlot.NECK))
+                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
                     equip(item, NECK);
                 break;
             case 5:
-                if (!creatureData.wielded.containsKey(ClothingSlot.LEFT_FOOT) &&
-                        !creatureData.wielded.containsKey(ClothingSlot.RIGHT_FOOT))
+                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) &&
+                        !creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
                     equip(item, FEET);
                 break;
             case 1:
-                if (!creatureData.wielded.containsKey(ClothingSlot.RIGHT_HAND))
+                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
                     equip(item, RIGHT);
                 else
                     equip(item, LEFT);
@@ -327,7 +332,7 @@ public class Physical extends EpiData {
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (BodySlot ws : slots) {
-            Physical p = creatureData.wielded.remove(ws);
+            Physical p = creatureData.equippedBySlot.remove(ws);
             if (p != null) {
                 removing.add(p);
             }
@@ -335,9 +340,10 @@ public class Physical extends EpiData {
 
         for (Physical p : removing) {
             removed.add(p);
+            creatureData.equippedDistinct.remove(p);
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.wielded.get(subSlot))) {
-                    creatureData.wielded.remove(subSlot);
+                if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
+                    creatureData.equippedBySlot.remove(subSlot);
                     if(p.weaponData != null)
                         creatureData.weaponChoices.remove(p.weaponData);
                 }
@@ -473,11 +479,11 @@ public class Physical extends EpiData {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
+        }
+        if (this == obj) {
+            return true;
         }
         if (getClass() != obj.getClass()) {
             return false;
@@ -519,15 +525,18 @@ public class Physical extends EpiData {
             System.err.println("Can't disarm the Physical " + name + "; it is not a creature");
             return "";
         }
-        if(creatureData.wielded.isEmpty())
+        if(!creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_HAND) && !creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
             return "";
-        Physical p = creatureData.wielded.removeAt(nextInt(creatureData.wielded.size()));
+        Physical p = nextBoolean()
+                ? creatureData.equippedBySlot.remove(ClothingSlot.LEFT_HAND)
+                : creatureData.equippedBySlot.remove(ClothingSlot.RIGHT_HAND);
         if (p != null) {
+            creatureData.equippedDistinct.remove(p);
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.wielded.get(subSlot))) {
-                    creatureData.wielded.remove(subSlot);
+                if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
+                    creatureData.equippedBySlot.remove(subSlot);
                 }
             }
             addToInventory(p);
@@ -541,19 +550,20 @@ public class Physical extends EpiData {
             System.err.println("Can't sunder the equipment of Physical " + name + "; it is not a creature");
             return "";
         }
-        if(creatureData.wielded.isEmpty())
+        if(creatureData.equippedBySlot.isEmpty())
             return "";
-        int pos = nextInt(creatureData.wielded.size());
-        Physical p = creatureData.wielded.getAt(pos);
+        int pos = nextInt(creatureData.equippedBySlot.size());
+        Physical p = creatureData.equippedBySlot.getAt(pos);
         if (p != null) {
             if(p.mainMaterial == null || p.mainMaterial.getHardness() > nextDouble(power * 500))
                 return ""; // didn't break anything
+            creatureData.equippedDistinct.remove(p);
             if (p.weaponData != null)
                 creatureData.weaponChoices.remove(p.weaponData);
-            creatureData.wielded.removeAt(pos);
+            //creatureData.equippedBySlot.removeAt(pos);
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.wielded.get(subSlot))) {
-                    creatureData.wielded.remove(subSlot);
+                if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
+                    creatureData.equippedBySlot.remove(subSlot);
                 }
             }
             Physical p2 = RecipeMixer.buildMaterial(p.mainMaterial);

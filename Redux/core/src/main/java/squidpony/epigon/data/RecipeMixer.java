@@ -372,11 +372,15 @@ public class RecipeMixer {
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
 
-        for (int i = other.wielded.size() - 1; i >= 0; i--) {
-            Physical p = other.wielded.getAt(i);
-            if(p != null)
-                creature.wielded.put(other.wielded.keyAt(i), buildPhysical(p));
+        for (int i = other.equippedBySlot.size() - 1; i >= 0; i--) {
+            Physical p = other.equippedBySlot.getAt(i);
+            if (p != null) {
+                p = buildPhysical(p);
+                creature.equippedBySlot.put(other.equippedBySlot.keyAt(i), p);
+                creature.equippedDistinct.add(p);
+            }
         }
+        
         creature.weaponChoices = other.weaponChoices.copy();
 
         return creature;

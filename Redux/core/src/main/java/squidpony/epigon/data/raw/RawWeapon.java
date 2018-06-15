@@ -1,10 +1,11 @@
 package squidpony.epigon.data.raw;
 
-import static squidpony.squidmath.OrderedMap.makeMap;
+import squidpony.squidmath.NumberTools;
 
 import java.io.Serializable;
 import java.util.Map;
-import squidpony.squidmath.NumberTools;
+
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 public class RawWeapon implements Serializable {
   public static final long serialVersionUID = 1L;
