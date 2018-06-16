@@ -53,7 +53,6 @@ import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
  * Doesn't use any platform-specific code.
  */
 public class Epigon extends Game {
-
     private enum GameMode {
         DIVE, CRAWL;
         private final String name;
@@ -91,7 +90,7 @@ public class Epigon extends Game {
     private SoundManager sound;
 
     // Display
-    SpriteBatch batch;
+    private SpriteBatch batch;
     private SquidColorCenter colorCenter;
     private SparseLayers mapSLayers;
     private SparseLayers mapOverlaySLayers;
@@ -110,6 +109,11 @@ public class Epigon extends Game {
     private float bgColorFloat, unseenColorFloat, unseenCreatureColorFloat;
     private ArrayList<Coord> toCursor;
     private TextCellFactory font;
+
+    private boolean showingMenu = false;
+    private Coord menuLocation = null;
+    private Physical currentTarget = null;
+    private ArrayList<Weapon> attackOptions = new ArrayList<>(4);
 
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
@@ -341,9 +345,11 @@ public class Epigon extends Game {
         mapSLayers.animationCount = 0;
         handBuilt = new HandBuilt(mixer);
 
-        mapSLayers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
+        mapSLayers.addLayer();//first added layer adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
-        mapSLayers.addLayer();//next adds at level 3, used for effects
+        mapSLayers.addLayer();//level 3, backgrounds for hovering menus
+        mapSLayers.addLayer();//level 4, text for hovering menus
+        mapSLayers.addLayer();//next adds at level 5, used for effects
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
@@ -447,7 +453,7 @@ public class Epigon extends Game {
         world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         depth = 0;
         map = world[depth];
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
+        fxHandler = new FxHandler(mapSLayers, 5, colorCenter, map.fovResult);
         floors = new GreasedRegion(map.width, map.height);
         for (int i = world.length - 1; i > 0; i--) {
             setupLevel(i);
@@ -803,6 +809,17 @@ public class Epigon extends Game {
         awaitedMoves.add(player.location.translate(dir));
     }
 
+    private void validAttackOptions(Physical target) {
+        Arrangement<Weapon> table = player.creatureData.weaponChoices.table;
+        Weapon w;
+        currentTarget = target;
+        attackOptions.clear();
+        for (int i = 0; i < table.size(); i++) {
+            w = table.keyAt(i);
+            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5) 
+                attackOptions.add(w);
+        }
+    }
     private void attack(Physical target)
     {
         int targetX = target.location.x, targetY = target.location.y;
@@ -880,6 +897,82 @@ public class Epigon extends Game {
             } else {
                 message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
             }
+        }
+    }
+    private void attack(Physical target, Weapon choice) {
+        int targetX = target.location.x, targetY = target.location.y;
+        ActionOutcome ao = ActionOutcome.attack(player, choice, target);
+        Element element = ao.element;
+        fxHandler.attackEffect(player, target, ao);
+        //mapSLayers.bump(player.appearance, dir, 0.145f);
+        if (ao.hit) {
+            applyStatChange(target, Stat.VIGOR, ao.actualDamage);
+            if (target.stats.get(Stat.VIGOR).actual() <= 0) {
+                mapSLayers.removeGlyph(target.appearance);
+                if (target.overlayAppearance != null) {
+                    mapSLayers.removeGlyph(target.overlayAppearance);
+                }
+                creatures.remove(target.location);
+                map.contents[targetX][targetY].remove(target);
+                if (ao.crit) {
+                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                            .map(table -> {
+                                int quantity = table.quantity();
+                                Physical p = RecipeMixer.buildPhysical(table.random());
+                                if (p.groupingData != null) {
+                                    p.groupingData.quantity += quantity;
+                                } else {
+                                    p.groupingData = new Grouping(quantity);
+                                }
+                                return p;
+                            })
+                            .forEach(item -> {
+                                map.contents[targetX][targetY].add(item);
+                                if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
+                                    map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
+                                }
+                            });
+                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                    message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                } else {
+                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                            .map(table -> {
+                                int quantity = table.quantity();
+                                Physical p = RecipeMixer.buildPhysical(table.random());
+                                if (p.groupingData != null) {
+                                    p.groupingData.quantity += quantity;
+                                } else {
+                                    p.groupingData = new Grouping(quantity);
+                                }
+                                return p;
+                            })
+                            .forEach(item -> map.contents[targetX][targetY].add(item));
+                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                    message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
+                }
+            } else {
+                String amtText = String.valueOf(-ao.actualDamage);
+                if (ao.crit) {
+                    mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
+                            mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
+                    message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
+                            amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                } else {
+                    message(Messaging.transform("You " + element.verb + " the " + target.name + " for " +
+                            amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                }
+                if (ao.targetConditioned) {
+                    message(Messaging.transform("You " +
+                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
+                            " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                    if (target.overlaySymbol != '\uffff') {
+                        if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);
+                        target.overlayAppearance = mapSLayers.glyph(target.overlaySymbol, target.overlayColor, targetX, targetY);
+                    }
+                }
+            }
+        } else {
+            message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
         }
     }
     /**
@@ -979,7 +1072,7 @@ public class Epigon extends Game {
                 } else {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
-                        mapSLayers.clear(x, y);
+                        mapSLayers.clear(x, y, 0);
                         mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 0);
                     }
                 }
@@ -1728,8 +1821,26 @@ public class Epigon extends Game {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
             if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height
-                    || map.fovResult[screenX][screenY] <= 0.0) {
+                    || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
                 return false;
+            }
+            if(showingMenu)
+            {
+                if(menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < attackOptions.size()
+                        && currentTarget != null  && mapSLayers.getLayer(3).getFloat(screenX, screenY, 0f) != 0f)
+                {
+                    attack(currentTarget, attackOptions.get(screenY - menuLocation.y));
+                    calcFOV(player.location.x, player.location.y);
+                    calcDijkstra();
+                    runTurn();
+                }
+                showingMenu = false;
+                menuLocation = null;
+                attackOptions.clear();
+                currentTarget = null;
+                mapSLayers.clear(3);
+                mapSLayers.clear(4);
+                return true;
             }
             switch (button) {
                 case Input.Buttons.LEFT:
@@ -1749,10 +1860,12 @@ public class Epigon extends Game {
                     Physical thing = map.contents[screenX][screenY].getCreature();
                     if(thing == null)
                         return false;
-                    attack(thing);
-                    calcFOV(player.location.x, player.location.y);
-                    calcDijkstra();
-                    runTurn();
+                    validAttackOptions(thing);
+                    menuLocation = showAttackOptions(thing, attackOptions);
+//                    attack(thing);
+//                    calcFOV(player.location.x, player.location.y);
+//                    calcDijkstra();
+//                    runTurn();
 
                     break;
             }
@@ -1793,6 +1906,42 @@ public class Epigon extends Game {
             return false;
         }
     });
+
+    private Coord showAttackOptions(Physical target, ArrayList<Weapon> options) {
+        // = validAttackOptions(target);
+        int sz = options.size(), len = 0;
+        for (int i = 0; i < sz; i++) {
+            len = Math.max(options.get(i).rawWeapon.name.length(), len);
+        }
+        int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
+                startX = target.location.x+1;
+        final float smoke = SColor.translucentColor( -0x1.fefefep125F, 0.777f); //SColor.CW_GRAY
+        if(target.location.x+len+1 < map.width) {
+            for (int i = 0; i < sz; i++) {
+                String name = options.get(i).rawWeapon.name;
+                for (int j = 0; j < len; j++) {
+                    mapSLayers.put(startX + j, startY + i, '\u0000',
+                            smoke,
+                            0f, 3);
+                }
+                mapSLayers.put(startX, startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
+            }
+        }
+        else {
+            startX = target.location.x - len;
+            for (int i = 0; i < sz; i++) {
+                String name = options.get(i).rawWeapon.name;
+                for (int j = 0; j < len; j++) {
+                    mapSLayers.put(startX + j, startY + i, '\u0000',
+                            smoke,
+                            0f, 3);
+                }
+                mapSLayers.put(target.location.x-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
+            }
+        }
+        showingMenu = true;
+        return Coord.get(startX, startY);
+    }
 
     private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
             mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new InputAdapter() {
