@@ -2,6 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
+import squidpony.epigon.Radiance;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;
@@ -46,7 +47,7 @@ public class Physical extends EpiData {
     public char overlaySymbol = '\uffff';
     public float color;
     public float overlayColor = 0f; // if == 0f, this will be disregarded by SparseLayers
-
+    public Radiance radiance = null;
     // backing data
     public Physical parent;
     public Set<Physical> countsAs = new HashSet<>();
