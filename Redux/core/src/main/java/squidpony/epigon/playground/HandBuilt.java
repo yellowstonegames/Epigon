@@ -3,6 +3,7 @@ package squidpony.epigon.playground;
 import squidpony.Maker;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
+import squidpony.epigon.Radiance;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
 import squidpony.epigon.data.RecipeBlueprint;
@@ -272,7 +273,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }
-
+        playerBlueprint.radiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), SColor.CREAM.toFloatBits(), 0.8f, 0f);
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
 
@@ -365,6 +366,7 @@ public class HandBuilt {
         upStairBlueprint.name = "stairs up";
         upStairBlueprint.symbol = '≤';
         upStairBlueprint.color = SColor.GOLDEN.toRandomizedFloat(rng, 0.05f, 0f, 0.15f);
+        upStairBlueprint.radiance = new Radiance(1.9f, SColor.CREAM.toFloatBits(), 0f, 0f);
         upStairBlueprint.generic = true;
         upStairBlueprint.attached = true;
         upStairBlueprint.blocking = false;

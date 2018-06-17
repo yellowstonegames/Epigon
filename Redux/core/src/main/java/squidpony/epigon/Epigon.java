@@ -714,7 +714,30 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        FOV.reuseLOS(map.opacities(), map.losResult, checkX, checkY);
+        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        SColor.eraseColoredLighting(map.colorLighting);
+        Radiance radiance;
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                if((radiance = map.contents[x][y].getAnyRadiance()) != null)
+                {
+                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
+                    SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+                    SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                }
+            }
+        }
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                if(map.losResult[x][y] > 0.0)
+                {
+                    map.fovResult[x][y] = MathUtils.clamp(map.fovResult[x][y] + map.colorLighting[0][x][y], 0.0, 1.0);
+                }
+            }
+        }
+        
+
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
@@ -820,6 +843,42 @@ public class Epigon extends Game {
                 attackOptions.add(w);
         }
     }
+    private Coord showAttackOptions(Physical target, ArrayList<Weapon> options) {
+        // = validAttackOptions(target);
+        int sz = options.size(), len = 0;
+        for (int i = 0; i < sz; i++) {
+            len = Math.max(options.get(i).rawWeapon.name.length(), len);
+        }
+        int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
+                startX = target.location.x+1;
+        final float smoke = SColor.translucentColor( -0x1.fefefep125F, 0.777f); //SColor.CW_GRAY
+        if(target.location.x+len+1 < map.width) {
+            for (int i = 0; i < sz; i++) {
+                String name = options.get(i).rawWeapon.name;
+                for (int j = 0; j < len; j++) {
+                    mapSLayers.put(startX + j, startY + i, '\u0000',
+                            smoke,
+                            0f, 3);
+                }
+                mapSLayers.put(startX, startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
+            }
+        }
+        else {
+            startX = target.location.x - len;
+            for (int i = 0; i < sz; i++) {
+                String name = options.get(i).rawWeapon.name;
+                for (int j = 0; j < len; j++) {
+                    mapSLayers.put(startX + j, startY + i, '\u0000',
+                            smoke,
+                            0f, 3);
+                }
+                mapSLayers.put(target.location.x-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
+            }
+        }
+        showingMenu = true;
+        return Coord.get(startX, startY);
+    }
+
     private void attack(Physical target)
     {
         int targetX = target.location.x, targetY = target.location.y;
@@ -1024,16 +1083,17 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground, float lightAmount, float noise) {
-        //float base = 1 - RememberedTile.frontFade;
-        //float front = lerpFloatColors(RememberedTile.memoryColorFloat, foreground, base + RememberedTile.frontFade * lightAmount); // objects don't get lit, just a fade to memory
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
-        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
-        int n = (int) (lightAmount * lightLevels.length);
-        n = Math.min(Math.max(n, 0), lightLevels.length - 1);
+//        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
+//        int n = (int) (lightAmount * lightLevels.length);
+//        n = Math.min(Math.max(n, 0), lightLevels.length - 1);
+
+
         //float back = lightLevels[n]; // background gets both lit and faded to memory
         //mapSLayers.put(x, y, c, front, back); // "light" theme
-        mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
+        //mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColors(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
     }
 
     /**
@@ -1042,6 +1102,18 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         float time = (System.currentTimeMillis() & 0xffffffL) * 0.00125f; // if you want to adjust the speed of flicker, change the multiplier
         long time0 = Noise.longFloor(time);
+        Radiance radiance;
+        SColor.eraseColoredLighting(map.colorLighting);
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                if((radiance = map.contents[x][y].getAnyRadiance()) != null)
+                {
+                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
+                    SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+                    SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                }
+            }
+        }
 
         // we can use either Noise.querp (quintic Hermite spline) or Noise.cerp (cubic Hermite splne); cerp is cheaper but querp seems to look better.
         // querp() is extremely close to cos(); see https://www.desmos.com/calculator/l31nflff3g for graphs. It is likely that querp performs better than cos.
@@ -1053,7 +1125,6 @@ public class Epigon extends Game {
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
-                    // sightAmount should only be 1.0 if the player is standing in that cell, currently
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         putWithLight(x, y, ' ', 0f, sightAmount, noise);
                         creature.appearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
@@ -1906,43 +1977,7 @@ public class Epigon extends Game {
             return false;
         }
     });
-
-    private Coord showAttackOptions(Physical target, ArrayList<Weapon> options) {
-        // = validAttackOptions(target);
-        int sz = options.size(), len = 0;
-        for (int i = 0; i < sz; i++) {
-            len = Math.max(options.get(i).rawWeapon.name.length(), len);
-        }
-        int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
-                startX = target.location.x+1;
-        final float smoke = SColor.translucentColor( -0x1.fefefep125F, 0.777f); //SColor.CW_GRAY
-        if(target.location.x+len+1 < map.width) {
-            for (int i = 0; i < sz; i++) {
-                String name = options.get(i).rawWeapon.name;
-                for (int j = 0; j < len; j++) {
-                    mapSLayers.put(startX + j, startY + i, '\u0000',
-                            smoke,
-                            0f, 3);
-                }
-                mapSLayers.put(startX, startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
-            }
-        }
-        else {
-            startX = target.location.x - len;
-            for (int i = 0; i < sz; i++) {
-                String name = options.get(i).rawWeapon.name;
-                for (int j = 0; j < len; j++) {
-                    mapSLayers.put(startX + j, startY + i, '\u0000',
-                            smoke,
-                            0f, 3);
-                }
-                mapSLayers.put(target.location.x-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
-            }
-        }
-        showingMenu = true;
-        return Coord.get(startX, startY);
-    }
-
+    
     private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
             mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new InputAdapter() {
         @Override

@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.Radiance;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Stat;
@@ -191,5 +192,14 @@ public class EpiTile {
 
     public Physical getLargeNonCreature() {
         return blockage != null && blockage.creatureData == null ? blockage : null;
+    }
+    
+    public Radiance getAnyRadiance()
+    {
+        if(blockage != null && blockage.radiance != null)
+            return blockage.radiance;
+        if(!contents.isEmpty() && contents.get(0).radiance != null)
+            return contents.get(0).radiance;
+        return floor.radiance;
     }
 }

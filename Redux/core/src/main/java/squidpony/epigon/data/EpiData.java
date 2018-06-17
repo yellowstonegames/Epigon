@@ -19,7 +19,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     //public String notes; // NOTE - don't need to copy this into created objects <-- no way to eliminate the field
 
     private String id;
-    protected final int idHash;
+    public final int idHash;
     public long chaos;
     
     private static int uniqueIntGen = 123456789;

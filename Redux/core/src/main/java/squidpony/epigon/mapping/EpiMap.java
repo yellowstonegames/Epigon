@@ -23,6 +23,10 @@ public class EpiMap {
     public RememberedTile[][] remembered;
     public double[][] resistances;
     public double[][] fovResult;
+    public double[][] losResult;
+    public double[][] tempFOV;
+    public float[][][] colorLighting;
+    public float[][][] tempColorLighting;
     public GreasedRegion downStairPositions, upStairPositions;
     public StatefulRNG chaos;
     public OrderedMap<Coord, Physical> creatures;
@@ -30,6 +34,10 @@ public class EpiMap {
         this.width = width;
         this.height = height;
         fovResult = new double[width][height];
+        losResult = new double[width][height];
+        tempFOV = new double[width][height];
+        colorLighting = SColor.blankColoredLighting(width, height);
+        tempColorLighting = new float[2][width][height];
         chaos = new StatefulRNG(new LinnormRNG(rootChaos.nextLong()));
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];

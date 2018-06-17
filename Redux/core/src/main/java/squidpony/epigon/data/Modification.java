@@ -2,6 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
+import squidpony.epigon.Radiance;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.epigon.data.trait.Interactable;
@@ -52,7 +53,7 @@ public class Modification extends EpiData {
     public char overlaySymbol = '\uffff';
     public Color color;
     public Color overlayColor;
-
+    public Radiance radiance;
     public Double baseValue;
     public Double baseValueMultiplier;
 

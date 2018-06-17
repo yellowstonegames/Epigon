@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Colors;
+import squidpony.epigon.Radiance;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.quality.Stone;
@@ -282,6 +283,8 @@ public class RecipeMixer {
 
         physical.symbol = blueprint.symbol;
         physical.color = blueprint.color == 0f ? SColor.toRandomizedFloat(SColor.GRAY, physical, 1f, 0.1f, 0.15f) : blueprint.color;
+        if(blueprint.radiance != null)
+            physical.radiance = new Radiance(blueprint.radiance);
         physical.baseValue = blueprint.baseValue;
         physical.blocking = blueprint.blocking;
 
@@ -513,6 +516,10 @@ public class RecipeMixer {
 
         if (modification.color != null) {
             physical.color = SColor.toRandomizedFloat(modification.color, physical, 0.05f, 0f, 0.15f);
+        }
+        if(modification.radiance != null)
+        {
+            physical.radiance = new Radiance(modification.radiance);
         }
         if((modification.symbol != '\uffff' || modification.color != null) && physical.appearance != null)
         {
