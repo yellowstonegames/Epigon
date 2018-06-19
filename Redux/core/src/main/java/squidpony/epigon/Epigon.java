@@ -459,6 +459,7 @@ public class Epigon extends Game {
             setupLevel(i);
         }
         player.location = setupLevel(0);
+        map.contents[player.location.x][player.location.y].add(player);
         char[][] simple = new char[map.width][map.height];
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
@@ -1049,7 +1050,7 @@ public class Epigon extends Game {
         if (!map.inBounds(newX, newY)) {
             return; // can't move, should probably be error or something
         }
-
+        map.contents[player.location.x][player.location.y].remove(player);
         if (map.contents[newX][newY].blockage == null) {
             mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () ->
             {
@@ -1060,10 +1061,10 @@ public class Epigon extends Game {
             if (player.overlayAppearance != null)
                 mapSLayers.slide(player.overlayAppearance, player.location.x, player.location.y, newX, newY, 0.145f, null);
             player.location = newPos;
+            map.contents[player.location.x][player.location.y].add(player);
             sound.playFootstep();
         } else {
-            int targetX = newX, targetY = newY;
-            Physical thing = map.contents[targetX][targetY].getCreature();
+            Physical thing = map.contents[newX][newY].getCreature();
             if (thing != null) {
                 awaitedMoves.clear(); // don't keep moving if something hit
                 toCursor.clear();
@@ -1082,7 +1083,7 @@ public class Epigon extends Game {
         }
     }
 
-    public void putWithLight(int x, int y, char c, float foreground, float lightAmount, float noise) {
+    public void putWithLight(int x, int y, char c, float foreground) {
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
 //        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
@@ -1104,6 +1105,12 @@ public class Epigon extends Game {
         long time0 = Noise.longFloor(time);
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
+        if((radiance = handBuilt.playerRadiance) != null)
+        {
+            FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
+            SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+            SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+        }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if((radiance = map.contents[x][y].getAnyRadiance()) != null)
@@ -1117,7 +1124,7 @@ public class Epigon extends Game {
 
         // we can use either Noise.querp (quintic Hermite spline) or Noise.cerp (cubic Hermite splne); cerp is cheaper but querp seems to look better.
         // querp() is extremely close to cos(); see https://www.desmos.com/calculator/l31nflff3g for graphs. It is likely that querp performs better than cos.
-        float noise = Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0);
+        //float noise = Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0);
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
@@ -1126,7 +1133,7 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
-                        putWithLight(x, y, ' ', 0f, sightAmount, noise);
+                        putWithLight(x, y, ' ', 0f);
                         creature.appearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
                         if (creature.overlayAppearance != null)
                             creature.overlayAppearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
@@ -1138,7 +1145,7 @@ public class Epigon extends Game {
                         creature.wasSeen = true;
                     } else {
                         posrng.move(x, y);
-                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), sightAmount, noise);
+                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor());
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];

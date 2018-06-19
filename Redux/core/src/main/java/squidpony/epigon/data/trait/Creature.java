@@ -28,6 +28,9 @@ public class Creature {
     public OrderedSet<Physical> equippedDistinct = new OrderedSet<>(20, 0.7f);
     public ProbabilityTable<Weapon> weaponChoices;
 
+    public Weapon lastWieldedWeapon = null;
+    public Physical lastUsedItem = null;
+    
     public int skillWithWeapon(Weapon w)
     {
         int skill = 1;
