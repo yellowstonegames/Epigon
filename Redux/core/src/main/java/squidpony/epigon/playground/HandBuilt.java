@@ -50,6 +50,7 @@ public class HandBuilt {
 
 
     public Physical playerBlueprint;
+    public Radiance playerRadiance;
 
     public Recipe hatRecipe;
     public Recipe shirtRecipe;
@@ -273,7 +274,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerBlueprint.radiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), SColor.CREAM.toFloatBits(), 0.8f, 0f);
+        playerRadiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), SColor.CREAM.toFloatBits(), 0.8f, 0f);
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
 

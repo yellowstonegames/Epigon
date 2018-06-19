@@ -196,8 +196,12 @@ public class EpiTile {
     
     public Radiance getAnyRadiance()
     {
-        if(blockage != null && blockage.radiance != null)
-            return blockage.radiance;
+        if(blockage != null){
+            if(blockage.creatureData != null && blockage.creatureData.lastUsedItem != null && blockage.creatureData.lastUsedItem.radiance != null)
+                return blockage.creatureData.lastUsedItem.radiance;
+            if(blockage.radiance != null)
+                return blockage.radiance;
+        }
         if(!contents.isEmpty() && contents.get(0).radiance != null)
             return contents.get(0).radiance;
         return floor.radiance;

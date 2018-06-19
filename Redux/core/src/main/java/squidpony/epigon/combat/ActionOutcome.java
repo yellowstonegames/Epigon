@@ -30,73 +30,85 @@ public class ActionOutcome {
     {
         ArrayList<ActionOutcome> aos = new ArrayList<>(3);
         if(actor.creatureData != null) {
-            int totalWeight = 0;
+//            int totalWeight = 0;
             for (int i = 0; i < actor.creatureData.weaponChoices.table.size(); i++) {
                 ActionOutcome ao = new ActionOutcome();
                 Weapon w = actor.creatureData.weaponChoices.table.keyAt(i);
-                if(Radius.CIRCLE.radius(actor.location, target.location) > w.rawWeapon.range + 1.5)
+                if (Radius.CIRCLE.radius(actor.location, target.location) > w.rawWeapon.range + 1.5)
                     continue;
-                ao.actorWeapon = w;
-                totalWeight += actor.creatureData.weaponChoices.weight(w);
-                aos.add(ao);
-            }
-            for (int wi = 0; wi < aos.size(); wi++) {
-                ActionOutcome ao = aos.get(wi);
-                Weapon w = ao.actorWeapon;
-                int index = w.elements.table.random(actor.nextLong());
-                ao.element = w.elements.items.get(index);
-                ao.targetCondition = index < w.statuses.size() ? w.statuses.get(index) : actor.getRandomElement(w.statuses);
-                ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(actor) : target.creatureData.weaponChoices.random();
-                if(actor.nextInt(totalWeight) >= actor.creatureData.weaponChoices.weight(w))
-                    continue;
-                int actorSkill = 1, targetSkill = 1;
-                if (actor.creatureData != null) {
-                    for (int i = 0; i < w.skills.length; i++) {
-                        actorSkill += actor.creatureData.skills.getOrDefault(w.skills[i], Rating.NONE).ordinal();
-                    }
-                }
-                if (target.creatureData != null) {
-                    for (int i = 0; i < ao.targetWeapon.skills.length; i++) {
-                        targetSkill += target.creatureData.skills.getOrDefault(ao.targetWeapon.skills[i], Rating.NONE).ordinal();
-                    }
-                }
-                actor.statEffects.add(w.calcStats);
-                target.statEffects.add(ao.targetWeapon.calcStats);
-                ChangeTable.holdPhysical(actor, actor.statEffects);
-                //System.out.println("Attacker is " + actor.name + " with base stats " + actor.stats + " and adjusted stats: " + tempActorStats);
-                ChangeTable.holdPhysical(target, target.statEffects);
-                //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
-
-                ao.crit = (15 + 3 * (actor.actualStat(CalcStat.CRIT) - target.actualStat(CalcStat.STEALTH))) >= actor.nextInt(90);
-                double actorPrecision = actor.actualStat(CalcStat.PRECISION) + actorSkill,
-                        targetEvasion = target.actualStat(CalcStat.EVASION) + targetSkill;
-                ao.hit = (67 + 5 * ((ao.crit ? 10 : 0) + actorPrecision - targetEvasion)) >= actor.next(7);
-                if (ao.hit) {
-                    ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.4f - 0.5f) * ((ao.crit ? 12 : 1) +
-                            actor.actualStat(CalcStat.DAMAGE) + actorSkill)));
-                    ao.actualDamage = Math.min(0, ao.attemptedDamage -
-                            Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.3f + 0.35f) * (target.actualStat(CalcStat.DEFENSE) + targetSkill)));
-                    ao.targetConditioned = (35 + 5 * ((ao.crit ? 9 : 0) + actor.actualStat(CalcStat.INFLUENCE) + actorSkill -
-                            target.actualStat(CalcStat.LUCK) - targetSkill)) >= actor.next(8);
-                }
-                ChangeTable.releasePhysical(actor, actor.statEffects);
-                ChangeTable.releasePhysical(target, target.statEffects);
-                actor.statEffects.removeLast();
-                target.statEffects.removeLast();
-                if (ao.targetConditioned) {
-                    Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element);
-                    ChangeTable.strikePhysical(target, c.parent.changes);
-                    target.conditions.add(c);
-
-                }
+                aos.add(attack(actor, actor.creatureData.weaponChoices.random(), target));
             }
         }
+//            for (int wi = 0; wi < aos.size(); wi++) {
+//                ActionOutcome ao = aos.get(wi);
+//                Weapon w = ao.actorWeapon;
+//                int index = w.elements.table.random(actor.nextLong());
+//                ao.element = w.elements.items.get(index);
+//                ao.targetCondition = index < w.statuses.size() ? w.statuses.get(index) : actor.getRandomElement(w.statuses);
+//                ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(actor) : target.creatureData.weaponChoices.random();
+//                if(actor.nextInt(totalWeight) >= actor.creatureData.weaponChoices.weight(w))
+//                    continue;
+//                int actorSkill = 1, targetSkill = 1;
+//                if (actor.creatureData != null) {
+//                    for (int i = 0; i < w.skills.length; i++) {
+//                        actorSkill += actor.creatureData.skills.getOrDefault(w.skills[i], Rating.NONE).ordinal();
+//                    }
+//                }
+//                if (target.creatureData != null) {
+//                    for (int i = 0; i < ao.targetWeapon.skills.length; i++) {
+//                        targetSkill += target.creatureData.skills.getOrDefault(ao.targetWeapon.skills[i], Rating.NONE).ordinal();
+//                    }
+//                }
+//                actor.statEffects.add(w.calcStats);
+//                target.statEffects.add(ao.targetWeapon.calcStats);
+//                ChangeTable.holdPhysical(actor, actor.statEffects);
+//                //System.out.println("Attacker is " + actor.name + " with base stats " + actor.stats + " and adjusted stats: " + tempActorStats);
+//                ChangeTable.holdPhysical(target, target.statEffects);
+//                //System.out.println("Defender is " + target.name  + " with base stats " + target.stats + " and adjusted stats: " + tempTargetStats);
+//
+//                ao.crit = (15 + 3 * (actor.actualStat(CalcStat.CRIT) - target.actualStat(CalcStat.STEALTH))) >= actor.nextInt(90);
+//                double actorPrecision = actor.actualStat(CalcStat.PRECISION) + actorSkill,
+//                        targetEvasion = target.actualStat(CalcStat.EVASION) + targetSkill;
+//                ao.hit = (67 + 5 * ((ao.crit ? 10 : 0) + actorPrecision - targetEvasion)) >= actor.next(7);
+//                if (ao.hit) {
+//                    ao.attemptedDamage = Math.min(0, Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.4f - 0.5f) * ((ao.crit ? 12 : 1) +
+//                            actor.actualStat(CalcStat.DAMAGE) + actorSkill)));
+//                    ao.actualDamage = Math.min(0, ao.attemptedDamage -
+//                            Noise.fastFloor((NumberTools.formCurvedFloat(actor.nextLong()) * 0.3f + 0.35f) * (target.actualStat(CalcStat.DEFENSE) + targetSkill)));
+//                    ao.targetConditioned = (35 + 5 * ((ao.crit ? 9 : 0) + actor.actualStat(CalcStat.INFLUENCE) + actorSkill -
+//                            target.actualStat(CalcStat.LUCK) - targetSkill)) >= actor.next(8);
+//                }
+//                ChangeTable.releasePhysical(actor, actor.statEffects);
+//                ChangeTable.releasePhysical(target, target.statEffects);
+//                actor.statEffects.removeLast();
+//                target.statEffects.removeLast();
+//                if (ao.targetConditioned) {
+//                    Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element);
+//                    ChangeTable.strikePhysical(target, c.parent.changes);
+//                    target.conditions.add(c);
+//
+//                }
+//            }
+//        }
         return aos;
     }
     public static ActionOutcome attack(Physical actor, Weapon chosen, Physical target)
     {
         ActionOutcome ao = new ActionOutcome();
         if(actor.creatureData != null) {
+            if(chosen == null)
+                chosen = actor.creatureData.weaponChoices.table.isEmpty()
+                        ? Weapon.randomUnarmedWeapon(actor) 
+                        : actor.creatureData.weaponChoices.table.firstKey();
+            actor.creatureData.lastWieldedWeapon = chosen;
+            for (int i = 0; i < actor.creatureData.equippedDistinct.size(); i++) {
+                Physical p = actor.creatureData.equippedDistinct.getAt(i);
+                if(chosen.equals(p.weaponData))
+                {
+                    actor.creatureData.lastUsedItem = p;
+                    break;
+                }
+            }
             if (Radius.CIRCLE.radius(actor.location, target.location) > chosen.rawWeapon.range + 1.5)
                 return ao;
             ao.actorWeapon = chosen;
@@ -104,7 +116,6 @@ public class ActionOutcome {
             int index = w.elements.table.random(actor.nextLong());
             ao.element = w.elements.items.get(index);
             ao.targetCondition = index < w.statuses.size() ? w.statuses.get(index) : actor.getRandomElement(w.statuses);
-            ao.targetWeapon = target.creatureData == null ? Weapon.randomUnarmedWeapon(actor) : target.creatureData.weaponChoices.random();
             int actorSkill = 1, targetSkill = 1;
             if (actor.creatureData != null) {
                 for (int i = 0; i < w.skills.length; i++) {
@@ -112,9 +123,27 @@ public class ActionOutcome {
                 }
             }
             if (target.creatureData != null) {
+                target.creatureData.lastWieldedWeapon = ao.targetWeapon = target.creatureData.weaponChoices.table.isEmpty()
+                        ? Weapon.randomUnarmedWeapon(target)
+                        : target.creatureData.lastWieldedWeapon == null
+                        ? target.creatureData.weaponChoices.random()
+                        : target.creatureData.lastWieldedWeapon;
+                if(target.creatureData.lastUsedItem != null && ao.targetWeapon.equals(target.creatureData.lastUsedItem.weaponData)) {
+                    for (int i = 0; i < target.creatureData.equippedDistinct.size(); i++) {
+                        Physical p = target.creatureData.equippedDistinct.getAt(i);
+                        if (ao.targetWeapon.equals(p.weaponData)) {
+                            target.creatureData.lastUsedItem = p;
+                            break;
+                        }
+                    }
+                }
                 for (int i = 0; i < ao.targetWeapon.skills.length; i++) {
                     targetSkill += target.creatureData.skills.getOrDefault(ao.targetWeapon.skills[i], Rating.NONE).ordinal();
                 }
+            }
+            else
+            {
+                ao.targetWeapon = Weapon.randomUnarmedWeapon(target);
             }
             actor.statEffects.add(w.calcStats);
             target.statEffects.add(ao.targetWeapon.calcStats);
