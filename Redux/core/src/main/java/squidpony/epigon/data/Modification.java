@@ -59,9 +59,6 @@ public class Modification extends EpiData {
 
     public Boolean large;
 
-    public float lightEmitted;
-    public LiveValueModification lightEmittedStrengthChange;
-
     public List<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used
     public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
 

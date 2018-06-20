@@ -1105,16 +1105,14 @@ public class Epigon extends Game {
         long time0 = Noise.longFloor(time);
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        if((radiance = handBuilt.playerRadiance) != null)
-        {
+        if ((radiance = handBuilt.playerRadiance) != null) {
             FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
             SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
             SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
         }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if((radiance = map.contents[x][y].getAnyRadiance()) != null)
-                {
+                if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
@@ -1160,17 +1158,19 @@ public class Epigon extends Game {
         mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
-        for (int i = 0; i < toCursor.size(); i++) {
-            Coord c = toCursor.get(i);
-            Direction dir;
-            if (i == toCursor.size() - 1) {
-                dir = Direction.NONE; // last spot shouldn't have arrow
-            } else if (i == 0) {
-                dir = Direction.toGoTo(player.location, c);
-            } else {
-                dir = Direction.toGoTo(toCursor.get(i - 1), c);
+        if (!showingMenu) {
+            for (int i = 0; i < toCursor.size(); i++) {
+                Coord c = toCursor.get(i);
+                Direction dir;
+                if (i == toCursor.size() - 1) {
+                    dir = Direction.NONE; // last spot shouldn't have arrow
+                } else if (i == 0) {
+                    dir = Direction.toGoTo(player.location, c);
+                } else {
+                    dir = Direction.toGoTo(toCursor.get(i - 1), c);
+                }
+                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE, null, 2);
             }
-            mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE, null, 2);
         }
     }
 
@@ -1445,13 +1445,13 @@ public class Epigon extends Game {
                     break;
                 case MOVE_LOWER:
                     // up '≤', down '≥'
-                    if(map.contents[player.location.x][player.location.y].getSymbol() == '≥')
+                    if(map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≥')
                         changeLevel(++depth);
                     //prepFall();
                     break;
                 case MOVE_HIGHER:
                     // up '≤', down '≥'
-                    if(map.contents[player.location.x][player.location.y].getSymbol() == '≤')
+                    if(map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≤')
                         changeLevel(--depth);
                     break;
                 case OPEN: // Open all the doors nearby
