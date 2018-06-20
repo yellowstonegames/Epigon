@@ -255,10 +255,13 @@ public class RecipeMixer {
     public static Physical buildPhysical(Physical blueprint, Rating rarity, boolean applyRatingModifications){
         if (blueprint.generic) {
             // TODO - figure out how to allow sub instances of generics to be used without using generics
+            // Maybe we need an exorcist.
+            // "May my steel steal Guy Steele's power and constrain your generics back to the Turing Tarpit of Hell!"
         }
 
         if (blueprint.unique) {
             // TODO - check for whether one has been created
+            // also needs a definition of what makes two items different; you could create
         }
 
         Physical physical = new Physical();
@@ -287,10 +290,7 @@ public class RecipeMixer {
             physical.radiance = new Radiance(blueprint.radiance);
         physical.baseValue = blueprint.baseValue;
         physical.blocking = blueprint.blocking;
-
-        physical.lightEmitted = blueprint.lightEmitted;
-        physical.lightEmittedStrength = blueprint.lightEmittedStrength;
-
+        
         physical.whenUsedAsMaterial.addAll(blueprint.whenUsedAsMaterial);
 
         physical.elementalDamageMultiplier = new OrderedMap<>(blueprint.elementalDamageMultiplier);
@@ -550,15 +550,7 @@ public class RecipeMixer {
         if (modification.large != null) {
             physical.blocking = modification.large;
         }
-
-        if (modification.lightEmitted != 0f) {
-            physical.lightEmitted = modification.lightEmitted;
-        }
-
-        if (modification.lightEmittedStrengthChange != null) {
-            physical.lightEmittedStrength.modify(modification.lightEmittedStrengthChange);
-        }
-
+        
         if (modification.whenUsedAsMaterial != null) {
             physical.whenUsedAsMaterial = new ArrayList<>(modification.whenUsedAsMaterial);
         }

@@ -2,7 +2,6 @@ package squidpony.epigon.data;
 
 import squidpony.StringKit;
 import squidpony.squidmath.AbstractRNG;
-import squidpony.squidmath.LinnormRNG;
 import squidpony.squidmath.StatefulRNG;
 
 import java.io.Serializable;
@@ -11,6 +10,20 @@ import static squidpony.epigon.Epigon.rootChaos;
 
 /**
  * Data class for information shared by all data objects.
+ * <br>
+ * Every EpiData has a unique int in a field called {@link #idHash}. Unless more than 2 to the 32 EpiData are created,
+ * which is basically impossible due to memory constraints unless some EpiData values are constantly created and
+ * destroyed, this number will never repeat. This may be useful for some purposes; it is used as a more-controlled
+ * identity hash in the {@link #hashCode()} implementation here. Subclasses that want to compare EpiData by value should
+ * not call {@code super.equals()} or {@code super.hashCode()} but may compare and hash {@link #name} and/or
+ * {@link #description}.
+ * <br>
+ * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
+ * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
+ * algorithm this uses is "QuixoticRNG" from tommyettinger's Sarong project, which may go into SquidLib if it passes
+ * 32TB of tests (it has already passed 16TB with no failures). QuixoticRNG is really really fast, uses only one long of
+ * state, and seems rather solid on the tests that have been run (two "unusual" anomalies, both barely considered
+ * significant enough to note, and no anomalies after 64GB).
  */
 public abstract class EpiData extends AbstractRNG implements Serializable {
 
@@ -43,8 +56,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int next(int bits) {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
+        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
         return (int)(z ^ z >>> 25) >>> (32 - bits);
     }
 
@@ -55,8 +68,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int nextInt() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
+        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
         return (int)(z ^ z >>> 25);
     }
 
@@ -67,8 +80,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final long nextLong() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
+        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
         return (z ^ z >>> 25);
     }
 
@@ -78,24 +91,19 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final boolean nextBoolean() {
-        final long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L) < 0;
+        return  (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL) < 0;
     }
 
     /**
      * Gets a random double between 0.0 inclusive and 1.0 exclusive.
      * This returns a maximum of 0.9999999999999999 because that is the largest double value that is less than 1.0 .
-     * <br>
-     * This is abstract because some generators may natively work with double or float values, but others may need to
-     * convert a long to a double as with {@code (nextLong() & 0x1fffffffffffffL) * 0x1p-53}, which is recommended if
-     * longs are fast to produce.
      *
      * @return a double between 0.0 (inclusive) and 0.9999999999999999 (inclusive)
      */
     @Override
     public final double nextDouble() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
+        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
         return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
     }
 
@@ -106,21 +114,18 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final float nextFloat() {
-        final long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
+        return ((z ^ z >>> 27) + 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }
 
     /**
-     * Creates a copy of this IRNG; it will generate the same random numbers, given the same calls in order, as this
-     * IRNG at the point copy() is called. The copy will not share references with this IRNG. If this IRNG does not
-     * permit copying itself, it is suggested to either throw an {@link UnsupportedOperationException} or return a new
-     * IRNG of the same type but with a random seed, with the latter meant as a partial defense against cheating.
-     *
-     * @return a copy of this IRNG
+     * This can't copy itself because EpiData is abstract, so it returns a StatefulRNG with {@link #chaos} as its seed
+     * instead. This makes it stay an IRNG, but not an EpiData, and it won't use the same random number generation
+     * algorithm, either.
      */
     @Override
     public StatefulRNG copy() {
-        return new StatefulRNG(new LinnormRNG(chaos));
+        return new StatefulRNG(chaos);
     }
 
     /**

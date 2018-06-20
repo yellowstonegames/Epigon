@@ -60,9 +60,6 @@ public class Physical extends EpiData {
 
     public double baseValue;
     public boolean blocking;
-
-    public float lightEmitted;
-    public LiveValue lightEmittedStrength;
     
     public List<Modification> whenUsedAsMaterial = new ArrayList<>();
     public List<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
@@ -464,62 +461,104 @@ public class Physical extends EpiData {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 59 * hash + (this.generic ? 1 : 0);
-        hash = 59 * hash + (this.unique ? 1 : 0);
-        hash = 59 * hash + (this.buildingBlock ? 1 : 0);
-        hash = 59 * hash + this.symbol;
-        hash = 59 * hash + Float.floatToIntBits(this.color);
-        hash = 59 * hash + (int) (Double.doubleToLongBits(this.baseValue) ^ (Double.doubleToLongBits(this.baseValue) >>> 32));
-        hash = 59 * hash + (this.blocking ? 1 : 0);
-        hash = 59 * hash + Float.floatToIntBits(this.lightEmitted);
-        hash = 59 * hash + Objects.hashCode(this.rarity);
-        return hash;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Physical physical = (Physical) o;
+        if (name != null ? !name.equals(physical.name) : physical.name != null) return false;
+        if (description != null ? !description.equals(physical.description) : physical.description != null) return false;
+        if (attached != physical.attached) return false;
+        if (symbol != physical.symbol) return false;
+        if (overlaySymbol != physical.overlaySymbol) return false;
+        if (Float.compare(physical.color, color) != 0) return false;
+        if (Float.compare(physical.overlayColor, overlayColor) != 0) return false;
+        if (generic != physical.generic) return false;
+        if (unique != physical.unique) return false;
+        if (buildingBlock != physical.buildingBlock) return false;
+        if (Double.compare(physical.baseValue, baseValue) != 0) return false;
+        if (blocking != physical.blocking) return false;
+        if (radiance != null ? !radiance.equals(physical.radiance) : physical.radiance != null) return false;
+        if (parent != null ? !parent.equals(physical.parent) : physical.parent != null) return false;
+        if (possibleAliases != null ? !possibleAliases.equals(physical.possibleAliases) : physical.possibleAliases != null)
+            return false;
+        if (modifications != null ? !modifications.equals(physical.modifications) : physical.modifications != null)
+            return false;
+        if (elementalDamageMultiplier != null ? !elementalDamageMultiplier.equals(physical.elementalDamageMultiplier) : physical.elementalDamageMultiplier != null)
+            return false;
+        if (inventory != null ? !inventory.equals(physical.inventory) : physical.inventory != null) return false;
+        if (optionalInventory != null ? !optionalInventory.equals(physical.optionalInventory) : physical.optionalInventory != null)
+            return false;
+        if (physicalDrops != null ? !physicalDrops.equals(physical.physicalDrops) : physical.physicalDrops != null)
+            return false;
+        if (elementDrops != null ? !elementDrops.equals(physical.elementDrops) : physical.elementDrops != null)
+            return false;
+        if (rarity != physical.rarity) return false;
+        if (rarityModifications != null ? !rarityModifications.equals(physical.rarityModifications) : physical.rarityModifications != null)
+            return false;
+        if (creatureData != null ? !creatureData.equals(physical.creatureData) : physical.creatureData != null)
+            return false;
+        if (mainMaterial != null ? !mainMaterial.equals(physical.mainMaterial) : physical.mainMaterial != null)
+            return false;
+        if (ammunitionData != null ? !ammunitionData.equals(physical.ammunitionData) : physical.ammunitionData != null)
+            return false;
+        if (containerData != null ? !containerData.equals(physical.containerData) : physical.containerData != null)
+            return false;
+        if (groupingData != null ? !groupingData.equals(physical.groupingData) : physical.groupingData != null)
+            return false;
+        if (interactableData != null ? !interactableData.equals(physical.interactableData) : physical.interactableData != null)
+            return false;
+        if (liquidData != null ? !liquidData.equals(physical.liquidData) : physical.liquidData != null) return false;
+        if (legibleData != null ? !legibleData.equals(physical.legibleData) : physical.legibleData != null)
+            return false;
+        if (wearableData != null ? !wearableData.equals(physical.wearableData) : physical.wearableData != null)
+            return false;
+        if (weaponData != null ? !weaponData.equals(physical.weaponData) : physical.weaponData != null) return false;
+        if (zappableData != null ? !zappableData.equals(physical.zappableData) : physical.zappableData != null)
+            return false;
+        return terrainData != null ? terrainData.equals(physical.terrainData) : physical.terrainData == null;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this == obj) {
-            return true;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Physical other = (Physical) obj;
-        if (this.generic != other.generic) {
-            return false;
-        }
-        if (this.unique != other.unique) {
-            return false;
-        }
-        if (this.buildingBlock != other.buildingBlock) {
-            return false;
-        }
-        if (this.symbol != other.symbol) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.color) != Float.floatToIntBits(other.color)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.baseValue) != Double.doubleToLongBits(other.baseValue)) {
-            return false;
-        }
-        if (this.blocking != other.blocking) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.lightEmitted) != Float.floatToIntBits(other.lightEmitted)) {
-            return false;
-        }
-        if (this.rarity != other.rarity) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        int result = 31 * CrossHash.hash(name) + CrossHash.hash(description);
+        long temp;
+        result = 31 * result + (attached ? 1 : 0);
+        result = 31 * result + (int) symbol;
+        result = 31 * result + (int) overlaySymbol;
+        result = 31 * result + (color != +0.0f ? Float.floatToIntBits(color) : 0);
+        result = 31 * result + (overlayColor != +0.0f ? Float.floatToIntBits(overlayColor) : 0);
+        result = 31 * result + (radiance != null ? radiance.hashCode() : 0);
+        result = 31 * result + (parent != null ? parent.hashCode() : 0);
+        result = 31 * result + (generic ? 1 : 0);
+        result = 31 * result + (unique ? 1 : 0);
+        result = 31 * result + (buildingBlock ? 1 : 0);
+        result = 31 * result + (possibleAliases != null ? possibleAliases.hashCode() : 0);
+        temp = Double.doubleToLongBits(baseValue);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (blocking ? 1 : 0);
+        result = 31 * result + (modifications != null ? modifications.hashCode() : 0);
+        result = 31 * result + (elementalDamageMultiplier != null ? elementalDamageMultiplier.hashCode() : 0);
+        result = 31 * result + (inventory != null ? inventory.hashCode() : 0);
+        result = 31 * result + (optionalInventory != null ? optionalInventory.hashCode() : 0);
+        result = 31 * result + (physicalDrops != null ? physicalDrops.hashCode() : 0);
+        result = 31 * result + (elementDrops != null ? elementDrops.hashCode() : 0);
+        result = 31 * result + (rarity != null ? rarity.hashCode() : 0);
+        result = 31 * result + (rarityModifications != null ? rarityModifications.hashCode() : 0);
+        result = 31 * result + (creatureData != null ? creatureData.hashCode() : 0);
+        result = 31 * result + (mainMaterial != null ? mainMaterial.hashCode() : 0);
+        result = 31 * result + (ammunitionData != null ? ammunitionData.hashCode() : 0);
+        result = 31 * result + (containerData != null ? containerData.hashCode() : 0);
+        result = 31 * result + (groupingData != null ? groupingData.hashCode() : 0);
+        result = 31 * result + (interactableData != null ? interactableData.hashCode() : 0);
+        result = 31 * result + (liquidData != null ? liquidData.hashCode() : 0);
+        result = 31 * result + (legibleData != null ? legibleData.hashCode() : 0);
+        result = 31 * result + (wearableData != null ? wearableData.hashCode() : 0);
+        result = 31 * result + (weaponData != null ? weaponData.hashCode() : 0);
+        result = 31 * result + (zappableData != null ? zappableData.hashCode() : 0);
+        result = 31 * result + (terrainData != null ? terrainData.hashCode() : 0);
+        return result;
     }
-
 
     public String disarm() {
         if (creatureData == null) {
