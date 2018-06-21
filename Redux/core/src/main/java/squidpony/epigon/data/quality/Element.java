@@ -21,13 +21,13 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     NATURE(null, "natural", "roar$", SColor.FOREST_GREEN, 0.1f, 0f),
     EARTH(NATURE, "earthen", "bur$$$", SColor.SLATE_GRAY, 0f, 0f),
     CRYSTAL(EARTH, "crystalline", "slice$", new Color(0xE0FFFF99), 0f, 0f),
-    FIRE(NATURE, "fiery", "burn$", SColor.ORANGE_PEEL, 1.1f, 0f),
+    FIRE(NATURE, "fiery", "burn$", SColor.ORANGE_PEEL, 0.8f, 0f),
     //MAGMA(FIRE, "magma", "melt$", SColor.CW_BRIGHT_ORANGE), // removed because it seems to overlap with fire heavily
-    AIR(NATURE, "airy", "toss$$", SColor.BRIGHT_TURQUOISE, 1f, 0f),
+    AIR(NATURE, "airy", "toss$$", SColor.BRIGHT_TURQUOISE, 0.85f, 0f),
     SOUND(NATURE, "sonic", "deafen$", new Color(0xE3D7B455), 0f, 1.8f),
     WATER(NATURE, "watery", "flood$", SColor.CW_FLUSH_AZURE, 0f, 0.5f),
     ICE(WATER, "icy", "freeze$", SColor.CW_PALE_AZURE, 0f, 0.1f),
-    LIGHTNING(NATURE, "stormy", "shock$", SColor.CW_LIGHT_VIOLET, 1.2f, 0f),
+    LIGHTNING(NATURE, "stormy", "shock$", SColor.CW_LIGHT_VIOLET, 0.925f, 0f),
     POISON(NATURE, "poisonous", "poison$", SColor.PEAR, 0f, 0f),
     ACID(POISON, "acidic", "mar$", SColor.CW_BRIGHT_LIME, 0.5f, 0f),
     CAUSTIC(POISON, "caustic", "bleach$$", SColor.CW_SEAFOAM, 0.2f, 0f),
@@ -46,7 +46,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     CHANNELING(MAGIC, "channeling", "channel$", SColor.INTERNATIONAL_KLEIN_BLUE),
     // may want magic based on authority/bond-of-word/pacts, to fit the theme of a relative of royalty
     CONTRACTUAL(CHANNELING, "contractual", "bind$", SColor.STEEL_BLUE, 0f, 0f), // pact magic or magic that damages based on some powerful authority
-    SINISTER(CHANNELING, "sinister", "hex$$", SColor.BURGUNDY, 0.9f, 0f), // stealing power from gods and/or demons and diverting the punishment to others
+    SINISTER(CHANNELING, "sinister", "hex$$", SColor.BURGUNDY, 0.7f, 0f), // stealing power from gods and/or demons and diverting the punishment to others
     DIVINE(CHANNELING, "divine", "judge$", SColor.LEMON_CHIFFON, 0f, 0.9f), // faith-based power granted by gods to their followers
     // Physical
     PHYSICAL(null, "physical", "manipulate$", SColor.CW_DRAB_AZURE), // more sci-fi elements that most people don't understand like NATURAL ones
@@ -63,7 +63,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     PLANETARY(COSMIC, "planetary", "madden$", SColor.CW_FADED_APRICOT), // Knowledge of other planets and being able to mimic their conditions here
     METEORIC(COSMIC, "meteoric", "madden$", SColor.BRIGHT_GOLDEN_YELLOW), // Meteors are space debris that falls to ground, this moves them to attack enemies
     // Misc
-    LIGHT(null, "light", "illuminate$", SColor.ALICE_BLUE, 0.7f, 0f); //Basic lighting, not related to magical or other effects.
+    LIGHT(null, "light", "illuminate$", SColor.ALICE_BLUE, 0.5f, 0f); //Basic lighting, not related to magical or other effects.
 
     public static final Element[] allMundane = {BLUNT, PIERCING, SLASHING},
     allNatural = {EARTH, CRYSTAL, FIRE, AIR, SOUND, WATER, ICE, LIGHTNING, POISON, ACID, CAUSTIC, DISEASE},
@@ -143,7 +143,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
             mod.color = mod.color.cpy().lerp(color, 0.5f);
         else
             mod.color = color;
-        mod.radiance = new Radiance(2.5f,  SColor.toEditedFloat(floatColor, 0f, -0.1f, 0.3f, -0.2f), flicker, strobe);
+        mod.radiance = new Radiance(3.4f, SColor.toEditedFloat(floatColor, 0f, -0.1f, 0.3f, -0.2f), flicker, strobe);
         return mod;
     }
 }
