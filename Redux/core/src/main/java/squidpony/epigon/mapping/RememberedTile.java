@@ -32,9 +32,9 @@ public class RememberedTile {
         front = front == 0f ? 0f :
                 tile.contents.isEmpty()
                         ? SColor.floatGetHSV(0, 0, SColor.valueOfFloat(front), 1f)
-                        : SColor.lerpFloatColors(front, memoryColorFloat, frontFade);
+                        : SColor.lerpFloatColorsBlended(front, memoryColorFloat, frontFade);
         back = tile.getBackgroundColor();
-        back = back == 0f ? 0f : SColor.lerpFloatColors(back, memoryColorFloat, backFade);
+        back = back == 0f ? 0f : SColor.translucentColor(memoryColorFloat, backFade);
 //        if 
 //                (tile.getCreature() != null){
 //            miniMapColor = SColor.SCARLET.toFloatBits();

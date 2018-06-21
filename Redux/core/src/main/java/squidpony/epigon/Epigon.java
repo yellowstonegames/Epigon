@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static squidpony.epigon.data.Physical.*;
-import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColors;
+import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -713,6 +713,51 @@ public class Epigon extends Game {
         }
          */
     }
+    /**
+     * Adds two 3D arrays produced by {@link SColor#colorLighting(double[][], float)} or this method and modifies the basis
+     * parameter so it contains the combined brightnesses and colors of basis and other, in a pair of 2D arrays.
+     * Modified to use {@link SColor#lerpFloatColorsBlended(float, float, float)} instead of
+     * {@link SColor#lerpFloatColors(float, float, float)}.
+     * 
+     *
+     * @param basis a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
+     *              will be modified to contain its existing contents mixed with other's contents 
+     * @param other a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
+     *              will not be modified
+     * @return basis, after modification; it can be passed to this method as basis again
+     */
+    public static float[][][] mixColoredLighting(float[][][] basis, float[][][] other) {
+        int w = basis[0].length, h = basis[0][0].length, w2 = other[0].length, h2 = other[0][0].length;
+        for (int x = 0; x < w && x < w2; x++) {
+            for (int y = 0; y < h && y < h2; y++) {
+                if(basis[1][x][y] == FLOAT_WHITE)
+                {
+                    basis[1][x][y] = other[1][x][y];
+                    basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y]);
+                }
+                else
+                {
+                    if(other[1][x][y] != FLOAT_WHITE)
+                    {
+                        float change = (other[0][x][y] - basis[0][x][y]) * 0.5f + 0.5f;
+                        final int s = NumberTools.floatToIntBits(basis[1][x][y]), e = NumberTools.floatToIntBits(other[1][x][y]),
+                                rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
+                                re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
+                        change *= ae * 0.007874016f;
+                        basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
+                                | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
+                                | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
+                                | as);
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change);
+                    }
+                    else
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y]);
+                }
+                
+            }
+        }
+        return basis;
+    }
 
     private void calcFOV(int checkX, int checkY) {
         FOV.reuseLOS(map.opacities(), map.losResult, checkX, checkY);
@@ -725,7 +770,7 @@ public class Epigon extends Game {
                 {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting);
                 }
             }
         }
@@ -1094,7 +1139,8 @@ public class Epigon extends Game {
         //float back = lightLevels[n]; // background gets both lit and faded to memory
         //mapSLayers.put(x, y, c, front, back); // "light" theme
         //mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
-        mapSLayers.put(x, y, c, lerpFloatColors(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
+        //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
     }
 
     /**
@@ -1108,14 +1154,14 @@ public class Epigon extends Game {
         if ((radiance = handBuilt.playerRadiance) != null) {
             FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
             SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-            SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+            mixColoredLighting(map.colorLighting, map.tempColorLighting);
         }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting);
                 }
             }
         }
@@ -1132,9 +1178,9 @@ public class Epigon extends Game {
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         putWithLight(x, y, ' ', 0f);
-                        creature.appearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
+                        creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
                         if (creature.overlayAppearance != null)
-                            creature.overlayAppearance.setPackedColor(lerpFloatColors(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
+                            creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();

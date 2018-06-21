@@ -137,14 +137,14 @@ public class EpiTile {
         //check in order of preference
         if (blockage != null) {
             if (blockage.creatureData != null) {
-                return SColor.lerpFloatColors(getCreature().color, tintColor, tintAmount);
+                return SColor.lerpFloatColorsBlended(getCreature().color, tintColor, tintAmount);
             } else {
-                return SColor.lerpFloatColors(blockage.color, tintColor, tintAmount);
+                return SColor.lerpFloatColorsBlended(blockage.color, tintColor, tintAmount);
             }
         } else if (!contents.isEmpty()) {
             return contents.get(0).color; // arbitrarily get first thing in list
         } else if (floor != null) {
-            return SColor.lerpFloatColors(floor.color, tintColor, tintAmount);
+            return SColor.lerpFloatColorsBlended(floor.color, tintColor, tintAmount);
         }
 
         return 0f;

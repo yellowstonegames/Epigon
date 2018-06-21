@@ -56,8 +56,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int next(int bits) {
-        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
-        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL);
+        z = (z ^ z >>> 27) + 0x9E3779B97F4A7C15L;
         return (int)(z ^ z >>> 25) >>> (32 - bits);
     }
 
@@ -68,8 +68,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int nextInt() {
-        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
-        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL);
+        z = (z ^ z >>> 27) + 0x9E3779B97F4A7C15L;
         return (int)(z ^ z >>> 25);
     }
 
@@ -80,8 +80,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final long nextLong() {
-        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
-        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL);
+        z = (z ^ z >>> 27) + 0x9E3779B97F4A7C15L;
         return (z ^ z >>> 25);
     }
 
@@ -91,7 +91,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final boolean nextBoolean() {
-        return  (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL) < 0;
+        return  (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL) < 0;
     }
 
     /**
@@ -102,8 +102,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final double nextDouble() {
-        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
-        z = (z ^ z >>> 27) + 0xAEF17502108EF2D9L;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL);
+        z = (z ^ z >>> 27) + 0x9E3779B97F4A7C15L;
         return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
     }
 
@@ -114,8 +114,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final float nextFloat() {
-        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x41C64E6BL);
-        return ((z ^ z >>> 27) + 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
+        long z = (chaos = (chaos ^ 0x6C8E9CF570932BD5L) * 0x42042E4DD58BL);
+        return ((z ^ z >>> 27) + 0x9E3779B97F4A7C15L >>> 40) * 0x1p-24f;
     }
 
     /**
