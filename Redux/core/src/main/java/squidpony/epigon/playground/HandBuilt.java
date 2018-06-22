@@ -11,6 +11,7 @@ import squidpony.epigon.data.RecipeBlueprint;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.Creature;
+import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.data.trait.Profession;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -144,7 +145,8 @@ public class HandBuilt {
         money.color = SColor.CW_GOLD.toFloatBits();
         money.symbol = '$';
         money.blocking = false;
-
+        money.groupingData = new Grouping(1);
+        
         baseFood = new Physical();
         baseFood.name = "fūd";
         baseFood.description = "base food item";

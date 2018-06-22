@@ -242,7 +242,10 @@ public class FallingHandler {
                     update();
                     return;
                 }
-                player.addToInventory(p);
+                if(p.groupingData != null && player.inventory.contains(p))
+                    p.groupingData.quantity++;
+                else 
+                    player.addToInventory(p);
                 fx.twinkle(Coord.get(target.x, currentDepth + target.y), Element.FIRE);// have to have it lower due to border offset
                 li.remove();
             }
