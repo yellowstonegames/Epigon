@@ -1,6 +1,7 @@
 package squidpony.epigon.playground;
 
 import squidpony.Maker;
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.Radiance;
@@ -204,9 +205,9 @@ public class HandBuilt {
         chef = new Profession();
         chef.name = "chef";
         chef.titlePrefix = "Chef";
-        chef.initialStatRequirements.put(Stat.AIM, 1.0);
-        chef.initialStatRequirements.put(Stat.CREATIVITY, 2.0);
-        chef.initialStatRequirements.put(Stat.IMPACT, 1.0);
+        chef.initialStatRequirements.put(CalcStat.PRECISION, 1.0);
+        chef.initialStatRequirements.put(CalcStat.INFLUENCE, 2.0);
+        chef.initialStatRequirements.put(CalcStat.QUICKNESS, 1.0);
         chef.initialSkillRequirements.put(Skill.COOKING, Rating.SLIGHT);
 
         Modification mod = new Modification();
@@ -245,31 +246,31 @@ public class HandBuilt {
         playerBlueprint.possibleAliases = Maker.makeList("Mario", "Link", "Sam");
 
         Rating[] ratingChoices = new Rating[]{Rating.SLIGHT, Rating.TYPICAL, Rating.GOOD, Rating.HIGH};
-        for (Stat s : Stat.bases) {
+        for (ConstantKey s : CalcStat.all) {
             Rating rating = rng.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel(rng));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        for (Stat s : Stat.healths) {
+        for (ConstantKey s : Stat.healths) {
             Rating rating = rng.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        for (Stat s : Stat.needs) {
+        for (ConstantKey s : Stat.needs) {
             Rating rating = rng.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.needForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        for (Stat s : Stat.senses) {
+        for (ConstantKey s : Stat.senses) {
             Rating rating = Rating.NONE;
             LiveValue lv = new LiveValue(9);
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
-        for (Stat s : Stat.utilities) {
+        for (ConstantKey s : Stat.utilities) {
             Rating rating = rng.getRandomElement(ratingChoices);
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
@@ -305,7 +306,7 @@ public class HandBuilt {
         }
 
         // make sure the player has prereqs for chef
-        for (Entry<Stat, Double> entry : chef.initialStatRequirements.entrySet()) {
+        for (Entry<ConstantKey, Double> entry : chef.initialStatRequirements.entrySet()) {
             if (playerBlueprint.stats.get(entry.getKey()).base() < entry.getValue()) {
                 playerBlueprint.stats.get(entry.getKey()).base(entry.getValue());
             }
@@ -442,11 +443,11 @@ public class HandBuilt {
         liven.symbol = ((char)('s' | Epigon.BOLD | Epigon.ITALIC));
         liven.large = true;
 
-        for(Stat s : Stat.bases) {
+        for(ConstantKey s : CalcStat.all) {
             LiveValueModification lvm = new LiveValueModification((rng.next(2) + rng.next(2) + rng.next(1)) + 2); // 0-3 + 0-3 + 0-1 == 0-7 biased centrally
             liven.statChanges.put(s, lvm);
         }
-        for(Stat s : Stat.healths) {
+        for(ConstantKey s : Stat.healths) {
             LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 8 + 20); // 12 to 28, biased on 20
             liven.statChanges.put(s, lvm);
         }

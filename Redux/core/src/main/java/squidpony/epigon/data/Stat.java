@@ -3,6 +3,8 @@ package squidpony.epigon.data;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 
+import static squidpony.epigon.data.CalcStat.*;
+
 /**
  * Represents all of the possible base stats.
  *
@@ -63,17 +65,17 @@ public enum Stat implements ConstantKey {
     OPACITY("OP", "How much light is blocked."),
     STRUCTURE("ST", "How much of itself there is. When this is zero the object no longer exists.");
 
-    public static final Stat[] physicals = {AIM, IMPACT, DODGE, TOUGHNESS};
+//    public static final Stat[] physicals = {AIM, IMPACT, DODGE, TOUGHNESS};
+//
+//    public static final Stat[] magicals = {POTENCY, ATTUNEMENT};
+//
+//    public static final Stat[] intellects = {CREATIVITY, KNOWLEDGE};
+//
+//    public static final Stat[] socials = {APPEARANCE, DEVOTION, AUTHORITY};
 
-    public static final Stat[] magicals = {POTENCY, ATTUNEMENT};
+//    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, CREATIVITY, KNOWLEDGE, APPEARANCE, DEVOTION, AUTHORITY};
 
-    public static final Stat[] intellects = {CREATIVITY, KNOWLEDGE};
-
-    public static final Stat[] socials = {APPEARANCE, DEVOTION, AUTHORITY};
-
-    public static final Stat[] bases = {AIM, IMPACT, DODGE, TOUGHNESS, POTENCY, ATTUNEMENT, CREATIVITY, KNOWLEDGE, APPEARANCE, DEVOTION, AUTHORITY};
-
-    public static final Stat[] oldHealths = {VIGOR, ENDURANCE, SPIRIT, INTELLECT, CHARM, SANITY};
+//    public static final Stat[] oldHealths = {VIGOR, ENDURANCE, SPIRIT, INTELLECT, CHARM, SANITY};
 
     public static final Stat[] healths = {VIGOR, ENDURANCE, SPIRIT, SANITY};
 
@@ -84,6 +86,9 @@ public enum Stat implements ConstantKey {
     public static final Stat[] utilities = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
 
     public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, /*CHARM, INTELLECT,*/ SPIRIT, ENDURANCE};
+
+    public static final ConstantKey[] allStats = {PRECISION, DAMAGE, INFLUENCE, CRIT, EVASION, DEFENSE,
+            LUCK, STEALTH, QUICKNESS, RANGE, AREA, VIGOR, ENDURANCE, SPIRIT, SANITY};
 
     private final String nick;
     private final String description;
