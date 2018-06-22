@@ -5,6 +5,7 @@ import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
+import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonGenerator;
@@ -24,7 +25,6 @@ public class WorldGenerator {
     private EpiMap[] world;
     private int width, height, depth;
     private HandBuilt handBuilt;
-    private RecipeMixer mixer;
     private StatefulRNG rng;
     private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
@@ -55,7 +55,7 @@ public class WorldGenerator {
                         break;
                     case '$':
                         map.contents[x][y].floor = handBuilt.emptySpace;
-                        map.contents[x][y].add(RecipeMixer.buildPhysical(handBuilt.money));
+                        map.contents[x][y].add(handBuilt.money);
                         break;
                     default:
                         Physical p = new Physical();
@@ -99,6 +99,7 @@ public class WorldGenerator {
         for (int i = 0; i < inclusions.length; i++){
             Physical gem = RecipeMixer.buildPhysical(inclusions[i]);
             gem.symbol = '♦';
+            gem.groupingData = new Grouping(1);
             contents[i] = gem;
             weights[i] = rng.between(1.0, 3.0);
         }
@@ -108,7 +109,7 @@ public class WorldGenerator {
 
         for (Coord cash : safeSpots) {
             if(map.contents[cash.x][cash.y].blockage == null) 
-                map.contents[cash.x][cash.y].add(RecipeMixer.buildPhysical(table.random()));
+                map.contents[cash.x][cash.y].add(table.random());
         }
 
         // Close off bottom with "goal"
@@ -134,7 +135,6 @@ public class WorldGenerator {
         this.height = height;
         this.depth = depth;
         this.handBuilt = handBuilt;
-        mixer = handBuilt.mixer;
         rng = handBuilt.rng.copy();
         rng.setState(1000L);
         world = new EpiMap[depth];

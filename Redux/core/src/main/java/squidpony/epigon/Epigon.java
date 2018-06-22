@@ -163,7 +163,7 @@ public class Epigon extends Game {
     static {
         worldWidth = 60;
         worldHeight = 60;
-        worldDepth = 300;
+        worldDepth = 100;
         totalDepth = worldDepth + World.DIVE_HEADER.length;
         int bigW = World.DIVE_HEADER[0].length() + 2;
         int bigH = 26;
@@ -1236,7 +1236,14 @@ public class Epigon extends Game {
     public void showFallingWin() {
         message("You have reached the Dragon's Hoard!");
         message("On the way, you gathered:");
-        List<String> lines = StringKit.wrap(StringKit.join(", ", player.inventory), messageSize.gridWidth - 2);
+        
+        StringBuilder sb = new StringBuilder(100);
+        for(Physical item : player.inventory)
+        {
+            sb.append(item.groupingData != null && item.groupingData.quantity > 1 ? item.toString() + " x" + item.groupingData.quantity : item.toString()).append(", ");
+        }
+        sb.setLength(sb.length() - 2);
+        List<String> lines = StringKit.wrap(sb, messageSize.gridWidth - 2);
         int start;
         for (start = 0; start < lines.size() && start < 4; start++) {
             message(lines.get(start));
@@ -1289,7 +1296,7 @@ public class Epigon extends Game {
                     }
                     infoHandler.updateDisplay();
 
-                    for (Stat s : Stat.values()) {
+                    for (Stat s : Stat.healths) {
                         if (player.stats.get(s).actual() <= 0) {
                             paused = true;
                             showFallingGameOver();
@@ -1493,7 +1500,6 @@ public class Epigon extends Game {
                     // up '≤', down '≥'
                     if(map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≥')
                         changeLevel(++depth);
-                    //prepFall();
                     break;
                 case MOVE_HIGHER:
                     // up '≤', down '≥'
@@ -1594,6 +1600,9 @@ public class Epigon extends Game {
                     return;
                 case WAIT:
                     scheduleMove(Direction.NONE);
+                    break;
+                case REST:
+                    prepFall();
                     break;
                 default:
                     //message("Can't " + verb.name + " from main view.");
