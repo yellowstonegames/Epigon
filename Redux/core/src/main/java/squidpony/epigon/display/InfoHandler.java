@@ -255,7 +255,7 @@ public class InfoHandler {
             return;
         }
         int offset = 1;
-        showStats(offset, Stat.values(), physical);
+        showStats(offset, Stat.allStats, physical);
     }
 
     private void infoHealthAndArmor(Physical physical) {
@@ -349,9 +349,9 @@ public class InfoHandler {
         }
     }
 
-    private void showStats(int offset, Stat[] stats, Physical physical) {
+    private void showStats(int offset, ConstantKey[] stats, Physical physical) {
         double biggest = 0;
-        for (Stat s : stats) {
+        for (ConstantKey s : stats) {
             LiveValue lv = physical.stats.get(s);
             if (lv != null) {
                 biggest = Math.max(biggest, Math.max(lv.base(), lv.actual()));

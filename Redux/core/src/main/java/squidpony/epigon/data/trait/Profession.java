@@ -1,10 +1,10 @@
 package squidpony.epigon.data.trait;
 
+import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.Modification;
-import squidpony.epigon.data.Skill;
 import squidpony.epigon.data.Rating;
-import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.Skill;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.OrderedMap;
 
@@ -25,7 +25,8 @@ public class Profession extends EpiData {
     public String titlePrefix;
     public String titleSuffix;
 
-    public EnumOrderedMap<Stat, Double> initialStatRequirements = new EnumOrderedMap<>(Stat.class); // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
+    public OrderedMap<ConstantKey, Double> initialStatRequirements = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+    // base value of the stat, temporary buffs and debuffs shouldn't affect what profession can be learned
     public OrderedMap<Skill, Rating> initialSkillRequirements = new OrderedMap<>();
 
     /**

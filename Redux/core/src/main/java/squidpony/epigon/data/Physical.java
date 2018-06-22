@@ -386,72 +386,12 @@ public class Physical extends EpiData {
     }
 
     public void calculateStats() {
-        LiveValue lv, calc;
-        int current;
-        if ((lv = stats.get(Stat.AIM)) != null) {
-            current = (int) lv.actual();
-
-            calc = stats.get(CalcStat.PRECISION);
-            if(calc == null) stats.put(CalcStat.PRECISION, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.CRIT);
-            if(calc == null) stats.put(CalcStat.CRIT, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
-        }
-        if ((lv = stats.get(Stat.IMPACT)) != null) {
-            current = (int) lv.actual();
-
-            calc = stats.get(CalcStat.DAMAGE);
-            if(calc == null) stats.put(CalcStat.DAMAGE, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.CRIT);
-            if(calc == null) stats.put(CalcStat.CRIT, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
-        }
-        if ((lv = stats.get(Stat.DODGE)) != null) {
-            current = (int) lv.actual();
-
-            calc = stats.get(CalcStat.EVASION);
-            if(calc == null) stats.put(CalcStat.EVASION, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.STEALTH);
-            if(calc == null) stats.put(CalcStat.STEALTH, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
-        }
-        if ((lv = stats.get(Stat.TOUGHNESS)) != null) {
-            current = (int) lv.actual();
-
-            calc = stats.get(CalcStat.DEFENSE);
-            if(calc == null) stats.put(CalcStat.DEFENSE, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.DAMAGE);
-            if(calc == null) stats.put(CalcStat.DAMAGE, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
-        }
-        if ((lv = stats.get(Stat.POTENCY)) != null) {
-            current = (int) lv.actual();
-
-            calc = stats.get(CalcStat.INFLUENCE);
-            if(calc == null) stats.put(CalcStat.INFLUENCE, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.PRECISION);
-            if(calc == null) stats.put(CalcStat.PRECISION, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
-        }
-        if ((lv = stats.get(Stat.ATTUNEMENT)) != null) {
-            current = (int) lv.actual();
-            calc = stats.get(CalcStat.LUCK);
-            if(calc == null) stats.put(CalcStat.LUCK, new LiveValue(current, 99.0));
-            else calc.addActual(current);
-
-            calc = stats.get(CalcStat.STEALTH);
-            if(calc == null) stats.put(CalcStat.STEALTH, new LiveValue(current * 0.5, 99.0));
-            else calc.addActual(current * 0.5);
+        for (int lim = next(3) + 4; lim >= 0; lim--) {
+            CalcStat stat = getRandomElement(CalcStat.all);
+            if(stats.containsKey(stat)) 
+                stats.get(stat).addActual(nextCurvedDouble());
+            else
+                stats.put(stat, new LiveValue(0.0, 99.0));
         }
     }
     
