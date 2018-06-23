@@ -131,11 +131,16 @@ public class RecipeMixer {
         return result;
     }
 
-    public static Physical buildWeapon(Weapon weapon, IRNG rng)
-    {
-        OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
-        Material mat = materials.randomItem(rng);
-        return mix(createRecipe(weapon.recipeBlueprint), mat, rng).get(0);
+    public static Physical buildWeapon(Weapon weapon, IRNG rng) {
+        if (weapon.materialTypes != null && weapon.materialTypes.length > 0) {
+            OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
+            Material mat = materials.randomItem(rng);
+            return mix(createRecipe(weapon.recipeBlueprint), mat, rng).get(0);
+        }
+        else
+        {
+            return createRecipe(weapon.recipeBlueprint).result.firstKey();
+        }
     }
 
     public static Physical buildPhysical(Stone stone) {

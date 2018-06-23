@@ -69,7 +69,8 @@ public class Weapon {
             paths = Maker.makeArrange("Straight", "Arc");
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
-            unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
+            unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
+            naturalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length);
     public static OrderedMap<String, List<Weapon>> categories = new OrderedMap<>(RawWeapon.ENTRIES.length >> 2, Hashers.caseInsensitiveStringHasher),
     cultures = new OrderedMap<>(24);
     private static boolean initialized = false;
@@ -94,7 +95,9 @@ public class Weapon {
                 }
 
             }
-            else
+            else if("Natural".equals(rw.kind))
+                naturalWeapons.put(rw.name, wpn);
+            else 
                 unarmedWeapons.put(rw.name, wpn);
             for(String training : rw.training)
             {
