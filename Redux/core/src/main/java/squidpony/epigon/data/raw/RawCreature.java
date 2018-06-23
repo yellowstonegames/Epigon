@@ -16,11 +16,12 @@ public class RawCreature implements Serializable {
     new RawCreature("goblin delinquent", "The toughest goblin... of a group of the weakest goblins. Possibly a threat, maybe? To a toy poodle?", "ɠ*", "CW Flush Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("section staff"), RawWeapon.get("meteor flail"), RawWeapon.get("staff sling")}, 3, 2, 3, 4, 3, 2, 2, 5, 0, 0, 5, 2, 2, 1, 5, makeMap("jester", 1, "brawler", 2), new String[] {"Mobyuld"}),
     new RawCreature("hobgoblin grunt", "Bigger than the average human, but a little lacking in the creative thinking department. Seems to like taking orders.", "ġ", "CW Faded Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("khopesh"), RawWeapon.get("heavy shield"), RawWeapon.get("hammer")}, 5, 6, 2, 1, 2, 4, 0, 6, 0, 0, 4, 5, 5, 1, 6, makeMap("brute", 2, "guardian", 1), new String[] {"Mobyuld"}),
     new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}),
+    new RawCreature("Hell lion", "Like a lion... from Hell. Big pointy teeth, serious claws, and fire magic.", "L*", "Coral Red", RawWeapon.get("fire magic"), new RawWeapon[] {RawWeapon.get("raking claws"), RawWeapon.get("mauling bite")}, 3, 9, 3, 2, 2, 6, 0, 0, 0, 0, 5, 20, 7, 6, 7, makeMap("sorcerer", 3, "hunter", 4), new String[] {"Beast"}),
   };
 
   public static final Map<String, RawCreature> MAPPING = makeMap(
   "goblin nincompoop", ENTRIES[0], "goblin delinquent", ENTRIES[1], "hobgoblin grunt",
-  ENTRIES[2], "hobgoblin captain", ENTRIES[3]);
+  ENTRIES[2], "hobgoblin captain", ENTRIES[3], "Hell lion", ENTRIES[4]);
 
   public String name;
 
