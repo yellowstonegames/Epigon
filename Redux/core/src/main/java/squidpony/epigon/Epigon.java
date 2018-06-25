@@ -113,8 +113,7 @@ public class Epigon extends Game {
     private boolean showingMenu = false;
     private Coord menuLocation = null;
     private Physical currentTarget = null;
-    private ArrayList<Weapon> attackOptions = new ArrayList<>(4);
-
+    private OrderedMap<String, Weapon> maneuverOptions = new OrderedMap<>(12);
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
@@ -882,29 +881,32 @@ public class Epigon extends Game {
         Arrangement<Weapon> table = player.creatureData.weaponChoices.table;
         Weapon w;
         currentTarget = target;
-        attackOptions.clear();
+        maneuverOptions.clear();
         for (int i = 0; i < table.size(); i++) {
             w = table.keyAt(i);
             if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5) 
-                attackOptions.add(w);
+            {
+                maneuverOptions.put(w.rawWeapon.name + " Attack", w);
+                for (int j = 0; j < w.maneuvers.size(); j++) {
+                    maneuverOptions.put(w.rawWeapon.name + ' ' + w.maneuvers.get(j), w);
+                }
+            }
         }
     }
-    private Coord showAttackOptions(Physical target, ArrayList<Weapon> options) {
+    private Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
         // = validAttackOptions(target);
         int sz = options.size(), len = 0;
         for (int i = 0; i < sz; i++) {
-            len = Math.max(options.get(i).rawWeapon.name.length(), len);
+            len = Math.max(options.keyAt(i).length(), len);
         }
         int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
                 startX = target.location.x+1;
         final float smoke = SColor.translucentColor( -0x1.fefefep125F, 0.777f); //SColor.CW_GRAY
         if(target.location.x+len+1 < map.width) {
             for (int i = 0; i < sz; i++) {
-                String name = options.get(i).rawWeapon.name;
+                String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
-                    mapSLayers.put(startX + j, startY + i, '\u0000',
-                            smoke,
-                            0f, 3);
+                    mapSLayers.put(startX + j, startY + i, '\u0000', smoke, 0f, 3);
                 }
                 mapSLayers.put(startX, startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
             }
@@ -912,11 +914,9 @@ public class Epigon extends Game {
         else {
             startX = target.location.x - len;
             for (int i = 0; i < sz; i++) {
-                String name = options.get(i).rawWeapon.name;
+                String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
-                    mapSLayers.put(startX + j, startY + i, '\u0000',
-                            smoke,
-                            0f, 3);
+                    mapSLayers.put(startX + j, startY + i, '\u0000', smoke, 0f, 3);
                 }
                 mapSLayers.put(target.location.x-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_BRIGHT[(i*3)&15], null, 4);
             }
@@ -1959,17 +1959,17 @@ public class Epigon extends Game {
             }
             if(showingMenu)
             {
-                if(menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < attackOptions.size()
+                if(menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size()
                         && currentTarget != null  && mapSLayers.getLayer(3).getFloat(screenX, screenY, 0f) != 0f)
                 {
-                    attack(currentTarget, attackOptions.get(screenY - menuLocation.y));
+                    attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     runTurn();
                 }
                 showingMenu = false;
                 menuLocation = null;
-                attackOptions.clear();
+                maneuverOptions.clear();
                 currentTarget = null;
                 mapSLayers.clear(3);
                 mapSLayers.clear(4);
@@ -1994,7 +1994,7 @@ public class Epigon extends Game {
                     if(thing == null)
                         return false;
                     validAttackOptions(thing);
-                    menuLocation = showAttackOptions(thing, attackOptions);
+                    menuLocation = showAttackOptions(thing, maneuverOptions);
 //                    attack(thing);
 //                    calcFOV(player.location.x, player.location.y);
 //                    calcDijkstra();
