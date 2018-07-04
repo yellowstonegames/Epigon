@@ -111,6 +111,8 @@ public class ActionOutcome {
             }
             if (Radius.CIRCLE.radius(actor.location, target.location) > chosen.rawWeapon.range + 1.5)
                 return ao;
+            if(actor.creatureData.lastUsedItem != null && actor.creatureData.lastUsedItem.radiance != null)
+                actor.creatureData.lastUsedItem.radiance.flare = 0.8f;
             ao.actorWeapon = chosen;
             Weapon w = ao.actorWeapon;
             int index = w.elements.table.random(actor.nextLong());

@@ -2,10 +2,16 @@ sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = [ "src/main/java" ]
 sourceSets.main.resources.srcDirs += ["src/main/resources"]
 
+//project.ext.mainClassName = "squidpony.epigon.desktop.AStarProfile"
+//project.ext.mainClassName = "squidpony.epigon.desktop.DijkstraPreProfile"
+//project.ext.mainClassName = "squidpony.epigon.desktop.DijkstraProfile"
 project.ext.mainClassName = "squidpony.epigon.desktop.DesktopLauncher"
-project.ext.assetsDir = new File("assets");
+project.ext.assetsDir = new File("assets")
 
 if (!hasProperty('mainClass')) {
+    //ext.mainClass = 'squidpony.epigon.desktop.DijkstraPreProfile'
+    //ext.mainClass = 'squidpony.epigon.desktop.AStarProfile'
+    //ext.mainClass = 'squidpony.epigon.desktop.DijkstraProfile'
     ext.mainClass = 'squidpony.epigon.desktop.DesktopLauncher'
 }
 
@@ -30,9 +36,14 @@ task dist(type: Jar) {
     from files(sourceSets.main.java.outputDir)
     from files(sourceSets.main.output.resourcesDir)
     from { configurations.compile.collect { zipTree(it) } }
-    from files(project.assetsDir);
+    from files(project.assetsDir)
+    //archiveName "DijkstraArray-${version}.jar"
+    //archiveName "Dijkstra-${version}.jar"
+    //archiveName "DijkstraNext-${version}.jar"
+    //archiveName "DijkstraPre-${version}.jar"
+    //archiveName "AStar-${version}.jar"
     archiveName "Epigon-${version}.jar"
-    from { configurations.compile.collect { zipTree(it) } }
+//    from { configurations.compile.collect { zipTree(it) } }
     manifest {
         attributes 'Main-Class': project.mainClassName
     }

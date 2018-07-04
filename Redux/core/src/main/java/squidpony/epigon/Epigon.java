@@ -558,19 +558,26 @@ public class Epigon extends Game {
                                 }
                             }
                         }
-                    } else if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
-                        map.contents[c.x][c.y].remove(creature);
-                        if (creature.appearance == null) {
-                            creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
-                            if (creature.overlaySymbol != '\uffff')
-                                creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
+                    } else
+                    {
+                        if(creature.creatureData != null &&
+                                creature.creatureData.lastUsedItem != null &&
+                                creature.creatureData.lastUsedItem.radiance != null)
+                            creature.creatureData.lastUsedItem.radiance.flare = 0f;
+                        if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
+                            map.contents[c.x][c.y].remove(creature);
+                            if (creature.appearance == null) {
+                                creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
+                                if (creature.overlaySymbol != '\uffff')
+                                    creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
+                            }
+                            creatures.alterAt(i, step);
+                            creature.location = step;
+                            map.contents[step.x][step.y].add(creature);
+                            mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
+                            if (creature.overlayAppearance != null)
+                                mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                         }
-                        creatures.alterAt(i, step);
-                        creature.location = step;
-                        map.contents[step.x][step.y].add(creature);
-                        mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
-                        if (creature.overlayAppearance != null)
-                            mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                     }
                 }
             }
@@ -1314,6 +1321,9 @@ public class Epigon extends Game {
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!mapSLayers.hasActiveAnimations()) {
+                if(player.creatureData.lastUsedItem != null && 
+                        player.creatureData.lastUsedItem.radiance != null && player.creatureData.lastUsedItem.radiance.flare > 0f)
+                    player.creatureData.lastUsedItem.radiance.flare = 0f;
                 Coord m = awaitedMoves.remove(0);
                 if (!toCursor.isEmpty())
                     toCursor.remove(0);
