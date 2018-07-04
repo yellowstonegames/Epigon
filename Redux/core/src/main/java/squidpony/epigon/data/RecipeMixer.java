@@ -266,7 +266,7 @@ public class RecipeMixer {
 
         if (blueprint.unique) {
             // TODO - check for whether one has been created
-            // also needs a definition of what makes two items different; you could create
+            // also needs a definition of what makes two items different
         }
 
         Physical physical = new Physical();
@@ -390,7 +390,8 @@ public class RecipeMixer {
         }
         
         creature.weaponChoices = other.weaponChoices.copy();
-
+        creature.lastUsedItem = other.lastUsedItem;
+        creature.lastWieldedWeapon = other.lastWieldedWeapon;
         return creature;
     }
     public static Physical buildCreature(RawCreature raw) {

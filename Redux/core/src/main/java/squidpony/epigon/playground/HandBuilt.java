@@ -52,7 +52,7 @@ public class HandBuilt {
 
 
     public Physical playerBlueprint;
-    public Radiance playerRadiance;
+//    public Radiance playerRadiance;
 
     public Recipe hatRecipe;
     public Recipe shirtRecipe;
@@ -70,6 +70,8 @@ public class HandBuilt {
 
     public Physical rawMeat; // base item for dead animal chunks
     public Recipe steakRecipe;
+    
+    public Physical torch;
 
     // Cooking skills
 //    public Skill cooking = new Skill("cooking");
@@ -159,6 +161,13 @@ public class HandBuilt {
         rawMeat.symbol = 'ₘ';
         rawMeat.color = SColor.DB_FAWN.toFloatBits();
 
+        torch = new Physical();
+        torch.name = "torch";
+        torch.description = "burning rags on a stick";
+        torch.symbol =  'ῗ';
+        torch.color = SColor.CREAM.toFloatBits();
+        torch.radiance = new Radiance(6f, SColor.CREAM.toFloatBits(), 0.71f, 0f);
+        
         initAbilities();
         initProfessions();
         initItems();
@@ -277,7 +286,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }
-        playerRadiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), SColor.CREAM.toFloatBits(), 0.8f, 0f);
+        
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
 
@@ -322,6 +331,16 @@ public class HandBuilt {
 
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
         Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
+        if(unarmed.kind == Weapon.MAGIC)
+        {
+            Element elem = unarmed.elements.items.get(0);
+            playerBlueprint.radiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), elem.floatColor, elem.flicker, elem.strobe);
+        }
+        else
+        {
+            playerBlueprint.inventory.add(torch);
+            playerBlueprint.creatureData.lastUsedItem = torch;
+        }
         //Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
@@ -398,7 +417,7 @@ public class HandBuilt {
     }
 
     private void initItems() {
-        swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '(');
+        swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '†');
         hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), 'ʍ');
         shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'τ');
         pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), '∏');
