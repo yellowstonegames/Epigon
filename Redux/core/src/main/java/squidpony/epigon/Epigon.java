@@ -732,14 +732,15 @@ public class Epigon extends Game {
      *              will not be modified
      * @return basis, after modification; it can be passed to this method as basis again
      */
-    public static float[][][] mixColoredLighting(float[][][] basis, float[][][] other) {
+    public static float[][][] mixColoredLighting(float[][][] basis, float[][][] other, float flare) {
         int w = basis[0].length, h = basis[0][0].length, w2 = other[0].length, h2 = other[0][0].length;
+        flare = flare + 1f;
         for (int x = 0; x < w && x < w2; x++) {
             for (int y = 0; y < h && y < h2; y++) {
                 if(basis[1][x][y] == FLOAT_WHITE)
                 {
                     basis[1][x][y] = other[1][x][y];
-                    basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y]);
+                    basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
                 }
                 else
                 {
@@ -754,12 +755,11 @@ public class Epigon extends Game {
                                 | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
                                 | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
                                 | as);
-                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change);
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change * flare);
                     }
                     else
-                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y]);
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
                 }
-                
             }
         }
         return basis;
@@ -776,7 +776,7 @@ public class Epigon extends Game {
                 {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
         }
@@ -1158,17 +1158,17 @@ public class Epigon extends Game {
         long time0 = Noise.longFloor(time);
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        if ((radiance = handBuilt.playerRadiance) != null) {
-            FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
-            SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-            mixColoredLighting(map.colorLighting, map.tempColorLighting);
-        }
+//        if ((radiance = handBuilt.playerRadiance) != null) {
+//            FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
+//            SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+//            mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
+//        }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
         }
@@ -1613,6 +1613,16 @@ public class Epigon extends Game {
                     break;
                 case REST:
                     prepFall();
+                    break;
+                case INTERACT:
+                    Optional<Physical> t;
+                    if((t= player.inventory.stream().filter(ph -> ph.symbol == 'ῗ').findFirst()).isPresent())
+                    {
+                        if(player.creatureData.lastUsedItem != null && player.creatureData.lastUsedItem.symbol == 'ῗ')
+                            player.creatureData.lastUsedItem = null;
+                        else 
+                            player.creatureData.lastUsedItem = t.get();
+                    }
                     break;
                 default:
                     //message("Can't " + verb.name + " from main view.");
