@@ -35,7 +35,12 @@ public class Radiance {
      * The rate of non-random continuous change to radiance range, like a mechanical strobe effect.
      */
     public float strobe = 0f;
-    
+
+    /**
+     * A temporary increase to the minimum radiance range, meant to brighten a glow during an effect.
+     * This should be a float between 0f and 1f, with 0f meaning no change and 1f meaning always max radius.
+     */
+    public float flare = 0f;
     public Radiance()
     {
     }
@@ -61,10 +66,18 @@ public class Radiance {
         this.flicker = flicker;
         this.strobe = strobe;
     }
-    
+    public Radiance(float range, float color, float flicker, float strobe, float flare)
+    {
+        this.range = range;
+        this.color = color;
+        this.flicker = flicker;
+        this.strobe = strobe;
+        this.flare = flare;
+    }
+
     public Radiance(Radiance other)
     {
-        this(other.range, other.color, other.flicker, other.strobe);
+        this(other.range, other.color, other.flicker, other.strobe, other.flare);
     }
 
     /**
@@ -83,6 +96,6 @@ public class Radiance {
             current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker) * 0.25f + 0.75f;
         if(strobe != 0f)
             current *= NumberTools.swayTight(time * strobe) * 0.25f + 0.75f;
-        return current;
+        return Math.max(current, range * flare);
     }
 }

@@ -144,7 +144,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
                                   double waterMod, double coolMod, long state)
         {
             boolean fresh = false;
-            if(cachedState != state || waterMod != waterModifier || coolMod != coolingModifier)
+            if(cachedState != state || waterMod != landModifier || coolMod != coolingModifier)
             {
                 minHeight = Double.POSITIVE_INFINITY;
                 maxHeight = Double.NEGATIVE_INFINITY;
@@ -165,7 +165,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
             long seedA = rng.nextLong(), seedB = rng.nextLong(), seedC = rng.nextLong();
             int t;
 
-            waterModifier = (waterMod <= 0) ? rng.nextDouble(0.29) + 0.91 : waterMod;
+            landModifier = (waterMod <= 0) ? rng.nextDouble(0.29) + 0.91 : waterMod;
             coolingModifier = (coolMod <= 0) ? rng.nextDouble(0.45) * (rng.nextDouble()-0.5) + 1.1 : coolMod;
 
             double p,
@@ -198,7 +198,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
                     h = terrain.getNoiseWithSeed(pc +
                                     terrainRidged.getNoiseWithSeed(pc, ps, qs,seedA + seedB),
                             ps, qs, seedA);
-                    h *= waterModifier;
+                    h *= landModifier;
                     heightData[x][y] = h;
                     heatData[x][y] = (p = heat.getNoiseWithSeed(pc, ps
                                     + otherRidged.getNoiseWithSeed(pc, ps, qs,seedB + seedC)

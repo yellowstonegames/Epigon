@@ -13,7 +13,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "EpigonRedux"
-        squidlibVersion = '173f8adfbf'
+        squidlibVersion = 'b4e95db739'//'ed1b28b3a4'//
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
         aiVersion = '1.8.1'
@@ -34,14 +34,17 @@ project(":desktop") {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
     }
 }
 
 project(":core") {
+    apply plugin: "java-library"
     dependencies {
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
+        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         ///// implicitly included by dep on squidlib; don't need to explicitly require
         //compile "com.github.tommyettinger:regexodus:$regexodusVersion"
         //compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
