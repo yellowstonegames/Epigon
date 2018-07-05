@@ -499,9 +499,9 @@ public class Epigon extends Game {
     }
 
     private void runTurn() {
-        int size = creatures.size();
         Set<Coord> creaturePositions = creatures.keySet();
-        for (int i = 0; i < size; i++) {
+        Coord[] pl = {player.location};
+        for (int i = 0; i < creatures.size(); i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
             if (creature.overlaySymbol == '\uffff') {
@@ -509,15 +509,16 @@ public class Epigon extends Game {
                 creature.overlayAppearance = null;
             }
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && (map.fovResult[c.x][c.y] > 0)) {
-                List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, player.location);
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
+                List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, pl);
                 if (path != null && !path.isEmpty()) {
                     Coord step = path.get(0);
                     if (player.location.x == step.x && player.location.y == step.y) {
                         ArrayList<ActionOutcome> aos = ActionOutcome.attack(creature, player);
                         for(ActionOutcome ao : aos) {
                             Element element = ao.element;
-                            fxHandler.attackEffect(creature, player, ao);
+                            if(map.fovResult[c.x][c.y] > 0) 
+                                fxHandler.attackEffect(creature, player, ao);
                             if (ao.hit) {
                                 int amt = ao.actualDamage >> 1;
                                 applyStatChange(player, Stat.VIGOR, amt);
@@ -532,7 +533,8 @@ public class Epigon extends Game {
                                     }
                                 } else {
                                     if (ao.crit) {
-                                        mapSLayers.wiggle(player.appearance, 0.4f);
+                                        if(map.fovResult[c.x][c.y] > 0)
+                                            mapSLayers.wiggle(player.appearance, 0.4f);
                                         message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
@@ -545,7 +547,7 @@ public class Epigon extends Game {
                                         if (player.overlaySymbol != '\uffff') {
                                             if (player.overlayAppearance != null) {
                                                 mapSLayers.removeGlyph(player.overlayAppearance);
-                                            }
+                                            }                                             
                                             player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
                                         }
                                     }
@@ -565,18 +567,22 @@ public class Epigon extends Game {
                                 creature.creatureData.lastUsedItem.radiance != null)
                             creature.creatureData.lastUsedItem.radiance.flare = 0f;
                         if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step)) {
-                            map.contents[c.x][c.y].remove(creature);
-                            if (creature.appearance == null) {
-                                creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
-                                if (creature.overlaySymbol != '\uffff')
-                                    creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
+                            if (!creatures.containsKey(step)) {
+                                map.contents[c.x][c.y].remove(creature);
+                                if (creature.appearance == null && (map.fovResult[step.x][step.y] > 0 || map.fovResult[c.x][c.y] > 0)) {
+                                    creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
+                                    if (creature.overlaySymbol != '\uffff')
+                                        creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
+                                }
+                                creatures.putAt(step, creatures.remove(c), i);
+                                creature.location = step;
+                                map.contents[step.x][step.y].add(creature);
+                                if (map.fovResult[c.x][c.y] > 0) {
+                                    mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
+                                    if (creature.overlayAppearance != null)
+                                        mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
+                                }
                             }
-                            creatures.alterAt(i, step);
-                            creature.location = step;
-                            map.contents[step.x][step.y].add(creature);
-                            mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
-                            if (creature.overlayAppearance != null)
-                                mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                         }
                     }
                 }
@@ -809,7 +815,8 @@ public class Epigon extends Game {
                                 mapSLayers.glyphs.add(creature.overlayAppearance);
                         }
                     }
-                } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
+                }
+                else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
                     if (creature.overlayAppearance != null)
                         mapSLayers.removeGlyph(creature.overlayAppearance);
