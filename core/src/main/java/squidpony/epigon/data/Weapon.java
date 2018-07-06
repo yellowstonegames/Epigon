@@ -48,6 +48,7 @@ public class Weapon {
             IMPLEMENT = 2, // + 2 INFLUENCE
             UNARMED = 3,   // + 1 STEALTH
             MAGIC = 4,     // + 1 PRECISION
+            NATURAL = 5,   // + 2 CRIT
     
             REPEAT = 0, 
             PROJECTILE = 1, 
@@ -63,7 +64,7 @@ public class Weapon {
             STRAIGHT = 0,  // aims at the first thing in a line
             ARC = 1;       // aims at the target unless it is adjacent, then it cannot target
     // for if you need to get a string from one of the above constants, and also to read the TSV contents
-    public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic"), 
+    public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic", "Natural"), 
             usages = Maker.makeArrange("Repeat", "Projectile", "Thrown"),
             shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Burst", "Through"),
             paths = Maker.makeArrange("Straight", "Arc");
@@ -216,6 +217,7 @@ public class Weapon {
                 skills[i] = Skill.skillsByName.get(training[i]);
             }
         }
+        blueprint.attached = (kind >= UNARMED);
         blueprint.weaponData = this;
         blueprint.rarity = Rating.values()[blueprint.between(1, 8)];
         recipeBlueprint = new RecipeBlueprint();
@@ -243,6 +245,7 @@ public class Weapon {
         while (blueprint.rarity == null || blueprint.rarity == Rating.NONE) {
             blueprint.rarity = blueprint.getRandomElement(Rating.values());
         }
+        blueprint.attached = (kind >= UNARMED);
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);

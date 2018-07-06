@@ -39,7 +39,6 @@ public class Physical extends EpiData {
     // operational bits for live objects
     public Coord location;
     public boolean attached; // cannot be removed from its location (or inventory pile) without special means
-    public boolean aware; // knows where the player is
     public boolean wasSeen;
     public TextCellFactory.Glyph appearance; // for things that move, we should use Glyph, which is a kind of Actor
     public TextCellFactory.Glyph overlayAppearance; // mainly for showing status effects over the existing appearance
@@ -337,7 +336,8 @@ public class Physical extends EpiData {
         }
 
         for (Physical p : removing) {
-            removed.add(p);
+            if(!p.attached) 
+                removed.add(p);
             creatureData.equippedDistinct.remove(p);
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equippedBySlot.get(subSlot))) {

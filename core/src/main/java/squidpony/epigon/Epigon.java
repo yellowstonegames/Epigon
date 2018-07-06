@@ -969,6 +969,7 @@ public class Epigon extends Game {
                                     return p;
                                 })
                                 .forEach(item -> {
+                                    if(item.attached) return;
                                     map.contents[targetX][targetY].add(item);
                                     if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
                                         map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
@@ -988,7 +989,10 @@ public class Epigon extends Game {
                                     }
                                     return p;
                                 })
-                                .forEach(item -> map.contents[targetX][targetY].add(item));
+                                .forEach(item -> {
+                                    if(item.attached) return;
+                                    map.contents[targetX][targetY].add(item);
+                                });
                         mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                         message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                     }
@@ -1046,6 +1050,7 @@ public class Epigon extends Game {
                                 return p;
                             })
                             .forEach(item -> {
+                                if(item.attached) return;
                                 map.contents[targetX][targetY].add(item);
                                 if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
                                     map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
@@ -1065,7 +1070,10 @@ public class Epigon extends Game {
                                 }
                                 return p;
                             })
-                            .forEach(item -> map.contents[targetX][targetY].add(item));
+                            .forEach(item -> {
+                                if(item.attached) return;
+                                map.contents[targetX][targetY].add(item);
+                            });
                     mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                     message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 }
