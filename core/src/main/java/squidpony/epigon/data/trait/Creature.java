@@ -3,7 +3,6 @@ package squidpony.epigon.data.trait;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.BodySlot;
-import squidpony.squidgrid.Direction;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
@@ -31,9 +30,7 @@ public class Creature {
 
     public Weapon lastWieldedWeapon = null;
     public Physical lastUsedItem = null;
-    public double facingAngle = 0.0;
-    public double awarenessSpan = 90.0;
-
+    
     public int skillWithWeapon(Weapon w)
     {
         int skill = 1;
@@ -43,29 +40,7 @@ public class Creature {
         return skill;
     }
     
-    // Runtime values
-    public boolean aware;//has noticed the player
-
-    public void setAngle(Direction dir) {
-        if(dir == null)
-            return;
-        if(dir.equals(Direction.NONE)) 
-            awarenessSpan = Math.min(awarenessSpan + 45.0, 360.0);
-        else
-            awarenessSpan = 90.0;
-        switch (dir)
-        {
-            case RIGHT: facingAngle = 0.0; break;
-            case DOWN_RIGHT: facingAngle = 45.0; break;
-            case DOWN: facingAngle = 90.0; break;
-            case DOWN_LEFT: facingAngle = 135.0; break;
-            case LEFT: facingAngle = 180.0; break;
-            case UP_LEFT: facingAngle = 225.0; break;
-            case UP: facingAngle = 270.0; break;
-            case UP_RIGHT: facingAngle = 315.0; break;
-        }
-    }
-
+    
     /*
      * Properties Creatures Need to model real life
      * 
