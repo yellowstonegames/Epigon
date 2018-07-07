@@ -467,9 +467,8 @@ public class FxHandler {
     }
 
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
-    public void attackEffect(Physical attacker, Physical target, ActionOutcome ao)
+    public void attackEffect(Physical attacker, Physical target, ActionOutcome ao, Direction dir)
     {
-        Direction dir = Direction.getDirection(target.location.x - attacker.location.x, target.location.y - attacker.location.y);
         fx.clear(2);
         if(ao.element == null)
         {

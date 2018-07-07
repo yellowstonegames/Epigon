@@ -488,6 +488,9 @@ public class Epigon extends Game {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+        posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
+        player.creatureData.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
+        player.creatureData.awarenessSpan = 90.0;
         contextHandler.setMap(map);
         fxHandler.seen = map.fovResult;
         creatures = map.creatures;
@@ -518,7 +521,11 @@ public class Epigon extends Game {
                         for(ActionOutcome ao : aos) {
                             Element element = ao.element;
                             if(map.fovResult[c.x][c.y] > 0) 
-                                fxHandler.attackEffect(creature, player, ao);
+                            {
+                                Direction dir = Direction.getDirection(player.location.x - creature.location.x, player.location.y - creature.location.y);
+                                creature.creatureData.setAngle(dir);
+                                fxHandler.attackEffect(creature, player, ao, dir);
+                            }
                             if (ao.hit) {
                                 int amt = ao.actualDamage >> 1;
                                 applyStatChange(player, Stat.VIGOR, amt);
@@ -772,8 +779,10 @@ public class Epigon extends Game {
     }
 
     private void calcFOV(int checkX, int checkY) {
-        FOV.reuseLOS(map.opacities(), map.losResult, checkX, checkY);
-        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE);
+        FOV.reuseFOV(map.opacities(), map.losResult, checkX, checkY, map.width + map.height, Radius.SQUARE,
+                player.creatureData.facingAngle, player.creatureData.awarenessSpan);
+        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, player.stats.get(Stat.SIGHT).actual(), Radius.CIRCLE,
+                player.creatureData.facingAngle, player.creatureData.awarenessSpan);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
         for (int x = 0; x < map.width; x++) {
@@ -945,12 +954,16 @@ public class Epigon extends Game {
         ArrayList<ActionOutcome> aos = ActionOutcome.attack(player, target);
         for(ActionOutcome ao : aos) {
             Element element = ao.element;
-            fxHandler.attackEffect(player, target, ao);
+            Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
+            player.creatureData.setAngle(dir);
+            calcFOV(player.location.x, player.location.y);
+            fxHandler.attackEffect(player, target, ao, dir);
             //mapSLayers.bump(player.appearance, dir, 0.145f);
             if (ao.hit) {
                 applyStatChange(target, Stat.VIGOR, ao.actualDamage);
                 if (target.stats.get(Stat.VIGOR).actual() <= 0) {
-                    mapSLayers.removeGlyph(target.appearance);
+                    if(target.appearance != null)
+                        mapSLayers.removeGlyph(target.appearance);
                     if (target.overlayAppearance != null) {
                         mapSLayers.removeGlyph(target.overlayAppearance);
                     }
@@ -975,7 +988,8 @@ public class Epigon extends Game {
                                         map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
                                     }
                                 });
-                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                        if(target.appearance != null)
+                            mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                         message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                     } else {
                         Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
@@ -993,13 +1007,15 @@ public class Epigon extends Game {
                                     if(item.attached) return;
                                     map.contents[targetX][targetY].add(item);
                                 });
-                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                        if(target.appearance != null) 
+                            mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                         message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                     }
                 } else {
                     String amtText = String.valueOf(-ao.actualDamage);
                     if (ao.crit) {
-                        mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
+                        if(target.appearance != null)
+                            mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
                                 mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
                         message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
                                 amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
@@ -1026,12 +1042,16 @@ public class Epigon extends Game {
         int targetX = target.location.x, targetY = target.location.y;
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
         Element element = ao.element;
-        fxHandler.attackEffect(player, target, ao);
+        Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
+        player.creatureData.setAngle(dir);
+        calcFOV(player.location.x, player.location.y);
+        fxHandler.attackEffect(player, target, ao, dir);
         //mapSLayers.bump(player.appearance, dir, 0.145f);
         if (ao.hit) {
             applyStatChange(target, Stat.VIGOR, ao.actualDamage);
             if (target.stats.get(Stat.VIGOR).actual() <= 0) {
-                mapSLayers.removeGlyph(target.appearance);
+                if(target.appearance != null)
+                    mapSLayers.removeGlyph(target.appearance);
                 if (target.overlayAppearance != null) {
                     mapSLayers.removeGlyph(target.overlayAppearance);
                 }
@@ -1056,7 +1076,8 @@ public class Epigon extends Game {
                                     map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
                                 }
                             });
-                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                    if(target.appearance != null)
+                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                     message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 } else {
                     Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
@@ -1074,13 +1095,15 @@ public class Epigon extends Game {
                                 if(item.attached) return;
                                 map.contents[targetX][targetY].add(item);
                             });
-                    mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                    if(target.appearance != null)
+                        mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                     message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 }
             } else {
                 String amtText = String.valueOf(-ao.actualDamage);
                 if (ao.crit) {
-                    mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
+                    if(target.appearance != null)
+                        mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
                             mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
                     message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
                             amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
@@ -1121,6 +1144,7 @@ public class Epigon extends Game {
         if (map.contents[newX][newY].blockage == null) {
             mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () ->
             {
+                player.creatureData.setAngle(dir);
                 calcFOV(newX, newY);
                 calcDijkstra();
                 runTurn();
@@ -1533,25 +1557,57 @@ public class Epigon extends Game {
                     break;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
-                    Arrays.stream(Direction.OUTWARDS)
-                            .map(d -> player.location.translate(d))
-                            .filter(c -> map.inBounds(c))
-                            .filter(c -> map.fovResult[c.x][c.y] > 0)
-                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                            .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
+                    for (Direction d : Direction.OUTWARDS)
+                    {
+                        Coord c = player.location.translate(d);
+                        if(!map.inBounds(c))
+                            continue;
+                        if(map.fovResult[c.x][c.y] <= 0)
+                            continue;
+                        for (Physical p : map.contents[c.x][c.y].contents)
+                        {
+                            if(p.countsAs(handBuilt.baseClosedDoor))
+                            {
+                                RecipeMixer.applyModification(p, handBuilt.openDoor);
+                                player.creatureData.setAngle(d);
+                            }
+                        }
+                    }
+//                    Arrays.stream(Direction.OUTWARDS)
+//                            .map(d -> player.location.translate(d))
+//                            .filter(c -> map.inBounds(c))
+//                            .filter(c -> map.fovResult[c.x][c.y] > 0)
+//                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+//                            .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
+//                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
                 case SHUT: // Close all the doors nearby
                     message("Closing nearby doors");
-                    Arrays.stream(Direction.OUTWARDS)
-                            .map(d -> player.location.translate(d))
-                            .filter(c -> map.inBounds(c))
-                            .filter(c -> map.fovResult[c.x][c.y] > 0)
-                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
+                    for (Direction d : Direction.OUTWARDS)
+                    {
+                        Coord c = player.location.translate(d);
+                        if(!map.inBounds(c))
+                            continue;
+                        if(map.fovResult[c.x][c.y] <= 0)
+                            continue;
+                        for (Physical p : map.contents[c.x][c.y].contents)
+                        {
+                            if(p.countsAs(handBuilt.baseOpenDoor))
+                            {
+                                RecipeMixer.applyModification(p, handBuilt.closeDoor);
+                                player.creatureData.setAngle(d.opposite());
+                            }
+                        }
+                    }
+//                    Arrays.stream(Direction.OUTWARDS)
+//                            .map(d -> player.location.translate(d))
+//                            .filter(c -> map.inBounds(c))
+//                            .filter(c -> map.fovResult[c.x][c.y] > 0)
+//                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
+//                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
+//                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
