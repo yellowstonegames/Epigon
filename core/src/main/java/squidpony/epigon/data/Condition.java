@@ -14,7 +14,7 @@ public class Condition extends EpiData {
 
     public ConditionBlueprint parent;
     public int currentTick = 0;
-    public List<Condition> suppressedBys;//lists the specific conditions that are currently suppressing this one
+    public List<Condition> suppressors;//lists the specific conditions that are currently suppressing this one
     public Physical attachedTo;
     public Element overrideElement;
     private Condition()
@@ -27,13 +27,13 @@ public class Condition extends EpiData {
 
     public Condition(ConditionBlueprint blueprint, Physical attached){
         parent = blueprint;
-        suppressedBys = new ArrayList<>();
+        suppressors = new ArrayList<>();
         attach(attached);
     }
 
     public Condition(ConditionBlueprint blueprint, Physical attached, Element element){
         parent = blueprint;
-        suppressedBys = new ArrayList<>();
+        suppressors = new ArrayList<>();
         overrideElement = element;
         attach(attached);
     }
@@ -44,13 +44,17 @@ public class Condition extends EpiData {
             wearOff();
         }
         attachedTo = attachTo;
+        attachedTo.conditions.add(this);
         //RecipeMixer.applyModification(attachedTo, parent.modification);
         if(parent.overlaySymbol != '\uffff') {
             attachedTo.overlaySymbol = parent.overlaySymbol;
             attachedTo.overlayColor = overrideElement == null ? -0x1.0101p126F : overrideElement.floatColor; // SColor.GRAY
         }
         if(parent.changes != null)
+        {
+            ChangeTable.holdPhysical(attachedTo, parent.changes);
             attachedTo.statEffects.add(parent.changes);
+        }
     }
     /**
      * Returns true if it has an ancestor that is the passed in blueprint.
@@ -70,7 +74,10 @@ public class Condition extends EpiData {
             RecipeMixer.applyModification(attachedTo, m);
         }
         if(parent.changes != null)
+        {
+            ChangeTable.releasePhysical(attachedTo, parent.changes);
             attachedTo.statEffects.remove(parent.changes);
+        }
         attachedTo.overlaySymbol = '\uffff';
         attachedTo = null;
         return true;

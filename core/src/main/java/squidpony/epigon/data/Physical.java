@@ -157,7 +157,7 @@ public class Physical extends EpiData {
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
         facingAngle = (idHash & 7) * 45.0;
-        System.arraycopy(rangeChoices[nextInt(7)], 0, directionRanges, 0, 5);
+        System.arraycopy(rangeChoices[nextInt(5)], 0, directionRanges, 0, 5);
         
     }
     public static Physical makeBasic(String name, char symbol, Color color)
@@ -228,7 +228,7 @@ public class Physical extends EpiData {
      */
     public boolean immune(ConditionBlueprint condition) {
         for (Condition c : conditions) {
-            if (c.suppressedBys.isEmpty() && c.parent != null) {//only active conditions can provide immunity //TODO -- ensure that when they become unsuppressed they remove things they provide immunity against
+            if (c.suppressors.isEmpty() && c.parent != null) {//only active conditions can provide immunity //TODO -- ensure that when they become unsuppressed they remove things they provide immunity against
                 for (ConditionBlueprint cb : c.parent.immunizes) {
                     if (cb.hasParent(condition)) {
                         return true;//found an immunity
@@ -248,24 +248,17 @@ public class Physical extends EpiData {
      * @return
      */
     public boolean applyCondition(Condition condition) {
-        boolean conflicted = false;
         if (immune(condition.parent)) {//make sure it's not immune
-            conflicted = true;
+            return false;
         } else {
             for (Condition c : conditions) {
                 if (!c.parent.conflictsWith(condition.parent)) {
-                    conflicted = true;
-                    break;
+                    return false;
                 }
             }
-        }
-        if (!conflicted) {
-            conditions.add(condition);
-            condition.attachedTo = this;
-            return true;
-        }
-
-        return false;//can't be applied
+        }         
+        condition.attach(this);
+        return true;
     }
 
     /**

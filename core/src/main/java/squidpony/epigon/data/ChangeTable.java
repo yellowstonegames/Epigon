@@ -84,296 +84,296 @@ public class ChangeTable implements Iterable<ConstantKey> {
         return indexer.iterator();
     }
 
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to Double values using the changes in this ChangeTable.
-     * Treats all changes as if they are destructive, which can be useful if non-destructive changes don't need to be
-     * tracked for later removal.
-     * @param changing a non-null OrderedMap of ConstantKey keys to Double values; will be modified
-     * @return the parameter this was given, after modifications
-     */
-    public OrderedMap<ConstantKey, Double> changeDoubles(OrderedMap<ConstantKey, Double> changing)
-    {
-        int mySize = values.size;
-        ConstantKey k;
-        int op;
-        Double e;
-        for (int i = 0; i < mySize; i++) {
-            k = indexer.keyAt(i);
-            op = changeSymbols.get(i);
-            if((e = changing.get(k)) != null)
-            {
-                switch (op)
-                {
-                    case '=':
-                    case ~'=':
-                        changing.put(k, (double)values.get(i));
-                        break;
-                    case '+':
-                    case ~'+':
-                        changing.put(k, e + values.get(i));
-                        break;
-                    case '-':
-                    case ~'-':
-                        changing.put(k, e - values.get(i));
-                        break;
-                    case '*':
-                    case ~'*':
-                        changing.put(k, e * values.get(i));
-                        break;
-                }
-            }
-            else
-            {
-                switch (op)
-                {
-                    case '=':
-                    case ~'=':
-                        changing.put(k, (double)values.get(i));
-                        break;
-                    case '+':
-                    case ~'+':
-                        changing.put(k, (double)values.get(i));
-                        break;
-                    case '-':
-                    case ~'-':
-                        changing.put(k, -(double)values.get(i));
-                        break;
-                    case '*':
-                    case ~'*':
-                        changing.put(k, 0.0);
-                        break;
-                }
-
-            }
-        }
-        return changing;
-    }
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in this ChangeTable.
-     * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
-     * will be ignored without affecting the rest of the changes. Treats all changes as if they are destructive, which
-     * can be useful if non-destructive changes don't need to be tracked for later removal.
-     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
-     * @return the parameter this was given, after modifications
-     */
-    public OrderedMap<ConstantKey, LiveValue> changeLiveValues(OrderedMap<ConstantKey, LiveValue> changing)
-    {
-        int mySize = values.size;
-        ConstantKey k;
-        int op;
-        LiveValue e;
-        for (int i = 0; i < mySize; i++) {
-            k = indexer.keyAt(i);
-            op = changeSymbols.get(i);
-            if((e = changing.get(k)) != null)
-            {
-                switch (op)
-                {
-                    case '=':
-                    case ~'=':
-                        e.set(values.get(i));
-                        break;
-                    case '+':
-                    case ~'+':
-                        e.addActual(values.get(i));
-                        break;
-                    case '-':
-                    case ~'-':
-                        e.addActual(-values.get(i));
-                        break;
-                    case '*':
-                    case ~'*':
-                        e.multiplyActual(values.get(i));
-                        break;
-                }
-            }
-        }
-        return changing;
-    }
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in the given Iterable of
-     * ChangeTable values. If a key is not present in changing but a ChangeTable in tables has an instruction to change
-     * that key, that instruction will be ignored without affecting the other changes. Treats all changes as if they are
-     * destructive, which can be useful if non-destructive changes don't need to be tracked for later removal.
-     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
-     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
-     * @return the parameter this was given, after modifications
-     */
-    public static OrderedMap<ConstantKey, LiveValue> changeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
-    {
-        int originalSize = changing.size();
-        ConstantKey k;
-        int op;
-        LiveValue e;
-        int index;
-        double v;
-        for (int i = 0; i < originalSize; i++) {
-            k = changing.keyAt(i);
-            e = changing.getAt(i);
-            v = e.actual();
-            for (ChangeTable ct : tables) {
-                if ((index = ct.indexer.getInt(k)) < 0)
-                    continue;
-                op = ct.changeSymbols.get(index);
-                switch (op) {
-                    case '=':
-                    case ~'=':
-                        v = ct.values.get(index);
-                        break;
-                    case '+':
-                    case ~'+':
-                        v += ct.values.get(index);
-                        break;
-                    case '-':
-                    case ~'-':
-                        v -= ct.values.get(index);
-                        break;
-                    case '*':
-                    case ~'*':
-                        v *= ct.values.get(index);
-                        break;
-                }
-            }
-            e.actual(v);
-        }
-        return changing;
-    }
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the destructive changes in the
-     * given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
-     * non-destructive change; non-destructive changes will be ignored here). If a key is not present in changing but a
-     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
-     * the other changes.
-     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
-     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
-     * @return the parameter this was given, after modifications
-     */
-    public static OrderedMap<ConstantKey, LiveValue> strikeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
-    {
-        int originalSize = changing.size();
-        ConstantKey k;
-        int op;
-        LiveValue e;
-        int index;
-        double v;
-        for (int i = 0; i < originalSize; i++) {
-            k = changing.keyAt(i);
-            e = changing.getAt(i);
-            v = e.actual();
-            for (ChangeTable ct : tables) {
-                if ((index = ct.indexer.getInt(k)) < 0)
-                    continue;
-                op = ct.changeSymbols.get(index);
-                switch (op) {
-                    case ~'=':
-                        v = ct.values.get(index);
-                        break;
-                    case ~'+':
-                        v += ct.values.get(index);
-                        break;
-                    case ~'-':
-                        v -= ct.values.get(index);
-                        break;
-                    case ~'*':
-                        v *= ct.values.get(index);
-                        break;
-                }
-            }
-            e.actual(v);
-        }
-        return changing;
-    }
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the non-destructive changes in
-     * the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
-     * non-destructive change; destructive changes will be ignored here). If a key is not present in changing but a
-     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
-     * the other changes. The changes applied by this method can be reversed, mostly, by 
-     * {@link #releaseManyLiveValues(OrderedMap, Iterable)}.
-     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
-     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
-     * @return the parameter this was given, after modifications
-     */
-    public static OrderedMap<ConstantKey, LiveValue> holdManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
-    {
-        int originalSize = changing.size();
-        ConstantKey k;
-        int op;
-        LiveValue e;
-        int index;
-        double v;
-        for (int i = 0; i < originalSize; i++) {
-            k = changing.keyAt(i);
-            e = changing.getAt(i);
-            v = e.actual();
-            for (ChangeTable ct : tables) {
-                if ((index = ct.indexer.getInt(k)) < 0)
-                    continue;
-                op = ct.changeSymbols.get(index);
-                switch (op) {
-                    case '=':
-                        v = ct.values.get(index);
-                        break;
-                    case '+':
-                        v += ct.values.get(index);
-                        break;
-                    case '-':
-                        v -= ct.values.get(index);
-                        break;
-                    case '*':
-                        v *= ct.values.get(index);
-                        break;
-                }
-            }
-            e.actual(v);
-        }
-        return changing;
-    }
-    /**
-     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the reversed non-destructive
-     * changes in the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold"
-     * is a non-destructive change that is reversed by a "release" operation; destructive changes will be ignored here).
-     * If a key is not present in changing but a ChangeTable in tables has an instruction to change that key, that
-     * instruction will be ignored without affecting the other changes.
-     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
-     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet; the opposite of its non-destructive instructions will be applied
-     * @return the parameter this was given, after modifications
-     */
-    public static OrderedMap<ConstantKey, LiveValue> releaseManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
-    {
-        int originalSize = changing.size();
-        ConstantKey k;
-        int op;
-        LiveValue e;
-        int index;
-        double v;
-        for (int i = 0; i < originalSize; i++) {
-            k = changing.keyAt(i);
-            e = changing.getAt(i);
-            v = e.actual();
-            for (ChangeTable ct : tables) {
-                if ((index = ct.indexer.getInt(k)) < 0)
-                    continue;
-                op = ct.changeSymbols.get(index);
-                switch (op) {
-                    case '=': // not yet sure how non-destructive assignment can even work
-                        //v = ct.values.get(index);
-                        break;
-                    case '+':
-                        v -= ct.values.get(index);
-                        break;
-                    case '-':
-                        v += ct.values.get(index);
-                        break;
-                    case '*':
-                        v /= ct.values.get(index);
-                        break;
-                }
-            }
-            e.actual(v);
-        }
-        return changing;
-    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to Double values using the changes in this ChangeTable.
+//     * Treats all changes as if they are destructive, which can be useful if non-destructive changes don't need to be
+//     * tracked for later removal.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to Double values; will be modified
+//     * @return the parameter this was given, after modifications
+//     */
+//    public OrderedMap<ConstantKey, Double> changeDoubles(OrderedMap<ConstantKey, Double> changing)
+//    {
+//        int mySize = values.size;
+//        ConstantKey k;
+//        int op;
+//        Double e;
+//        for (int i = 0; i < mySize; i++) {
+//            k = indexer.keyAt(i);
+//            op = changeSymbols.get(i);
+//            if((e = changing.get(k)) != null)
+//            {
+//                switch (op)
+//                {
+//                    case '=':
+//                    case ~'=':
+//                        changing.put(k, (double)values.get(i));
+//                        break;
+//                    case '+':
+//                    case ~'+':
+//                        changing.put(k, e + values.get(i));
+//                        break;
+//                    case '-':
+//                    case ~'-':
+//                        changing.put(k, e - values.get(i));
+//                        break;
+//                    case '*':
+//                    case ~'*':
+//                        changing.put(k, e * values.get(i));
+//                        break;
+//                }
+//            }
+//            else
+//            {
+//                switch (op)
+//                {
+//                    case '=':
+//                    case ~'=':
+//                        changing.put(k, (double)values.get(i));
+//                        break;
+//                    case '+':
+//                    case ~'+':
+//                        changing.put(k, (double)values.get(i));
+//                        break;
+//                    case '-':
+//                    case ~'-':
+//                        changing.put(k, -(double)values.get(i));
+//                        break;
+//                    case '*':
+//                    case ~'*':
+//                        changing.put(k, 0.0);
+//                        break;
+//                }
+//
+//            }
+//        }
+//        return changing;
+//    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in this ChangeTable.
+//     * If a key is not present in changing but this ChangeTable has an instruction to change that key, that instruction
+//     * will be ignored without affecting the rest of the changes. Treats all changes as if they are destructive, which
+//     * can be useful if non-destructive changes don't need to be tracked for later removal.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+//     * @return the parameter this was given, after modifications
+//     */
+//    public OrderedMap<ConstantKey, LiveValue> changeLiveValues(OrderedMap<ConstantKey, LiveValue> changing)
+//    {
+//        int mySize = values.size;
+//        ConstantKey k;
+//        int op;
+//        LiveValue e;
+//        for (int i = 0; i < mySize; i++) {
+//            k = indexer.keyAt(i);
+//            op = changeSymbols.get(i);
+//            if((e = changing.get(k)) != null)
+//            {
+//                switch (op)
+//                {
+//                    case '=':
+//                    case ~'=':
+//                        e.set(values.get(i));
+//                        break;
+//                    case '+':
+//                    case ~'+':
+//                        e.addActual(values.get(i));
+//                        break;
+//                    case '-':
+//                    case ~'-':
+//                        e.addActual(-values.get(i));
+//                        break;
+//                    case '*':
+//                    case ~'*':
+//                        e.multiplyActual(values.get(i));
+//                        break;
+//                }
+//            }
+//        }
+//        return changing;
+//    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using the changes in the given Iterable of
+//     * ChangeTable values. If a key is not present in changing but a ChangeTable in tables has an instruction to change
+//     * that key, that instruction will be ignored without affecting the other changes. Treats all changes as if they are
+//     * destructive, which can be useful if non-destructive changes don't need to be tracked for later removal.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+//     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+//     * @return the parameter this was given, after modifications
+//     */
+//    public static OrderedMap<ConstantKey, LiveValue> changeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+//    {
+//        int originalSize = changing.size();
+//        ConstantKey k;
+//        int op;
+//        LiveValue e;
+//        int index;
+//        double v;
+//        for (int i = 0; i < originalSize; i++) {
+//            k = changing.keyAt(i);
+//            e = changing.getAt(i);
+//            v = e.actual();
+//            for (ChangeTable ct : tables) {
+//                if ((index = ct.indexer.getInt(k)) < 0)
+//                    continue;
+//                op = ct.changeSymbols.get(index);
+//                switch (op) {
+//                    case '=':
+//                    case ~'=':
+//                        v = ct.values.get(index);
+//                        break;
+//                    case '+':
+//                    case ~'+':
+//                        v += ct.values.get(index);
+//                        break;
+//                    case '-':
+//                    case ~'-':
+//                        v -= ct.values.get(index);
+//                        break;
+//                    case '*':
+//                    case ~'*':
+//                        v *= ct.values.get(index);
+//                        break;
+//                }
+//            }
+//            e.actual(v);
+//        }
+//        return changing;
+//    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the destructive changes in the
+//     * given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+//     * non-destructive change; non-destructive changes will be ignored here). If a key is not present in changing but a
+//     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+//     * the other changes.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+//     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+//     * @return the parameter this was given, after modifications
+//     */
+//    public static OrderedMap<ConstantKey, LiveValue> strikeManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+//    {
+//        int originalSize = changing.size();
+//        ConstantKey k;
+//        int op;
+//        LiveValue e;
+//        int index;
+//        double v;
+//        for (int i = 0; i < originalSize; i++) {
+//            k = changing.keyAt(i);
+//            e = changing.getAt(i);
+//            v = e.actual();
+//            for (ChangeTable ct : tables) {
+//                if ((index = ct.indexer.getInt(k)) < 0)
+//                    continue;
+//                op = ct.changeSymbols.get(index);
+//                switch (op) {
+//                    case ~'=':
+//                        v = ct.values.get(index);
+//                        break;
+//                    case ~'+':
+//                        v += ct.values.get(index);
+//                        break;
+//                    case ~'-':
+//                        v -= ct.values.get(index);
+//                        break;
+//                    case ~'*':
+//                        v *= ct.values.get(index);
+//                        break;
+//                }
+//            }
+//            e.actual(v);
+//        }
+//        return changing;
+//    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the non-destructive changes in
+//     * the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold" is a
+//     * non-destructive change; destructive changes will be ignored here). If a key is not present in changing but a
+//     * ChangeTable in tables has an instruction to change that key, that instruction will be ignored without affecting
+//     * the other changes. The changes applied by this method can be reversed, mostly, by 
+//     * {@link #releaseManyLiveValues(OrderedMap, Iterable)}.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+//     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet
+//     * @return the parameter this was given, after modifications
+//     */
+//    public static OrderedMap<ConstantKey, LiveValue> holdManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+//    {
+//        int originalSize = changing.size();
+//        ConstantKey k;
+//        int op;
+//        LiveValue e;
+//        int index;
+//        double v;
+//        for (int i = 0; i < originalSize; i++) {
+//            k = changing.keyAt(i);
+//            e = changing.getAt(i);
+//            v = e.actual();
+//            for (ChangeTable ct : tables) {
+//                if ((index = ct.indexer.getInt(k)) < 0)
+//                    continue;
+//                op = ct.changeSymbols.get(index);
+//                switch (op) {
+//                    case '=':
+//                        v = ct.values.get(index);
+//                        break;
+//                    case '+':
+//                        v += ct.values.get(index);
+//                        break;
+//                    case '-':
+//                        v -= ct.values.get(index);
+//                        break;
+//                    case '*':
+//                        v *= ct.values.get(index);
+//                        break;
+//                }
+//            }
+//            e.actual(v);
+//        }
+//        return changing;
+//    }
+//    /**
+//     * Edits the existing OrderedMap of ConstantKey keys to LiveValue values using only the reversed non-destructive
+//     * changes in the given Iterable of ChangeTable values ("strike" is used to mean a destructive change, while "hold"
+//     * is a non-destructive change that is reversed by a "release" operation; destructive changes will be ignored here).
+//     * If a key is not present in changing but a ChangeTable in tables has an instruction to change that key, that
+//     * instruction will be ignored without affecting the other changes.
+//     * @param changing a non-null OrderedMap of ConstantKey keys to LiveValue values; will be modified
+//     * @param tables an Iterable of ChangeTable values, such as an ArrayList or OrderedSet; the opposite of its non-destructive instructions will be applied
+//     * @return the parameter this was given, after modifications
+//     */
+//    public static OrderedMap<ConstantKey, LiveValue> releaseManyLiveValues(OrderedMap<ConstantKey, LiveValue> changing, Iterable<ChangeTable> tables)
+//    {
+//        int originalSize = changing.size();
+//        ConstantKey k;
+//        int op;
+//        LiveValue e;
+//        int index;
+//        double v;
+//        for (int i = 0; i < originalSize; i++) {
+//            k = changing.keyAt(i);
+//            e = changing.getAt(i);
+//            v = e.actual();
+//            for (ChangeTable ct : tables) {
+//                if ((index = ct.indexer.getInt(k)) < 0)
+//                    continue;
+//                op = ct.changeSymbols.get(index);
+//                switch (op) {
+//                    case '=': // not yet sure how non-destructive assignment can even work
+//                        //v = ct.values.get(index);
+//                        break;
+//                    case '+':
+//                        v -= ct.values.get(index);
+//                        break;
+//                    case '-':
+//                        v += ct.values.get(index);
+//                        break;
+//                    case '*':
+//                        v /= ct.values.get(index);
+//                        break;
+//                }
+//            }
+//            e.actual(v);
+//        }
+//        return changing;
+//    }
 
     /**
      * Edits the existing Physical using only the destructive changes in the given Iterable of ChangeTable values
@@ -413,6 +413,19 @@ public class ChangeTable implements Iterable<ConstantKey> {
                     break;
                 case ~'*':
                     v *= ct.values.get(index);
+                    break;
+                    // be careful of these delta-related effects in strikes; they must be reversed with another ChangeTable, if at all
+                // set delta
+                case ~':':
+                    e.delta(ct.values.get(index));
+                    break;
+                // lessen, reduces LiveValue delta
+                case ~'<':
+                    e.delta(e.delta() - ct.values.get(index));
+                    break;
+                // raise, increases LiveValue delta
+                case ~'>':
+                    e.delta(e.delta() + ct.values.get(index));
                     break;
             }
             e.actual(v);
@@ -473,6 +486,18 @@ public class ChangeTable implements Iterable<ConstantKey> {
                 case '*':
                     v *= ct.values.get(index);
                     break;
+                // set delta
+                case ':':
+                    e.delta(ct.values.get(index));
+                    break;
+                // lessen, reduces LiveValue delta
+                case '<':
+                    e.delta(e.delta() - ct.values.get(index));
+                    break;
+                // raise, increases LiveValue delta
+                case '>':
+                    e.delta(e.delta() + ct.values.get(index));
+                    break;
             }
             e.actual(v);
         }
@@ -517,6 +542,18 @@ public class ChangeTable implements Iterable<ConstantKey> {
                     break;
                 case '*':
                     v /= ct.values.get(index);
+                    break;
+                // set delta
+                case ':': // again, not sure how non-destructive assignment works
+                    //e.delta(ct.values.get(index));
+                    break;
+                // lessen, reduces LiveValue delta
+                case '<':
+                    e.delta(e.delta() + ct.values.get(index));
+                    break;
+                // raise, increases LiveValue delta
+                case '>':
+                    e.delta(e.delta() - ct.values.get(index));
                     break;
             }
 
@@ -564,6 +601,20 @@ public class ChangeTable implements Iterable<ConstantKey> {
                     case ~'*':
                         v *= ct.values.get(index);
                         break;
+                    // be careful of these delta-related effects in strikes; they must be reversed with another ChangeTable, if at all
+                    // set delta
+                    case ~':':
+                        e.delta(ct.values.get(index));
+                        break;
+                    // lessen, reduces LiveValue delta
+                    case ~'<':
+                        e.delta(e.delta() - ct.values.get(index));
+                        break;
+                    // raise, increases LiveValue delta
+                    case ~'>':
+                        e.delta(e.delta() + ct.values.get(index));
+                        break;
+
                 }
             }
             e.actual(v);
@@ -627,6 +678,19 @@ public class ChangeTable implements Iterable<ConstantKey> {
                     case '*':
                         v *= ct.values.get(index);
                         break;
+                    // set delta
+                    case ':':
+                        e.delta(ct.values.get(index));
+                        break;
+                    // lessen, reduces LiveValue delta
+                    case '<':
+                        e.delta(e.delta() - ct.values.get(index));
+                        break;
+                    // raise, increases LiveValue delta
+                    case '>':
+                        e.delta(e.delta() + ct.values.get(index));
+                        break;
+
                 }
             }
             e.actual(v);
@@ -672,6 +736,18 @@ public class ChangeTable implements Iterable<ConstantKey> {
                         break;
                     case '*':
                         v /= ct.values.get(index);
+                        break;
+                    // set delta
+                    case ':': // again, not sure how non-destructive assignment works
+                        //e.delta(ct.values.get(index));
+                        break;
+                    // lessen, reduces LiveValue delta
+                    case '<':
+                        e.delta(e.delta() + ct.values.get(index));
+                        break;
+                    // raise, increases LiveValue delta
+                    case '>':
+                        e.delta(e.delta() - ct.values.get(index));
                         break;
                 }
             }

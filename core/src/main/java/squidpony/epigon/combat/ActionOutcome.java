@@ -173,7 +173,7 @@ public class ActionOutcome {
             if (ao.targetConditioned) {
                 Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element);
                 ChangeTable.strikePhysical(target, c.parent.changes);
-                target.conditions.add(c);
+                //target.conditions.add(c);
             }
         }
         return ao;

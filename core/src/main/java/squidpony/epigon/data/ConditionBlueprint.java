@@ -90,5 +90,10 @@ public class ConditionBlueprint extends EpiData {
                     null, null, null)
             , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff', ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
                     null, null, null)
+            , "Afflict", new ConditionBlueprint("afflict", "afflict$", 6, 1, Element.POISON, '\uffff', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.5, CalcStat.PRECISION, (int)'-', 3.0), null, null, null)
+            , "Bleed", new ConditionBlueprint("bleed", "cut$", 3, 1, Element.SLASHING, '\uffff', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.DAMAGE, (int)'-', 1.0), null, null, null)
+            , "Chill", new ConditionBlueprint("chill", "chill$", 3, 1, Element.ICE, '▯', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0), null, null, null)
+            , "Curse", new ConditionBlueprint("curse", "curse$", 3, 1, Element.FATEFUL, '\uffff', ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0), null, null, null)
+            , "Ignite", new ConditionBlueprint("ignite", "ignite$", 2, 1, Element.FIRE, 'ˇ', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5), null, null, null)
     );
 }
