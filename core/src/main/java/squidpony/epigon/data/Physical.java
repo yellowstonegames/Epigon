@@ -131,9 +131,8 @@ public class Physical extends EpiData {
             {1.5, 0.9, 0.25, 0.125, 0.0}, // aiming sniper
             {0.6, 0.6, 0.6, 0.6, 0.6}, // all-around
             {0.4, 0.7, 1.0, 0.5, 0.0}, // cow or other herbivore
-            {0.0, 1.1, 0.0, 1.1, 0.0}, // super weird chess-bishop alien thing
+            {0.2, 1.1, 0.2, 1.1, 0.2}, // super weird chess-bishop alien thing
     };
-    public double forward = 1.125, sideForward = 1.1, side = 0.4, sideBack = 0.25, back = 0.0;
 
     public void setAngle(Direction dir) {
         if(dir == null)
