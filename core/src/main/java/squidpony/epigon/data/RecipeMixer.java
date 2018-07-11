@@ -430,7 +430,7 @@ public class RecipeMixer {
         blueprint.stats.put(Stat.SIGHT, new LiveValue(9));
         blueprint.creatureData = new Creature();
         for (int i = 0; i < raw.training.size(); i++) {
-            blueprint.creatureData.skills.put(Skill.skillsByName.get(((OrderedMap<String, Integer>)raw.training).keyAt(i)),
+            blueprint.creatureData.skills.put(Skill.skillsByName.getOrDefault(((OrderedMap<String, Integer>)raw.training).keyAt(i), Skill.BRAWLER),
                     Rating.allRatings[((OrderedMap<String, Integer>)raw.training).getAt(i)]);
         }
         blueprint.creatureData.weaponChoices = new ProbabilityTable<>(blueprint.nextLong());

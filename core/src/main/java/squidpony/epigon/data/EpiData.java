@@ -1,9 +1,7 @@
 package squidpony.epigon.data;
 
 import squidpony.StringKit;
-import squidpony.squidmath.AbstractRNG;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.io.Serializable;
 
@@ -21,9 +19,11 @@ import static squidpony.epigon.Epigon.rootChaos;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is LinnormRNG, which is the default in SquidLib currently. It has very high quality and is tied
- * with another (slightly less-certain quality) generator for the fastest that can produce all possible results and pass
- * quality tests.
+ * algorithm this uses is TangleRNG, which is not yet in SquidLib but has been benchmarked in the related Sarong project
+ * and passes quality tests just fine. It has very high quality, including passing birthday-problem tests (which
+ * LightRNG and LinnormRNG do not) and also is faster than either of those. Each individual EpiData will have its own
+ * pattern of duplicate outputs and holes in the possible outputs; because each is different and random, this should be
+ * good for the actual quality (it also makes it less feasible to go backwards from output to states).
  */
 public abstract class EpiData extends AbstractRNG implements Serializable {
 
@@ -33,13 +33,14 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
 
     private String id;
     public final int idHash;
-    public long chaos;
+    private long chaos, jumble;
     
     private static int uniqueIntGen = 123456789;
 
     public EpiData() {
         idHash = (uniqueIntGen += 0x632BE5AB);
         chaos = rootChaos.nextLong();
+        jumble = chaos ^ (chaos + 0x6C8E9CF570932BD5L); // always odd, intentional
     }
     public EpiData(final String name)
     {
@@ -56,9 +57,12 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int next(int bits) {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (int)(z ^ z >>> 25) >>> (32 - bits);
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
+        return (int)(z ^ z >>> 22) >>> (32 - bits);
+//        long z = (chaos = chaos * 0x41C64E6DL + 1L);
+//        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+//        return (int)(z ^ z >>> 25) >>> (32 - bits);
     }
 
     /**
@@ -68,9 +72,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int nextInt() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (int)(z ^ z >>> 25);
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
+        return (int)(z ^ z >>> 22);
     }
 
     /**
@@ -80,9 +84,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final long nextLong() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return (z ^ z >>> 25);
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
+        return (z ^ z >>> 22);
     }
 
     /**
@@ -91,7 +95,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final boolean nextBoolean() {
-        return  (chaos = chaos * 0x41C64E6DL + 1L) < 0;
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        return  (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L) < 0L;
+//        return  (chaos = chaos * 0x41C64E6DL + 1L) < 0;
     }
 
     /**
@@ -102,9 +108,12 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final double nextDouble() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
+        return ((z ^ z >>> 22) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+//        long z = (chaos = chaos * 0x41C64E6DL + 1L);
+//        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+//        return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
     }
 
     /**
@@ -114,25 +123,30 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final float nextFloat() {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        return ((s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L) >>> 40) * 0x1p-24f;
+//        long z = (chaos = chaos * 0x41C64E6DL + 1L);
+//        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }
     
     public final double nextCurvedDouble()
     {
-        long z = (chaos = chaos * 0x41C64E6DL + 1L);
-        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
-        return NumberTools.formCurvedDouble(z ^ z >>> 25);
+        final long s = (chaos += 0x6C8E9CF570932BD5L);
+        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
+        return NumberTools.formCurvedDouble(z ^ z >>> 22);
+
+//        long z = (chaos = chaos * 0x41C64E6DL + 1L);
+//        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
+//        return NumberTools.formCurvedDouble(z ^ z >>> 25);
     }
     
     /**
-     * This can't copy itself because EpiData is abstract, so it returns a StatefulRNG with {@link #chaos} as its seed
-     * instead. This makes it stay an IRNG, but not an EpiData, and it won't use the same random number generation
-     * algorithm, either.
+     * This can't copy itself because EpiData is abstract, so it returns an RNG using a new TangleRNG as its
+     * RandomnessSource, seeded with this EpiData's chaos and jumble. This makes it stay an IRNG, but not an EpiData.
      */
     @Override
-    public StatefulRNG copy() {
-        return new StatefulRNG(chaos);
+    public RNG copy() {
+        return new RNG(new TangleRNG(chaos, jumble));
     }
 
     /**

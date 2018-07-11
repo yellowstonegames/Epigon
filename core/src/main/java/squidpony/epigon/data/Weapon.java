@@ -214,7 +214,7 @@ public class Weapon {
         if(training != null) {
             skills = new Skill[training.length];
             for (int i = 0; i < training.length; i++) {
-                skills[i] = Skill.skillsByName.get(training[i]);
+                skills[i] = Skill.skillsByName.getOrDefault(training[i], Skill.BRAWLER);
             }
         }
         blueprint.attached = (kind >= UNARMED);
