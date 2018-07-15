@@ -19,11 +19,16 @@ import static squidpony.epigon.Epigon.rootChaos;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is TangleRNG, which is not yet in SquidLib but has been benchmarked in the related Sarong project
- * and passes quality tests just fine. It has very high quality, including passing birthday-problem tests (which
- * LightRNG and LinnormRNG do not) and also is faster than either of those. Each individual EpiData will have its own
- * pattern of duplicate outputs and holes in the possible outputs; because each is different and random, this should be
- * good for the actual quality (it also makes it less feasible to go backwards from output to states).
+ * algorithm this uses is a variant on TangleRNG from SquidLib that should have similarly excellent speed and also
+ * slightly better quality. It passes birthday-problem tests (which LightRNG and LinnormRNG do not) and also is faster
+ * than either of those. Each individual EpiData will have its own pattern of duplicate outputs and holes in the
+ * possible outputs; because each is different and random, this should be good for the actual quality (it also makes it
+ * less feasible to go backwards from output to states). The large long constants used here are a frequently-used
+ * number based off the fractional portion of the golden ratio times 2 to the 64, and a similar number based off 
+ * <a href="https://en.wikipedia.org/wiki/Gelfond%27s_constant">Gelfond's constant</a> times 2 to the 64 then divided by
+ * 50. Both the golden ratio and Gelfond's constant are transcendental, which has good properties for Weyl sequence
+ * increments (as they are used here).
+ * 
  */
 public abstract class EpiData extends AbstractRNG implements Serializable {
 
@@ -57,9 +62,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int next(int bits) {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
-        return (int)(z ^ z >>> 22) >>> (32 - bits);
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        final long z = (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L);
+        return (int)(z ^ z >>> 28) >>> (32 - bits);
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return (int)(z ^ z >>> 25) >>> (32 - bits);
@@ -72,9 +77,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final int nextInt() {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
-        return (int)(z ^ z >>> 22);
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        final long z = (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L);
+        return (int)(z ^ z >>> 28);
     }
 
     /**
@@ -84,9 +89,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final long nextLong() {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
-        return (z ^ z >>> 22);
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        final long z = (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L);
+        return (z ^ z >>> 28);
     }
 
     /**
@@ -95,8 +100,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final boolean nextBoolean() {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        return  (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L) < 0L;
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        return  (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L) < 0L;
 //        return  (chaos = chaos * 0x41C64E6DL + 1L) < 0;
     }
 
@@ -108,9 +113,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final double nextDouble() {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
-        return ((z ^ z >>> 22) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        final long z = (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L);
+        return ((z ^ z >>> 28) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
@@ -123,17 +128,17 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final float nextFloat() {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        return ((s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L) >>> 40) * 0x1p-24f;
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        return ((s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L) >>> 40) * 0x1p-24f;
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }
     
     public final double nextCurvedDouble()
     {
-        final long s = (chaos += 0x6C8E9CF570932BD5L);
-        final long z = (s ^ s >>> 25) * (jumble += 0x9E3779B97F4A7C16L);
-        return NumberTools.formCurvedDouble(z ^ z >>> 22);
+        final long s = (chaos += 0x9E3779B97F4A7C15L);
+        final long z = (s ^ s >>> 30) * (jumble += 0x767AF7F94A9FDF56L);
+        return NumberTools.formCurvedDouble(z ^ z >>> 28);
 
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;

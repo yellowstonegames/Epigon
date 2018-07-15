@@ -346,7 +346,10 @@ public class HandBuilt {
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
         String culture = playerBlueprint.getRandomElement(unarmed.rawWeapon.culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
-        for (int i = 0; i < 3 && i < possibleItems.size(); i++) {
+        playerBlueprint.inventory.add(RecipeMixer.applyModification(
+                RecipeMixer.buildWeapon(possibleItems.get(0).copy(), playerBlueprint), 
+                beamWeaponModification()));
+        for (int i = 1; i < 3 && i < possibleItems.size(); i++) {
             playerBlueprint.inventory.add(RecipeMixer.buildWeapon(possibleItems.get(i).copy(), playerBlueprint));
         }
         // and one weapon from some other group
@@ -495,4 +498,13 @@ public class HandBuilt {
         meaten.quantity = rng.between(1, 3);
         return meaten;
     }
+    public static Modification beamWeaponModification()
+    {
+        Modification mod = new Modification();
+        mod.possiblePrefix.add("beam");
+        mod.color = mod.getRandomElement(SColor.COLOR_WHEEL_PALETTE_BRIGHT);
+        mod.radiance = new Radiance(5.8f, ((SColor) mod.color).toEditedFloat(0f, -0.1f, 0.3f, 0f), 0f, 2.1f);
+        return mod;
+    }
+
 }

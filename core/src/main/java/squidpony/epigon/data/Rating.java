@@ -47,7 +47,7 @@ public enum Rating {
             case TYPICAL:
                 return SColor.CW_PALE_JADE; // Whitish-green
             case GOOD:
-                return SColor.EMERALD; // Deeper green
+                return SColor.FOREST_GREEN; // Deeper green
             case HIGH:
                 return SColor.CW_AZURE; // Blue
             case SUPERB:
@@ -58,7 +58,7 @@ public enum Rating {
                 return SColor.FUCSHIA_PINK;// Pink
             case NONE:
             default:
-                return SColor.ALOEWOOD_BROWN; // Dark grey
+                return SColor.ALOEWOOD_BROWN; // Dark grey; not actually brown!
         }
     }
 

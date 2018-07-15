@@ -489,7 +489,7 @@ public class Epigon extends Game {
         }
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
-        player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
+        //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
         contextHandler.setMap(map);
         fxHandler.seen = map.fovResult;
         creatures = map.creatures;
@@ -521,7 +521,7 @@ public class Epigon extends Game {
                             Element element = ao.element;
                             if (map.fovResult[c.x][c.y] > 0) {
                                 Direction dir = Direction.getDirection(player.location.x - creature.location.x, player.location.y - creature.location.y);
-                                creature.setAngle(dir);
+//                                creature.setAngle(dir);
                                 fxHandler.attackEffect(creature, player, ao, dir);
                             }
                             if (ao.hit) {
@@ -776,10 +776,13 @@ public class Epigon extends Game {
 
     private void calcFOV(int checkX, int checkY) {
         double sight = player.stats.get(Stat.SIGHT).actual();
-        FOV.reuseFOV(map.opacities(), map.losResult, checkX, checkY, sight * 2.0, Radius.SQUARE,
-                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
-        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE,
-                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
+        FOV.reuseLOS(map.opacities(), map.losResult, checkX, checkY);
+        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE);
+
+//        FOV.reuseFOV(map.opacities(), map.losResult, checkX, checkY, sight * 2.0, Radius.SQUARE,
+//                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
+//        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE,
+//                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
         for (int x = 0; x < map.width; x++) {
@@ -952,7 +955,7 @@ public class Epigon extends Game {
         for(ActionOutcome ao : aos) {
             Element element = ao.element;
             Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
-            player.setAngle(dir);
+//            player.setAngle(dir);
             calcFOV(player.location.x, player.location.y);
             fxHandler.attackEffect(player, target, ao, dir);
             //mapSLayers.bump(player.appearance, dir, 0.145f);
@@ -1040,7 +1043,7 @@ public class Epigon extends Game {
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
         Element element = ao.element;
         Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
-        player.setAngle(dir);
+//        player.setAngle(dir);
         calcFOV(player.location.x, player.location.y);
         fxHandler.attackEffect(player, target, ao, dir);
         //mapSLayers.bump(player.appearance, dir, 0.145f);
@@ -1141,7 +1144,7 @@ public class Epigon extends Game {
         if (map.contents[newX][newY].blockage == null) {
             mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () ->
             {
-                player.setAngle(dir);
+//                player.setAngle(dir);
                 calcFOV(newX, newY);
                 calcDijkstra();
                 runTurn();
@@ -1573,7 +1576,7 @@ public class Epigon extends Game {
                             if(p.countsAs(handBuilt.baseClosedDoor))
                             {
                                 RecipeMixer.applyModification(p, handBuilt.openDoor);
-                                player.setAngle(d);
+//                                player.setAngle(d);
                             }
                         }
                     }
@@ -1601,7 +1604,7 @@ public class Epigon extends Game {
                             if(p.countsAs(handBuilt.baseOpenDoor))
                             {
                                 RecipeMixer.applyModification(p, handBuilt.closeDoor);
-                                player.setAngle(d.opposite());
+//                                player.setAngle(d.opposite());
                             }
                         }
                     }

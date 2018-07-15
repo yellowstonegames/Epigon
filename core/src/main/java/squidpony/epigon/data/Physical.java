@@ -8,7 +8,6 @@ import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.*;
-import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
@@ -120,43 +119,43 @@ public class Physical extends EpiData {
     // Non-action mixins
     public Terrain terrainData;
 
-    public double facingAngle = 0.0;
+//    public double facingAngle = 0.0;
     
-    public final double[] directionRanges = new double[5]; // final so I don't copy a reference to an array
+//    public final double[] directionRanges = new double[5]; // final so I don't copy a reference to an array
     
-    public static final double[][] rangeChoices = {
-            {0.9, 0.8, 0.7, 0.5, 0.25}, // brawler
-            {1.1, 0.95, 0.6, 0.4, 0.1}, // well-rounded
-            {1.25, 1.1, 0.4, 0.25, 0.0}, // template from old docs, maybe a wizard?
-            {1.5, 0.9, 0.25, 0.125, 0.0}, // aiming sniper
-            {0.6, 0.6, 0.6, 0.6, 0.6}, // all-around
-            {0.4, 0.7, 1.0, 0.5, 0.0}, // cow or other herbivore
-            {0.2, 1.1, 0.2, 1.1, 0.2}, // super weird chess-bishop alien thing
-    };
+//    public static final double[][] rangeChoices = {
+//            {0.9, 0.8, 0.7, 0.5, 0.25}, // brawler
+//            {1.1, 0.95, 0.6, 0.4, 0.1}, // well-rounded
+//            {1.25, 1.1, 0.4, 0.25, 0.0}, // template from old docs, maybe a wizard?
+//            {1.5, 0.9, 0.25, 0.125, 0.0}, // aiming sniper
+//            {0.6, 0.6, 0.6, 0.6, 0.6}, // all-around
+//            {0.4, 0.7, 1.0, 0.5, 0.0}, // cow or other herbivore
+//            {0.2, 1.1, 0.2, 1.1, 0.2}, // super weird chess-bishop alien thing
+//    };
 
-    public void setAngle(Direction dir) {
-        if(dir == null)
-            return;
-        switch (dir)
-        {
-            case RIGHT: facingAngle = 0.0; break;
-            case DOWN_RIGHT: facingAngle = 45.0; break;
-            case DOWN: facingAngle = 90.0; break;
-            case DOWN_LEFT: facingAngle = 135.0; break;
-            case LEFT: facingAngle = 180.0; break;
-            case UP_LEFT: facingAngle = 225.0; break;
-            case UP: facingAngle = 270.0; break;
-            case UP_RIGHT: facingAngle = 315.0; break;
-        }
-    }
+//    public void setAngle(Direction dir) {
+//        if(dir == null)
+//            return;
+//        switch (dir)
+//        {
+//            case RIGHT: facingAngle = 0.0; break;
+//            case DOWN_RIGHT: facingAngle = 45.0; break;
+//            case DOWN: facingAngle = 90.0; break;
+//            case DOWN_LEFT: facingAngle = 135.0; break;
+//            case LEFT: facingAngle = 180.0; break;
+//            case UP_LEFT: facingAngle = 225.0; break;
+//            case UP: facingAngle = 270.0; break;
+//            case UP_RIGHT: facingAngle = 315.0; break;
+//        }
+//    }
 
 
     public Physical() {
         super();
         stats.put(Stat.OPACITY, new LiveValue(1)); // default to opaque
         stats.put(Stat.MOBILITY, new LiveValue(0)); // default to not being able to move
-        facingAngle = (idHash & 7) * 45.0;
-        System.arraycopy(rangeChoices[nextInt(5)], 0, directionRanges, 0, 5);
+//        facingAngle = (idHash & 7) * 45.0;
+//        System.arraycopy(rangeChoices[nextInt(5)], 0, directionRanges, 0, 5);
         
     }
     public static Physical makeBasic(String name, char symbol, Color color)
