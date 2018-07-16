@@ -1,21 +1,26 @@
-name	description	location
+name^	description	location
 Bididhayi	A now-peaceful theocracy that has benefited greatly from their warlike Chobesh neighbors' collapse.	South Mid-Cap
 Cheuritae	A conglomerate of various island groups that sends privateers to raid other nations' ships.	East Rim
 Chobesh	A formerly-powerful kingdom that lost it all after a century at war with its neighbors, and lies in ruin.	West Mid-Cap
 Elethian	The unified nation of elves; these long-lived people have little interest in short-term power grabs.	North Mid-Cap
 Hidzaajji	A desert nation that has built up strength through alliances and trade; they compete with Geuhwae.	South Outer-Cap
-Hueztotli	A nation that has somehow survived despite being based in a jungle with terrifyingly-strong monsters.	North Inner-Cap
-Hyrden	An alliance of a church and a kingdom; they routinely crusade against undead in the West Bowl.	West Outer-Cap
+Siarrolla	A formidable naval armada that controls a puppet kingdom while frequently invading the Tip nations.	North Inner-Cap
+Hyrden	An alliance of a church and a kingdom; they routinely crusade against Xuruk's nearby undead.	West Outer-Cap
 Ikkutiq	A magically-formidable utopia that thrives deep in the dangerous Bowl using their arcane barriers.	North Bowl
 Jalgeaux	A potent nation where the sizable aristocratic class manipulates the lower classes away from revolt.	West Inner-Cap
 Geuhwae	A massive empire that formed from the merger of various rival states; it is an economic titan.	East Mid-Cap
 Khainghal	A nomadic group that moves between dodging monsters near Hueztotli and raiding Geuhwae.	East Inner-Cap
 Krort	A grouping of similar Orc tribes that, unable to easily raid Ikkutiq, have settled down to learn magic.	North Rim
 Laathrik	A group of Kobold clans that tunnel under undead palaces to raid them of their riches.	East Bowl
-Mbegonda	A group of nations across a wide area that speak a common language, but don't share a government.	South Inner-Cap
+Tekikerrek	A hive-state of insect-people whose Queen's word is law; they seem to be allied with Khanghal.	South Inner-Cap
 Mobyuld	An attempt at a Goblin nation, modeled after Ugexiir, that wants to be a dominant force in the Bowl.	South Bowl
-Ninja	A rebel state that has split off of Otekai, and has been embroiled in that civil war for centuries.	East Outer-Cap
-Otekai	An honor-driven nation that refuses to admit surrender or sign a treaty in their war against the Ninja.	East Outer-Cap
+Notsurashi	A rebel state that has split off of Otekai, and has been embroiled in that civil war for centuries.	East Outer-Cap
+Otekai	An honor-driven nation that refuses to admit surrender or sign a treaty in their war against Notsurashi.	East Outer-Cap
 Ugexiir	A land that has driven off many Goblin invasions, and watches with curiosity as Mobyuld forms.	South Rim
-Zedmedov	A grim nation that has the misfortune of being located closest to the undead-infested West Bowl.	West Rim
-Nuruk	A fallen empire of necromancers overthrown by their undead minions; the walking dead own this land.	West Bowl
+Zedmedov	A grim nation that has the misfortune of being located closest to the undead hordes of Xuruk.	West Rim
+Vroyuul	An organized civilization of amphibious tentacled humanoids that trades heavily with the Deep Lands.	North Tip
+Hueztotli	A nation that has somehow survived despite being based in a jungle with terrifyingly-strong monsters.	East Tip
+Mbegonda	A group of nations across a wide area that speak a common language, but don't share a government.	South Tip
+Whareowa	A small island nation that has nonetheless intimidated its neighbors into respecting its territory.	West Tip
+Xuruk	A fallen empire of necromancers overthrown by their undead minions; the walking dead own this land.	West Bowl
+Beast	Monsters that aren't part of a civilization are generally called beasts, regardless of their intelligence.	Everywhere

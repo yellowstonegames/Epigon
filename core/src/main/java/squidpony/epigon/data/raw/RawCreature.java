@@ -1,22 +1,21 @@
 package squidpony.epigon.data.raw;
 
-import squidpony.squidmath.NumberTools;
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-
-import static squidpony.squidmath.OrderedMap.makeMap;
+import squidpony.squidmath.NumberTools;
 
 public class RawCreature implements Serializable {
   public static final long serialVersionUID = 1L;
 
   public static final RawCreature[] ENTRIES = new RawCreature[] {
-    new RawCreature("goblin nincompoop", "The laughingstock of other goblins, who themselves are the laughingstock of everyone else.", "ģ/", "CW Drab Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("carving knife"), RawWeapon.get("sickle"), RawWeapon.get("sling")}, 2, 1, 3, 4, 3, 1, 2, 6, 0, 0, 6, 1, 1, 1, 5, makeMap("hunter", 1, "swordsman", 1), new String[] {"Mobyuld"}),
-    new RawCreature("goblin delinquent", "The toughest goblin... of a group of the weakest goblins. Possibly a threat, maybe? To a toy poodle?", "ɠ*", "CW Flush Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("section staff"), RawWeapon.get("meteor flail"), RawWeapon.get("staff sling")}, 3, 2, 3, 4, 3, 2, 2, 5, 0, 0, 5, 2, 2, 1, 5, makeMap("jester", 1, "brawler", 2), new String[] {"Mobyuld"}),
-    new RawCreature("hobgoblin grunt", "Bigger than the average human, but a little lacking in the creative thinking department. Seems to like taking orders.", "ġ", "CW Faded Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("khopesh"), RawWeapon.get("heavy shield"), RawWeapon.get("hammer")}, 5, 6, 2, 1, 2, 4, 0, 6, 0, 0, 4, 5, 5, 1, 6, makeMap("brute", 2, "guardian", 1), new String[] {"Mobyuld"}),
-    new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}),
-    new RawCreature("Hell lion", "Like a lion... from Hell. Big pointy teeth, serious claws, and fire magic.", "L*", "Coral Red", RawWeapon.get("fire magic"), new RawWeapon[] {RawWeapon.get("raking claws"), RawWeapon.get("mauling bite")}, 3, 9, 3, 2, 2, 6, 0, 0, 0, 0, 5, 20, 7, 6, 7, makeMap("sorcerer", 3, "hunter", 4), new String[] {"Beast"}),
+    new RawCreature("goblin nincompoop", "The laughingstock of other goblins, who themselves are the laughingstock of everyone else.", "ģ/", "CW Drab Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("carving knife"), RawWeapon.get("sickle"), RawWeapon.get("sling")}, 2, 1, 3, 4, 3, 1, 2, 6, 0, 0, 6, 1, 1, 1, 5, 36, makeMap("hunter", 1, "swordsman", 1), new String[] {"Mobyuld"}),
+    new RawCreature("goblin delinquent", "The toughest goblin... of a group of the weakest goblins. Possibly a threat, maybe? To a toy poodle?", "ɠ*", "CW Flush Chartreuse", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("section staff"), RawWeapon.get("meteor flail"), RawWeapon.get("staff sling")}, 3, 2, 3, 4, 3, 2, 2, 5, 0, 0, 5, 2, 2, 1, 5, 39, makeMap("jester", 1, "brawler", 2), new String[] {"Mobyuld"}),
+    new RawCreature("hobgoblin grunt", "Bigger than the average human, but a little lacking in the creative thinking department. Seems to like taking orders.", "ġ", "CW Faded Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("khopesh"), RawWeapon.get("heavy shield"), RawWeapon.get("hammer")}, 5, 6, 2, 1, 2, 4, 0, 6, 0, 0, 4, 5, 5, 1, 6, 47, makeMap("brute", 2, "guardian", 1), new String[] {"Mobyuld"}),
+    new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, 53, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}),
+    new RawCreature("Hell lion", "Like a lion... from Hell. Big pointy teeth, serious claws, and fire magic.", "L*", "Coral Red", RawWeapon.get("fire magic"), new RawWeapon[] {RawWeapon.get("raking claws"), RawWeapon.get("mauling bite")}, 3, 9, 3, 2, 2, 6, 0, 0, 0, 0, 5, 20, 7, 6, 7, 70, makeMap("sorcerer", 3, "hunter", 4), new String[] {"Beast"}),
   };
 
   public static final Map<String, RawCreature> MAPPING = makeMap(
@@ -65,6 +64,8 @@ public class RawCreature implements Serializable {
 
   public double sanity;
 
+  public int total;
+
   public Map<String, Integer> training;
 
   public String[] culture;
@@ -76,7 +77,7 @@ public class RawCreature implements Serializable {
       RawWeapon baseWeapon, RawWeapon[] weapons, double precision, double damage, double crit,
       double influence, double evasion, double defense, double luck, double stealth, double range,
       double area, double quickness, double vigor, double endurance, double spirit, double sanity,
-      Map<String, Integer> training, String[] culture) {
+      int total, Map<String, Integer> training, String[] culture) {
     this.name = name;
     this.description = description;
     this.symbol = symbol;
@@ -98,6 +99,7 @@ public class RawCreature implements Serializable {
     this.endurance = endurance;
     this.spirit = spirit;
     this.sanity = sanity;
+    this.total = total;
     this.training = training;
     this.culture = culture;
   }
@@ -144,6 +146,7 @@ public class RawCreature implements Serializable {
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(endurance));
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(spirit));
     result += (a ^= 0x8329C6EB9E6AD3E3L * NumberTools.doubleToLongBits(sanity));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * total);
     result += (a ^= 0x8329C6EB9E6AD3E3L * hashBasic(training));
     innerR = 0x9E3779B97F4A7C94L;
     innerA = 0x632BE59BD9B4E019L;
@@ -193,6 +196,7 @@ public class RawCreature implements Serializable {
     if (endurance != other.endurance) return false;
     if (spirit != other.spirit) return false;
     if (sanity != other.sanity) return false;
+    if (total != other.total) return false;
     if (training != null ? !training.equals(other.training) : other.training != null) return false;
     if(!stringArrayEquals(culture, other.culture)) return false;
     return true;

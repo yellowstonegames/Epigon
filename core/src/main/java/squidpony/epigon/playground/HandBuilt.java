@@ -345,6 +345,7 @@ public class HandBuilt {
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);
         String culture = playerBlueprint.getRandomElement(unarmed.rawWeapon.culture);
+        System.out.println("Player's culture is " + culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         playerBlueprint.inventory.add(RecipeMixer.applyModification(
                 RecipeMixer.buildWeapon(possibleItems.get(0).copy(), playerBlueprint), 
