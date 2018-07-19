@@ -16,11 +16,17 @@ public class RawCreature implements Serializable {
     new RawCreature("hobgoblin grunt", "Bigger than the average human, but a little lacking in the creative thinking department. Seems to like taking orders.", "ġ", "CW Faded Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("khopesh"), RawWeapon.get("heavy shield"), RawWeapon.get("hammer")}, 5, 6, 2, 1, 2, 4, 0, 6, 0, 0, 4, 5, 5, 1, 6, 47, makeMap("brute", 2, "guardian", 1), new String[] {"Mobyuld"}),
     new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, 53, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}),
     new RawCreature("Hell lion", "Like a lion... from Hell. Big pointy teeth, serious claws, and fire magic.", "L*", "Coral Red", RawWeapon.get("fire magic"), new RawWeapon[] {RawWeapon.get("raking claws"), RawWeapon.get("mauling bite")}, 3, 9, 3, 2, 2, 6, 0, 0, 0, 0, 5, 20, 7, 6, 7, 70, makeMap("sorcerer", 3, "hunter", 4), new String[] {"Beast"}),
+    new RawCreature("squishy", "A mobile slime mold the size of a small dog.", "s", "CW Faded Purple", RawWeapon.get("wriggling cilia"), new RawWeapon[] {RawWeapon.get("lashing tentacles")}, 7, 1, 1, 1, 6, 7, 4, 3, 0, 0, 3, 2, 3, 2, 5, 45, makeMap("scavenger", 3), new String[] {"Vroyuul"}),
+    new RawCreature("bull squishy", "A large squishy with a wild tangle of hardened bits that act as antlers for fighting.", "š", "CW Drab Purple", RawWeapon.get("majestic antlers"), new RawWeapon[] {RawWeapon.get("lashing tentacles"), RawWeapon.get("wriggling cilia")}, 5, 8, 4, 2, 3, 8, 2, 0, 0, 0, 2, 8, 8, 2, 5, 57, makeMap("brute", 4, "guardian", 2), new String[] {"Vroyuul"}),
+    new RawCreature("farmer squishy", "A very large squishy that actively seeks out organics to break down into food for its herd.", "ŝ*", "CW Flush Magenta", RawWeapon.get("lashing tentacles"), new RawWeapon[] {RawWeapon.get("wriggling cilia"), RawWeapon.get("toxic sting")}, 6, 6, 2, 4, 4, 7, 2, 0, 0, 0, 1, 12, 9, 2, 5, 60, makeMap("scavenger", 5, "hunter", 2, "farmer", 2), new String[] {"Vroyuul"}),
+    new RawCreature("squishy farmer", "A human who specializes in raising and caring for squishy.", "@/", "CW Light Purple", RawWeapon.get("Siarrolla style"), new RawWeapon[] {RawWeapon.get("net"), RawWeapon.get("carving knife")}, 1, 2, 1, 2, 2, 3, 5, 4, 0, 0, 4, 1, 3, 2, 6, 36, makeMap("farmer", 3, "guardian", 1), new String[] {"Siarrolla"}),
   };
 
   public static final Map<String, RawCreature> MAPPING = makeMap(
   "goblin nincompoop", ENTRIES[0], "goblin delinquent", ENTRIES[1], "hobgoblin grunt",
-  ENTRIES[2], "hobgoblin captain", ENTRIES[3], "Hell lion", ENTRIES[4]);
+  ENTRIES[2], "hobgoblin captain", ENTRIES[3], "Hell lion", ENTRIES[4],
+  "squishy", ENTRIES[5], "bull squishy", ENTRIES[6], "farmer squishy",
+  ENTRIES[7], "squishy farmer", ENTRIES[8]);
 
   public String name;
 
