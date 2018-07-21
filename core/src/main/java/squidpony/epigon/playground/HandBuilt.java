@@ -295,6 +295,7 @@ public class HandBuilt {
         hat.rarity = Rating.SUPERB;
         hat.color = SColor.DARK_SPRING_GREEN.toFloatBits();
         cb.equippedBySlot.put(ClothingSlot.HEAD, hat);
+        cb.equippedDistinct.add(hat);
         Physical shirt = RecipeMixer.mix(shirtRecipe, Cloth.VELVET).get(0);
         shirt.rarity = Rating.TYPICAL;
         shirt.color = SColor.CW_FADED_JADE.toFloatBits();
@@ -303,12 +304,14 @@ public class HandBuilt {
         cb.equippedBySlot.put(ClothingSlot.RIGHT_SHOULDER, shirt);
         cb.equippedBySlot.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
         cb.equippedBySlot.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
+        cb.equippedDistinct.add(shirt);
         Physical pants = RecipeMixer.mix(pantsRecipe, Cloth.DENIM).get(0); // jeans, why not
         pants.rarity = Rating.SLIGHT;
         pants.color = SColor.CW_DRAB_AZURE.toFloatBits(); // blue jeans
         cb.equippedBySlot.put(ClothingSlot.WAIST, pants);
         cb.equippedBySlot.put(ClothingSlot.LEFT_LEG, pants);
         cb.equippedBySlot.put(ClothingSlot.RIGHT_LEG, pants);
+        cb.equippedDistinct.add(pants);
 
         cb.skills = new OrderedMap<>();
         int[] ordering = rng.randomOrdering(Skill.combatSkills.size());

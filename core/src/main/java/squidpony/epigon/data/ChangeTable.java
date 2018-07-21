@@ -6,12 +6,13 @@ import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.IntVLA;
 import squidpony.squidmath.OrderedMap;
 
+import java.util.AbstractCollection;
 import java.util.Iterator;
 
 /**
  * Created by Tommy Ettinger on 1/23/2018.
  */
-public class ChangeTable implements Iterable<ConstantKey> {
+public class ChangeTable extends AbstractCollection<ConstantKey> {
     public Arrangement<ConstantKey> indexer;
     public FloatArray values;
     public IntVLA changeSymbols, unrelatedSymbols;
@@ -64,6 +65,7 @@ public class ChangeTable implements Iterable<ConstantKey> {
 
     }
 
+    @Override
     public void clear() {
         indexer.clear();
         values.clear();
@@ -71,10 +73,12 @@ public class ChangeTable implements Iterable<ConstantKey> {
         unrelatedSymbols.clear();
     }
 
+    @Override
     public int size() {
         return values.size;
     }
 
+    @Override
     public boolean isEmpty() {
         return indexer.isEmpty();
     }
@@ -756,6 +760,13 @@ public class ChangeTable implements Iterable<ConstantKey> {
         return physical;
     }
 
+    /**
+     * Takes parameters in groups of three, first a ConstantKey (or null), then an Integer, then a Double.
+     * For example, {@code ChangeTable.makeCT(CalcStat.DAMAGE, (int)'-', 2.0, null, ~'d', 2.0)} would penalize
+     * damage by 2.0 and have a chance to instantly disarm the target.
+     * @param rest vararg made of groups of three consisting of ConstantKey, Integer, Double
+     * @return a new ChangeTable
+     */
     public static ChangeTable makeCT(Object... rest)
     {
         if(rest == null || rest.length < 3)

@@ -18,7 +18,7 @@ import static squidpony.epigon.data.Physical.basePhysical;
 public class Weapon {
     public static final int HANDS = 11;
     public RawWeapon rawWeapon;
-    public int hands = 1;
+    public int hands;
     public Physical blueprint;
     public RecipeBlueprint recipeBlueprint;
     public ChangeTable calcStats;

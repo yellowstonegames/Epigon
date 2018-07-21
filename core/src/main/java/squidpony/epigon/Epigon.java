@@ -180,7 +180,7 @@ public class Epigon extends Game {
 
     public Epigon() {
         mixer = new RecipeMixer();
-        handBuilt = new HandBuilt(mixer);
+        //handBuilt = new HandBuilt(mixer);
         Weapon.init();
     }
 
@@ -341,7 +341,7 @@ public class Epigon extends Game {
     private void startGame() {
         mapSLayers.clear();
         mapSLayers.glyphs.clear();
-        mapSLayers.animationCount = 0;
+        mapSLayers.clearActions();
         handBuilt = new HandBuilt(mixer);
 
         mapSLayers.addLayer();//first added layer adds at level 1, used for cases when we need "extra background"
@@ -868,31 +868,55 @@ public class Epigon extends Game {
 //            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
 //        else
 //            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
-        switch (item.weaponData.hands) {
-            case 2:
-                player.equip(item, BOTH);
-                break;
-            case 0:
-                player.creatureData.weaponChoices.add(item.weaponData, 1);
-                break;
-            case 3:
-                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
+        if(item.weaponData == null)
+        {
+            //TODO: non-weapon items don't know how or where they should be equipped yet
+            // this will just unequip hats and things
+            player.creatureData.equippedBySlot.removeAt(player.creatureData.equippedBySlot.valuesAsList().indexOf(item));
+        }
+        else {
+            switch (item.weaponData.hands) {
+                case 2:
+                    player.equip(item, BOTH);
+                    break;
+                case 0:
+                    player.creatureData.weaponChoices.add(item.weaponData, 1);
+                    break;
+                case 3:
+                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
+                        player.unequip(HEAD);                     
                     player.equip(item, HEAD);
-                break;
-            case 4:
-                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
+                    break;
+                case 4:
+                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
+                        player.unequip(NECK);                     
                     player.equip(item, NECK);
-                break;
-            case 5:
-                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) && !player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
+                    break;
+                case 5:
+                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) || player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
+                        player.unequip(FEET);                     
                     player.equip(item, FEET);
-                break;
-            case 1:
-                if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
-                    player.equip(item, RIGHT);
-                else
-                    player.equip(item, LEFT);
-                break;
+                    break;
+                case 1:
+                    if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
+                        player.equip(item, RIGHT);
+                    else if(player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_HAND)) {
+                        if(player.nextBoolean())
+                        {
+                            player.unequip(RIGHT);
+                            player.equip(item, RIGHT);
+                        }
+                        else
+                        {
+                            player.unequip(LEFT);
+                            player.equip(item, LEFT);
+                        }
+                    }
+                    else
+                        player.equip(item, LEFT);
+
+                    break;
+            }
         }
     }
 

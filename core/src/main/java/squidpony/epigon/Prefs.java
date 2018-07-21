@@ -9,7 +9,7 @@ public class Prefs {
 
     static private int screenWidth = Epigon.totalPixelWidth();
     static private int screenHeight = Epigon.totalPixelHeight();
-    private static final String title = "Epigon - The next one";
+    private static final String title = "Epigon";
     private static final String prefKey = "Epigon";
     static private boolean debug = true;
 

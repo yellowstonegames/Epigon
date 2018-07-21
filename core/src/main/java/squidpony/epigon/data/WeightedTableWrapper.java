@@ -44,8 +44,17 @@ public class WeightedTableWrapper<T> {
         this.items = Maker.makeList(items);
         int len = items.length;
         table = new WeightedTable(originalWeights = Arrays.copyOf(weights, len));
-        minAmounts = new IntVLA(mins);
-        maxAmounts = new IntVLA(maxes);
+        if (mins == null || maxes == null) {
+            minAmounts = new IntVLA(len);
+            maxAmounts = new IntVLA(len);
+            for (int i = 0; i < len; i++) {
+                minAmounts.add(1);
+                maxAmounts.add(1);
+            }
+        } else {
+            minAmounts = new IntVLA(mins);
+            maxAmounts = new IntVLA(maxes);
+        }
     }
     public WeightedTableWrapper(long chaos, T item, double weight) {
         this(chaos, item, weight, 1, 1);
@@ -81,8 +90,17 @@ public class WeightedTableWrapper<T> {
         this.items = new ArrayList<>(items);
         int len = items.size();
         table = new WeightedTable(originalWeights = Arrays.copyOf(weights, len));
-        this.minAmounts = new IntVLA(minAmounts);
-        this.maxAmounts = new IntVLA(maxAmounts);
+        if (minAmounts == null || maxAmounts == null) {
+            this.minAmounts = new IntVLA(len);
+            this.maxAmounts = new IntVLA(len);
+            for (int i = 0; i < len; i++) {
+                this.minAmounts.add(1);
+                this.maxAmounts.add(1);
+            }
+        } else {
+            this.minAmounts = new IntVLA(minAmounts);
+            this.maxAmounts = new IntVLA(maxAmounts);
+        }
     }
     public WeightedTableWrapper<T> copy()
     {
