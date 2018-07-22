@@ -20,15 +20,17 @@ public enum CalcStat implements ConstantKey {
         this.description = description;
         prettyName = Utilities.caps(name(), "_");
         hash = ConstantKey.precomputeHash("creature.CalcStat", ordinal());
+        hashSmall = (int)(hash & 0xFFFFFFFFL);
     }
     public final long hash;
+    public final int hashSmall;
     @Override
     public long hash64() {
         return hash;
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return hashSmall;
     }
 
     public String nick(){

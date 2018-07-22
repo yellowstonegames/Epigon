@@ -516,8 +516,8 @@ public class Epigon extends Game {
                 if (path != null && !path.isEmpty()) {
                     Coord step = path.get(0);
                     if (player.location.x == step.x && player.location.y == step.y) {
-                        ArrayList<ActionOutcome> aos = ActionOutcome.attack(creature, player);
-                        for (ActionOutcome ao : aos) {
+                        ActionOutcome ao = ActionOutcome.attack(creature, chooseValidWeapon(creature, player), player);
+                        {
                             Element element = ao.element;
                             if (map.fovResult[c.x][c.y] > 0) {
                                 Direction dir = Direction.getDirection(player.location.x - creature.location.x, player.location.y - creature.location.y);
@@ -931,7 +931,7 @@ public class Epigon extends Game {
         maneuverOptions.clear();
         for (int i = 0; i < table.size(); i++) {
             w = table.keyAt(i);
-            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5) 
+            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5)
             {
                 maneuverOptions.put(w.rawWeapon.name + " Attack", w);
                 for (int j = 0; j < w.maneuvers.size(); j++) {
@@ -939,6 +939,20 @@ public class Epigon extends Game {
                 }
             }
         }
+    }
+
+    private Weapon chooseValidWeapon(Physical attacker, Physical target) {
+        Arrangement<Weapon> table = attacker.creatureData.weaponChoices.table;
+        Weapon w;
+        int[] order = attacker.randomOrdering(table.size());
+        for (int i = 0; i < table.size(); i++) {
+            w = table.keyAt(order[i]);
+            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5)
+            {
+                return w;
+            }
+        }
+        return null;
     }
     private Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
         // = validAttackOptions(target);
@@ -974,93 +988,7 @@ public class Epigon extends Game {
 
     private void attack(Physical target)
     {
-        int targetX = target.location.x, targetY = target.location.y;
-        ArrayList<ActionOutcome> aos = ActionOutcome.attack(player, target);
-        for(ActionOutcome ao : aos) {
-            Element element = ao.element;
-            Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
-//            player.setAngle(dir);
-            calcFOV(player.location.x, player.location.y);
-            fxHandler.attackEffect(player, target, ao, dir);
-            //mapSLayers.bump(player.appearance, dir, 0.145f);
-            if (ao.hit) {
-                applyStatChange(target, Stat.VIGOR, ao.actualDamage);
-                if (target.stats.get(Stat.VIGOR).actual() <= 0) {
-                    if(target.appearance != null)
-                        mapSLayers.removeGlyph(target.appearance);
-                    if (target.overlayAppearance != null) {
-                        mapSLayers.removeGlyph(target.overlayAppearance);
-                    }
-                    creatures.remove(target.location);
-                    map.contents[targetX][targetY].remove(target);
-                    if (ao.crit) {
-                        Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                .map(table -> {
-                                    int quantity = table.quantity();
-                                    Physical p = RecipeMixer.buildPhysical(table.random());
-                                    if (p.groupingData != null) {
-                                        p.groupingData.quantity += quantity;
-                                    } else {
-                                        p.groupingData = new Grouping(quantity);
-                                    }
-                                    return p;
-                                })
-                                .forEach(item -> {
-                                    if(item.attached) return;
-                                    map.contents[targetX][targetY].add(item);
-                                    if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
-                                        map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
-                                    }
-                                });
-                        if(target.appearance != null)
-                            mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
-                        message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
-                    } else {
-                        Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                                .map(table -> {
-                                    int quantity = table.quantity();
-                                    Physical p = RecipeMixer.buildPhysical(table.random());
-                                    if (p.groupingData != null) {
-                                        p.groupingData.quantity += quantity;
-                                    } else {
-                                        p.groupingData = new Grouping(quantity);
-                                    }
-                                    return p;
-                                })
-                                .forEach(item -> {
-                                    if(item.attached) return;
-                                    map.contents[targetX][targetY].add(item);
-                                });
-                        if(target.appearance != null) 
-                            mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
-                        message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
-                    }
-                } else {
-                    String amtText = String.valueOf(-ao.actualDamage);
-                    if (ao.crit) {
-                        if(target.appearance != null)
-                            mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
-                                mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
-                        message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
-                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                    } else {
-                        message(Messaging.transform("You " + element.verb + " the " + target.name + " for " +
-                                amtText + " " + element.styledName + " damage!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                    }
-                    if (ao.targetConditioned) {
-                        message(Messaging.transform("You " +
-                                ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
-                                " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                        if (target.overlaySymbol != '\uffff') {
-                            if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);
-                            target.overlayAppearance = mapSLayers.glyph(target.overlaySymbol, target.overlayColor, targetX, targetY);
-                        }
-                    }
-                }
-            } else {
-                message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
-            }
-        }
+        attack(target, chooseValidWeapon(player, target));
     }
     private void attack(Physical target, Weapon choice) {
         int targetX = target.location.x, targetY = target.location.y;
