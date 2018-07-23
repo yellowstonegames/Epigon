@@ -123,7 +123,8 @@ public class ContextHandler {
                 @Override
                 public void draw(Batch batch, float parentAlpha) {
                     super.draw(batch, parentAlpha);
-                    float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(), yOff = yo + 1f + mainMap.gridHeight * 3f;
+                    float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(),
+                            yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
                     //mainMap.font.configureShader(batch);
                     float widthInc = miniMapFont.actualCellWidth, heightInc = -miniMapFont.actualCellHeight;
                     RememberedTile memory;
@@ -160,7 +161,7 @@ public class ContextHandler {
                     }
                 }
             };
-            miniMapFont = mainMap.font.copy().width(3f).height(3f).initBySize();
+            miniMapFont = mainMap.font.copy().width(4f).height(4f).initBySize();
             layers.addActor(miniMap);
             miniMap.setVisible(false);
         }
