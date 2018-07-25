@@ -1,13 +1,15 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.ArrayTools;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.Creature;
-import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.PanelEffect;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.*;
 
 import java.util.Arrays;
@@ -59,10 +61,11 @@ public class InfoHandler {
 
     private final int widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
-    private SquidPanel back;
-    private SquidPanel front;
-    private SquidPanel fxBack;
-    private SquidPanel fx;
+//    private SquidPanel back;
+//    private SquidPanel front;
+//    private SquidPanel fxBack;
+//    private SquidPanel fx;
+    private SparseLayers layers;
     private int width;
     private int height;
     private InfoMode infoMode = InfoMode.HEALTH_AND_ARMOR;
@@ -74,24 +77,22 @@ public class InfoHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public InfoHandler(SquidLayers layers, SquidColorCenter colorCenter) {
+    public InfoHandler(SparseLayers layers, SquidColorCenter colorCenter) {
         this.colorCenter = colorCenter;
-        width = layers.getGridWidth();
-        height = layers.getGridHeight();
-        back = layers.getBackgroundLayer();
-        front = layers.getForegroundLayer();
-        fxBack = layers.addExtraLayer().getLayer(3);
-        fx = layers.addExtraLayer().getLayer(4);
+        width = layers.gridWidth;
+        height = layers.gridHeight;
+        layers.addLayer();
+        layers.addLayer();
+//        back = layers.getBackgroundLayer();
+//        front = layers.getForegroundLayer();
+//        fxBack = layers.addExtraLayer().getLayer(3);
+//        fx = layers.addExtraLayer().getLayer(4);
 
         arrowLeft = Coord.get(1, 0);
-        arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
+        arrowRight = Coord.get(width - 2, 0);
 
-        ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
-        ArrayTools.fill(back.contents, '\0');
-        ArrayTools.fill(front.colors, front.getDefaultForegroundColor().toFloatBits());
-        ArrayTools.fill(front.contents, ' ');
-        fxBack.erase();
-        fx.erase();
+        layers.fillBackground(layers.defaultPackedBackground);
+        this.layers = layers;
     }
 
     public void setPlayer(Physical player) {
@@ -103,8 +104,7 @@ public class InfoHandler {
     }
 
     private void clear() {
-        ArrayTools.fill(front.contents, ' ');
-
+        layers.clear();
         int w = width;
         int h = height;
         for (int x = 0; x < w; x++) {
@@ -141,35 +141,39 @@ public class InfoHandler {
     }
 
     private void put(int x, int y, String s) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx));
-        }
+        layers.put(x, y, s, layers.defaultPackedForeground, 0f);
     }
 
     private void put(int x, int y, String s, Color color) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx), color);
-        }
+        layers.put(x, y, s, color, null);
+    }
+
+    private void put(int x, int y, String s, float color) {
+        layers.put(x, y, s, color, 0f);
     }
 
     private void put(int x, int y, char c) {
-        front.put(x, y, c);
+        layers.put(x, y, c, layers.defaultPackedForeground);
     }
 
     private void put(int x, int y, char c, Color color) {
-        front.put(x, y, c, color);
+        layers.put(x, y, c, color, null);
+    }
+
+    private void put(int x, int y, char c, float color) {
+        layers.put(x, y, c, color, 0f);
     }
 
     public void next() {
-        front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
+            SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         infoMode = infoMode.next();
         updateDisplay();
     }
 
     public void prior() {
-        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
+                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         infoMode = infoMode.prior();
         updateDisplay();
     }
@@ -283,7 +287,7 @@ public class InfoHandler {
             //₩
             put(3, yOffset, "RH:");
             if (equippedRight != null && (currentWeapon = equippedRight.weaponData) != null) {
-                front.put(8, yOffset, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
+                put(8, yOffset, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
                         Utilities.progressiveLighten(equippedRight.color));
             } else {
                 put(8, yOffset, "empty", Rating.NONE.color());
@@ -291,7 +295,7 @@ public class InfoHandler {
 
             put(3, yOffset + 1, "LH:");
             if (equippedLeft != null && (currentWeapon = equippedLeft.weaponData) != null) {
-                front.put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
+                put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
                         Utilities.progressiveLighten(equippedLeft.color));
             } else {
                 put(8, yOffset + 1, "empty", Rating.NONE.color());
@@ -422,7 +426,7 @@ public class InfoHandler {
     }
 
     private void damage(int originX, int originY, Color color, IRNG rng) {
-        fx.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), originX, originY,
+        layers.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), originX, originY,
             new float[]{
                     SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                     SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
@@ -443,7 +447,7 @@ public class InfoHandler {
         public int x, y;
 
         public DamageEffect(float duration, int cycles, int centerX, int centerY, float[] coloring) {
-            super(front, duration);
+            super(layers, duration);
             this.cycles = cycles;
             x = centerX;
             y = centerY;
@@ -453,8 +457,8 @@ public class InfoHandler {
         @Override
         protected void end() {
             super.end();
-            fxBack.clear(x, y);
-            fx.clear(x, y);
+            layers.clear(x, y, 1);
+            layers.clear(x, y, 2);
         }
 
         @Override
@@ -468,8 +472,8 @@ public class InfoHandler {
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
-            fxBack.put(x, y, '█', SColor.translucentColor(back.getDefaultForegroundColor().toFloatBits(), 0.5f));
-            fx.put(x, y, Utilities.sparkles.charAt((int)(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color);
+            layers.put(x, y, '█', SColor.translucentColor(layers.defaultPackedBackground, 0.5f), 1);
+            layers.put(x, y, Utilities.sparkles.charAt((int)(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color, 2);
         }
     }
 }

@@ -2,15 +2,18 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
+import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.Stat;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Stat;
-import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.EnumOrderedSet;
@@ -61,11 +64,9 @@ public class ContextHandler {
             return name;
         }
     }
-
-    private SquidLayers layers;
+    public Group group;
+    private SparseLayers layers;
     private SparseLayers mainMap;
-    private SquidPanel back;
-    private SquidPanel front;
     private Actor miniMap;
     private int width;
     private int height;
@@ -76,42 +77,35 @@ public class ContextHandler {
     private EnumOrderedMap<ContextMode, float[][]> cachedColors = new EnumOrderedMap<>(ContextMode.class);
     private EnumOrderedSet<ContextMode> cacheIsValid = new EnumOrderedSet<>(ContextMode.class);
     private float defaultFrontColor;
+    private Epigon game;
 
     public Coord arrowLeft;
     public Coord arrowRight;
-
-    public ContextHandler(SquidLayers layers, SparseLayers mainMap) {
-        this(layers, mainMap, null);
-    }
-
-    public ContextHandler(SquidLayers layers, SparseLayers mainMap, EpiMap map) {
+    
+    public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game) {
+        group = new Group();
         this.layers = layers;
+        group.addActor(this.layers);
         this.mainMap = mainMap;
-        width = layers.getGridWidth();
-        height = layers.getGridHeight();
-        back = layers.getBackgroundLayer();
-        front = layers.getForegroundLayer();
-        epiMap = map;
-        setMap(map);
+        width = layers.gridWidth;
+        height = layers.gridHeight;
+        epiMap = null;
         arrowLeft = Coord.get(1, 0);
-        arrowRight = Coord.get(layers.getGridWidth() - 2, 0);
-
-        defaultFrontColor = front.getDefaultForegroundColor().toFloatBits();
+        arrowRight = Coord.get(width - 2, 0);
+        this.game = game;
+        defaultFrontColor = layers.defaultPackedForeground;
         for (ContextMode mode : ContextMode.values()) {
             cachedTexts.put(mode, ArrayTools.fill(' ', width, height));
             cachedColors.put(mode, ArrayTools.fill(defaultFrontColor, width, height));
             cacheIsValid.remove(mode);
         }
-
-        ArrayTools.fill(back.colors, back.getDefaultForegroundColor().toFloatBits());
-        ArrayTools.fill(back.contents, '\0');
-        ArrayTools.fill(front.colors, defaultFrontColor);
-        ArrayTools.fill(front.contents, ' ');
+        
+        layers.fillBackground(layers.defaultPackedBackground);
     }
 
     public void setMap(EpiMap map) {
         if (miniMap != null) {
-            layers.removeActor(miniMap);
+            group.removeActor(miniMap);
             miniMap.setVisible(false);
             miniMap.clear();
             miniMap = null;
@@ -154,7 +148,8 @@ public class ContextHandler {
                             || mainMap.backgrounds[x][y] == 0f) {
                             continue;
                         }
-                        miniMapFont.draw(batch, '\u0000', i == 0
+                        miniMapFont.draw(batch, '\u0000', game.player != null && 
+                                        glyph.equals(game.player.appearance)
                             ? -0x1.fffep126F // SColor.CYAN
                             : -0x1.0049fep125F, // SColor.SCARLET
                             xo + widthInc * x, yOff + heightInc * y);
@@ -162,13 +157,13 @@ public class ContextHandler {
                 }
             };
             miniMapFont = mainMap.font.copy().width(4f).height(4f).initBySize();
-            layers.addActor(miniMap);
+            group.addActor(miniMap);
             miniMap.setVisible(false);
         }
     }
 
     private void clear() {
-        ArrayTools.fill(front.contents, ' ');
+        layers.clear();
 
         int w = width;
         int h = height;
@@ -217,29 +212,31 @@ public class ContextHandler {
 
     private void put(int x, int y, char c, float color) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            front.put(x, y, c);
+            layers.put(x, y, c);
             cachedTexts.get(contextMode)[x][y] = c;
             cachedColors.get(contextMode)[x][y] = color;
         }
     }
 
     private void putFromCache() {
+        final char[][] texts = cachedTexts.get(contextMode);
+        final float[][] colors = cachedColors.get(contextMode);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                front.put(x, y, cachedTexts.get(contextMode)[x][y], cachedColors.get(contextMode)[x][y]);
+                layers.put(x, y, texts[x][y], colors[x][y]);
             }
         }
     }
 
     public void next() {
-        front.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowRight.x, arrowRight.y, arrowRight.x + 1, arrowRight.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
+            SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         switchTo(contextMode.next());
     }
 
     public void prior() {
-        front.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', SColor.CW_HONEYDEW,
-            SColor.CW_RICH_HONEYDEW.cpy().sub(0f, 0f, 0f, 0.8f), 0f, 0.6f);
+        layers.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
+                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         switchTo(contextMode.prior());
     }
 

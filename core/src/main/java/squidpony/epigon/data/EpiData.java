@@ -14,19 +14,13 @@ import static squidpony.epigon.Epigon.rootChaos;
  * which is basically impossible due to memory constraints unless some EpiData values are constantly created and
  * destroyed, this number will never repeat. This may be useful for some purposes; it is used as a more-controlled
  * identity hash in the {@link #hashCode()} implementation here. Subclasses that want to compare EpiData by value should
- * not call {@code super.equals()} or {@code super.hashCode()} but may compare and hash {@link #name} and/or
- * {@link #description}.
+ * not call {@code super.equals()} or {@code super.hashCode()} but may compare and hash {@link #name}, {@link #chaos},
+ * and/or {@link #description}.
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is a variant on TangleRNG from SquidLib that should have similarly excellent speed and also
- * slightly better quality. It passes birthday-problem tests (which LightRNG and LinnormRNG do not) and also is faster
- * than either of those. Each individual EpiData will have its own pattern of duplicate outputs and holes in the
- * possible outputs; because each is different and random, this should be good for the actual quality (it also makes it
- * less feasible to go backwards from output to states). The large long constants used here are a frequently-used
- * number based off the fractional portion of the golden ratio times 2 to the 64, and a number that was used in
- * SquidLib's CrossHash class and had good results there.
- * 
+ * algorithm this uses is LinnormRNG from SquidLib. It is slightly slower than TangleRNG and does not pass
+ * birthday-problem tests (whether Tangle passes them is debatable), but has stronger quality and uses less state.
  */
 public abstract class EpiData extends AbstractRNG implements Serializable {
 

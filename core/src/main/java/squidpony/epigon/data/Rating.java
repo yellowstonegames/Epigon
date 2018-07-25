@@ -55,7 +55,7 @@ public enum Rating {
             case AMAZING:
                 return SColor.PUMPKIN; // Orange
             case ULTIMATE:
-                return SColor.FUCSHIA_PINK;// Pink
+                return SColor.FUCHSIA_PINK;// Pink
             case NONE:
             default:
                 return SColor.ALOEWOOD_BROWN; // Dark grey; not actually brown!

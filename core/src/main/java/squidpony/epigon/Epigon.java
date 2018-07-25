@@ -94,8 +94,8 @@ public class Epigon extends Game {
     private SquidColorCenter colorCenter;
     private SparseLayers mapSLayers;
     private SparseLayers mapOverlaySLayers;
-    private SquidLayers infoSLayers;
-    private SquidLayers contextSLayers;
+    private SparseLayers infoSLayers;
+    private SparseLayers contextSLayers;
     private SquidLayers messageSLayers;
     private SparseLayers fallingSLayers;
 
@@ -133,7 +133,7 @@ public class Epigon extends Game {
     private GreasedRegion blocked, floors;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private Coord cursor;
-    private Physical player;
+    public Physical player;
     private ArrayList<Coord> awaitedMoves;
     private OrderedMap<Coord, Physical> creatures;
     private int autoplayTurns = 0;
@@ -231,23 +231,27 @@ public class Epigon extends Game {
                 messageSize.cellHeight,
                 font);
 
-        infoSLayers = new SquidLayers(
+        infoSLayers = new SparseLayers(
                 infoSize.gridWidth,
                 infoSize.gridHeight,
                 infoSize.cellWidth,
                 infoSize.cellHeight,
                 smallFont);
-        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
-        infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
+        infoSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
+        infoSLayers.setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
+//        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
+//        infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
-        contextSLayers = new SquidLayers(
+        contextSLayers = new SparseLayers(
                 contextSize.gridWidth,
                 contextSize.gridHeight,
                 contextSize.cellWidth,
                 contextSize.cellHeight,
                 smallFont);
-        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
-        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
+        contextSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
+        contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
+//        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
+//        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
                 worldWidth,
@@ -257,7 +261,7 @@ public class Epigon extends Game {
                 font);
 
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
-        contextHandler = new ContextHandler(contextSLayers, mapSLayers);
+        contextHandler = new ContextHandler(contextSLayers, mapSLayers, this);
 
         mapOverlaySLayers = new SparseLayers(
                 mapSize.gridWidth,
@@ -317,7 +321,7 @@ public class Epigon extends Game {
         fallingStage.addActor(fallingSLayers);
         messageStage.addActor(messageSLayers);
         infoStage.addActor(infoSLayers);
-        contextStage.addActor(contextSLayers);
+        contextStage.addActor(contextHandler.group);
 
         fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight >> 1);
         finishY = fallingSLayers.worldY(totalDepth);
