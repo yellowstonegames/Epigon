@@ -188,7 +188,7 @@ public class ContextHandler {
         put(arrowRight.x, arrowRight.y, '▶');
     }
 
-    private void put(CharSequence[] text) {
+    private void put(String[] text) {
         for (int y = 0; y < text.length && y < height - 2; y++) {
             put(1, y + 1, text[y]);
         }
@@ -200,10 +200,8 @@ public class ContextHandler {
         }
     }
 
-    private void put(int x, int y, CharSequence s) {
-        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-            put(sx + x, y, s.charAt(sx));
-        }
+    private void put(int x, int y, String s) {
+        layers.put(x, y, s, layers.defaultForeground);
     }
 
     private void put(int x, int y, char c) {
@@ -327,7 +325,7 @@ public class ContextHandler {
         cacheIsValid.add(contextMode);
     }
 
-    public void message(CharSequence... text) {
+    public void message(String... text) {
         contextMode = ContextMode.MESSAGE;
         if (miniMap != null) {
             miniMap.setVisible(false);
