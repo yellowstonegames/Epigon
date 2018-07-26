@@ -201,7 +201,9 @@ public class ContextHandler {
     }
 
     private void put(int x, int y, String s) {
-        layers.put(x, y, s, layers.defaultForeground);
+        for (int i = 0; i < s.length(); i++) {
+            put(x+i, y, s.charAt(i), layers.defaultPackedForeground);
+        }
     }
 
     private void put(int x, int y, char c) {
