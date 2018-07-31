@@ -1005,9 +1005,13 @@ public class Epigon extends Game {
         Weapon w;
         currentTarget = target;
         maneuverOptions.clear();
+        double range;
         for (int i = 0; i < table.size(); i++) {
             w = table.keyAt(i);
-            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5)
+            range = Radius.CIRCLE.radius(player.location, target.location);
+            if((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5)
+                continue;
+            if(range <= w.rawWeapon.range + 1.5)
             {
                 maneuverOptions.put(w.rawWeapon.name + " Attack", w);
                 for (int j = 0; j < w.maneuvers.size(); j++) {
@@ -1021,9 +1025,13 @@ public class Epigon extends Game {
         Arrangement<Weapon> table = attacker.creatureData.weaponChoices.table;
         Weapon w;
         int[] order = attacker.randomOrdering(table.size());
+        double range;
         for (int i = 0; i < table.size(); i++) {
             w = table.keyAt(order[i]);
-            if(Radius.CIRCLE.radius(player.location, target.location) <= w.rawWeapon.range + 1.5)
+            range = Radius.CIRCLE.radius(player.location, target.location);
+            if((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5)
+                continue;
+            if(range <= w.rawWeapon.range + 1.5)
             {
                 return w;
             }

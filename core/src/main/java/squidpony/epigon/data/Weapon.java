@@ -24,7 +24,7 @@ public class Weapon {
     public ChangeTable calcStats;
     public List<String> groups = new ArrayList<>(2), maneuvers = new ArrayList<>(4), statuses = new ArrayList<>(4);
     //public String[] qualities = new String[4];
-    public int kind, usage, shape, path;
+    public int kind, usage, shape;
     public String[] materialTypes, training;
     public Skill[] skills;
     public WeightedTableWrapper<Element> elements;
@@ -60,14 +60,11 @@ public class Weapon {
             WAVE = 3,      // affects a 60 degree cone with length = AREA + RANGE, accuracy penalty
             BURST = 4,     // affects a (AREA * 2 + 1) side-length square at up to RANGE distance, accuracy penalty 
             THROUGH = 5,   // can attempt to target even ignoring AREA obstacles in the way 
-    
-            STRAIGHT = 0,  // aims at the first thing in a line
-            ARC = 1;       // aims at the target unless it is adjacent, then it cannot target
+            ARC = 6;       // same as MULTI, but ignores obstacles and cannot target adjacent cells
     // for if you need to get a string from one of the above constants, and also to read the TSV contents
     public static final Arrangement<String> kinds = Maker.makeArrange("Melee", "Ranged", "Implement", "Unarmed", "Magic", "Natural"), 
             usages = Maker.makeArrange("Repeat", "Projectile", "Thrown"),
-            shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Burst", "Through"),
-            paths = Maker.makeArrange("Straight", "Arc");
+            shapes = Maker.makeArrange("Multi", "Beam", "Sweep", "Wave", "Burst", "Through", "Arc");
     public static OrderedMap<String, Weapon> weapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             physicalWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
             unarmedWeapons = new OrderedMap<>(RawWeapon.ENTRIES.length),
@@ -200,7 +197,6 @@ public class Weapon {
         kind = kinds.getInt(raw.kind);
         usage = usages.getInt(raw.usage);
         shape = shapes.getInt(raw.shape);
-        path = paths.getInt(raw.path);
         hands = raw.hands;
         groups.add(raw.group1);
         groups.add(raw.group2);
@@ -231,7 +227,6 @@ public class Weapon {
         kind = toCopy.kind;
         usage = toCopy.usage;
         shape = toCopy.shape;
-        path = toCopy.path;
         materialTypes = Arrays.copyOf(toCopy.materialTypes, toCopy.materialTypes.length);
         training = Arrays.copyOf(toCopy.training, toCopy.training.length);
         skills = Arrays.copyOf(toCopy.skills, toCopy.skills.length);

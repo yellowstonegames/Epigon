@@ -3,6 +3,7 @@ package squidpony.epigon.data.trait;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.BodySlot;
+import squidpony.squidai.Technique;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.OrderedSet;
 import squidpony.squidmath.ProbabilityTable;
@@ -30,7 +31,7 @@ public class Creature {
 
     public Weapon lastWieldedWeapon = null;
     public Physical lastUsedItem = null;
-    
+    public Technique currentTechnique = null;
     public int skillWithWeapon(Weapon w)
     {
         int skill = 1;
