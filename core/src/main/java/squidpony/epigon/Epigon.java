@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -93,9 +92,9 @@ public class Epigon extends Game {
     private SoundManager sound;
 
     // Display
-    private SpriteBatch batch;
+    private FilterBatch batch;
     private SquidColorCenter colorCenter;
-    static public FloatFilter filter;
+    static public FloatFilter filter, identityFilter, grayscale;
     private SparseLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
@@ -200,7 +199,8 @@ public class Epigon extends Game {
 //        filter = new FloatFilters.GrayscaleFilter();
 //        filter = new FloatFilters.ColorizeFilter(SColor.CLOVE_BROWN, 0.6f, 0.0f);
         filter = new FloatFilters.YCbCrFilter(0.9f, 1.2f, 1.2f);
- 
+        identityFilter = new FloatFilters.IdentityFilter();
+        grayscale = new FloatFilters.GrayscaleFilter();
         System.out.println(rootChaos.getState());
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
@@ -449,7 +449,7 @@ public class Epigon extends Game {
 
     private void initPlayer() {
         player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.VIGOR).set(999.0);
+        player.stats.get(Stat.VIGOR).set(9.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         //player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
@@ -689,6 +689,7 @@ public class Epigon extends Game {
         infoHandler.updateDisplay(player, changes);
         if (player.stats.get(Stat.VIGOR).actual() <= 0) {
             message("You are now dead with Vigor: " + player.stats.get(Stat.VIGOR).actual());
+            batch.setFilter(grayscale);
         }
 
         if (autoplayTurns > 0) {
@@ -1789,8 +1790,13 @@ public class Epigon extends Game {
             }
             if (verb == null) {
                 message("Unknown input for " + m + " mode: " + key);
-            } else
+                if(batch.filter == identityFilter)
+                    batch.setFilter(filter);
+                else
+                    batch.setFilter(identityFilter);
+            } else {
                 message("Can't " + verb.name + " from " + m + " mode.");
+            }
         }
     };
 
