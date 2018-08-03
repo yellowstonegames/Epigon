@@ -1,7 +1,6 @@
 package squidpony.epigon.mapping;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
 
@@ -29,13 +28,13 @@ public class RememberedTile {
 
     public void remake(EpiTile tile) {
         symbol = tile.getSymbolUninhabited();
-        front = Epigon.filter.alter(tile.getForegroundColor());
+        front = tile.getForegroundColor();
         front = front == 0f ? 0f :
-                Epigon.filter.alter(tile.contents.isEmpty()
+                tile.contents.isEmpty()
                         ? SColor.floatGetHSV(0, 0, SColor.valueOfFloat(front), 1f)
-                        : SColor.lerpFloatColorsBlended(front, memoryColorFloat, frontFade));
+                        : SColor.lerpFloatColorsBlended(front, memoryColorFloat, frontFade);
         back = tile.getBackgroundColor();
-        back = back == 0f ? 0f : Epigon.filter.alter(SColor.translucentColor(memoryColorFloat, backFade));
+        back = back == 0f ? 0f : SColor.translucentColor(memoryColorFloat, backFade);
 //        if 
 //                (tile.getCreature() != null){
 //            miniMapColor = SColor.SCARLET.toFloatBits();

@@ -195,14 +195,13 @@ public class Epigon extends Game {
 
         System.out.println("Loading sound manager.");
         sound = new SoundManager();
-        colorCenter = new SquidColorCenter(new Filters.DistinctRedGreenFilter());
-        colorCenter.granularity = 3;
+        colorCenter = new SquidColorCenter();
 //        filter = new FloatFilters.DistinctRedGreenFilter();
 //        filter = new FloatFilters.GrayscaleFilter();
 //        filter = new FloatFilters.ColorizeFilter(SColor.CLOVE_BROWN, 0.6f, 0.0f);
-        filter = new FloatFilters.HSVFilter(-0.15f, -0.05f);
+        filter = new FloatFilters.YCbCrFilter(0.9f, 1.2f, 1.2f);
  
-        System.out.println(rng.getState());
+        System.out.println(rootChaos.getState());
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
 
@@ -211,8 +210,10 @@ public class Epigon extends Game {
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
         bgColorFloat = bgColor.toFloatBits();
         unseenColorFloat = unseenColor.toFloatBits();
-        //Some classes in SquidLib need access to a batch to render certain things, so it's a good idea to have one.
-        batch = new SpriteBatch();
+        //FilterBatch is new, and automatically filters all text colors and image tints with a FloatFilter
+        batch = new FilterBatch(filter);
+        // uncomment the line below to see the game with no filters
+        //batch = new FilterBatch();
 
         System.out.println("Putting together display.");
         mapViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
@@ -546,7 +547,7 @@ public class Epigon extends Game {
         if (player.appearance != null) {
             mapSLayers.removeGlyph(player.appearance);
         }
-        player.appearance = mapSLayers.glyph(player.symbol, filter.alter(player.color), player.location.x, player.location.y);
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
         mode = GameMode.CRAWL;
         mapInput.flush();
@@ -563,7 +564,7 @@ public class Epigon extends Game {
         for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
-        player.appearance = mapSLayers.glyph(player.symbol, filter.alter(player.color), player.location.x, player.location.y);
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
         //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
         contextHandler.setMap(map);
@@ -649,7 +650,7 @@ public class Epigon extends Game {
                         if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step) && creatures.alterAtCarefully(i, step) != null) {
                             map.contents[c.x][c.y].remove(creature);
                             if (creature.appearance == null && (/* map.fovResult[step.x][step.y] > 0 || */ map.fovResult[c.x][c.y] > 0)) {
-                                creature.appearance = mapSLayers.glyph(creature.symbol, filter.alter(creature.color), c.x, c.y);
+                                creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
                                 if (creature.overlayAppearance != null && creature.overlaySymbol != '\uffff')
                                     creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
                             }
@@ -1223,7 +1224,8 @@ public class Epigon extends Game {
         //mapSLayers.put(x, y, c, front, back); // "light" theme
         //mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
         //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
-        mapSLayers.put(x, y, c, filter.alter(lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y])), filter.alter(lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f))); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]),
+                lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
     }
 
     /**
@@ -1262,11 +1264,11 @@ public class Epigon extends Game {
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         putWithLight(x, y, ' ', 0f);
                         if(creature.appearance == null)
-                            creature.appearance = mapSLayers.glyph(creature.symbol, filter.alter(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount)), x, y);                         
+                            creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount), x, y);                         
                         else
-                            creature.appearance.setPackedColor(filter.alter(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount)));
+                            creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
                         if (creature.overlayAppearance != null)
-                            creature.overlayAppearance.setPackedColor(filter.alter(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount)));
+                            creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();
@@ -1301,7 +1303,7 @@ public class Epigon extends Game {
                 } else {
                     dir = Direction.toGoTo(toCursor.get(i - 1), c);
                 }
-                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), Epigon.filter.alter(SColor.CW_PURPLE), 0f, 2);
+                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE.toFloatBits(), 0f, 2);
             }
         }
     }
