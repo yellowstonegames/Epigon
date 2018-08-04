@@ -198,9 +198,11 @@ public class Epigon extends Game {
 //        filter = new FloatFilters.DistinctRedGreenFilter();
 //        filter = new FloatFilters.GrayscaleFilter();
 //        filter = new FloatFilters.ColorizeFilter(SColor.CLOVE_BROWN, 0.6f, 0.0f);
-        filter = new FloatFilters.YCbCrFilter(0.9f, 1.2f, 1.2f);
+        filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
         identityFilter = new FloatFilters.IdentityFilter();
-        grayscale = new FloatFilters.GrayscaleFilter();
+        // mostly mutes colors but doesn't fully grayscale everything; also darkens colors slightly
+        grayscale = new FloatFilters.YCbCrFilter(0.75f, 0.2f, 0.2f); // can also use GrayscaleFilter
+        //grayscale = new FloatFilters.YCbCrFilter(0.75f, 0f, 0f); // an option to fully grayscale/darken
         System.out.println(rootChaos.getState());
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
@@ -449,7 +451,7 @@ public class Epigon extends Game {
 
     private void initPlayer() {
         player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.VIGOR).set(9.0);
+        player.stats.get(Stat.VIGOR).set(20.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         //player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
@@ -463,7 +465,7 @@ public class Epigon extends Game {
     }
 
     private void prepFall() {
-        message("Falling..... Pres SPACE to continue");
+        message("Falling..... Press SPACE to continue");
         int w = World.DIVE_HEADER[0].length(), d = worldDepth;
         map = worldGenerator.buildDive(w, d, handBuilt);
         contextHandler.setMap(map);
@@ -1060,13 +1062,13 @@ public class Epigon extends Game {
             }
         }
         else {
-            startX = target.location.x - len;
+            startX = target.location.x * 2 - len;
             for (int i = 0; i < sz; i++) {
                 String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
                     mapHoverSLayers.put(startX + j, startY + i, smoke);
                 }
-                mapHoverSLayers.put(target.location.x-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i*3)&15], null);
+                mapHoverSLayers.put(target.location.x*2-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i*3)&15], null);
             }
         }
         showingMenu = true;
