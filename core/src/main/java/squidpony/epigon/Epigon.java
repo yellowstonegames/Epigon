@@ -451,7 +451,7 @@ public class Epigon extends Game {
 
     private void initPlayer() {
         player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
-        player.stats.get(Stat.VIGOR).set(20.0);
+        player.stats.get(Stat.VIGOR).set(42.0);
         player.stats.get(Stat.HUNGER).delta(-0.1);
         player.stats.get(Stat.HUNGER).min(0);
         //player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
@@ -466,8 +466,8 @@ public class Epigon extends Game {
 
     private void prepFall() {
         message("Falling..... Press SPACE to continue");
-        int w = World.DIVE_HEADER[0].length(), d = worldDepth;
-        map = worldGenerator.buildDive(w, d, handBuilt);
+        int w = World.DIVE_HEADER[0].length();
+        map = worldGenerator.buildDive(w, worldDepth, handBuilt);
         contextHandler.setMap(map);
 
         // Start out in the horizontal middle and visual a bit down
@@ -594,8 +594,9 @@ public class Epigon extends Game {
                 List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, pl);
                 if (path != null && !path.isEmpty()) {
                     Coord step = path.get(0);
-                    if (player.location.x == step.x && player.location.y == step.y) {
-                        ActionOutcome ao = ActionOutcome.attack(creature, chooseValidWeapon(creature, player), player);
+                    Weapon weapon = chooseValidWeapon(creature, player);
+                    if (weapon != null) {
+                        ActionOutcome ao = ActionOutcome.attack(creature, weapon, player);
                         {
                             Element element = ao.element;
                             if (map.fovResult[c.x][c.y] > 0) {
@@ -1032,7 +1033,7 @@ public class Epigon extends Game {
         double range;
         for (int i = 0; i < table.size(); i++) {
             w = table.keyAt(order[i]);
-            range = Radius.CIRCLE.radius(player.location, target.location);
+            range = Radius.CIRCLE.radius(attacker.location, target.location);
             if((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5)
                 continue;
             if(range <= w.rawWeapon.range + 1.5)

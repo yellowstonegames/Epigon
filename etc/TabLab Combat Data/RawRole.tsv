@@ -1,7 +1,7 @@
 name	description	training	signature
 Assassin	A killer-for-hire who lurks in the shadows, then strikes with concealed weapons drawn in an instant.	Assassination	You enter an area with a large bonus to Crit and Stealth, but this bonus decreases as Zone Tension rises.
 Brawler	A disciplined fighter who trains in both hand-to-hand combat and with various weapons.	Martial Arts	Each time you attack an enemy, you have a small chance to repeat that attack immediately.
-Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality	Each time you take damage, there is a moderate chance that you enter a Power Burst.
+Brute	A muscular thug who recognizes that his physique is his greatest asset; he uses heavy weapons.	Brutality	Each time you take damage, there is a small chance that you enter a Power Burst.
 Dervish	A deadly dancer in battle who sprints between skirmishes with an unpredictable weapon.	Whirling Death	Your attacks have a small bonus to Area, and this bonus increases slowly as Zone Tension rises.
 Duelist	A nimble noble who is courteous to a fault, unless dishonored… then a duel is called for.	Elegance	When an enemy inflicts an ailment on you, you have a moderate chance to enter a Power Burst.
 Guardian	A cautious defender who prefers to use polearms and shields to keep foes at bay.	Foresight	You gain a small Damage, Defense, and Evasion bonus for each enemy or ally currently adjacent to you.
