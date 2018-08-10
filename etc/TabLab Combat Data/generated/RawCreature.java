@@ -1,12 +1,11 @@
-package squidpony.epigon.data.raw;
+package generated;
 
-import squidpony.squidmath.NumberTools;
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-
-import static squidpony.squidmath.OrderedMap.makeMap;
+import squidpony.squidmath.NumberTools;
 
 public class RawCreature implements Serializable {
   public static final long serialVersionUID = 1L;

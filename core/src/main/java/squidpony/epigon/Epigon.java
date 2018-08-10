@@ -34,6 +34,7 @@ import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
+import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
@@ -128,6 +129,8 @@ public class Epigon extends Game {
     private WorldGenerator worldGenerator;
     private EpiMap[] world;
     private EpiMap map;
+    private char[][] simple;
+
     private int depth;
     private FxHandler fxHandler;
     private MapOverlayHandler mapOverlayHandler;
@@ -135,7 +138,9 @@ public class Epigon extends Game {
     private InfoHandler infoHandler;
     private FallingHandler fallingHandler;
     private GreasedRegion blocked, floors;
+    private Coord[] floorCells;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
+    private LOS los;
     private Coord cursor;
     public Physical player;
     private ArrayList<Coord> awaitedMoves;
@@ -489,6 +494,7 @@ public class Epigon extends Game {
     {
         map = world[depth];
         floors.refill(map.opacities(), 0.999);
+        floorCells = floors.asCoords();
         GreasedRegion floors2 = floors.copy();
         floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
         floors2.copy().randomScatter(rng, 3)
@@ -538,11 +544,11 @@ public class Epigon extends Game {
         }
         player.location = setupLevel(0);
         map.contents[player.location.x][player.location.y].add(player);
-        char[][] simple = new char[map.width][map.height];
+        simple = new char[map.width][map.height];
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
-
+        los = new LOS(LOS.BRESENHAM);
         blocked = new GreasedRegion(map.width, map.height);
         changeLevel(0);
 
@@ -573,7 +579,7 @@ public class Epigon extends Game {
         fxHandler.seen = map.fovResult;
         creatures = map.creatures;
         calcFOV(player.location.x, player.location.y);
-        char[][] simple = map.simpleChars();
+        simple = map.simpleChars();
         toPlayerDijkstra.initialize(simple);
         monsterDijkstra.initialize(simple);
         calcDijkstra();
@@ -582,6 +588,8 @@ public class Epigon extends Game {
     private void runTurn() {
         Set<Coord> creaturePositions = creatures.keySet();
         Coord[] pl = {player.location};
+        Set<Coord> ps = Collections.singleton(player.location);
+        ArrayList<Coord> path = new ArrayList<>(5);
         for (int i = 0; i < creatures.size(); i++) {
             final Physical creature = creatures.getAt(i);
             creature.update();
@@ -591,15 +599,21 @@ public class Epigon extends Game {
             }
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
-                List<Coord> path = monsterDijkstra.findPath(1, 5, creaturePositions, null, c, pl);
-                if (path != null && !path.isEmpty()) {
-                    Coord step = path.get(0);
-                    Weapon weapon = chooseValidWeapon(creature, player);
+                Weapon weapon = chooseValidWeapon(creature, player);
+                if(weapon == null)
+                {
+                    pl[0] = creature.getRandomElement(floorCells);
+                    monsterDijkstra.findPath(path, 1, 3, creaturePositions, null, c, pl);
+                }
+                else
+                    monsterDijkstra.findTechniquePath(path, 1, weapon.technique, simple, los, creaturePositions, null, c, ps);
+                if (monsterDijkstra.path != null && !monsterDijkstra.path.isEmpty()) {
+                    Coord step = monsterDijkstra.path.get(0);
                     if (weapon != null) {
                         ActionOutcome ao = ActionOutcome.attack(creature, weapon, player);
                         {
                             Element element = ao.element;
-                            if (map.fovResult[c.x][c.y] > 0) {
+                            if (map.fovResult[c.x][c.y] > 0.0) {
                                 Direction dir = Direction.getDirection(player.location.x - creature.location.x, player.location.y - creature.location.y);
 //                                creature.setAngle(dir);
                                 fxHandler.attackEffect(creature, player, ao, dir);
@@ -608,7 +622,7 @@ public class Epigon extends Game {
                                 int amt = ao.actualDamage >> 1;
                                 applyStatChange(player, Stat.VIGOR, amt);
                                 amt *= -1; // flip sign for output message
-                                if (player.stats.get(Stat.VIGOR).actual() <= 0) {
+                                if (player.stats.get(Stat.VIGOR).actual() <= 0.0) {
                                     if (ao.crit) {
                                         message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));

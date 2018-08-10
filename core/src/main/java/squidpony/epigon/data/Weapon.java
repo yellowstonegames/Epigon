@@ -4,6 +4,11 @@ import squidpony.Maker;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawWeapon;
+import squidpony.squidai.ConeAOE;
+import squidpony.squidai.LineAOE;
+import squidpony.squidai.PointAOE;
+import squidpony.squidai.Technique;
+import squidpony.squidgrid.Radius;
 import squidpony.squidmath.*;
 
 import java.util.ArrayList;
@@ -28,6 +33,7 @@ public class Weapon {
     public String[] materialTypes, training;
     public Skill[] skills;
     public WeightedTableWrapper<Element> elements;
+    public Technique technique;
     public static final OrderedMap<String, OrderedSet<Material>> makes = OrderedMap.makeMap(
             "Stone", new OrderedSet<>(Stone.values()),
             "Inclusion", new OrderedSet<>(Inclusion.values()),
@@ -55,7 +61,7 @@ public class Weapon {
             THROWN = 2, 
     
             MULTI = 0,     // gives a 1/16 chance to double an attack per AREA
-            BEAM = 1,      // affects 1 cell beyond the initial target per AREA
+            BEAM = 1,      // affects a line of cells, 1 wide, with length = AREA + RANGE
             SWEEP = 2,     // affects 1 cell clockwise and counterclockwise from the target per AREA 
             WAVE = 3,      // affects a 60 degree cone with length = AREA + RANGE, accuracy penalty
             BURST = 4,     // affects a (AREA * 2 + 1) side-length square at up to RANGE distance, accuracy penalty 
@@ -219,6 +225,7 @@ public class Weapon {
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
+        assignTechnique(raw);
     }
     public Weapon(Weapon toCopy)
     {
@@ -244,8 +251,41 @@ public class Weapon {
         recipeBlueprint = new RecipeBlueprint();
         recipeBlueprint.requiredCatalyst.put(basePhysical,1);
         recipeBlueprint.result.put(blueprint,1);
+        assignTechnique(toCopy.rawWeapon);
     }
+    
+    private void assignTechnique(RawWeapon raw)
+    {
+        switch (shape) {
+            case ARC:
+                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
+                        2, (int) raw.range));
+                break;
+            case THROUGH:
+                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
+                        1, (int) raw.range));
+                break;
+            case BEAM:
+                technique = new Technique(raw.name + " attack", new LineAOE(Coord.get(-1, -1),
+                        Coord.get(-1, -1), (int) (raw.range + raw.area), Radius.CIRCLE,
+                        1, (int) (raw.range + raw.area)));
+                break;
+            case WAVE:
+                technique = new Technique(raw.name + " attack", new ConeAOE(Coord.get(-1, -1),
+                        (int) (raw.range + raw.area), 0.0, 60.0, Radius.CIRCLE));
+                break;
+            case SWEEP:
+                technique = new Technique(raw.name + " attack", new ConeAOE(Coord.get(-1, -1),
+                        (int) (raw.range), 0.0, raw.area * 22.5 + 25, Radius.SQUARE));
+                break;
+            default:
+                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
+                        1, (int) raw.range));
+                break;
+        }
 
+    }
+    
     public Weapon copy()
     {
         return new Weapon(this);
