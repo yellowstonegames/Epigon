@@ -8,8 +8,10 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -167,6 +169,11 @@ public class Epigon extends Game {
     public static final int worldWidth, worldHeight, worldDepth, totalDepth;
     public float startingY, finishY, timeToFall;
 
+    private static final boolean DEBUG = false; 
+    private GLProfiler glp;
+    private StringBuilder tempSB = new StringBuilder(16);
+    private Vector2 screenPosition = new Vector2(20, 20);
+
     // Set up sizing all in one place
     static {
         worldWidth = 60;
@@ -222,6 +229,10 @@ public class Epigon extends Game {
         // uncomment the line below to see the game with no filters
         //batch = new FilterBatch();
 
+        if(DEBUG) {
+            glp = new GLProfiler(Gdx.graphics);
+            glp.enable();
+        }
         System.out.println("Putting together display.");
         mapViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
@@ -1365,7 +1376,9 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        super.render();
+        if(DEBUG)
+            glp.reset();
+        //super.render();
 
         // standard clear the background routine for libGDX
         Gdx.gl.glClearColor(unseenColor.r, unseenColor.g, unseenColor.b, 1.0f);
@@ -1462,11 +1475,21 @@ public class Epigon extends Game {
             mapStage.getRoot().draw(batch, 1f);
             //so we can draw the actors independently of the stage while still in the same batch
             //player.appearance.draw(batch, 1.0f);
-            //we still need to end
+            if(DEBUG)
+            {
+                int drawCalls = glp.getDrawCalls();
+                int textureBindings = glp.getTextureBindings();
+                tempSB.setLength(0);
+                tempSB.append(Gdx.graphics.getFramesPerSecond()).append(" FPS, Draw Calls: ").append(drawCalls).append(", Texture Binds: ").append(textureBindings);
+                screenPosition.set(16, 8);
+                mapViewport.unproject(screenPosition);
+                font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
+            }
+            mapOverlayStage.act();
+            batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
+            mapOverlayStage.getRoot().draw(batch, 1f);
             batch.end();
 
-            mapOverlayStage.act();
-            mapOverlayStage.draw();
         } else {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
             fallingViewport.apply(false);
