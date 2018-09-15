@@ -1,15 +1,15 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.Radiance;
-import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.LiveValue;
+import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static squidpony.epigon.Epigon.posrng;
 import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
@@ -31,8 +31,15 @@ public class EpiTile {
     
     public EpiTile()
     {
-        tintColor = dbColors[posrng.next(5)];
-        tintAmount = posrng.nextFloat(0.3f);
+        tintColor = dbColors[System.identityHashCode(this) & 31];
+        tintAmount = GauntRNG.nextFloat(System.identityHashCode(this)) * 0.3f;
+    }
+    
+    public EpiTile(Physical floor)
+    {
+        this.floor = floor;
+        tintColor = dbColors[floor.next(5)];
+        tintAmount = floor.nextFloat(0.3f);
     }
     
     /**

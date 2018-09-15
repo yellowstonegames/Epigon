@@ -48,13 +48,12 @@ public class WorldGenerator {
         for (int x = 0; x < World.DIVE_HEADER[0].length(); x++) {
             for (int y = 0; y < World.DIVE_HEADER.length; y++) {
                 char c = World.DIVE_HEADER[y].charAt(x);
-                map.contents[x][y] = new EpiTile();
                 switch (c) {
                     case ' ':
-                        map.contents[x][y].floor = handBuilt.emptySpace;
+                        map.contents[x][y] = new EpiTile(handBuilt.emptySpace);
                         break;
                     case '$':
-                        map.contents[x][y].floor = handBuilt.emptySpace;
+                        map.contents[x][y] = new EpiTile(handBuilt.emptySpace);
                         map.contents[x][y].add(handBuilt.money);
                         break;
                     default:
@@ -62,7 +61,7 @@ public class WorldGenerator {
                         p.symbol = c;
                         p.color = SColor.SCARLET.toFloatBits();
                         p.blocking = true;
-                        map.contents[x][y].floor = p;
+                        map.contents[x][y] = new EpiTile(p);
                         break;
                 }
             }
@@ -283,11 +282,9 @@ public class WorldGenerator {
                 for (int y = 0; y < height; y++) {
                     EpiTile tile = world[z].contents[x][y];
                     if (tile == null) {
-                        tile = new EpiTile();
+                        tile = new EpiTile(floor);
                         world[z].contents[x][y] = tile;
                     }
-
-                    tile.floor = floor;
                 }
             }
             z++;

@@ -82,7 +82,7 @@ public class Epigon extends Game {
     public final StatefulRNG rng = new StatefulRNG(new LinnormRNG(seed));
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
-    public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
+    //public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final LinnormRNG rootChaos = new LinnormRNG();
     public final RecipeMixer mixer;
@@ -584,7 +584,7 @@ public class Epigon extends Game {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
-        posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
+        //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
         //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
         contextHandler.setMap(map);
         fxHandler.seen = map.fovResult;
@@ -915,7 +915,8 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (map.fovResult[x][y] > 0) {
-                    posrng.move(x, y);
+                    //posrng.move(x, y);
+                    
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
                     } else {
@@ -1305,7 +1306,7 @@ public class Epigon extends Game {
                         }
                         creature.wasSeen = true;
                     } else {
-                        posrng.move(x, y);
+                        //posrng.move(x, y);
                         putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor());
                     }
                 } else {
