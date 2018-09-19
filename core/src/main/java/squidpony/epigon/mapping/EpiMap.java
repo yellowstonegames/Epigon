@@ -2,6 +2,7 @@ package squidpony.epigon.mapping;
 
 import squidpony.epigon.data.Physical;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.*;
 
 import static squidpony.epigon.Epigon.rootChaos;
@@ -21,8 +22,12 @@ public class EpiMap {
     public int width, height;
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
+    public char[][] simple;
+    public char[][] line;
     public double[][] resistances;
+    public double[][] triResistances;
     public double[][] fovResult;
+    public double[][] triFovResult;
     public double[][] losResult;
     public double[][] tempFOV;
     public float[][][] colorLighting;
@@ -34,14 +39,16 @@ public class EpiMap {
         this.width = width;
         this.height = height;
         fovResult = new double[width][height];
-        losResult = new double[width][height];
-        tempFOV = new double[width][height];
-        colorLighting = SColor.blankColoredLighting(width, height);
-        tempColorLighting = new float[2][width][height];
+        losResult = new double[width * 3][height * 3];
+        tempFOV = new double[width * 3][height * 3];
+        colorLighting = SColor.blankColoredLighting(width * 3, height * 3);
+        tempColorLighting = new float[2][width * 3][height * 3];
         chaos = new StatefulRNG(new LinnormRNG(rootChaos.nextLong()));
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
         resistances = new double[width][height];
+        triResistances = new double[width * 3][height * 3];
+        triFovResult = new double[width * 3][height * 3];
         downStairPositions = new GreasedRegion(width, height);
         upStairPositions = new GreasedRegion(width, height);
         creatures = new OrderedMap<>();
@@ -60,22 +67,98 @@ public class EpiMap {
     }
 
     public double[][] opacities() {
+        double o;
+        int xx, yy;
         for (int x = 0; x < width; x++) {
+            xx = x * 3;
             for (int y = 0; y < height; y++) {
-                resistances[x][y] = contents[x][y].opacity();
+                yy = y * 3;
+                resistances[x][y] = o = contents[x][y].opacity();
+                switch (line[x][y]) {
+                    case '\1':
+                    case '#':
+                    case '+':
+                        triResistances[xx][yy] = triResistances[xx + 1][yy] = triResistances[xx + 2][yy] =
+                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                        triResistances[xx][yy + 2] = triResistances[xx + 1][yy + 2] = triResistances[xx + 2][yy + 2] = o;
+                        break;
+                    case '├':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┤':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
+                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┴':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┬':
+                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
+                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┌':
+                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
+                        /*triResistances[xx][yy+1] =*/
+                        triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┐':
+                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
+                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
+                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '└':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '┘':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
+                                        /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '│':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
+                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                    case '─':
+                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] = o;
+                        break;
+                    case '┼':
+                        /*triResistances[xx][yy] =*/
+                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
+                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
+                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        break;
+                }
             }
         }
         return resistances;
     }
 
     public char[][] simpleChars() {
-        char[][] ret = new char[width][height];
+        if(simple == null || simple.length != width || simple[0].length != height) 
+            simple = new char[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                ret[x][y] = contents[x][y].getSymbol();
+                simple[x][y] = contents[x][y].getSymbol();
             }
         }
-        return ret;
+        line = DungeonUtility.hashesToLines(simple, true);
+        return simple;
     }
 
     public char altSymbolOf(char symbol) {

@@ -79,7 +79,7 @@ public class Epigon extends Game {
     public static final PanelSize contextSize;
     public static final int messageCount;
     public static final long seed = 0xBEEFD00DFADEFEEL;
-    public final StatefulRNG rng = new StatefulRNG(new LinnormRNG(seed));
+    public final StatefulRNG rng = new StatefulRNG(new LinnormRNG());
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     //public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
@@ -98,7 +98,7 @@ public class Epigon extends Game {
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
     static public FloatFilter filter, identityFilter, grayscale;
-    private SparseLayers mapSLayers;
+    private SubcellLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
@@ -281,7 +281,7 @@ public class Epigon extends Game {
 //        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
-        mapSLayers = new SparseLayers(
+        mapSLayers = new SubcellLayers(
                 worldWidth,
                 worldHeight,
                 mapSize.cellWidth,
@@ -292,7 +292,7 @@ public class Epigon extends Game {
             public void draw(Batch batch, float parentAlpha) {
                 //super.draw(batch, parentAlpha);
                 float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo;
-                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
+                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
                 int len = layers.size();
                 Frustum frustum = null;
                 Stage stage = getStage();
@@ -336,7 +336,7 @@ public class Epigon extends Game {
                             !glyph.isVisible() ||
                                     (x = Math.round((gxo = glyph.getX() - xo) / font.actualCellWidth)) < 0 || x >= gridWidth ||
                                     (y = Math.round((gyo = glyph.getY() - yo)  / -font.actualCellHeight + gridHeight)) < 0 || y >= gridHeight ||
-                                    backgrounds[x][y] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f)))
+                                    backgrounds[x * 3 + 1][y * 3 + 1] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f)))
                         continue;
                     glyph.draw(batch, 1f);
                 }
@@ -504,6 +504,7 @@ public class Epigon extends Game {
     private Coord setupLevel(int depth)
     {
         map = world[depth];
+        simple = map.simpleChars();
         floors.refill(map.opacities(), 0.999);
         floorCells = floors.asCoords();
         GreasedRegion floors2 = floors.copy();
@@ -589,8 +590,8 @@ public class Epigon extends Game {
         contextHandler.setMap(map);
         fxHandler.seen = map.fovResult;
         creatures = map.creatures;
-        calcFOV(player.location.x, player.location.y);
         simple = map.simpleChars();
+        calcFOV(player.location.x, player.location.y);
         toPlayerDijkstra.initialize(simple);
         monsterDijkstra.initialize(simple);
         calcDijkstra();
@@ -847,33 +848,41 @@ public class Epigon extends Game {
      *              will not be modified
      * @return basis, after modification; it can be passed to this method as basis again
      */
-    public static float[][][] mixColoredLighting(float[][][] basis, float[][][] other, float flare) {
+    public float[][][] mixColoredLighting(float[][][] basis, float[][][] other, float flare) {
         int w = basis[0].length, h = basis[0][0].length, w2 = other[0].length, h2 = other[0][0].length;
         flare = flare + 1f;
         for (int x = 0; x < w && x < w2; x++) {
             for (int y = 0; y < h && y < h2; y++) {
-                if(basis[1][x][y] == FLOAT_WHITE)
+//                if(map.triFovResult[x][y] <= 0.0)
+//                {
+//                    basis[1][x][y] = 0f;
+//                    basis[0][x][y] = 0f;
+//                }
+//                else 
                 {
-                    basis[1][x][y] = other[1][x][y];
-                    basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
-                }
-                else
-                {
-                    if(other[1][x][y] != FLOAT_WHITE)
+                    if(basis[1][x][y] == FLOAT_WHITE)
                     {
-                        float change = (other[0][x][y] - basis[0][x][y]) * 0.5f + 0.5f;
-                        final int s = NumberTools.floatToIntBits(basis[1][x][y]), e = NumberTools.floatToIntBits(other[1][x][y]),
-                                rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
-                                re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
-                        change *= ae * 0.007874016f;
-                        basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
-                                | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
-                                | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
-                                | as);
-                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change * flare);
+                        basis[1][x][y] = other[1][x][y];
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
                     }
                     else
-                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
+                    {
+                        if(other[1][x][y] != FLOAT_WHITE)
+                        {
+                            float change = (other[0][x][y] - basis[0][x][y]) * 0.5f + 0.5f;
+                            final int s = NumberTools.floatToIntBits(basis[1][x][y]), e = NumberTools.floatToIntBits(other[1][x][y]),
+                                    rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
+                                    re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
+                            change *= ae * 0.007874016f;
+                            basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
+                                    | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
+                                    | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
+                                    | as);
+                            basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change * flare);
+                        }
+                        else
+                            basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
+                    }
                 }
             }
         }
@@ -882,9 +891,9 @@ public class Epigon extends Game {
 
     private void calcFOV(int checkX, int checkY) {
         double sight = player.stats.get(Stat.SIGHT).actual();
-        FOV.reuseLOS(map.opacities(), map.losResult, checkX, checkY);
-        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE);
-
+        FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, sight, Radius.CIRCLE);
+        FOV.reuseLOS(map.triResistances, map.losResult, checkX * 3 + 1, checkY * 3 + 1);
+        FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1,  checkY * 3 + 1, sight * 3, Radius.CIRCLE);
 //        FOV.reuseFOV(map.opacities(), map.losResult, checkX, checkY, sight * 2.0, Radius.SQUARE,
 //                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
 //        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE,
@@ -895,7 +904,7 @@ public class Epigon extends Game {
             for (int y = 0; y < map.height; y++) {
                 if((radiance = map.contents[x][y].getAnyRadiance()) != null)
                 {
-                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
+                    FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.range * 3);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
@@ -903,9 +912,15 @@ public class Epigon extends Game {
         }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if(map.losResult[x][y] > 0.0)
-                {
-                    map.fovResult[x][y] = MathUtils.clamp(map.fovResult[x][y] + map.colorLighting[0][x][y], 0.0, 1.0);
+                for (int ix = 0; ix < 3; ix++) {
+                    for (int iy = 0; iy < 3; iy++) {
+                        if(map.losResult[x * 3 + ix][y * 3 + iy] > 0.0)
+                        {
+                            map.fovResult[x][y] = MathUtils.clamp(
+                                    Math.max(map.fovResult[x][y], map.triFovResult[x][y] + map.colorLighting[0][x * 3 + 1][y * 3 + 1])
+                                    , 0.0, 1.0);
+                        }
+                    }
                 }
             }
         }
@@ -1242,6 +1257,10 @@ public class Epigon extends Game {
         }
     }
 
+    public void putSolo(int x, int y)
+    {
+        mapSLayers.putSingle(x, y, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
+    }
     public void putWithLight(int x, int y, char c, float foreground) {
         // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
         // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
@@ -1254,16 +1273,36 @@ public class Epigon extends Game {
         //mapSLayers.put(x, y, c, front, back); // "light" theme
         //mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
         //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
-        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]),
-                lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
+        //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]),
+        //        lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y])); // "dark" theme
+//        x *= 3;
+//        y *= 3;
+//        mapSLayers.putSingle(x  , y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y  ], map.colorLighting[0][x  ][y  ] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x  , y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y+1], map.colorLighting[0][x  ][y+1] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x  , y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y+2], map.colorLighting[0][x  ][y+2] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+1, y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y  ], map.colorLighting[0][x+1][y  ] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+1, y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y+1], map.colorLighting[0][x+1][y+1] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+1, y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y+2], map.colorLighting[0][x+1][y+2] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+2, y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y  ], map.colorLighting[0][x+2][y  ] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+2, y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y+1], map.colorLighting[0][x+2][y+1] * 0.4f)); // "dark" theme
+//        mapSLayers.putSingle(x+2, y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y+2], map.colorLighting[0][x+2][y+2] * 0.4f)); // "dark" theme
+
+//        mapSLayers.putSingle(x  , y  , map.triResistances[x  ][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x  , y+1, map.triResistances[x  ][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x  , y+2, map.triResistances[x  ][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+1, y  , map.triResistances[x+1][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+1, y+1, map.triResistances[x+1][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+1, y+2, map.triResistances[x+1][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+2, y  , map.triResistances[x+2][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+2, y+1, map.triResistances[x+2][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
+//        mapSLayers.putSingle(x+2, y+2, map.triResistances[x+2][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
     }
 
     /**
      * Draws the map, applies any highlighting for the path to the cursor, and then draws the player.
      */
     public void putCrawlMap() {
-        float time = (System.currentTimeMillis() & 0xffffffL) * 0.00125f; // if you want to adjust the speed of flicker, change the multiplier
-        long time0 = Noise.longFloor(time);
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
 //        if ((radiance = handBuilt.playerRadiance) != null) {
@@ -1274,7 +1313,7 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
-                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
+                    FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.currentRange() * 3.0);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
@@ -1287,7 +1326,20 @@ public class Epigon extends Game {
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                float sightAmount = (float) map.fovResult[x][y];
+                double sight;
+                float sightAmount = 0f;
+                for (int ix = 0; ix < 3; ix++) {
+                    for (int iy = 0; iy < 3; iy++) {
+                        if((sight = map.losResult[x*3+ix][y*3+iy]) > 0.0)
+                        {
+                            putSolo(x*3+ix,y*3+iy);
+                            sightAmount = Math.max(sightAmount, (float)sight);
+                        }
+                    }
+                }
+//                        (Math.max(map.triFovResult[x*3][y*3], Math.max(map.triFovResult[x*3][y*3+1], Math.max(map.triFovResult[x*3][y*3+2],
+//                                Math.max(map.triFovResult[x*3+1][y*3], Math.max(map.triFovResult[x*3+1][y*3+1], Math.max(map.triFovResult[x*3+1][y*3+2],
+//                                        Math.max(map.triFovResult[x*3+2][y*3], Math.max(map.triFovResult[x*3+2][y*3+1], map.triFovResult[x*3+2][y*3+2])))))))));
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);

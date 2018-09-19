@@ -13,6 +13,7 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidgrid.gui.gdx.SubcellLayers;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
@@ -66,7 +67,7 @@ public class ContextHandler {
     }
     public Group group;
     private SparseLayers layers;
-    private SparseLayers mainMap;
+    private SubcellLayers mainMap;
     private Actor miniMap;
     private int width;
     private int height;
@@ -82,7 +83,7 @@ public class ContextHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
     
-    public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game) {
+    public ContextHandler(SparseLayers layers, SubcellLayers mainMap, Epigon game) {
         group = new Group();
         this.layers = layers;
         group.addActor(this.layers);
@@ -145,7 +146,7 @@ public class ContextHandler {
                         //glyph.act(Gdx.graphics.getDeltaTime());
                         if ((x = mainMap.gridX(glyph.getX())) < 0 || x >= mainMap.gridWidth
                             || (y = mainMap.gridY(glyph.getY())) < 0 || y >= mainMap.gridHeight
-                            || mainMap.backgrounds[x][y] == 0f) {
+                            || mainMap.backgrounds[x * 3 + 1][y * 3 + 1] == 0f) {
                             continue;
                         }
                         miniMapFont.draw(batch, '\u0000', game.player != null && 
@@ -156,7 +157,7 @@ public class ContextHandler {
                     }
                 }
             };
-            miniMapFont = mainMap.font.copy().width(4f).height(4f).initBySize();
+            miniMapFont = mainMap.font.copy().width(1f).height(1f).initBySize();
             group.addActor(miniMap);
             miniMap.setVisible(false);
         }
