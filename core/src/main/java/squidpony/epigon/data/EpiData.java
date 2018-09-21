@@ -33,7 +33,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     private final int idHash;
     private long stateA, stateB;
     
-    private static int uniqueIntGen = 123456789;
+    private static int uniqueIntGen = (int)System.nanoTime();
 
     private static final long[] startingA = {
             0x0000000000000001L, 0x770391C6587202CDL, 0x0148D0D6B055DE19L, 0x2CFFDEE4C4C8654FL, 0x3669291DE218F372L, 0x5B744ACB07F3D380L, 0x103F93C86BDF21D0L, 0x9A1D980831BCF2ABL,

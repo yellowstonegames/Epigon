@@ -78,8 +78,8 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
     public static final int messageCount;
-    public static final long seed = 0xBEEFD00DFADEFEEL;
-    public final StatefulRNG rng = new StatefulRNG(new LinnormRNG());
+    public static final long seed = 0xBEEFEED00DBA77L;
+    public final StatefulRNG rng = new StatefulRNG(seed);
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     //public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
@@ -97,7 +97,10 @@ public class Epigon extends Game {
     // Display
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
-    static public FloatFilter filter, identityFilter, grayscale;
+    public static final FloatFilters.YCbCrFilter filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
+    public static FloatFilter
+            identityFilter = new FloatFilters.IdentityFilter(),
+            grayscale = new FloatFilters.YCbCrFilter(0.75f, 0.2f, 0.2f);
     private SubcellLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
@@ -210,10 +213,10 @@ public class Epigon extends Game {
 //        filter = new FloatFilters.DistinctRedGreenFilter();
 //        filter = new FloatFilters.GrayscaleFilter();
 //        filter = new FloatFilters.ColorizeFilter(SColor.CLOVE_BROWN, 0.6f, 0.0f);
-        filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
-        identityFilter = new FloatFilters.IdentityFilter();
+//        filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
+//        identityFilter = new FloatFilters.IdentityFilter();
         // mostly mutes colors but doesn't fully grayscale everything; also darkens colors slightly
-        grayscale = new FloatFilters.YCbCrFilter(0.75f, 0.2f, 0.2f); // can also use GrayscaleFilter
+        
         //grayscale = new FloatFilters.YCbCrFilter(0.75f, 0f, 0f); // an option to fully grayscale/darken
         System.out.println(rootChaos.getState());
 
@@ -292,6 +295,9 @@ public class Epigon extends Game {
             public void draw(Batch batch, float parentAlpha) {
                 //super.draw(batch, parentAlpha);
                 float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo;
+                filter.cbMul = 0.65f;
+                filter.crMul = 0.65f;
+                filter.yMul = 0.7f;
                 font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
                 int len = layers.size();
                 Frustum frustum = null;
@@ -312,6 +318,9 @@ public class Epigon extends Game {
                         }
                     }
                 }
+                filter.cbMul = 0.95f;
+                filter.crMul = 0.95f;
+                filter.yMul = 0.9f;
                 font.configureShader(batch);
                 if(frustum == null) {
                     for (int i = 0; i < len; i++) {
@@ -325,7 +334,9 @@ public class Epigon extends Game {
                         layers.get(i).draw(batch, font, frustum, xo, yOff);
                     }
                 }
-
+                filter.cbMul = 1.4f;
+                filter.crMul = 1.4f;
+                filter.yMul = 1.05f;
                 int x, y;
                 for (int i = 0; i < glyphs.size(); i++) {
                     TextCellFactory.Glyph glyph = glyphs.get(i);

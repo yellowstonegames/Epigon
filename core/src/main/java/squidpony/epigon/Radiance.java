@@ -90,7 +90,7 @@ public class Radiance {
      */
     public float currentRange()
     {
-        final float time = (System.currentTimeMillis() & 0x3ffffL) * 0x1.8p-8f;
+        final float time = (System.currentTimeMillis() & 0x3ffffL) * 0x1.9p-9f;
         float current = range;
         if(flicker != 0f) 
             current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker) * 0.25f + 0.75f;
