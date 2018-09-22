@@ -512,19 +512,31 @@ public class Epigon extends Game {
         pausedAt = Instant.now();
     }
     
-    private Coord setupLevel(int depth)
-    {
-        map = world[depth];
+    private void setupLevel() {
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                if (map.contents[x][y] == null) {
+                    map.contents[x][y] = new EpiTile();
+                }
+            }
+        }
+
         simple = map.simpleChars();
         floors.refill(map.opacities(), 0.999);
         floorCells = floors.asCoords();
+
+        if (map.populated) {
+            return;
+        }
+        map.populated = true;
+
         GreasedRegion floors2 = floors.copy();
         floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
-        floors2.copy().randomScatter(rng, 3)
-                .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-                        RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
-                        player.getRandomElement(Element.allEnergy).weaponModification())));
-        floors2.randomScatter(rng, 5);
+        floors2.copy().randomScatter(rng, 4)
+            .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
+            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
+            player.getRandomElement(Element.allEnergy).weaponModification())));
+        floors2.randomScatter(rng, 6);
         for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
                 //Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
@@ -533,17 +545,17 @@ public class Epigon extends Game {
                 p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
-                Physical[] held = new Physical[p.creatureData.equippedDistinct.size()+1];
+                Physical[] held = new Physical[p.creatureData.equippedDistinct.size() + 1];
                 p.creatureData.equippedDistinct.toArray(held);
-                held[held.length-1]=pMeat;
+                held[held.length - 1] = pMeat;
                 double[] weights = new double[held.length];
                 Arrays.fill(weights, 1.0);
-                weights[held.length-1] = 3.0;
+                weights[held.length - 1] = 3.0;
                 int[] mins = new int[held.length], maxes = new int[held.length];
                 Arrays.fill(mins, 1);
                 Arrays.fill(maxes, 1);
-                mins[held.length-1] = 2;
-                maxes[held.length-1] = 4;
+                mins[held.length - 1] = 2;
+                maxes[held.length - 1] = 4;
                 WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), held, weights, mins, maxes);
                 p.physicalDrops.add(pt);
                 p.location = coord;
@@ -551,34 +563,31 @@ public class Epigon extends Game {
                 map.creatures.put(coord, p);
             }
         }
-
-        return floors2.notAnd(floors).andNot(map.downStairPositions).andNot(map.upStairPositions).singleRandom(rng);
     }
-    
+
     private void prepCrawl() {
         message("Generating crawl.");
-        world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
-        depth = 0;
+        //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
+        int underground = 8;
+        int aboveground = 2;
+        world = worldGenerator.buildCastle(worldWidth, worldHeight, underground, aboveground, handBuilt);
+        depth = aboveground; // should be the very surface
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
         floors = new GreasedRegion(map.width, map.height);
-        for (int i = world.length - 1; i > 0; i--) {
-            setupLevel(i);
-        }
-        player.location = setupLevel(0);
-        map.contents[player.location.x][player.location.y].add(player);
+//        for (int i = world.length - 1; i > aboveground + 1; i--) {
+//            setupLevel(i);
+//        }
         simple = new char[map.width][map.height];
+
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
         los = new LOS(LOS.BRESENHAM);
         blocked = new GreasedRegion(map.width, map.height);
-        changeLevel(0);
 
-        if (player.appearance != null) {
-            mapSLayers.removeGlyph(player.appearance);
-        }
-        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+        player.location = Coord.get(0, 0);
+        changeLevel(depth);
 
         mode = GameMode.CRAWL;
         mapInput.flush();
@@ -586,15 +595,31 @@ public class Epigon extends Game {
         mapInput.setKeyHandler(mapKeys);
         mapInput.setMouse(mapMouse);
     }
-    
-    private void changeLevel(int level)
-    {
+
+    private void changeLevel(int level){
+        changeLevel(level, null);
+    }
+
+    private void changeLevel(int level, Coord location) {
+        map.contents[player.location.x][player.location.y].contents.remove(player); // remove from old location before moving
+
         depth = level;
         map = world[depth];
         mapSLayers.clear();
         for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
+        setupLevel();
+        if (location == null) { // set up a valid random start location
+            GreasedRegion floors2 = floors.copy();
+            floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
+            do {
+                location = floors2.singleRandom(rng);
+            } while (map.creatures.containsKey(location));
+        }
+        
+        player.location = location;
+        map.contents[player.location.x][player.location.y].add(player);
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
         //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
@@ -1696,15 +1721,27 @@ public class Epigon extends Game {
                 case MOVE_UP_RIGHT:
                     scheduleMove(Direction.UP_RIGHT);
                     break;
-                case MOVE_LOWER:
-                    // up '≤', down '≥'
-                    if(map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≥')
-                        changeLevel(++depth);
+                case MOVE_LOWER:// up '≤', down '≥'
+                    //  if (map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≥') {
+                        if (depth >= world.length - 1) {
+                            message("Theses down stairs turn out to lead nowhere.");
+                        } else {
+                            changeLevel(depth + 1, player.location);
+                        }
+//                    } else {
+//                        message("You're not on stairs going down.");
+//                    }
                     break;
-                case MOVE_HIGHER:
-                    // up '≤', down '≥'
-                    if(map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≤')
-                        changeLevel(--depth);
+                case MOVE_HIGHER:// up '≤', down '≥'
+//                    if (map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≤') {
+                        if (depth <= 0) {
+                            message("Theses up stairs turn out to lead nowhere.");
+                        } else {
+                            changeLevel(depth - 1, player.location);
+                        }
+//                    } else {
+//                        message("You're not on stairs going up.");
+//                    }
                     break;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
@@ -2275,7 +2312,7 @@ public class Epigon extends Game {
                 toCursor.clear(); // don't show path when mouse moves out of range or view
                 return false;
             }
-            contextHandler.tileContents(screenX, screenY, map.contents[screenX][screenY]);
+            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
             cursor = Coord.get(screenX, screenY);
             toCursor.clear();
             toPlayerDijkstra.findPathPreScanned(toCursor, cursor);

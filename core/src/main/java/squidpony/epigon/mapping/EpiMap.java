@@ -12,8 +12,8 @@ import static squidpony.epigon.Epigon.rootChaos;
  *
  * Each cell is considered to be 1 meter by 1 meter square.
  *
- * A null tile represents open space with no special properties or opacities to things passing
- * through. They should not be considered a vacuum, but rather normal air.
+ * A null tile represents open space with no special properties or opacities to things passing through. They should not
+ * be considered a vacuum, but rather normal air.
  *
  * @author Eben Howard - http://squidpony.com
  */
@@ -35,6 +35,8 @@ public class EpiMap {
     public GreasedRegion downStairPositions, upStairPositions;
     public StatefulRNG chaos;
     public OrderedMap<Coord, Physical> creatures;
+    public boolean populated;
+
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
@@ -78,70 +80,70 @@ public class EpiMap {
                     case '\1':
                     case '#':
                     case '+':
-                        triResistances[xx][yy] = triResistances[xx + 1][yy] = triResistances[xx + 2][yy] =
-                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                        triResistances[xx][yy + 2] = triResistances[xx + 1][yy + 2] = triResistances[xx + 2][yy + 2] = o;
+                        triResistances[xx][yy] = triResistances[xx + 1][yy] = triResistances[xx + 2][yy]
+                            = triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = triResistances[xx][yy + 2] = triResistances[xx + 1][yy + 2] = triResistances[xx + 2][yy + 2] = o;
                         break;
                     case '├':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┤':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
-                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
+                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┴':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┬':
                         /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┌':
                         /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-                        /*triResistances[xx][yy+1] =*/
-                        triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+ /*triResistances[xx][yy+1] =*/
+                        triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┐':
                         /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
-                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
+                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '└':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '┘':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
-                                        /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
+                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '│':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = /*triResistances[xx+2][yy+1] =*/
-                                /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1]
+                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                     case '─':
                         triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] = o;
                         break;
                     case '┼':
                         /*triResistances[xx][yy] =*/
-                        triResistances[xx + 1][yy] = /*triResistances[xx+2][yy] =*/
-                                triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] =
-                                        /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
+                        triResistances[xx + 1][yy]
+                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
+                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
                         break;
                 }
             }
@@ -150,8 +152,9 @@ public class EpiMap {
     }
 
     public char[][] simpleChars() {
-        if(simple == null || simple.length != width || simple[0].length != height) 
+        if (simple == null || simple.length != width || simple[0].length != height) {
             simple = new char[width][height];
+        }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 simple[x][y] = contents[x][y].getSymbol();

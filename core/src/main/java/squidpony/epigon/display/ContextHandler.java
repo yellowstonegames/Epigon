@@ -267,7 +267,7 @@ public class ContextHandler {
                     contextStatDetails(null, null);
                     break;
                 case TILE_CONTENTS:
-                    tileContents(0, 0, null);
+                    tileContents(0, 0, 0, null);
             }
         }
     }
@@ -303,13 +303,13 @@ public class ContextHandler {
         cacheIsValid.add(contextMode);
     }
 
-    public void tileContents(int x, int y, EpiTile tile) {
+    public void tileContents(int x, int y, int depth, EpiTile tile) {
         if (contextMode != ContextMode.TILE_CONTENTS) {
             return;
         }
         clear();
         if (tile != null) {
-            String tileDescription = "[" + x + ", " + y + "] ";
+            String tileDescription = "[" + x + ", " + y + ", " + depth + "] ";
             if (tile.floor != null) {
                 tileDescription += tile.floor.name;
             } else {

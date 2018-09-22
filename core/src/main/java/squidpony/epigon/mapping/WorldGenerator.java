@@ -14,13 +14,15 @@ import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Creates and populates a world.
+ * Creates a world.
  *
  * @author Eben Howard - http://squidpony.com
  */
 public class WorldGenerator {
+
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -28,6 +30,25 @@ public class WorldGenerator {
     private StatefulRNG rng;
     private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
+
+    public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
+        EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
+        EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
+
+        for (int i = 0; i <= sky; i++) {
+            aboveground[i] = new EpiMap(width, height);
+        }
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                aboveground[sky].contents[x][y] = new EpiTile(getFloor(Stone.GRANITE));
+            }
+        }
+
+        world = Stream.of(aboveground, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
+
+        return world;
+    }
 
     public EpiMap buildDive(int width, int depth, HandBuilt handBuilt) {
 
@@ -70,10 +91,10 @@ public class WorldGenerator {
         int centerGap = width / 2;
         int gapSize = (int) (width * 0.4);
         long seed1 = handBuilt.rng.nextLong() + System.nanoTime(),
-                seed2 = handBuilt.rng.nextLong() + seed1,
-                seed3 = handBuilt.rng.nextLong() + seed2 ^ seed1;
+            seed2 = handBuilt.rng.nextLong() + seed1,
+            seed3 = handBuilt.rng.nextLong() + seed2 ^ seed1;
         final double portionGapSize = 0.08 * width, offGapSize = 0.12 * width,
-                halfWidth = 0.5 * width, centerOff = 0.135 * width, extraWiggle = 0.02 * width;
+            halfWidth = 0.5 * width, centerOff = 0.135 * width, extraWiggle = 0.02 * width;
         for (int level = World.DIVE_HEADER.length; level < height; level++) {
             for (int x = centerGap - gapSize; x < centerGap + gapSize; x++) {
                 map.contents[x][level].floor = handBuilt.emptySpace;
@@ -81,10 +102,10 @@ public class WorldGenerator {
                 safeSpots.insert(x, level);
             }
             // Basic1D noise is more wobbly, with small changes frequently and frequent (cyclical) major changes
-            gapSize = (int)(Noise.Basic1D.noise(level * 0.17, seed1) * portionGapSize + offGapSize
-                    + NumberTools.randomFloatCurved(seed3 * (level + seed2)) * extraWiggle);
+            gapSize = (int) (Noise.Basic1D.noise(level * 0.17, seed1) * portionGapSize + offGapSize
+                + NumberTools.randomFloatCurved(seed3 * (level + seed2)) * extraWiggle);
             // swayRandomized spends a little more time at extremes before shifting suddenly to a very different value
-            centerGap = (int)((NumberTools.swayRandomized(seed2, level * 0.08) + NumberTools.swayRandomized(seed3, level * 0.135)) * centerOff + halfWidth);
+            centerGap = (int) ((NumberTools.swayRandomized(seed2, level * 0.08) + NumberTools.swayRandomized(seed3, level * 0.135)) * centerOff + halfWidth);
             centerGap = Math.max(centerGap, gapSize / 2 + 1); // make sure it's not off the left side
             centerGap = Math.min(centerGap, width - gapSize / 2 - 1); // make sure it's not off the right side
         }
@@ -95,7 +116,7 @@ public class WorldGenerator {
         Inclusion[] inclusions = Inclusion.values();
         Physical[] contents = new Physical[inclusions.length + 1];
         double[] weights = new double[inclusions.length + 1];
-        for (int i = 0; i < inclusions.length; i++){
+        for (int i = 0; i < inclusions.length; i++) {
             Physical gem = RecipeMixer.buildPhysical(inclusions[i]);
             gem.symbol = '♦';
             gem.groupingData = new Grouping(1);
@@ -107,8 +128,9 @@ public class WorldGenerator {
         WeightedTableWrapper<Physical> table = new WeightedTableWrapper<>(rng.nextLong(), contents, weights);
 
         for (Coord cash : safeSpots) {
-            if(map.contents[cash.x][cash.y].blockage == null) 
+            if (map.contents[cash.x][cash.y].blockage == null) {
                 map.contents[cash.x][cash.y].add(table.random());
+            }
         }
 
         // Close off bottom with "goal"
@@ -117,30 +139,20 @@ public class WorldGenerator {
         goal.symbol = '♥';
         goal.blocking = false;
         goal.unique = true; // misusing this intentionally to mark special "objects"
-        for (int x = 0; x < width; x++){
-            map.contents[x][height-2].floor = goal;
-            map.contents[x][height-2].add(RecipeMixer.buildPhysical(goal));
-            map.contents[x][height-2].blockage = null;
-            map.contents[x][height-1].floor = goal;
-            map.contents[x][height-1].add(RecipeMixer.buildPhysical(goal));
-            map.contents[x][height-1].blockage = null;
+        for (int x = 0; x < width; x++) {
+            map.contents[x][height - 2].floor = goal;
+            map.contents[x][height - 2].add(RecipeMixer.buildPhysical(goal));
+            map.contents[x][height - 2].blockage = null;
+            map.contents[x][height - 1].floor = goal;
+            map.contents[x][height - 1].add(RecipeMixer.buildPhysical(goal));
+            map.contents[x][height - 1].blockage = null;
         }
 
         return map;
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-        this.handBuilt = handBuilt;
-        rng = handBuilt.rng.copy();
-        rng.setState(1000L);
-        world = new EpiMap[depth];
-        for (int d = 0; d < depth; d++) {
-            world[d] = new EpiMap(width, height);
-        }
-
+        init(width, height, depth, handBuilt);
         mineralPlacement();
         faultMap();
         bubbleMap(false);
@@ -200,14 +212,13 @@ public class WorldGenerator {
                 }
             }
         }
-        for (int e = 0; e < depth-1; e++) {
+        for (int e = 0; e < depth - 1; e++) {
             EpiMap eMap = world[e];
-            EpiMap nextMap = world[e+1];
-            tmp.remake(floorWorld[e]).and(floorWorld[e+1]).randomScatter(rng, 21, 4);
+            EpiMap nextMap = world[e + 1];
+            tmp.remake(floorWorld[e]).and(floorWorld[e + 1]).randomScatter(rng, 21, 4);
             eMap.downStairPositions.or(tmp);
             nextMap.upStairPositions.or(tmp);
-            for(Coord c : tmp)
-            {
+            for (Coord c : tmp) {
                 tile = eMap.contents[c.x][c.y];
                 Stone stone = tile.floor.terrainData.stone;
                 adding = RecipeMixer.buildPhysical(stone);
@@ -219,16 +230,15 @@ public class WorldGenerator {
                 tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
             }
             floorWorld[e].andNot(tmp);
-            floorWorld[e+1].andNot(tmp);
+            floorWorld[e + 1].andNot(tmp);
         }
         for (int e = 1; e < depth; e++) {
             EpiMap eMap = world[e];
-            EpiMap prevMap = world[e-1];
-            tmp.remake(floorWorld[e]).and(floorWorld[e-1]).randomScatter(rng, 21, 4);
+            EpiMap prevMap = world[e - 1];
+            tmp.remake(floorWorld[e]).and(floorWorld[e - 1]).randomScatter(rng, 21, 4);
             eMap.upStairPositions.or(tmp);
             prevMap.downStairPositions.or(tmp);
-            for(Coord c : tmp)
-            {
+            for (Coord c : tmp) {
                 tile = eMap.contents[c.x][c.y];
                 Stone stone = tile.floor.terrainData.stone;
                 adding = RecipeMixer.buildPhysical(stone);
@@ -240,15 +250,29 @@ public class WorldGenerator {
                 tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
             }
             floorWorld[e].andNot(tmp);
-            floorWorld[e-1].andNot(tmp);
+            floorWorld[e - 1].andNot(tmp);
         }
 
         return world;
     }
 
-    private Physical getWall(Stone stone){
+    private void init(int width, int height, int depth, HandBuilt handBuilt) {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.handBuilt = handBuilt;
+        rng = handBuilt.rng.copy();
+        rng.setState(1000L);
+        world = new EpiMap[depth];
+
+        for (int d = 0; d < depth; d++) {
+            world[d] = new EpiMap(width, height);
+        }
+    }
+
+    private Physical getWall(Stone stone) {
         Physical wall = walls.get(stone);
-        if (wall != null){
+        if (wall != null) {
             return wall;
         }
 
@@ -258,9 +282,9 @@ public class WorldGenerator {
         return wall;
     }
 
-    private Physical getFloor(Stone stone){
+    private Physical getFloor(Stone stone) {
         Physical floor = floors.get(stone);
-        if (floor != null){
+        if (floor != null) {
             return floor;
         }
 
@@ -297,10 +321,10 @@ public class WorldGenerator {
     }
 
     /**
-     * Makes every block contain a full wall. Should be called after floor manipulations are done to
-     * have walls match the floor under them.
+     * Makes every block contain a full wall. Should be called after floor manipulations are done to have walls match
+     * the floor under them.
      */
-    private void makeSolid(){
+    private void makeSolid() {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
@@ -370,15 +394,15 @@ public class WorldGenerator {
         double m = 1;
 
 //        do { // single thickness does not play nice with checks against single thickness :)
-            x = rng.nextInt(width);
-            y = rng.nextInt(height);
-            do {
-                x2 = x - rng.nextInt(width);
-                y2 = y - rng.nextInt(height);
-            } while ((x2 == 0) && (y2 == 0));
-            m = (y2) / (x2);//y - y1/x - x1
+        x = rng.nextInt(width);
+        y = rng.nextInt(height);
+        do {
+            x2 = x - rng.nextInt(width);
+            y2 = y - rng.nextInt(height);
+        } while ((x2 == 0) && (y2 == 0));
+        m = (y2) / (x2);//y - y1/x - x1
 //        } while (((int) m == 0) || ((int) m == 1) || ((int) m == -1));
-        
+
         int b = (int) (y - m * x);//y-mx
 
         for (int z = 0; z < (depth - 1); z++) {
@@ -531,7 +555,7 @@ public class WorldGenerator {
                     for (Physical testing1[][] : near) {
                         for (Physical testing2[] : testing1) {
                             for (Physical test : testing2) {
-                                if (test == null || test.terrainData == null){
+                                if (test == null || test.terrainData == null) {
                                     continue;
                                 }
                                 if (test.terrainData.sedimentary) {
@@ -584,7 +608,7 @@ public class WorldGenerator {
                     for (Physical testing1[][] : near) {
                         for (Physical testing2[] : testing1) {
                             for (Physical test : testing2) {
-                                if (test == null || test.terrainData == null){
+                                if (test == null || test.terrainData == null) {
                                     continue;
                                 }
                                 if (test.terrainData.sedimentary) {

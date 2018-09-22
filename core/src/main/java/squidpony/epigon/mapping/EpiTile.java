@@ -65,11 +65,12 @@ public class EpiTile {
     public char getSymbol() {
         //check in order of preference
         if (blockage != null) {
-            if(blockage.creatureData != null)
+            if (blockage.creatureData != null && floor != null) {
                 return floor.symbol;
-            else
+            } else {
                 return blockage.symbol;
-        } else if (!contents.isEmpty()){
+            }
+        } else if (!contents.isEmpty()) {
             return contents.get(0).symbol; // arbitrarily get first thing in list
         } else if (floor != null) {
             return floor.symbol;
@@ -200,17 +201,19 @@ public class EpiTile {
     public Physical getLargeNonCreature() {
         return blockage != null && blockage.creatureData == null ? blockage : null;
     }
-    
-    public Radiance getAnyRadiance()
-    {
-        if(blockage != null){
-            if(blockage.creatureData != null && blockage.creatureData.lastUsedItem != null && blockage.creatureData.lastUsedItem.radiance != null)
+
+    public Radiance getAnyRadiance() {
+        if (blockage != null) {
+            if (blockage.creatureData != null && blockage.creatureData.lastUsedItem != null && blockage.creatureData.lastUsedItem.radiance != null) {
                 return blockage.creatureData.lastUsedItem.radiance;
-            if(blockage.radiance != null)
+            }
+            if (blockage.radiance != null) {
                 return blockage.radiance;
+            }
         }
-        if(!contents.isEmpty() && contents.get(0).radiance != null)
+        if (!contents.isEmpty() && contents.get(0).radiance != null) {
             return contents.get(0).radiance;
-        return floor.radiance;
+        }
+        return floor == null ? null : floor.radiance;
     }
 }
