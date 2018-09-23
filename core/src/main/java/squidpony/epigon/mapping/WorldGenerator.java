@@ -23,6 +23,10 @@ import java.util.stream.Stream;
  */
 public class WorldGenerator {
 
+    private enum CastleZone {
+        MOAT, KEEP, WALL, YARD, GATE;
+    };
+
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -44,6 +48,8 @@ public class WorldGenerator {
                 aboveground[sky].contents[x][y] = new EpiTile(getFloor(Stone.GRANITE));
             }
         }
+
+        generateCastle(aboveground);
 
         world = Stream.of(aboveground, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
 
@@ -153,7 +159,7 @@ public class WorldGenerator {
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
         init(width, height, depth, handBuilt);
-        mineralPlacement();
+        placeMinerals();
         faultMap();
         bubbleMap(false);
         extrudeMap();
@@ -165,7 +171,6 @@ public class WorldGenerator {
         makeSolid();
 
         EpiTile tile;
-        Physical adding;
         GreasedRegion[] floorWorld = new GreasedRegion[depth];
         GreasedRegion tmp = new GreasedRegion(width, height);
         for (int e = 0; e < depth; e++) {
@@ -178,10 +183,7 @@ public class WorldGenerator {
             serpent.putCaveCarvers(1);
             char[][] simpleChars = gen.generate(serpent.generate());
             floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
-//            Coord stairs = gen.stairsDown;
-//            simpleChars[stairs.x][stairs.y] = '≤';
-//            stairs = gen.stairsUp;
-//            simpleChars[stairs.x][stairs.y] = '≥';
+
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     char c = simpleChars[x][y];
@@ -191,16 +193,10 @@ public class WorldGenerator {
                         case '.':
                             break;
                         case '#':
-                            adding = getWall(tile.floor.terrainData.stone);
-                            tile.add(adding);
+                            placeWall(tile);
                             break;
                         case '+':
-                            Stone stone = tile.floor.terrainData.stone;
-                            adding = RecipeMixer.buildPhysical(stone);
-                            List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
-                            Physical door = adds.get(0);
-                            RecipeMixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
-                            tile.add(door);
+                            placeDoor(tile);
                             break;
                         default:
                             tile.floor = RecipeMixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
@@ -219,15 +215,7 @@ public class WorldGenerator {
             eMap.downStairPositions.or(tmp);
             nextMap.upStairPositions.or(tmp);
             for (Coord c : tmp) {
-                tile = eMap.contents[c.x][c.y];
-                Stone stone = tile.floor.terrainData.stone;
-                adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
-
-                tile = nextMap.contents[c.x][c.y];
-                stone = tile.floor.terrainData.stone;
-                adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+                placeStairs(eMap, nextMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e + 1].andNot(tmp);
@@ -239,15 +227,7 @@ public class WorldGenerator {
             eMap.upStairPositions.or(tmp);
             prevMap.downStairPositions.or(tmp);
             for (Coord c : tmp) {
-                tile = eMap.contents[c.x][c.y];
-                Stone stone = tile.floor.terrainData.stone;
-                adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
-
-                tile = prevMap.contents[c.x][c.y];
-                stone = tile.floor.terrainData.stone;
-                adding = RecipeMixer.buildPhysical(stone);
-                tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+                placeStairs(prevMap, eMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e - 1].andNot(tmp);
@@ -268,6 +248,49 @@ public class WorldGenerator {
         for (int d = 0; d < depth; d++) {
             world[d] = new EpiMap(width, height);
         }
+    }
+
+    private void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
+        Physical adding;
+
+        EpiTile tile = top.contents[c.x][c.y];
+        Stone stone = tile.floor.terrainData.stone;
+        adding = RecipeMixer.buildPhysical(stone);
+        tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+
+        tile = bottom.contents[c.x][c.y];
+        stone = tile.floor.terrainData.stone;
+        adding = RecipeMixer.buildPhysical(stone);
+        tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+    }
+
+    private void placeDoor(EpiTile tile) {
+        Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
+        List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
+        Physical door = adds.get(0);
+        RecipeMixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
+        setDoorOpen(door, rng.nextBoolean());
+        tile.add(door);
+    }
+
+    /**
+     * Sets the door to the open state, true means open and false means closed.
+     *
+     * @param open
+     */
+    private void setDoorOpen(Physical door, boolean open) {
+        RecipeMixer.applyModification(door, open ? handBuilt.openDoor : handBuilt.closeDoor);
+    }
+
+    private void placeWall(EpiTile tile) {
+        Physical adding = getWall(tile.floor.terrainData.stone);
+        tile.add(adding);
+    }
+
+    private void placeWater(EpiTile tile) {
+        // TODO - make water in HandBuilt to use and check against
+        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.WATER));
+        tile.floor = water;
     }
 
     private Physical getWall(Stone stone) {
@@ -297,7 +320,7 @@ public class WorldGenerator {
     /**
      * Randomly places minerals in the provided map.
      */
-    private void mineralPlacement() {
+    private void placeMinerals() {
         int z = 0;
         int thickness = rng.between(12, 18);
         Physical floor = getFloor(rng.getRandomElement(Stone.values()));
@@ -635,6 +658,46 @@ public class WorldGenerator {
                 }
             }
         }
+    }
+
+    private void generateCastle(EpiMap[] buildZone) { // TODO - add "boundaries" so that a subsection of the zone can be the limit
+        int sky = buildZone.length; // how much verticality we have to work with
+        EpiMap map = buildZone[sky-1];
+        int localWidth = map.width;
+        int localHeight = map.height;
+        int edging = 2; // the amount of clear space to leave
+        int distance = 3; // space between points
+
+        GreasedRegion region = new GreasedRegion(localWidth - edging, localHeight - edging);
+        region.allOn();
+        //choose area for moat
+        GreasedRegion points = region.copy();
+       // do {
+           points.allOn().randomScatter(rng, 3, 8);
+            System.out.println("Found " + points.size() + " points for moat area");
+            System.out.println(points.toString());
+       // } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+
+        for (Coord c : points.asCoords()) {
+            placeWater(map.contents[c.x + edging][c.y + edging]);
+        }
+    }
+
+    private boolean pointsInLine(Coord[] points) {
+        if (points.length < 3) {
+            return true; // 2 or less points are considered to always be in a line
+        }
+
+        double angle = Coord.degrees(points[0], points[1]);
+        for (int i = 1; i < points.length - 1; i++) {
+            double test = Coord.degrees(points[i], points[i + 1]);
+            if (angle != test && (angle + 180) % 360 != test) {
+                return false;
+            }
+        }
+
+        System.out.println("Points in a line: " + points.toString());
+        return true;
     }
 
     private boolean pointInBounds(int x, int y, int z) {
