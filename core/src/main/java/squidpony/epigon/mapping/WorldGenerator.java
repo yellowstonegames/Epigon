@@ -15,6 +15,7 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import squidpony.squidgrid.LOS;
 
 /**
  * Creates a world.
@@ -662,22 +663,30 @@ public class WorldGenerator {
 
     private void generateCastle(EpiMap[] buildZone) { // TODO - add "boundaries" so that a subsection of the zone can be the limit
         int sky = buildZone.length; // how much verticality we have to work with
-        EpiMap map = buildZone[sky-1];
+        EpiMap map = buildZone[sky - 1];
         int localWidth = map.width;
         int localHeight = map.height;
         int edging = 2; // the amount of clear space to leave
-        int distance = 3; // space between points
+        int distance = 13; // space between points
 
         GreasedRegion region = new GreasedRegion(localWidth - edging, localHeight - edging);
         region.allOn();
+
         //choose area for moat
         GreasedRegion points = region.copy();
-       // do {
-           points.allOn().randomScatter(rng, 3, 8);
-           if(points.size() == 0) 
-               System.out.println("No points found for moat area");
-            //System.out.println(points.toString());
-       // } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+        do {
+            points.allOn().randomScatter(rng, distance, 8);
+            if (points.isEmpty()) {
+                System.out.println("No points found for moat area");
+            }
+        } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+
+        QuickHull hull = new QuickHull();
+        Coord[] coords = points.asCoords();
+        List<Coord> edge = hull.executeQuickHull(coords);
+        for (int i = 0; i < edge.size(); i++) {
+            points.addAll(Bresenham.line2D(edge.get(i), edge.get((i + 1) % edge.size())));
+        }
 
         for (Coord c : points.asCoords()) {
             placeWater(map.contents[c.x + edging][c.y + edging]);
