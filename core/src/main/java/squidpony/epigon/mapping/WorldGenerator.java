@@ -674,8 +674,9 @@ public class WorldGenerator {
         GreasedRegion points = region.copy();
        // do {
            points.allOn().randomScatter(rng, 3, 8);
-            System.out.println("Found " + points.size() + " points for moat area");
-            System.out.println(points.toString());
+           if(points.size() == 0) 
+               System.out.println("No points found for moat area");
+            //System.out.println(points.toString());
        // } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
 
         for (Coord c : points.asCoords()) {

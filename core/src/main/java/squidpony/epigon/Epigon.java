@@ -379,8 +379,8 @@ public class Epigon extends Game {
         fallingSLayers.setDefaultForeground(SColor.LIME);
         fallingHandler = new FallingHandler(fallingSLayers);
         mapSLayers.font.tweakWidth(15f).tweakHeight(28f).initBySize();
-        font.tweakWidth(messageSize.cellWidth * 1.1f).tweakHeight(messageSize.cellHeight * 1.1f).initBySize();
-        smallFont.tweakWidth(infoSize.cellWidth * 1.075f).tweakHeight(infoSize.cellHeight * 1.1f).initBySize();
+        font.tweakWidth(messageSize.cellWidth * 1.1f).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.075f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
