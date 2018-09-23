@@ -533,12 +533,19 @@ public class Epigon extends Game {
         GreasedRegion floors2 = floors.copy();
         floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
         floors2.copy().randomScatter(rng, 4)
-            .forEach(c -> map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-            RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
-            player.getRandomElement(Element.allEnergy).weaponModification())));
+            .stream()
+            .filter(c -> map.contents[c.x][c.y].floor != null) // TODO - allow flying/floating objects
+            .forEach(c -> {
+                map.contents[c.x][c.y].add(RecipeMixer.applyModification(
+                    RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
+                    player.getRandomElement(Element.allEnergy).weaponModification()));
+            });
         floors2.randomScatter(rng, 6);
         for (Coord coord : floors2) {
             if (map.contents[coord.x][coord.y].blockage == null) {
+                if (map.contents[coord.x][coord.y].floor == null) {
+                    continue; // TODO - allow spawning of flying things
+                }
                 //Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 //RecipeMixer.applyModification(p, handBuilt.makeAlive());
                 Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[rootChaos.nextInt(RawCreature.ENTRIES.length)]);
