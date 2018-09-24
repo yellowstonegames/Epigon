@@ -15,6 +15,8 @@ import squidpony.squidmath.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import squidpony.epigon.data.LiveValue;
+import squidpony.epigon.data.Stat;
 import squidpony.squidgrid.LOS;
 
 /**
@@ -46,7 +48,7 @@ public class WorldGenerator {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                aboveground[sky].contents[x][y] = new EpiTile(getFloor(Stone.GRANITE));
+                aboveground[sky].contents[x][y] = new EpiTile(RecipeMixer.buildPhysical(Physical.makeBasic("stone walkway", '.', SColor.LINEN)));
             }
         }
 
@@ -288,16 +290,22 @@ public class WorldGenerator {
         tile.add(adding);
     }
 
+
+
     private void placeWater(EpiTile tile) {
         // TODO - make water in HandBuilt to use and check against
         Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.AZUL));
+        water.blocking = false;
+        water.stats.put(Stat.OPACITY, LiveValue.ZERO);
         tile.floor = water;
     }
 
     private void placeMud(EpiTile tile) {
         // TODO - make mud in HandBuilt to use and check against
-        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN));
-        tile.floor = water;
+        Physical mud = RecipeMixer.buildPhysical(Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN));
+        mud.blocking = false;
+        mud.stats.put(Stat.OPACITY, LiveValue.ZERO);
+        tile.floor = mud;
     }
 
     private Physical getWall(Stone stone) {
