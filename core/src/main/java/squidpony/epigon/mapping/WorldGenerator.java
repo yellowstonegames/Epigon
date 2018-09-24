@@ -1,7 +1,9 @@
 package squidpony.epigon.mapping;
 
+import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.RecipeMixer;
+import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
@@ -10,14 +12,21 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.SerpentMapGenerator;
-import squidpony.squidmath.*;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.Elias;
+import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.LinnormRNG;
+import squidpony.squidmath.Noise;
+import squidpony.squidmath.NumberTools;
+import squidpony.squidmath.StatefulRNG;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Stat;
-import squidpony.squidgrid.LOS;
 
 /**
  * Creates a world.
@@ -121,7 +130,6 @@ public class WorldGenerator {
         rng = new StatefulRNG(new LinnormRNG(handBuilt.rng.nextLong() ^ seed3));
         safeSpots.retract(2).randomScatter(rng, 8);
 
-        RecipeMixer recipeMixer = new RecipeMixer();
         Inclusion[] inclusions = Inclusion.values();
         Physical[] contents = new Physical[inclusions.length + 1];
         double[] weights = new double[inclusions.length + 1];
@@ -705,25 +713,27 @@ public class WorldGenerator {
         }
 
         moat.expand8way();
-
-        GreasedRegion inside = moat.copy();
-        Coord in = Coord.get((edge.get(0).x + edge.get(1).x + edge.get(2).x) / 3, (edge.get(0).y + edge.get(1).y + edge.get(2).y) / 3);
-        inside.flood(inside.copy().fill(false).set(true, in));
+        
+        GreasedRegion nonMoat = moat.copy().not();
+        GreasedRegion inside = 
+                new GreasedRegion(Coord.get((edge.get(0).x + edge.get(1).x + edge.get(2).x) / 3,
+                (edge.get(0).y + edge.get(1).y + edge.get(2).y) / 3),
+                region.width, region.height).flood(nonMoat, region.width * region.height);
 
         GreasedRegion bank = moat.copy();
         moat.fray(0.3).fray(0.1);
 
-        for (Coord c : moat.asCoords()) {
+        for (Coord c : moat) {
             placeWater(map.contents[c.x + edging][c.y + edging]);
         }
 
         bank.andNot(moat);
-        for (Coord c : bank.asCoords()) {
+        for (Coord c : bank) {
             placeMud(map.contents[c.x + edging][c.y + edging]);
         }
 
         inside.andNot(bank).andNot(moat);
-        for (Coord c: inside.asCoords()){
+        for (Coord c: inside){
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
     }
