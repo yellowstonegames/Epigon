@@ -298,8 +298,6 @@ public class WorldGenerator {
         tile.add(adding);
     }
 
-
-
     private void placeWater(EpiTile tile) {
         // TODO - make water in HandBuilt to use and check against
         Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.AZUL));
@@ -691,51 +689,86 @@ public class WorldGenerator {
         int edging = 2; // the amount of clear space to leave
         int distance = 13; // space between points
 
-        GreasedRegion region = new GreasedRegion(localWidth - edging, localHeight - edging);
+        GreasedRegion region = new GreasedRegion(localWidth, localHeight);
         region.allOn();
+        for (int x = 0; x < edging; x++) {
+            for (int y = 0; y < localHeight; y++) {
+                region.set(false, x, y);
+                region.set(false, localWidth - 1 - x, y);
+            }
+        }
+        for (int x = 0; x < localWidth; x++) {
+            for (int y = 0; y < edging; y++) {
+                region.set(false, x, y);
+                region.set(false, x, localHeight - 1 - y);
+            }
+        }
 
         //choose area for moat
         GreasedRegion moat = region.copy();
-        do {
-            moat.allOn().randomScatter(rng, distance, 8);
-            if (moat.isEmpty()) {
-                System.out.println("No points found for moat area");
-            }
-        } while (pointsInLine(moat.asCoords())); // need to make sure at least a triangle is possible
-
-        QuickHull hull = new QuickHull();
-        Coord[] coords = moat.asCoords();
-        List<Coord> edge = hull.executeQuickHull(coords);
+        List<Coord> corners = findInternalPolygonCorners(moat, distance, 12);
         moat.fill(false);
-        Elias elias = new Elias();
-        for (int i = 0; i < edge.size(); i++) {
-            moat.addAll(elias.line(edge.get(i), edge.get((i + 1) % edge.size())));
-        }
+        moat = connectPoints(moat, corners);
 
         moat.expand8way();
-        
-        GreasedRegion nonMoat = moat.copy().not();
-        GreasedRegion inside = 
-                new GreasedRegion(Coord.get((edge.get(0).x + edge.get(1).x + edge.get(2).x) / 3,
-                (edge.get(0).y + edge.get(1).y + edge.get(2).y) / 3),
-                region.width, region.height).flood(nonMoat, region.width * region.height);
-
         GreasedRegion bank = moat.copy();
-        moat.fray(0.3).fray(0.1);
+        GreasedRegion nonMoat = region.copy().andNot(moat);
+        for (Coord c : nonMoat) {
+            map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
+        }
 
+        moat.fray(0.3).fray(0.1);
         for (Coord c : moat) {
-            placeWater(map.contents[c.x + edging][c.y + edging]);
+            placeWater(map.contents[c.x][c.y]);
         }
 
         bank.andNot(moat);
         for (Coord c : bank) {
-            placeMud(map.contents[c.x + edging][c.y + edging]);
+            placeMud(map.contents[c.x][c.y]);
         }
 
-        inside.andNot(bank).andNot(moat);
-        for (Coord c: inside){
+        int centroidX = 0;
+        int centroidY = 0;
+        for (Coord c : corners) {
+            centroidX += c.x;
+            centroidY += c.y;
+        }
+        centroidX /= corners.size();
+        centroidY /= corners.size();
+
+        GreasedRegion inside = new GreasedRegion(Coord.get(centroidX, centroidY), region.width, region.height)
+            .flood8way(nonMoat, region.width * region.height);
+
+        inside.andNot(moat).andNot(bank);
+        for (Coord c : inside) {
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
+
+        corners = findInternalPolygonCorners(inside, distance / 2, 6);
+
+    }
+
+    private List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
+        GreasedRegion points;
+        do {
+            points = region.copy().randomScatter(rng, distance, 12);
+            if (points.isEmpty()) {
+                System.out.println("No points found for area");
+            }
+        } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+
+        QuickHull hull = new QuickHull();
+        Coord[] coords = points.asCoords();
+        return hull.executeQuickHull(coords);// TODO - rework hull to use greased region
+    }
+
+    private GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {
+        Elias elias = new Elias();
+        GreasedRegion lines = region.copy();
+        for (int i = 0; i < points.size(); i++) {
+            lines.addAll(elias.line(points.get(i), points.get((i + 1) % points.size())));
+        }
+        return lines;
     }
 
     private boolean pointsInLine(Coord[] points) {
@@ -744,8 +777,8 @@ public class WorldGenerator {
         }
 
         double angle = Coord.degrees(points[0], points[1]);
-        for (int i = 1; i < points.length - 1; i++) {
-            double test = Coord.degrees(points[i], points[i + 1]);
+        for (int i = 1; i < points.length; i++) {
+            double test = Coord.degrees(points[i], points[(i + 1) % points.length]);
             if (angle != test && (angle + 180) % 360 != test) {
                 return false;
             }
