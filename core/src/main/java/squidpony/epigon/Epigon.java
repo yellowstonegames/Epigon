@@ -959,9 +959,10 @@ public class Epigon extends Game {
                     for (int iy = 0; iy < 3; iy++) {
                         if(map.losResult[x * 3 + ix][y * 3 + iy] > 0.0)
                         {
-                            map.fovResult[x][y] = MathUtils.clamp(
-                                    Math.max(map.fovResult[x][y], map.triFovResult[x][y] + map.colorLighting[0][x * 3 + 1][y * 3 + 1])
-                                    , 0.0, 1.0);
+                            map.triFovResult[x * 3 + ix][y * 3 + iy] = 
+                                    MathUtils.clamp(map.triFovResult[x * 3 + ix][y * 3 + iy] + map.colorLighting[0][x * 3 + ix][y * 3 + iy], 0, 1);
+                            map.fovResult[x][y] = 
+                                    Math.max(map.fovResult[x][y], map.triFovResult[x * 3 + ix][y * 3 + iy]);
                         }
                     }
                 }
@@ -1373,7 +1374,7 @@ public class Epigon extends Game {
                 float sightAmount = 0f;
                 for (int ix = 0; ix < 3; ix++) {
                     for (int iy = 0; iy < 3; iy++) {
-                        if((sight = map.losResult[x*3+ix][y*3+iy]) > 0.0)
+                        if((sight = map.triFovResult[x*3+ix][y*3+iy]) > 0.0)
                         {
                             putSolo(x*3+ix,y*3+iy);
                             sightAmount = Math.max(sightAmount, (float)sight);
