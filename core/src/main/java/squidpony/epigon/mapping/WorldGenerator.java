@@ -290,7 +290,13 @@ public class WorldGenerator {
 
     private void placeWater(EpiTile tile) {
         // TODO - make water in HandBuilt to use and check against
-        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.WATER));
+        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.AZUL));
+        tile.floor = water;
+    }
+
+    private void placeMud(EpiTile tile) {
+        // TODO - make mud in HandBuilt to use and check against
+        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN));
         tile.floor = water;
     }
 
@@ -673,23 +679,34 @@ public class WorldGenerator {
         region.allOn();
 
         //choose area for moat
-        GreasedRegion points = region.copy();
+        GreasedRegion moat = region.copy();
         do {
-            points.allOn().randomScatter(rng, distance, 8);
-            if (points.isEmpty()) {
+            moat.allOn().randomScatter(rng, distance, 8);
+            if (moat.isEmpty()) {
                 System.out.println("No points found for moat area");
             }
-        } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+        } while (pointsInLine(moat.asCoords())); // need to make sure at least a triangle is possible
 
         QuickHull hull = new QuickHull();
-        Coord[] coords = points.asCoords();
+        Coord[] coords = moat.asCoords();
         List<Coord> edge = hull.executeQuickHull(coords);
+        moat.fill(false);
+        Elias elias = new Elias();
         for (int i = 0; i < edge.size(); i++) {
-            points.addAll(Bresenham.line2D(edge.get(i), edge.get((i + 1) % edge.size())));
+            moat.addAll(elias.line(edge.get(i), edge.get((i + 1) % edge.size())));
         }
 
-        for (Coord c : points.asCoords()) {
+        moat.expand8way();
+        GreasedRegion bank = moat.copy();
+        moat.fray(0.3).fray(0.1);
+
+        for (Coord c : moat.asCoords()) {
             placeWater(map.contents[c.x + edging][c.y + edging]);
+        }
+
+        bank.andNot(moat);
+        for (Coord c : bank.asCoords()) {
+            placeMud(map.contents[c.x + edging][c.y + edging]);
         }
     }
 
