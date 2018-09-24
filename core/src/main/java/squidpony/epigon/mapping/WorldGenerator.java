@@ -705,6 +705,11 @@ public class WorldGenerator {
         }
 
         moat.expand8way();
+
+        GreasedRegion inside = moat.copy();
+        Coord in = Coord.get((edge.get(0).x + edge.get(1).x + edge.get(2).x) / 3, (edge.get(0).y + edge.get(1).y + edge.get(2).y) / 3);
+        inside.flood(inside.copy().fill(false).set(true, in));
+
         GreasedRegion bank = moat.copy();
         moat.fray(0.3).fray(0.1);
 
@@ -715,6 +720,11 @@ public class WorldGenerator {
         bank.andNot(moat);
         for (Coord c : bank.asCoords()) {
             placeMud(map.contents[c.x + edging][c.y + edging]);
+        }
+
+        inside.andNot(bank).andNot(moat);
+        for (Coord c: inside.asCoords()){
+            map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
     }
 

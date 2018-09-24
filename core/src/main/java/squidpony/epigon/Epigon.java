@@ -532,7 +532,7 @@ public class Epigon extends Game {
 
         GreasedRegion floors2 = floors.copy();
         floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
-        floors2.copy().randomScatter(rng, 14)
+        floors2.copy().randomScatter(rng, 9)
             .stream()
             .filter(c -> map.contents[c.x][c.y].floor != null) // TODO - allow flying/floating objects
             .forEach(c -> {
