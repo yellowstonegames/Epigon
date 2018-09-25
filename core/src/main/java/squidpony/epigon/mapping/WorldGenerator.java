@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import java.util.ArrayList;
 import squidpony.StringKit;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
@@ -688,7 +689,7 @@ public class WorldGenerator {
         int localWidth = map.width;
         int localHeight = map.height;
         int edging = 2; // the amount of clear space to leave
-        int distance = 13; // space between points
+        int distance = 8; // space between points
 
         GreasedRegion region = new GreasedRegion(localWidth, localHeight);
         region.allOn();
@@ -707,7 +708,7 @@ public class WorldGenerator {
 
         //choose area for moat
         GreasedRegion moat = region.copy();
-        List<Coord> corners = findInternalPolygonCorners(moat, distance, 12);
+        List<Coord> corners = findInternalPolygonCorners(moat, distance, 9);
         moat.fill(false);
         moat = connectPoints(moat, corners);
 
@@ -737,23 +738,104 @@ public class WorldGenerator {
         }
 
         corners = findInternalPolygonCorners(inside, distance / 2, 6);
-        GreasedRegion outerWall = connectPoints(inside, corners);
-//        System.out.println("outerWall (size is " + outerWall.size() + "): " );
-//        System.out.println(outerWall);
-        int i = 0;
-        for (Coord c : outerWall){
-            if(c == null)
-            {
-                System.out.println("SHOULD NEVER HAPPEN: Issue on point " + i);
-                if(i > 0)
-                    System.out.println("previous point was " + outerWall.nth(i-1));
-                System.out.println("current point is (obtained otherwise)" + outerWall.nth(i));
-            }
-            map.contents[c.x][c.y].add(getWall(Stone.GNEISS)); // c is null here
+        GreasedRegion outerWall = inside.copy();
+        outerWall.fill(false);
+        outerWall = connectPoints(outerWall, corners);
+        GreasedRegion hole = outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion
+        outerWall.expand();
+
+        for (Coord c : outerWall) {
+            map.contents[c.x][c.y].add(getWall(Stone.GNEISS));
             map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
-            i++;
         }
 
+        Coord courtyardCentroid = findCentroid(corners);
+        GreasedRegion courtyard = new GreasedRegion(courtyardCentroid, region.width, region.height)
+            .flood8way(inside.copy().andNot(outerWall), region.width * region.height);
+
+        Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '„', SColor.RED_PLUM));
+        for (Coord c : courtyard) {
+            map.contents[c.x][c.y].floor = brick;
+        }
+
+        System.out.println("Holes: " + hole.size());
+//        hole.expandSeries8way(2); // Didn't seem to expand
+        hole.expand(2);
+        Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
+        for (Coord c : hole) {
+            map.contents[c.x][c.y].blockage = null;
+            map.contents[c.x][c.y].add(rubble);
+            placeMud(map.contents[c.x][c.y]);
+        }
+
+        // sketch out a keep's borders
+        int top = courtyardCentroid.y;
+        int bottom = courtyardCentroid.y;
+        int left = courtyardCentroid.x;
+        int right = courtyardCentroid.x;
+        int lastChoice = 0;
+        expandKeep:
+        while (true) {
+            lastChoice = rng.nextInt(4);
+            switch (lastChoice) {
+                case 0:
+                    top--;
+                    break;
+                case 1:
+                    right++;
+                    break;
+                case 2:
+                    left--;
+                    break;
+                case 3:
+                default:
+                    bottom++;
+                    break;
+            }
+            for (int x = left; x <= right; x++) {
+                if (!courtyard.contains(x, top) || !courtyard.contains(x, bottom)) {
+                    break expandKeep;
+                }
+            }
+            for (int y = top; y <= bottom; y++) {
+                if (!courtyard.contains(left, y) || !courtyard.contains(right, y)) {
+                    break expandKeep;
+                }
+            }
+        }
+        switch (lastChoice) {
+            case 0:
+                top++;
+                break;
+            case 1:
+                right--;
+                break;
+            case 2:
+                left++;
+                break;
+            case 3:
+            default:
+                bottom--;
+                break;
+        }
+        GreasedRegion keepWalls = connectPoints(courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
+        for (Coord c : keepWalls) {
+            map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
+            map.contents[c.x][c.y].add(getWall(Stone.MARBLE));
+        }
+
+        for (Coord c : keepWalls.copy().randomScatter(rng, 8, 5)) {
+            map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
+            map.contents[c.x][c.y].blockage = null;
+            placeDoor(map.contents[c.x][c.y]);
+        }
+
+        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", '∽', SColor.ROYAL_PURPLE));
+        GreasedRegion insideKeep = new GreasedRegion(courtyardCentroid, region.width, region.height)
+            .flood8way(courtyard.copy().andNot(keepWalls), region.width * region.height);
+        for (Coord c : insideKeep) {
+            map.contents[c.x][c.y].floor = carpet;
+        }
     }
 
     private Coord findCentroid(List<Coord> coords) {
@@ -780,6 +862,10 @@ public class WorldGenerator {
         QuickHull hull = new QuickHull();
         Coord[] coords = points.asCoords();
         return hull.executeQuickHull(coords);// TODO - rework hull to use greased region
+    }
+
+    private GreasedRegion connectPoints(GreasedRegion region, Coord... points) {
+        return connectPoints(region, Arrays.asList(points));
     }
 
     private GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {

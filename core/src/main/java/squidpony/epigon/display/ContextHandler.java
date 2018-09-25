@@ -82,7 +82,7 @@ public class ContextHandler {
 
     public Coord arrowLeft;
     public Coord arrowRight;
-    
+
     public ContextHandler(SparseLayers layers, SubcellLayers mainMap, Epigon game) {
         group = new Group();
         this.layers = layers;
@@ -100,7 +100,7 @@ public class ContextHandler {
             cachedColors.put(mode, ArrayTools.fill(defaultFrontColor, width, height));
             cacheIsValid.remove(mode);
         }
-        
+
         layers.fillBackground(layers.defaultPackedBackground);
     }
 
@@ -119,7 +119,7 @@ public class ContextHandler {
                 public void draw(Batch batch, float parentAlpha) {
                     super.draw(batch, parentAlpha);
                     float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(),
-                            yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
+                        yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
                     //mainMap.font.configureShader(batch);
                     float widthInc = miniMapFont.actualCellWidth, heightInc = -miniMapFont.actualCellHeight;
                     RememberedTile memory;
@@ -149,8 +149,8 @@ public class ContextHandler {
                             || mainMap.backgrounds[x * 3 + 1][y * 3 + 1] == 0f) {
                             continue;
                         }
-                        miniMapFont.draw(batch, '\u0000', game.player != null && 
-                                        glyph.equals(game.player.appearance)
+                        miniMapFont.draw(batch, '\u0000', game.player != null
+                            && glyph.equals(game.player.appearance)
                             ? -0x1.fffep126F // SColor.CYAN
                             : -0x1.0049fep125F, // SColor.SCARLET
                             xo + widthInc * x, yOff + heightInc * y);
@@ -203,7 +203,7 @@ public class ContextHandler {
 
     private void put(int x, int y, String s) {
         for (int i = 0; i < s.length(); i++) {
-            put(x+i, y, s.charAt(i), layers.defaultPackedForeground);
+            put(x + i, y, s.charAt(i), layers.defaultPackedForeground);
         }
     }
 
@@ -237,7 +237,7 @@ public class ContextHandler {
 
     public void prior() {
         layers.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
-                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
+            SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         switchTo(contextMode.prior());
     }
 
@@ -317,12 +317,17 @@ public class ContextHandler {
             }
             put(1, 1, tileDescription);
             for (int i = 0; i < tile.contents.size(); i++) {
-                put(1, 2 + i, tile.contents.get(i).name); 
+                put(1, 2 + i, tile.contents.get(i).name);
             }
+            int offsetY = tile.contents.size() + 2;
             Physical c = tile.getCreature();
-            if(c != null)
-            {
+            if (c != null) {
                 put(1, 2 + tile.contents.size(), c.name);
+                offsetY++;
+            }
+            Physical b = tile.getLargeNonCreature();
+            if (b != null) {
+                put(1, offsetY, b.name);
             }
         }
         cacheIsValid.add(contextMode);

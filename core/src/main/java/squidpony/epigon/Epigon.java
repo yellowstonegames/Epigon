@@ -2317,6 +2317,7 @@ public class Epigon extends Game {
             }
 
             if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
+                // TODO - also don't show path that crosses unknown areas
                 toCursor.clear(); // don't show path when mouse moves out of range or view
                 return false;
             }
