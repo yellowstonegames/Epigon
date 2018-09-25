@@ -1,16 +1,16 @@
 package squidpony.epigon.mapping;
 
+import squidpony.squidmath.Coord;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import squidpony.squidmath.Coord;
 
 /**
  * QuickHull is an algorithm to compute the convex hull of a set of points. The time complexity is O(n^2) in the worst
  * case and O(n*log n) on average.
  *
- * Based on https://github.com/Thurion/algolab and modified to work in the SquidLib eocsystem
+ * Based on https://github.com/Thurion/algolab and modified to work in the SquidLib ecosystem
  *
  * @author Sebastian Bauer
  * @author Eben Howard
@@ -114,7 +114,7 @@ public class QuickHull {
      * @param points The list of points
      * @param p1
      * @param p2
-     * @param convexHull A list of points which are on the convex hull.
+     * @return a List of points, I guess? // TODO: Eben what am this do
      */
     private List<Coord> divide(List<Coord> points, Coord p1, Coord p2) {
 

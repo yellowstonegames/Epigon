@@ -97,10 +97,10 @@ public class Epigon extends Game {
     // Display
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
-    public static final FloatFilters.YCbCrFilter filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
+    public static final FloatFilters.YCoCgFilter filter = new FloatFilters.YCoCgFilter(0.9f, 1.3f, 1.3f);
     public static FloatFilter
             identityFilter = new FloatFilters.IdentityFilter(),
-            grayscale = new FloatFilters.YCbCrFilter(0.75f, 0.2f, 0.2f);
+            grayscale = new FloatFilters.YCoCgFilter(0.75f, 0.2f, 0.2f);
     private SubcellLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
@@ -295,8 +295,8 @@ public class Epigon extends Game {
             public void draw(Batch batch, float parentAlpha) {
                 //super.draw(batch, parentAlpha);
                 float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo;
-                filter.cbMul = 0.65f;
-                filter.crMul = 0.65f;
+                filter.coMul = 0.65f;
+                filter.cgMul = 0.65f;
                 filter.yMul = 0.7f;
                 font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
                 int len = layers.size();
@@ -318,8 +318,8 @@ public class Epigon extends Game {
                         }
                     }
                 }
-                filter.cbMul = 0.95f;
-                filter.crMul = 0.95f;
+                filter.coMul = 0.95f;
+                filter.cgMul = 0.95f;
                 filter.yMul = 0.9f;
                 font.configureShader(batch);
                 if(frustum == null) {
@@ -334,8 +334,8 @@ public class Epigon extends Game {
                         layers.get(i).draw(batch, font, frustum, xo, yOff);
                     }
                 }
-                filter.cbMul = 1.4f;
-                filter.crMul = 1.4f;
+                filter.coMul = 1.4f;
+                filter.cgMul = 1.4f;
                 filter.yMul = 1.05f;
                 int x, y;
                 for (int i = 0; i < glyphs.size(); i++) {

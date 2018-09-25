@@ -1,12 +1,7 @@
 package squidpony.epigon.mapping;
 
-import java.util.ArrayList;
 import squidpony.StringKit;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
-import squidpony.epigon.data.Stat;
-import squidpony.epigon.data.WeightedTableWrapper;
+import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.trait.Grouping;
@@ -14,19 +9,9 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.SerpentMapGenerator;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.Elias;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.LinnormRNG;
-import squidpony.squidmath.Noise;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -753,13 +738,13 @@ public class WorldGenerator {
         GreasedRegion courtyard = new GreasedRegion(courtyardCentroid, region.width, region.height)
             .flood8way(inside.copy().andNot(outerWall), region.width * region.height);
 
-        Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '„', SColor.RED_PLUM));
+        Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '≡', SColor.PERSIAN_RED));
         for (Coord c : courtyard) {
             map.contents[c.x][c.y].floor = brick;
         }
 
         System.out.println("Holes: " + hole.size());
-//        hole.expandSeries8way(2); // Didn't seem to expand
+        hole.expand8way(); // hole.expandSeries8way won't modify hole, but this will
         hole.expand(2);
         Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
         for (Coord c : hole) {
@@ -830,7 +815,7 @@ public class WorldGenerator {
             placeDoor(map.contents[c.x][c.y]);
         }
 
-        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", '∽', SColor.ROYAL_PURPLE));
+        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
         GreasedRegion insideKeep = new GreasedRegion(courtyardCentroid, region.width, region.height)
             .flood8way(courtyard.copy().andNot(keepWalls), region.width * region.height);
         for (Coord c : insideKeep) {
@@ -851,13 +836,13 @@ public class WorldGenerator {
     }
 
     private List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
-        GreasedRegion points;
+        GreasedRegion points = region.copy();
         do {
-            points = region.copy().randomScatter(rng, distance, 12);
+            points.remake(region).randomScatter(rng, distance, 12);
             if (points.isEmpty()) {
                 System.out.println("No points found for area");
             }
-        } while (pointsInLine(points.asCoords())); // need to make sure at least a triangle is possible
+        } while (pointsInLine(points)); // need to make sure at least a triangle is possible
 
         QuickHull hull = new QuickHull();
         Coord[] coords = points.asCoords();
@@ -865,7 +850,12 @@ public class WorldGenerator {
     }
 
     private GreasedRegion connectPoints(GreasedRegion region, Coord... points) {
-        return connectPoints(region, Arrays.asList(points));
+        Elias elias = new Elias();
+        GreasedRegion lines = region.copy();
+        for (int i = 0; i < points.length; i++) {
+            lines.addAll(elias.line(points[i], points[(i + 1) % points.length]));
+        }
+        return lines;
     }
 
     private GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {
@@ -877,14 +867,15 @@ public class WorldGenerator {
         return lines;
     }
 
-    private boolean pointsInLine(Coord[] points) {
-        if (points.length < 3) {
+    private boolean pointsInLine(GreasedRegion points) {
+        int sz = points.size();
+        if (sz < 3) {
             return true; // 2 or less points are considered to always be in a line
         }
 
-        double angle = Coord.degrees(points[0], points[1]);
-        for (int i = 1; i < points.length; i++) {
-            double test = Coord.degrees(points[i], points[(i + 1) % points.length]);
+        double angle = Coord.degrees(points.nth(0), points.nth(1));
+        for (int i = 1; i < sz; i++) {
+            double test = Coord.degrees(points.nth(i), points.nth((i + 1) % sz));
             if (angle != test && (angle + 180) % 360 != test) {
                 return false;
             }
