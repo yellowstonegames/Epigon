@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import squidpony.StringKit;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.RecipeMixer;
@@ -736,11 +737,21 @@ public class WorldGenerator {
         }
 
         corners = findInternalPolygonCorners(inside, distance / 2, 6);
-        GreasedRegion outerWall = inside.copy().fill(false);
-        outerWall = connectPoints(inside, corners);
+        GreasedRegion outerWall = connectPoints(inside, corners);
+//        System.out.println("outerWall (size is " + outerWall.size() + "): " );
+//        System.out.println(outerWall);
+        int i = 0;
         for (Coord c : outerWall){
+            if(c == null)
+            {
+                System.out.println("SHOULD NEVER HAPPEN: Issue on point " + i);
+                if(i > 0)
+                    System.out.println("previous point was " + outerWall.nth(i-1));
+                System.out.println("current point is (obtained otherwise)" + outerWall.nth(i));
+            }
             map.contents[c.x][c.y].add(getWall(Stone.GNEISS)); // c is null here
             map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
+            i++;
         }
 
     }
@@ -793,7 +804,7 @@ public class WorldGenerator {
             }
         }
 
-        System.out.println("Points in a line: " + points.toString());
+        System.out.println("Points in a line: " + StringKit.join(", ", points));
         return true;
     }
 
