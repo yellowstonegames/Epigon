@@ -727,16 +727,7 @@ public class WorldGenerator {
             placeMud(map.contents[c.x][c.y]);
         }
 
-        int centroidX = 0;
-        int centroidY = 0;
-        for (Coord c : corners) {
-            centroidX += c.x;
-            centroidY += c.y;
-        }
-        centroidX /= corners.size();
-        centroidY /= corners.size();
-
-        GreasedRegion inside = new GreasedRegion(Coord.get(centroidX, centroidY), region.width, region.height)
+        GreasedRegion inside = new GreasedRegion(findCentroid(corners), region.width, region.height)
             .flood8way(nonMoat, region.width * region.height);
 
         inside.andNot(moat).andNot(bank);
@@ -745,7 +736,25 @@ public class WorldGenerator {
         }
 
         corners = findInternalPolygonCorners(inside, distance / 2, 6);
+        GreasedRegion outerWall = inside.copy().fill(false);
+        outerWall = connectPoints(inside, corners);
+        for (Coord c : outerWall){
+            map.contents[c.x][c.y].add(getWall(Stone.GNEISS)); // c is null here
+            map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
+        }
 
+    }
+
+    private Coord findCentroid(List<Coord> coords) {
+        int centroidX = 0;
+        int centroidY = 0;
+        for (Coord c : coords) {
+            centroidX += c.x;
+            centroidY += c.y;
+        }
+        centroidX /= coords.size();
+        centroidY /= coords.size();
+        return Coord.get(centroidX, centroidY);
     }
 
     private List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
