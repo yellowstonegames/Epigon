@@ -21,6 +21,7 @@ import java.util.stream.Stream;
  * @author Eben Howard - http://squidpony.com
  */
 public class WorldGenerator {
+
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -673,14 +674,14 @@ public class WorldGenerator {
     Malbork Castle total area: 12 square km
 
     Approximate largest keeps: 31m x 31m
-    */
+     */
     private void generateCastle(EpiMap[] buildZone) {
         int sky = buildZone.length; // how much verticality we have to work with
         EpiMap map = buildZone[sky - 1];
+
         int localWidth = map.width;
         int localHeight = map.height;
         int edging = 2; // the amount of clear space to leave
-        int distance = 8; // space between points
 
         GreasedRegion region = new GreasedRegion(localWidth, localHeight);
         region.allOn();
@@ -697,14 +698,25 @@ public class WorldGenerator {
             }
         }
 
-        //choose area for moat
         GreasedRegion moat = region.copy();
+        GreasedRegion moatBank = null, insideMoat = null, outerWall = null, holes = null, courtyard = null, keepWall = null, insideKeep = null, garden = null, pond = null, pondBank = null;
+        buildGroundLevelCastle(map, region, moat, moatBank, insideMoat, outerWall, holes, courtyard, keepWall, insideKeep, garden, pond, pondBank);
+        for (int i = sky - 2; i >= 0; i++) {
+            //buildHigherLevelCastle();
+        }
+    }
+
+    //TODO - make a Castle object that holds all these regions in a better way
+    private void buildGroundLevelCastle(EpiMap map, GreasedRegion region, GreasedRegion moat, GreasedRegion insideMoat, GreasedRegion moatBank, GreasedRegion outerWall, GreasedRegion holes, GreasedRegion courtyard, GreasedRegion keepWall, GreasedRegion insideKeep, GreasedRegion garden, GreasedRegion pond, GreasedRegion pondBank) {
+
+        //choose area for moat
+        int distance = 8; // space between points
         List<Coord> corners = findInternalPolygonCorners(moat, distance, 7);
         moat.fill(false);
         moat = connectPoints(moat, corners);
 
         moat.expand8way();
-        GreasedRegion bank = moat.copy();
+        moatBank = moat.copy();
         GreasedRegion nonMoat = region.copy().andNot(moat);
         for (Coord c : nonMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
@@ -715,24 +727,24 @@ public class WorldGenerator {
             placeWater(map.contents[c.x][c.y]);
         }
 
-        bank.andNot(moat);
-        for (Coord c : bank) {
+        moatBank.andNot(moat);
+        for (Coord c : moatBank) {
             placeMud(map.contents[c.x][c.y]);
         }
 
-        GreasedRegion inside = new GreasedRegion(findCentroid(corners), region.width, region.height)
+        insideMoat = new GreasedRegion(findCentroid(corners), region.width, region.height)
             .flood8way(nonMoat, region.width * region.height);
 
-        inside.andNot(moat).andNot(bank);
-        for (Coord c : inside) {
+        insideMoat.andNot(moat).andNot(moatBank);
+        for (Coord c : insideMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
 
-        corners = findInternalPolygonCorners(inside, distance / 2, 4);
-        GreasedRegion outerWall = inside.copy();
+        corners = findInternalPolygonCorners(insideMoat, distance / 2, 4);
+        outerWall = insideMoat.copy();
         outerWall.fill(false);
         outerWall = connectPoints(outerWall, corners);
-        GreasedRegion hole = outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion
+        holes = outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion so that they're in the middle of the wall
         outerWall.expand();
 
         for (Coord c : outerWall) {
@@ -741,19 +753,19 @@ public class WorldGenerator {
         }
 
         Coord courtyardCentroid = findCentroid(corners);
-        GreasedRegion courtyard = new GreasedRegion(courtyardCentroid, region.width, region.height)
-            .flood8way(inside.copy().andNot(outerWall), region.width * region.height);
+        courtyard = new GreasedRegion(courtyardCentroid, region.width, region.height)
+            .flood8way(insideMoat.copy().andNot(outerWall), region.width * region.height);
 
         Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '≡', SColor.PERSIAN_RED));
         for (Coord c : courtyard) {
             map.contents[c.x][c.y].floor = brick;
         }
 
-        hole.expand(2);
-        hole.fray(0.2);
-        hole.fray(0.2);
+        holes.expand(2);
+        holes.fray(0.2);
+        holes.fray(0.2);
         Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
-        for (Coord c : hole) {
+        for (Coord c : holes) {
             map.contents[c.x][c.y].blockage = null;
             map.contents[c.x][c.y].add(rubble);
             placeMud(map.contents[c.x][c.y]);
@@ -809,31 +821,49 @@ public class WorldGenerator {
                 bottom--;
                 break;
         }
-        GreasedRegion keepWalls = connectPoints(courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
-        for (Coord c : keepWalls) {
+        keepWall = connectPoints(courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
+        for (Coord c : keepWall) {
             map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
             map.contents[c.x][c.y].add(getWall(Stone.MARBLE));
         }
 
-        for (Coord c : keepWalls.copy().randomScatter(rng, 8, 5)) {
+        for (Coord c : keepWall.copy().randomScatter(rng, 8, 5)) {
             map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
             map.contents[c.x][c.y].blockage = null;
             placeDoor(map.contents[c.x][c.y]);
         }
 
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
-        GreasedRegion insideKeep = new GreasedRegion(courtyardCentroid, region.width, region.height)
-            .flood8way(courtyard.copy().andNot(keepWalls), region.width * region.height);
+        insideKeep = new GreasedRegion(courtyardCentroid, region.width, region.height)
+            .flood8way(courtyard.copy().andNot(keepWall), region.width * region.height);
         for (Coord c : insideKeep) {
             map.contents[c.x][c.y].floor = carpet;
         }
 
-        GreasedRegion garden = courtyard.copy().andNot(keepWalls).andNot(insideKeep);
-        GreasedRegion pond = garden.copy().randomRegion(rng, 24);
+        garden = courtyard.copy().andNot(keepWall).andNot(insideKeep);
         Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
+
+        /* This section acts weird, I suspect I am not using randomRegion correctly
+        GreasedRegion pond = garden.copy().randomRegion(rng, 24);
         for (Coord c : pond){
+            if (c == null){
+                continue; // now it's an infinite loop somehow
+            }
             map.contents[c.x][c.y].blockage = null; // c is null
             map.contents[c.x][c.y].floor = pondWater;
+        }
+         */
+        pond = garden.copy();
+        Coord pondCenter = pond.singleRandom(rng);
+        pond.and(pond.copy().fill(false).insertCircle(pondCenter, 2));
+        pond.fray(0.4);
+        for (Coord c : pond) {
+            map.contents[c.x][c.y].blockage = null;
+            map.contents[c.x][c.y].floor = pondWater;
+        }
+        pondBank = pond.copy().fringe().andNot(keepWall).andNot(insideKeep).andNot(outerWall);
+        for (Coord c : pondBank) {
+            placeMud(map.contents[c.x][c.y]);
         }
     }
 
