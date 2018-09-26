@@ -21,11 +21,6 @@ import java.util.stream.Stream;
  * @author Eben Howard - http://squidpony.com
  */
 public class WorldGenerator {
-
-    private enum CastleZone {
-        MOAT, KEEP, WALL, YARD, GATE;
-    };
-
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -668,7 +663,18 @@ public class WorldGenerator {
         }
     }
 
-    private void generateCastle(EpiMap[] buildZone) { // TODO - add "boundaries" so that a subsection of the zone can be the limit
+    /* Castle notes from real castles
+    Average thickness of stone wall: 2m
+    Thickness of Chepstow Castle in Wales: 6m
+    Thickness of some walls at Borl Castle in Coratia: 12m
+    Length of wall at Conwy Castle in Wales: 1280m
+
+    Standard motte and baily area: 3 acres
+    Malbork Castle total area: 12 square km
+
+    Approximate largest keeps: 31m x 31m
+    */
+    private void generateCastle(EpiMap[] buildZone) {
         int sky = buildZone.length; // how much verticality we have to work with
         EpiMap map = buildZone[sky - 1];
         int localWidth = map.width;
@@ -693,7 +699,7 @@ public class WorldGenerator {
 
         //choose area for moat
         GreasedRegion moat = region.copy();
-        List<Coord> corners = findInternalPolygonCorners(moat, distance, 9);
+        List<Coord> corners = findInternalPolygonCorners(moat, distance, 7);
         moat.fill(false);
         moat = connectPoints(moat, corners);
 
@@ -722,7 +728,7 @@ public class WorldGenerator {
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
 
-        corners = findInternalPolygonCorners(inside, distance / 2, 6);
+        corners = findInternalPolygonCorners(inside, distance / 2, 4);
         GreasedRegion outerWall = inside.copy();
         outerWall.fill(false);
         outerWall = connectPoints(outerWall, corners);
@@ -743,9 +749,9 @@ public class WorldGenerator {
             map.contents[c.x][c.y].floor = brick;
         }
 
-        System.out.println("Holes: " + hole.size());
-        hole.expand8way(); // hole.expandSeries8way won't modify hole, but this will
         hole.expand(2);
+        hole.fray(0.2);
+        hole.fray(0.2);
         Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
         for (Coord c : hole) {
             map.contents[c.x][c.y].blockage = null;
@@ -820,6 +826,14 @@ public class WorldGenerator {
             .flood8way(courtyard.copy().andNot(keepWalls), region.width * region.height);
         for (Coord c : insideKeep) {
             map.contents[c.x][c.y].floor = carpet;
+        }
+
+        GreasedRegion garden = courtyard.copy().andNot(keepWalls).andNot(insideKeep);
+        GreasedRegion pond = garden.copy().randomRegion(rng, 24);
+        Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
+        for (Coord c : pond){
+            map.contents[c.x][c.y].blockage = null; // c is null
+            map.contents[c.x][c.y].floor = pondWater;
         }
     }
 
