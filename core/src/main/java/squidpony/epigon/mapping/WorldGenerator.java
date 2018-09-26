@@ -707,7 +707,10 @@ public class WorldGenerator {
     }
 
     //TODO - make a Castle object that holds all these regions in a better way
-    private void buildGroundLevelCastle(EpiMap map, GreasedRegion region, GreasedRegion moat, GreasedRegion insideMoat, GreasedRegion moatBank, GreasedRegion outerWall, GreasedRegion holes, GreasedRegion courtyard, GreasedRegion keepWall, GreasedRegion insideKeep, GreasedRegion garden, GreasedRegion pond, GreasedRegion pondBank) {
+    private void buildGroundLevelCastle(EpiMap map, GreasedRegion region, GreasedRegion moat, GreasedRegion insideMoat,
+                                        GreasedRegion moatBank, GreasedRegion outerWall, GreasedRegion holes,
+                                        GreasedRegion courtyard, GreasedRegion keepWall, GreasedRegion insideKeep,
+                                        GreasedRegion garden, GreasedRegion pond, GreasedRegion pondBank) {
 
         //choose area for moat
         int distance = 8; // space between points
@@ -843,16 +846,22 @@ public class WorldGenerator {
         garden = courtyard.copy().andNot(keepWall).andNot(insideKeep);
         Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
 
-        /* This section acts weird, I suspect I am not using randomRegion correctly
-        GreasedRegion pond = garden.copy().randomRegion(rng, 24);
+        pond = garden.copy();
+//      //   randomRegion() has a bug, fixed in latest SquidLib
+//      //   mixedRandomRegion() does not have this bug, so it's a good hotfix
+//        pond.mixedRandomRegion(0.2, 24, rng.nextLong());
+        pond.randomRegion(rng, 24);
+//        System.out.println("\nafter randomRegion:");
+//        System.out.println(pond.show('~', '#'));
+//        System.out.println();
         for (Coord c : pond){
             if (c == null){
-                continue; // now it's an infinite loop somehow
+                System.out.println(pond.show('~', '#'));
+                continue;
             }
             map.contents[c.x][c.y].blockage = null; // c is null
             map.contents[c.x][c.y].floor = pondWater;
         }
-         */
         pond = garden.copy();
         Coord pondCenter = pond.singleRandom(rng);
         pond.and(pond.copy().fill(false).insertCircle(pondCenter, 2));
