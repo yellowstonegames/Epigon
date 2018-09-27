@@ -1753,57 +1753,47 @@ public class Epigon extends Game {
                     break;
                 case OPEN: // Open all the doors nearby
                     message("Opening nearby doors");
-                    for (Direction d : Direction.OUTWARDS)
-                    {
+                    for (Direction d : Direction.OUTWARDS) {
                         Coord c = player.location.translate(d);
-                        if(!map.inBounds(c))
+                        if (!map.inBounds(c)) {
                             continue;
-                        if(map.fovResult[c.x][c.y] <= 0)
+                        }
+                        if (map.fovResult[c.x][c.y] <= 0) {
                             continue;
-                        for (Physical p : map.contents[c.x][c.y].contents)
-                        {
-                            if(p.countsAs(handBuilt.baseClosedDoor))
-                            {
-                                RecipeMixer.applyModification(p, handBuilt.openDoor);
-//                                player.setAngle(d);
-                            }
+                        }
+                        EpiTile tile = map.contents[c.x][c.y];
+                        if (tile.blockage != null && tile.blockage.countsAs(handBuilt.baseClosedDoor)){
+                                RecipeMixer.applyModification(tile.blockage, handBuilt.openDoor);
+                                tile.contents.add(tile.blockage);
+                                tile.blockage = null;
                         }
                     }
-//                    Arrays.stream(Direction.OUTWARDS)
-//                            .map(d -> player.location.translate(d))
-//                            .filter(c -> map.inBounds(c))
-//                            .filter(c -> map.fovResult[c.x][c.y] > 0)
-//                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-//                            .filter(p -> p.countsAs(handBuilt.baseClosedDoor))
-//                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.openDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;
                 case SHUT: // Close all the doors nearby
                     message("Closing nearby doors");
-                    for (Direction d : Direction.OUTWARDS)
-                    {
+                    for (Direction d : Direction.OUTWARDS) {
                         Coord c = player.location.translate(d);
-                        if(!map.inBounds(c))
+                        if (!map.inBounds(c)) {
                             continue;
-                        if(map.fovResult[c.x][c.y] <= 0)
+                        }
+                        if (map.fovResult[c.x][c.y] <= 0) {
                             continue;
-                        for (Physical p : map.contents[c.x][c.y].contents)
-                        {
-                            if(p.countsAs(handBuilt.baseOpenDoor))
-                            {
+                        }
+                        EpiTile tile = map.contents[c.x][c.y];
+                        for (Physical p : tile.contents) {
+                            if (p.countsAs(handBuilt.baseOpenDoor)) {
+                                if (tile.blockage != null) {
+                                    message("Can't shut the door to the " + d.toString() + " there's a " + tile.blockage.name + " in the way!");
+                                    continue;
+                                }
                                 RecipeMixer.applyModification(p, handBuilt.closeDoor);
-//                                player.setAngle(d.opposite());
+                                tile.remove(p);
+                                tile.blockage = p;
                             }
                         }
                     }
-//                    Arrays.stream(Direction.OUTWARDS)
-//                            .map(d -> player.location.translate(d))
-//                            .filter(c -> map.inBounds(c))
-//                            .filter(c -> map.fovResult[c.x][c.y] > 0)
-//                            .flatMap(c -> map.contents[c.x][c.y].contents.stream())
-//                            .filter(p -> p.countsAs(handBuilt.baseOpenDoor))
-//                            .forEach(p -> RecipeMixer.applyModification(p, handBuilt.closeDoor));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
                     break;

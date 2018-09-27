@@ -262,7 +262,6 @@ public class WorldGenerator {
         Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
         List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
         Physical door = adds.get(0);
-        RecipeMixer.applyModification(door, rng.nextBoolean() ? handBuilt.closeDoor : handBuilt.openDoor);
         setDoorOpen(door, rng.nextBoolean());
         tile.add(door);
     }
@@ -846,22 +845,6 @@ public class WorldGenerator {
         garden = courtyard.copy().andNot(keepWall).andNot(insideKeep);
         Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
 
-        pond = garden.copy();
-//      //   randomRegion() has a bug, fixed in latest SquidLib
-//      //   mixedRandomRegion() does not have this bug, so it's a good hotfix
-//        pond.mixedRandomRegion(0.2, 24, rng.nextLong());
-        pond.randomRegion(rng, 24);
-//        System.out.println("\nafter randomRegion:");
-//        System.out.println(pond.show('~', '#'));
-//        System.out.println();
-        for (Coord c : pond){
-            if (c == null){
-                System.out.println(pond.show('~', '#'));
-                continue;
-            }
-            map.contents[c.x][c.y].blockage = null; // c is null
-            map.contents[c.x][c.y].floor = pondWater;
-        }
         pond = garden.copy();
         Coord pondCenter = pond.singleRandom(rng);
         pond.and(pond.copy().fill(false).insertCircle(pondCenter, 2));

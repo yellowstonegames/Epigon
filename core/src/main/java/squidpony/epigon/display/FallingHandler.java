@@ -54,9 +54,7 @@ public class FallingHandler {
         height = layers.gridHeight;
         this.layers = layers;
 
-        trail = new Physical();
-        trail.symbol = 0x2801; // center braille
-
+        trail = Physical.makeBasic("trail", (char)0x2801, SColor.GREEN_TEA_DYE);
         colorCenter = new SquidColorCenter();
 
         layers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"

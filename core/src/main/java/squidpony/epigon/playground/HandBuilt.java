@@ -1,5 +1,6 @@
 package squidpony.epigon.playground;
 
+import com.badlogic.gdx.graphics.Color;
 import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
@@ -122,52 +123,33 @@ public class HandBuilt {
 
     public Profession chef;
 
-    public HandBuilt()
-    {
+    public HandBuilt() {
         this(new RecipeMixer());
     }
 
     public HandBuilt(RecipeMixer mixer) {
-//        this.rng = rng.copy();
         chaos = rootChaos.nextLong();
-        this.rng = new StatefulRNG(new LinnormRNG(chaos));
+        rng = new StatefulRNG(new LinnormRNG(chaos));
         this.mixer = mixer;
-        baseOpenDoor = new Physical();
-        baseClosedDoor = new Physical();
+        baseOpenDoor = Physical.makeBasic("base open door", '/', Color.CLEAR);
+        baseClosedDoor = Physical.makeBasic("base closed door", '+', Color.CLEAR);
 
-        nan = new Physical();
-        nan.name = "nan";
+        nan = Physical.makeBasic("nan", 'ᶯ', SColor.DB_PLATINUM);
         nan.description = "currency of power";
-        nan.color = SColor.DB_PLATINUM.toFloatBits();
-        nan.symbol = 'ᶯ';
-        nan.blocking = false;
 
-        money = new Physical();
-        money.name = "Gold Coin";
-        money.color = SColor.CW_GOLD.toFloatBits();
-        money.symbol = '$';
-        money.blocking = false;
+        money = Physical.makeBasic("Gold Coin", '$', SColor.CW_GOLD);
         money.groupingData = new Grouping(1);
-        
-        baseFood = new Physical();
-        baseFood.name = "fūd";
+
+        baseFood = Physical.makeBasic("fūd", '℉', SColor.AMBER_DYE);
         baseFood.description = "base food item";
-        baseFood.symbol = '℉';
-        baseFood.color = SColor.AMBER_DYE.toFloatBits();
 
-        rawMeat = new Physical();
-        rawMeat.name = "meat";
+        rawMeat = Physical.makeBasic("meat", 'ₘ', SColor.DB_FAWN);
         rawMeat.description = "chunk of something";
-        rawMeat.symbol = 'ₘ';
-        rawMeat.color = SColor.DB_FAWN.toFloatBits();
 
-        torch = new Physical();
-        torch.name = "torch";
+        torch = Physical.makeBasic("torch", 'ῗ', SColor.CREAM);
         torch.description = "burning rags on a stick";
-        torch.symbol =  'ῗ';
-        torch.color = SColor.CREAM.toFloatBits();
         torch.radiance = new Radiance(6f, SColor.CREAM.toFloatBits(), 0.71f, 0f);
-        
+
         initAbilities();
         initProfessions();
         initItems();
@@ -182,10 +164,7 @@ public class HandBuilt {
         makeWall.large = true;
         makeWall.attached = true;
 
-        emptySpace = new Physical();
-        emptySpace.name = "ø";
-        emptySpace.symbol = ' ';
-        emptySpace.color = SColor.TRANSPARENT.toFloatBits();
+        emptySpace = Physical.makeBasic("ø", ' ', SColor.TRANSPARENT);
     }
 
     private void initAbilities() {
