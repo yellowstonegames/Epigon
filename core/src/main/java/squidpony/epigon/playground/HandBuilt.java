@@ -71,6 +71,8 @@ public class HandBuilt {
 
     public Physical rawMeat; // base item for dead animal chunks
     public Recipe steakRecipe;
+
+    public Physical carrotOfTruth; // when eaten the player can see through walls for a while
     
     public Physical torch;
 

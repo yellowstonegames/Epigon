@@ -663,111 +663,74 @@ public class WorldGenerator {
         }
     }
 
-    /* Castle notes from real castles
-    Average thickness of stone wall: 2m
-    Thickness of Chepstow Castle in Wales: 6m
-    Thickness of some walls at Borl Castle in Coratia: 12m
-    Length of wall at Conwy Castle in Wales: 1280m
-
-    Standard motte and baily area: 3 acres
-    Malbork Castle total area: 12 square km
-
-    Approximate largest keeps: 31m x 31m
-     */
     private void generateCastle(EpiMap[] buildZone) {
-        int sky = buildZone.length; // how much verticality we have to work with
-        EpiMap map = buildZone[sky - 1];
-
-        int localWidth = map.width;
-        int localHeight = map.height;
-        int edging = 2; // the amount of clear space to leave
-
-        GreasedRegion region = new GreasedRegion(localWidth, localHeight);
-        region.allOn();
-        for (int x = 0; x < edging; x++) {
-            for (int y = 0; y < localHeight; y++) {
-                region.set(false, x, y);
-                region.set(false, localWidth - 1 - x, y);
-            }
-        }
-        for (int x = 0; x < localWidth; x++) {
-            for (int y = 0; y < edging; y++) {
-                region.set(false, x, y);
-                region.set(false, x, localHeight - 1 - y);
-            }
-        }
-
-        GreasedRegion moat = region.copy();
-        GreasedRegion moatBank = null, insideMoat = null, outerWall = null, holes = null, courtyard = null, keepWall = null, insideKeep = null, garden = null, pond = null, pondBank = null;
-        buildGroundLevelCastle(map, region, moat, moatBank, insideMoat, outerWall, holes, courtyard, keepWall, insideKeep, garden, pond, pondBank);
-        for (int i = sky - 2; i >= 0; i++) {
-            //buildHigherLevelCastle();
+        Castle castle = new Castle(buildZone);
+        buildGroundLevelCastle(castle);
+        for (int i = castle.sky - 2; i >= 0; i++) {
+            //buildHigherLevelCastle(castle);
         }
     }
 
-    //TODO - make a Castle object that holds all these regions in a better way
-    private void buildGroundLevelCastle(EpiMap map, GreasedRegion region, GreasedRegion moat, GreasedRegion insideMoat,
-                                        GreasedRegion moatBank, GreasedRegion outerWall, GreasedRegion holes,
-                                        GreasedRegion courtyard, GreasedRegion keepWall, GreasedRegion insideKeep,
-                                        GreasedRegion garden, GreasedRegion pond, GreasedRegion pondBank) {
+    private void buildGroundLevelCastle(Castle castle) {
+        EpiMap map = castle.groundLevel;
 
         //choose area for moat
         int distance = 8; // space between points
-        List<Coord> corners = findInternalPolygonCorners(moat, distance, 7);
-        moat.fill(false);
-        moat = connectPoints(moat, corners);
+        List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
+        castle.moat.fill(false);
+        castle.moat = connectPoints(castle.moat, corners);
 
-        moat.expand8way();
-        moatBank = moat.copy();
-        GreasedRegion nonMoat = region.copy().andNot(moat);
+        castle.moat.expand8way();
+        castle.moatBank = castle.moat.copy();
+        GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
         for (Coord c : nonMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
         }
 
-        moat.fray(0.3).fray(0.1);
-        for (Coord c : moat) {
+        castle.moat.fray(0.3).fray(0.1);
+        for (Coord c : castle.moat) {
             placeWater(map.contents[c.x][c.y]);
         }
 
-        moatBank.andNot(moat);
-        for (Coord c : moatBank) {
+        castle.moatBank.andNot(castle.moat);
+        for (Coord c : castle.moatBank) {
             placeMud(map.contents[c.x][c.y]);
         }
 
-        insideMoat = new GreasedRegion(findCentroid(corners), region.width, region.height)
-            .flood8way(nonMoat, region.width * region.height);
+        castle.insideMoat = new GreasedRegion(findCentroid(corners), castle.region.width, castle.region.height)
+            .flood8way(nonMoat, castle.region.width * castle.region.height);
 
-        insideMoat.andNot(moat).andNot(moatBank);
-        for (Coord c : insideMoat) {
+        castle.insideMoat.andNot(castle.moat).andNot(castle.moatBank);
+        for (Coord c : castle.insideMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
 
-        corners = findInternalPolygonCorners(insideMoat, distance / 2, 4);
-        outerWall = insideMoat.copy();
-        outerWall.fill(false);
-        outerWall = connectPoints(outerWall, corners);
-        holes = outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion so that they're in the middle of the wall
-        outerWall.expand();
+        corners = findInternalPolygonCorners(castle.insideMoat, distance / 2, 4);
+        castle.outerWall = castle.insideMoat.copy();
+        castle.outerWall.fill(false);
+        castle.outerWall = connectPoints(castle.outerWall, corners);
+        castle.holes = castle.outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion so that they're in the middle of the wall
+        castle.outerWall.expand();
 
-        for (Coord c : outerWall) {
+        for (Coord c : castle.outerWall) {
             map.contents[c.x][c.y].add(getWall(Stone.GNEISS));
             map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
         }
 
         Coord courtyardCentroid = findCentroid(corners);
-        courtyard = new GreasedRegion(courtyardCentroid, region.width, region.height)
-            .flood8way(insideMoat.copy().andNot(outerWall), region.width * region.height);
+        castle.courtyard = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
+            .flood8way(castle.insideMoat.copy().andNot(castle.outerWall), castle.region.width * castle.region.height);
 
         Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '≡', SColor.PERSIAN_RED));
-        for (Coord c : courtyard) {
+        for (Coord c : castle.courtyard) {
             map.contents[c.x][c.y].floor = brick;
         }
 
-        holes.expand(2);
-        holes.fray(0.2);
-        holes.fray(0.2);
+        castle.holes.expand(2);
+        castle.holes.fray(0.2);
+        castle.holes.fray(0.2);
         Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
-        for (Coord c : holes) {
+        for (Coord c : castle.holes) {
             map.contents[c.x][c.y].blockage = null;
             map.contents[c.x][c.y].add(rubble);
             placeMud(map.contents[c.x][c.y]);
@@ -798,12 +761,12 @@ public class WorldGenerator {
                     break;
             }
             for (int x = left; x <= right; x++) {
-                if (!courtyard.contains(x, top) || !courtyard.contains(x, bottom)) {
+                if (!castle.courtyard.contains(x, top) || !castle.courtyard.contains(x, bottom)) {
                     break expandKeep;
                 }
             }
             for (int y = top; y <= bottom; y++) {
-                if (!courtyard.contains(left, y) || !courtyard.contains(right, y)) {
+                if (!castle.courtyard.contains(left, y) || !castle.courtyard.contains(right, y)) {
                     break expandKeep;
                 }
             }
@@ -823,38 +786,38 @@ public class WorldGenerator {
                 bottom--;
                 break;
         }
-        keepWall = connectPoints(courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
-        for (Coord c : keepWall) {
+        castle.keepWall = connectPoints(castle.courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
+        for (Coord c : castle.keepWall) {
             map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
             map.contents[c.x][c.y].add(getWall(Stone.MARBLE));
         }
 
-        for (Coord c : keepWall.copy().randomScatter(rng, 8, 5)) {
+        for (Coord c : castle.keepWall.copy().randomScatter(rng, 8, 5)) {
             map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
             map.contents[c.x][c.y].blockage = null;
             placeDoor(map.contents[c.x][c.y]);
         }
 
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
-        insideKeep = new GreasedRegion(courtyardCentroid, region.width, region.height)
-            .flood8way(courtyard.copy().andNot(keepWall), region.width * region.height);
-        for (Coord c : insideKeep) {
+        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
+            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
+        for (Coord c : castle.insideKeep) {
             map.contents[c.x][c.y].floor = carpet;
         }
 
-        garden = courtyard.copy().andNot(keepWall).andNot(insideKeep);
+        castle.garden = castle.courtyard.copy().andNot(castle.keepWall).andNot(castle.insideKeep);
         Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
 
-        pond = garden.copy();
-        Coord pondCenter = pond.singleRandom(rng);
-        pond.and(pond.copy().fill(false).insertCircle(pondCenter, 2));
-        pond.fray(0.4);
-        for (Coord c : pond) {
+        castle.pond = castle.garden.copy();
+        Coord pondCenter = castle.pond.singleRandom(rng);
+        castle.pond.and(castle.pond.copy().fill(false).insertCircle(pondCenter, 2));
+        castle.pond.fray(0.4);
+        for (Coord c : castle.pond) {
             map.contents[c.x][c.y].blockage = null;
             map.contents[c.x][c.y].floor = pondWater;
         }
-        pondBank = pond.copy().fringe().andNot(keepWall).andNot(insideKeep).andNot(outerWall);
-        for (Coord c : pondBank) {
+        castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
+        for (Coord c : castle.pondBank) {
             placeMud(map.contents[c.x][c.y]);
         }
     }
