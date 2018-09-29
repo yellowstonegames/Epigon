@@ -193,13 +193,8 @@ public class ContextHandler {
                     int sky = world.length;
                     int width = world[0].width;
                     int height = world[0].height;
-                    // TODO - figure out way to "animate" MRI style through the side view slices
-//                            y = (int)(System.nanoTime() % Integer.MAX_VALUE) / 1_000_000_000;
-                       // y = (int) (System.currentTimeMillis() / 500);
-//                       y = Duration.between(lastFrame, Instant.now()).getNano() / frameDelay;
                     y = (int) ((System.currentTimeMillis() - startTime) / frameDelay);
-                            y %= height;
-                    //y = game.player.location.y;
+                    y %= height;
                     for (x = 0; x < width; x++) {
                         for (int z = 0; z < sky; z++) {
                             EpiTile tile = null;
@@ -214,6 +209,12 @@ public class ContextHandler {
             };
             float sideFontWidth = (layers.getWidth() - Epigon.contextSize.cellWidth * 2) / mainMap.gridWidth();
             float sideFontHeight = (layers.getHeight() - Epigon.contextSize.cellHeight * 2) / world.length;
+
+            if (sideFontHeight > sideFontWidth * 3){
+                sideFontHeight = sideFontWidth * 3;
+            } else if (sideFontWidth > sideFontHeight){
+                sideFontHeight = sideFontWidth;
+            }
 
             miniMapSideFont = mainMap.font.copy().width(sideFontWidth).height(sideFontHeight).initBySize();
             group.addActor(miniMapSideView);
