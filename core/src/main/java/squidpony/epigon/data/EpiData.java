@@ -2,9 +2,9 @@ package squidpony.epigon.data;
 
 import squidpony.StringKit;
 import squidpony.squidmath.AbstractRNG;
-import squidpony.squidmath.LinnormRNG;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.RNG;
+import squidpony.squidmath.TangleRNG;
 
 import java.io.Serializable;
 
@@ -20,8 +20,12 @@ import java.io.Serializable;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is LinnormRNG from SquidLib. It is slightly slower than TangleRNG and does not pass
- * birthday-problem tests (whether Tangle passes them is debatable), but has stronger quality and uses less state.
+ * algorithm this uses is OverdriveRNG from Sarong. It is slightly faster than TangleRNG or LinnormRNG and has very
+ * strong quality, but takes some time to initialize (instead of almost none for Linnorm). Overdrive is a combination of
+ * two subcycle generators, so some states will be on a low-period cycle and others will be on a higher-period cycle;
+ * the longer initialization ensures a high-enough period (minimum 2 to the 47, probably much higher). The time to
+ * initialize should take no more than the time it takes to make 512 calls to {@link #nextLong()}, and almost always
+ * less time than that.
  */
 public abstract class EpiData extends AbstractRNG implements Serializable {
 
@@ -53,22 +57,22 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
             0x68A0537869364FE2L, 0x32BA732DEC14AE42L, 0x3AAF6CDE0CE8DB48L, 0x552C1D9594CE212AL, 0x8BC1A33AE250B2E9L, 0xC02FCB678B465D00L, 0x496F580658AFD50AL, 0x6D0D982E45AD15A9L,
             0xC8E87307F336E8D0L, 0x257E726598418548L, 0xFADF2ED10B13D148L, 0x46FA6CC74F293535L, 0xF03227995C268856L, 0x46087E39622EA4CDL, 0x17EE09D3D2181207L, 0x9C7518A1E5AD4544L,
     }, startingB = {
-            0x0000000000000001L, 0x07293E6E09EC6368L, 0x96D969CADB4CD368L, 0x3FF86768F89EAEB3L, 0x2F9FAC39CC8E5CB7L, 0xF0ACF2D0542EE141L, 0x7BF403A079DCD087L, 0xDA68703F5EAB9409L,
-            0xF887EDE8E8AD388BL, 0xB93108A12DD8DC5CL, 0x98676A8BE90BB48EL, 0x3C66E22B602A7007L, 0x69A56A92BAD39B5BL, 0x58857B966DDF07BCL, 0x3B6890E3EDB96D6EL, 0xF0363B595221C86DL,
-            0x62EE3C3A7A528614L, 0xB0175247E00B4935L, 0xE70D810777ED42ACL, 0x275CE4F27473631AL, 0xB5DF57C4502967E9L, 0xB8EB0B9EC111C7FEL, 0xC28F3B422CA03689L, 0xD09DD3A8FEAB2DD1L,
-            0x4E2C713B5A7A0FFCL, 0x9AFC4BE99ED5F1AAL, 0xA89BFD2F6C2E97AEL, 0xF8735B9A6DF5F258L, 0xB2F89E533D9B9897L, 0xD89711EA7777E671L, 0x9658217AF4F448CAL, 0xEE3F474204385F6BL,
-            0x2B20D085EAB7ECC0L, 0xDF4FBDB5877EC70AL, 0xA27D970C88F1246BL, 0x88D0B336E63ADE23L, 0xC06AF42B0855C181L, 0x00E8B464987358DBL, 0xDA1DF8BA1E45586EL, 0x4C12347AB35D2F03L,
-            0x752C4942F1095640L, 0x608BD5FC9E04FA0AL, 0xB253E48775CDD5E1L, 0x643E8401460AAA59L, 0xE248C00B3A622F06L, 0xB01AD54DFE588BF2L, 0x1D486285F47A99D0L, 0x4ACE70E9A24E7B42L,
-            0xE498314246C2E894L, 0x67BB0785AEA67873L, 0xAB50922AD5171ABDL, 0x4BFA6DEE10549DC3L, 0x889BB7C03B745D65L, 0x705D68BC7379AEECL, 0x08BC6282C82C8B72L, 0xB967A84918604EDCL,
-            0x17F2AE6E78487967L, 0x038874F2D394FB80L, 0x7F7A2F1A581C66D3L, 0x99977A67381F6F7FL, 0x6B62915A4927F8D3L, 0x4DE18BB59A3C182DL, 0x94E508A682455109L, 0x986BE18241462557L,
-            0x0578DFAE00F8A0D6L, 0x29B22988B2264886L, 0xD552345E6E2A3125L, 0x5DB9E3195164C051L, 0x0E43BA334827D573L, 0x3AFAF8799E87209CL, 0xBC0E249E28B42DE9L, 0x022A07577137E25FL,
-            0x7DEB553C69DAA1FFL, 0x4A69C3A72EF45E41L, 0xBEBAC3CF3B608398L, 0xEB5771FF214E2487L, 0x9FB5E8C5B36B4CC9L, 0xC09F95341A44B518L, 0x668BEA20B4AE0875L, 0x633E56557743D5CBL,
-            0x60F91113C85EAAAAL, 0xB7FD377C14A36222L, 0xFCF5360544E39E14L, 0xC8201F79E019A016L, 0x9298BE81EFD5200FL, 0xBEB6A71A91068F67L, 0xB48125BFEFE20180L, 0xC470152566C3E1A0L,
-            0x46646F5388059BA1L, 0x6B2EFA0363CEB524L, 0xC60186015E2573E1L, 0x514BF9772FA2ACCEL, 0x1C44DACDE62A44EDL, 0x0CC4356D150B5469L, 0xDF21F9DAE98D5C86L, 0xA22573A5D741ACECL,
-            0x722CB87504029D8AL, 0x5727EA9D310F90F7L, 0x06D1E7DC6CF5C689L, 0x735BAEB75FDD9F85L, 0xEF96C3AF03785BEAL, 0xBE453FC733BEFA00L, 0xE27E2672BFCC1C44L, 0x541C5523E0FBB038L,
-            0xA04B840944E17E54L, 0x313CA18B6537B063L, 0xC7B93061D18C2FFEL, 0xE1D991D2E4A8CD20L, 0x5BB21B4ED59FAE91L, 0x7DB82C96F57D18C5L, 0x9EEBA39CBD611F6EL, 0x093E9402ABCC23F7L,
-            0x9A7637252A4475F7L, 0x0C8A522F0B70DB19L, 0x3532D24B07A4D08BL, 0x633C908FA64BB58AL, 0x16A3123AD6B3DD79L, 0x1169BB0D6BD6DEC5L, 0xDABFB787CED62E83L, 0x8F17A15C52A3B9BDL,
-            0xA2F3FA0F0F5F6FDFL, 0x95DA83EA34697FEFL, 0xFE1541E512CBAC77L, 0xE68287CDEB9302A5L, 0xB928A0223B695207L, 0x3F9D05B291DE5A8AL, 0x5E28B275895A2C79L, 0x8E9BD22FBFD57A6CL,
+            0x0000000000000001L, 0xE400A8A8DFFCDBB8L, 0xD48F52BDA014F338L, 0x1B348EF2FB81A072L, 0x52953C3D77622AFCL, 0x22CEA1428F6FAAAAL, 0x11C4D45E3F37ACCDL, 0x709F5A366A542F61L,
+            0xD093E219F7E32762L, 0xC2986214F61E4935L, 0x9841F301821A420DL, 0x8BC8F2F2B2D421DAL, 0x8819E1ED2169B636L, 0x019D281DB10747F3L, 0x018E1EA12FD10EFFL, 0xB5EDD9A1AF9852C8L,
+            0x606393B52FB4FE4BL, 0xDD1AC582299E7B24L, 0xD6AAB23FC69E967AL, 0x594E61948FAB7E27L, 0x474EF8B0F7AB6E45L, 0x494D82A15FB1A8F5L, 0xFE4DC58A2A26636DL, 0x1CE41B69F88A436CL,
+            0x1CDBAD85DF9D8DC8L, 0x268187ADA0F9843EL, 0xA6A9FD24B5F20971L, 0x43BD3DE92518DE85L, 0x08693D533C9E0253L, 0x39294885073F9B25L, 0x34694C33DC7B5E4DL, 0x2A9B79A87C7058FFL,
+            0x8C8D0152100D5921L, 0xF19FAB4D1E387EE0L, 0xDBC2D53FDEC850E2L, 0x5BCA216BC9B1C99AL, 0xC409048CF9E1CC8BL, 0x025105B820B1CDBFL, 0xE0C57B5A27453EF5L, 0xE0E91F20508585E9L,
+            0x928C7D3A4FD7C7A7L, 0xA562A6BDF1015D80L, 0x016294BA8883E09AL, 0xBFAB35783CC3DA97L, 0xBA4305AEBE03D91BL, 0xC6E306B12006310CL, 0x2F8305B416C912CEL, 0x1EC26EB303D9BDF2L,
+            0x2EBF2DB4B3DAE292L, 0xDA532E18FA229293L, 0x053F869333A352B7L, 0x653FD7FF33D3171EL, 0x85A9E9FFDD180311L, 0xCB43C7B03489D26CL, 0x9F10A148350AD2CFL, 0xA71FF57039ABD697L,
+            0x62A6809DC83FEE89L, 0x3BFE4C425850BA89L, 0x62D2B0C0AC1424A6L, 0x720F1FF7AD159B39L, 0x620FC06702156F39L, 0x69175E436E54D339L, 0x6A535CF4A6645739L, 0x272DAE2591C17FEFL,
+            0xB5E32375F56F1FF7L, 0x15B3265CD7A0EE6EL, 0x426D4A9BADB7BC05L, 0xCF169B92AD877067L, 0xB212C6FE7575A4EDL, 0xCE42C49D2D7C7AEEL, 0x8492C339B59939DFL, 0x04DA5E053365C9B3L,
+            0x6D2241057E3E7383L, 0x00C1286E2E3B37EFL, 0x00CB78687D54DF4BL, 0xFF29D9EAB6771277L, 0xF4B489E676CF73DFL, 0x1FC3C899124F900EL, 0x42A30B587EDD30D3L, 0xA6CC47B8042A6DF5L,
+            0x6230D76E4D065860L, 0x1B6C922EA7A2583AL, 0xFFD35FAA261D09F9L, 0xD608602F4DC9A277L, 0x140C2A804A58DE38L, 0xB5EC5505D402DE8AL, 0x15B309B8FFAA896FL, 0x9A87391F605087B3L,
+            0xA9CBB441389237B4L, 0x484BDC4B4E9CA56AL, 0xFE31344AA267873CL, 0x14F8333096E7A879L, 0x09F7505F5A67C77FL, 0x4CF79EE399E5073FL, 0x611EC9D57F153234L, 0xFC37D35F7CEC1FA1L,
+            0xF54EBD813E05D901L, 0xA97E15B924E7500DL, 0x1581AA01C467A6AEL, 0xBDADD62D68E7A1C8L, 0x45AF8A8FAAC02002L, 0x5A517A8AAAC6A6ACL, 0x4E710A9437BA1F46L, 0x5541D562BF1294D9L,
+            0x269D548125D1B97AL, 0xD056D48B6F668605L, 0x45E64E1AA85D7B43L, 0x354FD09228C67B24L, 0x5E8FC612828FB3BAL, 0x69CFCB52C50BC09AL, 0xBA2DD0CD530A2A8FL, 0x0854F25414696819L,
+            0x9F4578D0D43735CCL, 0x5F5FE60CFA3EE2F4L, 0x0B4BE5B17A413AF7L, 0x5B3FE34D820740A7L, 0x8D977D1830B404A6L, 0xD1FCA3BAD54E3953L, 0x0F69F02CE2902FA4L, 0x0849A89D71201C15L,
+            0x44F39E5C979007F3L, 0x7E8D24FF09FE44F3L, 0x4160C07D0F111A35L, 0x76718DD168041ACFL, 0xAF5D3F916FE3CC23L, 0x24B3DDF4EFBF834AL, 0x5E1689A56F9F58D0L, 0x3251CFCB89D7BF0AL,
     };
 
     public final void setState(final int s) {
@@ -79,8 +83,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
         }
         stateB = startingB[s >>> 25];
         for (int i = s >>> 16 & 0x1FF; i > 0; i--) {
-            stateB *= 0x9E3779B9L;
-            stateB = (stateB << 37 | stateB >>> 27);
+            stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29);
         }
     }
     
@@ -97,15 +100,13 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     public final int nextInt()
     {
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return (int)((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27)));
+        return (int)((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)));
     }
     @Override
     public final int next(final int bits)
     {
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return (int)((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27))) >>> (32 - bits);
+        return (int)((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) >>> (32 - bits);
     }
 
 //    /**
@@ -148,8 +149,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return (z ^ z >>> 25);
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return (stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27));
+        return (stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36));
     }
 
     /**
@@ -159,8 +159,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final boolean nextBoolean() {
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return ((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27))) < 0L;
+        return ((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) < 0L;
         //        return  (chaos = chaos * 0x41C64E6DL + 1L) < 0;
     }
 
@@ -172,10 +171,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
      */
     @Override
     public final double nextDouble() {
-
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return (((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27))) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+        return (((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) 
+                & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return ((z ^ z >>> 25) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
@@ -192,30 +190,28 @@ public abstract class EpiData extends AbstractRNG implements Serializable {
     @Override
     public final float nextFloat() {
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return (((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27))) & 0xFFFFFFL) * 0x1p-24f;
+        return (((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)))
+                & 0xFFFFFFL) * 0x1p-24f;
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        return ((z ^ z >>> 27) * 0xAEF17502108EF2D9L >>> 40) * 0x1p-24f;
     }
     
     public final double nextCurvedDouble()
     {
-
         final long a = stateA * 0x41C64E6BL;
-        final long b = stateB * 0x9E3779B9L;
-        return NumberTools.formCurvedDouble((stateA = (a << 28 | a >>> 36)) ^ (stateB = (b << 37 | b >>> 27)));
+        return NumberTools.formCurvedDouble((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)));
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return NumberTools.formCurvedDouble(z ^ z >>> 25);
     }
     
     /**
-     * This can't copy itself because EpiData is abstract, so it returns an RNG using a new LinnormRNG as its
-     * RandomnessSource, seeded with this EpiData's chaos and jumble. This makes it stay an IRNG, but not an EpiData.
+     * This can't copy itself because EpiData is abstract, so it returns an RNG using a new TangleRNG as its
+     * RandomnessSource, seeded with this EpiData's two states. This makes it stay an IRNG, but not an EpiData.
      */
     @Override
     public RNG copy() {
-        return new RNG(new LinnormRNG(stateA ^ stateB));
+        return new RNG(new TangleRNG(stateA, stateB));
     }
 
     /**
