@@ -3,6 +3,10 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.data.LiveValue;
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +38,7 @@ import java.util.stream.Collectors;
 public class ContextHandler {
 
     public enum ContextMode {
-        TILE_CONTENTS, INVENTORY, STAT_DETAILS, MINI_MAP, MESSAGE;
+        TILE_CONTENTS, INVENTORY, STAT_DETAILS, MINI_MAP, MINI_MAP_SIDE_VIEW, MESSAGE;
 
         private final String name;
 
@@ -69,10 +74,15 @@ public class ContextHandler {
     private SparseLayers layers;
     private SubcellLayers mainMap;
     private Actor miniMap;
+    private Actor miniMapSideView;
     private int width;
     private int height;
     private EpiMap epiMap;
+    private EpiMap[] world;
     private TextCellFactory miniMapFont;
+    private TextCellFactory miniMapSideFont;
+    private int frameDelay = 300;
+    private long startTime = System.currentTimeMillis();
     private ContextMode contextMode = ContextMode.TILE_CONTENTS;
     private EnumOrderedMap<ContextMode, char[][]> cachedTexts = new EnumOrderedMap<>(ContextMode.class);
     private EnumOrderedMap<ContextMode, float[][]> cachedColors = new EnumOrderedMap<>(ContextMode.class);
@@ -104,12 +114,18 @@ public class ContextHandler {
         layers.fillBackground(layers.defaultPackedBackground);
     }
 
-    public void setMap(EpiMap map) {
+    public void setMap(EpiMap map, EpiMap[] world) {
         if (miniMap != null) {
             group.removeActor(miniMap);
             miniMap.setVisible(false);
             miniMap.clear();
             miniMap = null;
+        }
+        if (miniMapSideView != null) {
+            group.removeActor(miniMapSideView);
+            miniMapSideView.setVisible(false);
+            miniMapSideView.clear();
+            miniMapSideView = null;
         }
 
         epiMap = map;
@@ -118,10 +134,12 @@ public class ContextHandler {
                 @Override
                 public void draw(Batch batch, float parentAlpha) {
                     super.draw(batch, parentAlpha);
-                    float xo = getX() + Epigon.contextSize.cellWidth, yo = getY(),
-                        yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
+                    float xo = getX() + Epigon.contextSize.cellWidth,
+                        yo = getY(), yOff;
                     //mainMap.font.configureShader(batch);
                     float widthInc = miniMapFont.actualCellWidth, heightInc = -miniMapFont.actualCellHeight;
+                    int x, y;
+                    yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
                     RememberedTile memory;
                     for (int i = 0; i < epiMap.width; i++) {
                         for (int j = 0; j < epiMap.height; j++) {
@@ -136,7 +154,6 @@ public class ContextHandler {
                         }
                     }
                     //mainMap.getLayer(0).draw(batch, miniMapFont, xo, yOff, '\u0000');
-                    int x, y;
                     ArrayList<TextCellFactory.Glyph> glyphs = mainMap.glyphs;
                     for (int i = 0; i < glyphs.size(); i++) {
                         TextCellFactory.Glyph glyph = glyphs.get(i);
@@ -157,9 +174,50 @@ public class ContextHandler {
                     }
                 }
             };
-            miniMapFont = mainMap.font.copy().width(1f).height(1f).initBySize();
+            float fontWidth = (layers.getWidth() - Epigon.contextSize.cellWidth * 2) / mainMap.gridWidth();
+            float fontHeight = (layers.getHeight() - Epigon.contextSize.cellHeight * 2) / mainMap.gridHeight();
+            miniMapFont = mainMap.font.copy().width(fontWidth).height(fontHeight).initBySize();
             group.addActor(miniMap);
-            miniMap.setVisible(false);
+            miniMap.setVisible(contextMode == ContextMode.MINI_MAP);
+
+            miniMapSideView = new Actor() {
+                @Override
+                public void draw(Batch batch, float parentAlpha) {
+                    super.draw(batch, parentAlpha);
+                    float xo = getX() + Epigon.contextSize.cellWidth,
+                        yo = getY(), yOff;
+                    //mainMap.font.configureShader(batch);
+                    float widthInc = miniMapSideFont.actualCellWidth, heightInc = -miniMapSideFont.actualCellHeight;
+                    int x, y;
+                    yOff = yo + Epigon.contextSize.cellHeight + world.length * miniMapSideFont.actualCellHeight;
+                    int sky = world.length;
+                    int width = world[0].width;
+                    int height = world[0].height;
+                    // TODO - figure out way to "animate" MRI style through the side view slices
+//                            y = (int)(System.nanoTime() % Integer.MAX_VALUE) / 1_000_000_000;
+                       // y = (int) (System.currentTimeMillis() / 500);
+//                       y = Duration.between(lastFrame, Instant.now()).getNano() / frameDelay;
+                    y = (int) ((System.currentTimeMillis() - startTime) / frameDelay);
+                            y %= height;
+                    //y = game.player.location.y;
+                    for (x = 0; x < width; x++) {
+                        for (int z = 0; z < sky; z++) {
+                            EpiTile tile = null;
+                            tile = world[z].contents[x][y];
+                            if (tile != null) {
+                                miniMapSideFont.draw(batch, tile.getSymbolUninhabited(), tile.getForegroundColor(),
+                                    xo + widthInc * x, yOff + heightInc * (z));
+                            }
+                        }
+                    }
+                }
+            };
+            float sideFontWidth = (layers.getWidth() - Epigon.contextSize.cellWidth * 2) / mainMap.gridWidth();
+            float sideFontHeight = (layers.getHeight() - Epigon.contextSize.cellHeight * 2) / world.length;
+
+            miniMapSideFont = mainMap.font.copy().width(sideFontWidth).height(sideFontHeight).initBySize();
+            group.addActor(miniMapSideView);
+            miniMapSideView.setVisible(contextMode == ContextMode.MINI_MAP_SIDE_VIEW);
         }
     }
 
@@ -246,8 +304,11 @@ public class ContextHandler {
     }
 
     private void switchTo(ContextMode mode) {
-        if (contextMode == ContextMode.MINI_MAP && miniMap != null) {
+        if (miniMap != null) {
             miniMap.setVisible(false);
+        }
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
         }
         contextMode = mode;
         if (cacheIsValid.contains(mode)) { // map cache is never valid
@@ -263,6 +324,9 @@ public class ContextHandler {
                 case MINI_MAP:
                     contextMiniMap();
                     break;
+                case MINI_MAP_SIDE_VIEW:
+                    contextMiniMapSideView();
+                    break;
                 case STAT_DETAILS:
                     contextStatDetails(null, null);
                     break;
@@ -277,6 +341,9 @@ public class ContextHandler {
         if (miniMap != null) {
             miniMap.setVisible(false);
         }
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
+        }
         clear();
         if (stat != null && lv != null) {
             put(1, 1, stat.toString() + " (" + stat.nick() + ")");
@@ -289,15 +356,34 @@ public class ContextHandler {
 
     public void contextMiniMap() {
         contextMode = ContextMode.MINI_MAP;
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
+        }
         clear();
         if (miniMap != null) {
             miniMap.setVisible(true);
         }
     }
 
+    public void contextMiniMapSideView() {
+        contextMode = ContextMode.MINI_MAP_SIDE_VIEW;
+        if (miniMap != null) {
+            miniMap.setVisible(false);
+        }
+        clear();
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(true);
+        }
+    }
+
     public void contextInventory(List<Physical> inventory) {
         contextMode = ContextMode.INVENTORY;
-        miniMap.setVisible(false);
+        if (miniMap != null) {
+            miniMap.setVisible(false);
+        }
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
+        }
         clear();
         put(inventory);
         cacheIsValid.add(contextMode);
@@ -306,6 +392,12 @@ public class ContextHandler {
     public void tileContents(int x, int y, int depth, EpiTile tile) {
         if (contextMode != ContextMode.TILE_CONTENTS) {
             return;
+        }
+        if (miniMap != null) {
+            miniMap.setVisible(false);
+        }
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
         }
         clear();
         if (tile != null) {
@@ -337,6 +429,9 @@ public class ContextHandler {
         contextMode = ContextMode.MESSAGE;
         if (miniMap != null) {
             miniMap.setVisible(false);
+        }
+        if (miniMapSideView != null) {
+            miniMapSideView.setVisible(false);
         }
         clear();
         put(text);

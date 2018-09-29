@@ -78,7 +78,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
     public static final int messageCount;
-    public static final long seed = 0xBEEFEED00DBA77L;
+    public static final long seed = 0xBEEFEED0DBA77L;
     public final StatefulRNG rng = new StatefulRNG(seed);
     // used for certain calculations where the state changes per-tile
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
@@ -495,7 +495,7 @@ public class Epigon extends Game {
         message("Falling..... Press SPACE to continue");
         int w = World.DIVE_HEADER[0].length();
         map = worldGenerator.buildDive(w, worldDepth, handBuilt);
-        contextHandler.setMap(map);
+        contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
         player.location = Coord.get(w / 2, 0); // for... reasons, y is an offset from the camera position
@@ -630,7 +630,6 @@ public class Epigon extends Game {
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
         //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
-        contextHandler.setMap(map);
         fxHandler.seen = map.fovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
@@ -638,6 +637,7 @@ public class Epigon extends Game {
         toPlayerDijkstra.initialize(simple);
         monsterDijkstra.initialize(simple);
         calcDijkstra();
+        contextHandler.setMap(map, world);
     }
 
     private void runTurn() {
