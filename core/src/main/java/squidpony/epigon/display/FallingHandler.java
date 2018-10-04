@@ -16,6 +16,7 @@ import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SubcellLayers;
 import squidpony.squidgrid.gui.gdx.TextCellFactory.Glyph;
 import squidpony.squidmath.Coord;
 
@@ -45,7 +46,7 @@ public class FallingHandler {
     public boolean reachedGoal = false;
     private int currentDepth = 0;
 
-    public FallingHandler(SparseLayers layers) {
+    public FallingHandler(SubcellLayers layers) {
         width = layers.gridWidth;
         halfWidth = width / 2;
         quarterWidth = halfWidth / 2;

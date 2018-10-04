@@ -13,8 +13,8 @@ import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.PanelEffect;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SubcellLayers;
 import squidpony.squidmath.*;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class FxHandler {
     private static char[] explosionChars = new char[]{'%', '$', '&', '!'};
     private static char[] zapChars = new char[]{};
 
-    private SparseLayers fx;
+    private SubcellLayers fx;
     private int layer;
     private int width;
     private int height;
@@ -39,7 +39,7 @@ public class FxHandler {
     public double[][] seen;
     private StatefulRNG rng = new StatefulRNG(new LinnormRNG());
 
-    public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
+    public FxHandler(SubcellLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
         width = layers.gridWidth();
         height = layers.gridHeight();
@@ -51,7 +51,7 @@ public class FxHandler {
 
     public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(0.85f, viable.refill(seen, 0.001, 999.0),
-            origin, size,
+            origin.multiply(3), size * 3,
             rng.nextDouble(360.0),
             radius,
             colorCenter.saturate(element.color, 0.3),
@@ -181,7 +181,9 @@ public class FxHandler {
             Coord c = path[pathIndex];
             String lines;
 
-            if (pathIndex == 0) {
+            if(path.length == 1) {
+                lines = Utilities.linesFor(Direction.NONE);
+            } else if (pathIndex == 0) {
                 lines = Utilities.linesFor(Direction.toGoTo(c, path[pathIndex + 1]));
             } else {
                 lines = Utilities.linesFor(Direction.toGoTo(path[pathIndex - 1], c));
@@ -333,11 +335,16 @@ public class FxHandler {
                 }
                 idx = (int) (f * colors.length);
                 if (idx >= colors.length - 1) {
-                    color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+                    fx.backgrounds[c.x][c.y] = SColor.lerpFloatColorsBlended(fx.backgrounds[c.x][c.y], 
+                            SColor.lerpFloatColors(colors[colors.length - 1], SColor.translucentColor(colors[colors.length - 1], 0f), (Math.min(0.99f, f) * colors.length) % 1f),
+                            (1f - percent) * percent * 4f);
                 } else {
-                    color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+                    fx.backgrounds[c.x][c.y] = SColor.lerpFloatColorsBlended(fx.backgrounds[c.x][c.y], 
+                            SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f),
+                            (1f - percent) * percent * 4f);
                 }
-                fx.put(c.x, c.y, '\u0000', color, 0f, layer);
+                
+                //fx.putSingle(c.x, c.y, color);
             }
         }
     }

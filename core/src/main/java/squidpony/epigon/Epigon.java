@@ -107,7 +107,7 @@ public class Epigon extends Game {
     private SparseLayers infoSLayers;
     private SparseLayers contextSLayers;
     private SquidLayers messageSLayers;
-    private SparseLayers fallingSLayers;
+    private SubcellLayers fallingSLayers;
 
     private InputSpecialMultiplexer multiplexer;
     private SquidInput mapInput;
@@ -369,7 +369,7 @@ public class Epigon extends Game {
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
-        fallingSLayers = new SparseLayers(
+        fallingSLayers = new SubcellLayers(
                 100, // weird because falling uses a different view
                 totalDepth,
                 mapSize.cellWidth,
@@ -580,7 +580,7 @@ public class Epigon extends Game {
         world = worldGenerator.buildCastle(worldWidth, worldHeight, underground, aboveground, handBuilt);
         depth = aboveground; // should be the very surface
         map = world[depth];
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.triFovResult);
         floors = new GreasedRegion(map.width, map.height);
 //        for (int i = world.length - 1; i > aboveground + 1; i--) {
 //            setupLevel(i);
@@ -630,7 +630,7 @@ public class Epigon extends Game {
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
         //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
-        fxHandler.seen = map.fovResult;
+        fxHandler.seen = map.triFovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
         calcFOV(player.location.x, player.location.y);
@@ -1929,10 +1929,10 @@ public class Epigon extends Game {
             }
             if (verb == null) {
                 message("Unknown input for " + m + " mode: " + key);
-                if(batch.filter == identityFilter)
-                    batch.setFilter(filter);
-                else
-                    batch.setFilter(identityFilter);
+//                if(batch.filter == identityFilter)
+//                    batch.setFilter(filter);
+//                else
+//                    batch.setFilter(identityFilter);
             } else {
                 message("Can't " + verb.name + " from " + m + " mode.");
             }
@@ -2177,11 +2177,10 @@ public class Epigon extends Game {
             if (multiplexer.processedInput) return;
             switch (key) {
                 case 'x':
-                    fxHandler.sectorBlast(player.location, Element.ACID, 7, Radius.CIRCLE);
+                    fxHandler.sectorBlast(player.location, rng.getRandomElement(Element.allEnergy), 7, Radius.CIRCLE);
                     break;
                 case 'X':
-                    Element e = rng.getRandomElement(Element.allEnergy);
-                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), e);
+                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), rng.getRandomElement(Element.allEnergy));
                     break;
                 case 'z':
                     fxHandler.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
