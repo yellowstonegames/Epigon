@@ -655,10 +655,15 @@ public class Epigon extends Game {
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
                 Weapon weapon = chooseValidWeapon(creature, player);
-                if(weapon == null)
-                {
-                    pl[0] = creature.getRandomElement(floorCells);
-                    monsterDijkstra.findPath(path, 1, 3, creaturePositions, null, c, pl);
+                if(weapon == null) {
+                    if (creature.weaponData != null && los.isReachable(simple, creature.location.x, creature.location.y, player.location.x, player.location.y, Radius.CIRCLE))
+                    {
+                        monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
+                    }
+                    else {
+                        pl[0] = creature.getRandomElement(floorCells);
+                        monsterDijkstra.findPath(path, 1, 3, creaturePositions, null, c, pl);
+                    }
                 }
                 else
                     monsterDijkstra.findTechniquePath(path, 1, weapon.technique, simple, los, creaturePositions, null, c, ps);
