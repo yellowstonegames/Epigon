@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Colors;
+import squidpony.Messaging;
 import squidpony.epigon.Radiance;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Material;
@@ -438,6 +439,14 @@ public class RecipeMixer {
         for (int i = 0, idx = blueprint.nextInt(raw.weapons.length); i < raw.weapons.length; i++, idx = (idx+1)%raw.weapons.length) {
             blueprint.equipItem(buildWeapon(Weapon.getWeapons().get(raw.weapons[idx].name), blueprint));
         }
+        blueprint.creatureData.culture = Culture.cultures.getOrDefault(blueprint.getRandomElement(raw.culture), blueprint.creatureData.culture);
+        if(raw.sayings == null || raw.sayings.length == 0)
+            blueprint.creatureData.sayings = new String[]{"The @name stare$ blankly..."};
+        else 
+            blueprint.creatureData.sayings = raw.sayings;
+        blueprint.creatureData.genderPronoun = blueprint.nextBoolean()
+                ? Messaging.NounTrait.MALE_GENDER
+                : Messaging.NounTrait.FEMALE_GENDER;
         return blueprint;
     }
 

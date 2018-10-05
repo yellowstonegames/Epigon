@@ -1,39 +1,39 @@
 package squidpony.epigon.data.raw;
 
-import static squidpony.squidmath.OrderedMap.makeMap;
-
 import java.io.Serializable;
 import java.util.Map;
+
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 public class RawCulture implements Serializable {
   public static final long serialVersionUID = 1L;
 
   public static final RawCulture[] ENTRIES = new RawCulture[] {
-    new RawCulture("Bididhayi", "A now-peaceful theocracy that has benefited greatly from their warlike Chobesh neighbors' collapse.", "South Mid-Cap"),
-    new RawCulture("Cheuritae", "A conglomerate of various island groups that sends privateers to raid other nations' ships.", "East Rim"),
-    new RawCulture("Chobesh", "A formerly-powerful kingdom that lost it all after a century at war with its neighbors, and lies in ruin.", "West Mid-Cap"),
-    new RawCulture("Elethian", "The unified nation of elves; these long-lived people have little interest in short-term power grabs.", "North Mid-Cap"),
-    new RawCulture("Hidzaajji", "A desert nation that has built up strength through alliances and trade; they compete with Geuhwae.", "South Outer-Cap"),
-    new RawCulture("Siarrolla", "A formidable naval armada that controls a puppet kingdom while frequently invading the Tip nations.", "North Inner-Cap"),
-    new RawCulture("Hyrden", "An alliance of a church and a kingdom; they routinely crusade against Xuruk's nearby undead.", "West Outer-Cap"),
-    new RawCulture("Ikkutiq", "A magically-formidable utopia that thrives deep in the dangerous Bowl using their arcane barriers.", "North Bowl"),
-    new RawCulture("Jalgeaux", "A potent nation where the sizable aristocratic class manipulates the lower classes away from revolt.", "West Inner-Cap"),
-    new RawCulture("Geuhwae", "A massive empire that formed from the merger of various rival states; it is an economic titan.", "East Mid-Cap"),
-    new RawCulture("Khainghal", "A nomadic group that moves between dodging monsters near Hueztotli and raiding Geuhwae.", "East Inner-Cap"),
-    new RawCulture("Krort", "A grouping of similar Orc tribes that, unable to easily raid Ikkutiq, have settled down to learn magic.", "North Rim"),
-    new RawCulture("Laathrik", "A group of Kobold clans that tunnel under undead palaces to raid them of their riches.", "East Bowl"),
-    new RawCulture("Tekikerrek", "A hive-state of insect-people whose Queen's word is law; they seem to be allied with Khanghal.", "South Inner-Cap"),
-    new RawCulture("Mobyuld", "An attempt at a Goblin nation, modeled after Ugexiir, that wants to be a dominant force in the Bowl.", "South Bowl"),
-    new RawCulture("Notsurashi", "A rebel state that has split off of Otekai, and has been embroiled in that civil war for centuries.", "East Outer-Cap"),
-    new RawCulture("Otekai", "An honor-driven nation that refuses to admit surrender or sign a treaty in their war against Notsurashi.", "East Outer-Cap"),
-    new RawCulture("Ugexiir", "A land that has driven off many Goblin invasions, and watches with curiosity as Mobyuld forms.", "South Rim"),
-    new RawCulture("Zedmedov", "A grim nation that has the misfortune of being located closest to the undead hordes of Xuruk.", "West Rim"),
-    new RawCulture("Vroyuul", "An organized civilization of amphibious tentacled humanoids that trades heavily with the Deep Lands.", "North Tip"),
-    new RawCulture("Hueztotli", "A nation that has somehow survived despite being based in a jungle with terrifyingly-strong monsters.", "East Tip"),
-    new RawCulture("Mbegonda", "A group of nations across a wide area that speak a common language, but don't share a government.", "South Tip"),
-    new RawCulture("Whareowa", "A small island nation that has nonetheless intimidated its neighbors into respecting its territory.", "West Tip"),
-    new RawCulture("Xuruk", "A fallen empire of necromancers overthrown by their undead minions; the walking dead own this land.", "West Bowl"),
-    new RawCulture("Beast", "Monsters that aren't part of a civilization are generally called beasts, regardless of their intelligence.", "Everywhere"),
+    new RawCulture("Bididhayi", "A now-peaceful theocracy that has benefited greatly from their warlike Chobesh neighbors' collapse.", "South Mid-Cap", "Hindi Romanized"),
+    new RawCulture("Cheuritae", "A conglomerate of various island groups that sends privateers to raid other nations' ships.", "East Rim", "Greek Romanized"),
+    new RawCulture("Chobesh", "A formerly-powerful kingdom that lost it all after a century at war with its neighbors, and lies in ruin.", "West Mid-Cap", "Simplish"),
+    new RawCulture("Elethian", "The unified nation of elves; these long-lived people have little interest in short-term power grabs.", "North Mid-Cap", "Elf"),
+    new RawCulture("Hidzaajji", "A desert nation that has built up strength through alliances and trade; they compete with Geuhwae.", "South Outer-Cap", "Arabic Romanized"),
+    new RawCulture("Siarrolla", "A formidable naval armada that controls a puppet kingdom while frequently invading the Tip nations.", "North Inner-Cap", "Spanish"),
+    new RawCulture("Hyrden", "An alliance of a church and a kingdom; they routinely crusade against Xuruk's nearby undead.", "West Outer-Cap", "Norse Simplified"),
+    new RawCulture("Ikkutiq", "A magically-formidable utopia that thrives deep in the dangerous Bowl using their arcane barriers.", "North Bowl", "Inuktitut"),
+    new RawCulture("Jalgeaux", "A potent nation where the sizable aristocratic class manipulates the lower classes away from revolt.", "West Inner-Cap", "French"),
+    new RawCulture("Geuhwae", "A massive empire that formed from the merger of various rival states; it is an economic titan.", "East Mid-Cap", "Korean Romanized"),
+    new RawCulture("Khainghal", "A nomadic group that moves between dodging monsters near Hueztotli and raiding Geuhwae.", "East Inner-Cap", "Mongolian"),
+    new RawCulture("Krort", "A grouping of similar Orc tribes that, unable to easily raid Ikkutiq, have settled down to learn magic.", "North Rim", "Demonic"),
+    new RawCulture("Laathrik", "A group of Kobold clans that tunnel under undead palaces to raid them of their riches.", "East Bowl", "Kobold"),
+    new RawCulture("Tekikerrek", "A hive-state of insect-people whose Queen's word is law; they seem to be allied with Khainghal.", "South Inner-Cap", "Insect"),
+    new RawCulture("Mobyuld", "An attempt at a Goblin nation, modeled after Ugexiir, that wants to be a dominant force in the Bowl.", "South Bowl", "Goblin"),
+    new RawCulture("Notsurashi", "A rebel state that has split off of Otekai, and has been embroiled in that civil war for centuries.", "East Outer-Cap", "Japanese Romanized"),
+    new RawCulture("Otekai", "An honor-driven nation that refuses to admit surrender or sign a treaty in their war against Notsurashi.", "East Outer-Cap", "Japanese Romanized"),
+    new RawCulture("Ugexiir", "A land that has driven off many Goblin invasions, and watches with curiosity as Mobyuld forms.", "South Rim", "Somali"),
+    new RawCulture("Zedmedov", "A grim nation that has the misfortune of being located closest to the undead hordes of Xuruk.", "West Rim", "Russian Romanized"),
+    new RawCulture("Vroyuul", "An organized civilization of amphibious tentacled humanoids that trades heavily with the Deep Lands.", "North Tip", "Deep Speech"),
+    new RawCulture("Hueztotli", "A nation that has somehow survived despite being based in a jungle with terrifyingly-strong monsters.", "East Tip", "Nahuatl"),
+    new RawCulture("Mbegonda", "A group of nations across a wide area that speak a common language, but don't share a government.", "South Tip", "Swahili"),
+    new RawCulture("Whareowa", "A small island nation that has nonetheless intimidated its neighbors into respecting its territory.", "West Tip", "Maori"),
+    new RawCulture("Xuruk", "A fallen empire of necromancers overthrown by their undead minions; the walking dead own this land.", "West Bowl", "Lovecraft"),
+    new RawCulture("Beast", "Monsters that aren't part of a civilization are generally called beasts, regardless of their intelligence.", "Everywhere", "Greek Authentic"),
   };
 
   public static final Map<String, RawCulture> MAPPING = makeMap(
@@ -53,13 +53,16 @@ public class RawCulture implements Serializable {
 
   public String location;
 
+  public String language;
+
   public RawCulture() {
   }
 
-  public RawCulture(String name, String description, String location) {
+  public RawCulture(String name, String description, String location, String language) {
     this.name = name;
     this.description = description;
     this.location = location;
+    this.language = language;
   }
 
   private static long hash64(String data) {
@@ -81,6 +84,7 @@ public class RawCulture implements Serializable {
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(name));
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(description));
     result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(location));
+    result += (a ^= 0x8329C6EB9E6AD3E3L * hash64(language));
     return result * (a | 1L) ^ (result >>> 27 | result << 37);
   }
 
@@ -105,6 +109,7 @@ public class RawCulture implements Serializable {
     if (name != null ? !name.equals(other.name) : other.name != null) return false;
     if (description != null ? !description.equals(other.description) : other.description != null) return false;
     if (location != null ? !location.equals(other.location) : other.location != null) return false;
+    if (language != null ? !language.equals(other.language) : other.language != null) return false;
     return true;
   }
 

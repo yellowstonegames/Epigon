@@ -656,7 +656,7 @@ public class Epigon extends Game {
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
                 Weapon weapon = chooseValidWeapon(creature, player);
                 if(weapon == null) {
-                    if (creature.weaponData != null && los.isReachable(simple, creature.location.x, creature.location.y, player.location.x, player.location.y, Radius.CIRCLE))
+                    if (creature.weaponData != null && los.isReachable(simple, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE))
                     {
                         monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
                     }
@@ -1404,6 +1404,7 @@ public class Epigon extends Game {
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             awaitedMoves.clear();
                             toCursor.clear();
+                            message(creature.creatureData.culture.messaging.transform(creature.getRandomElement(creature.creatureData.sayings), creature.name, creature.creatureData.genderPronoun, player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         }
                         creature.wasSeen = true;
                     } else {
