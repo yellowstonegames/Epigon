@@ -3,10 +3,6 @@ package squidpony.epigon.display;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.data.LiveValue;
@@ -27,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
