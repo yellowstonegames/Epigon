@@ -1088,6 +1088,10 @@ public class Epigon extends Game {
 
                     break;
             }
+
+            if (item.radiance != null) {
+                player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
+            }
         }
     }
 

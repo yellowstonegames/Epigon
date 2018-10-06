@@ -76,6 +76,8 @@ public class HandBuilt {
     
     public Physical torch;
 
+    public Physical magma;
+
     // Cooking skills
 //    public Skill cooking = new Skill("cooking");
 //    public Skill baking = new Skill("baking", cooking);
@@ -151,6 +153,10 @@ public class HandBuilt {
         torch = Physical.makeBasic("torch", 'ῗ', SColor.CREAM);
         torch.description = "burning rags on a stick";
         torch.radiance = new Radiance(6f, SColor.CREAM.toFloatBits(), 0.71f, 0f);
+
+        magma = Physical.makeBasic("magma", '#', Element.FIRE.color);
+        magma.description = "molten stone";
+        magma.radiance = new Radiance(3, magma.color, 0.2f, 0.1f, 0.67f);
 
         initAbilities();
         initProfessions();
