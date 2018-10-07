@@ -6,12 +6,14 @@ import squidpony.epigon.Utilities;
 /**
  * The areas where things can be held.
  */
-public enum WieldSlot implements ConstantKey {
+public enum WieldSlot implements BodySlot {
     LEFT_HAND,  // 0
     RIGHT_HAND, // 1
     HEAD,       // 2
     NECK,       // 3
-    FEET;        // 4
+    FEET,        // 4
+    LEFT_FOOT,
+    RIGHT_FOOT;
 
     WieldSlot()
     {

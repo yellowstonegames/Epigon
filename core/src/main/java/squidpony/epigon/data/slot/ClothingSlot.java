@@ -71,11 +71,6 @@ public enum ClothingSlot implements BodySlot {
     }
     public static final ClothingSlot[] ALL = values();
 
-    @Override
-    public Coord getLocation() {
-        return location;
-    }
-
     /**
      * Returns the short code for the slot name.
      */

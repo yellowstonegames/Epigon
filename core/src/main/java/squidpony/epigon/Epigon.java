@@ -582,9 +582,7 @@ public class Epigon extends Game {
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.triFovResult);
         floors = new GreasedRegion(map.width, map.height);
-//        for (int i = world.length - 1; i > aboveground + 1; i--) {
-//            setupLevel(i);
-//        }
+
         simple = new char[map.width][map.height];
 
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
@@ -1006,26 +1004,14 @@ public class Epigon extends Game {
                     return;
                 }
             }
-//            if(player.statEffects.contains(player.weaponData.calcStats))
-//                player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = player.unarmedData).calcStats);
-//            else
-//                player.statEffects.add((player.weaponData = player.unarmedData).calcStats);
-
         }
     }
     
     private void equipItem(Physical item) {
-//        if(player.statEffects.contains(player.weaponData.calcStats))
-//            player.statEffects.alter(player.weaponData.calcStats, (player.weaponData = item.weaponData).calcStats);
-//        else
-//            player.statEffects.add((player.weaponData = item.weaponData).calcStats);
-        if(item.weaponData == null)
-        {
-            //TODO: non-weapon items don't know how or where they should be equipped yet
-            // this will just unequip hats and things
-            player.creatureData.equippedBySlot.removeAt(player.creatureData.equippedBySlot.valuesAsList().indexOf(item));
-        }
-        else {
+        player.equipItem(item);
+        if (item.weaponData == null) {
+            item.equip(item, item.wearableData.slotsUsed);
+        } else {
             switch (item.weaponData.hands) {
                 case 2:
                     player.equip(item, BOTH);

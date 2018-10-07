@@ -12,6 +12,7 @@ import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.util.*;
+import squidpony.epigon.data.slot.WieldSlot;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -281,33 +282,47 @@ public class Physical extends EpiData {
             FEET = Arrays.asList(ClothingSlot.LEFT_FOOT, ClothingSlot.RIGHT_FOOT);
 
     public void equipItem(Physical item) {
-        switch (item.weaponData.hands) {
-            case 2:
-                equip(item, BOTH);
-                break;
-            case 0:
-                creatureData.weaponChoices.add(item.weaponData, 1);
-                creatureData.equippedDistinct.add(item);
-                break;
-            case 3:
-                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
-                    equip(item, HEAD);
-                break;
-            case 4:
-                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
-                    equip(item, NECK);
-                break;
-            case 5:
-                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) &&
-                        !creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
-                    equip(item, FEET);
-                break;
-            case 1:
-                if (!creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
-                    equip(item, RIGHT);
-                else
-                    equip(item, LEFT);
-                break;
+        if (item == null){
+            return; // How did this happen?
+        }
+        if (item.wearableData == null) {
+            equip(item, item.wearableData.slotsUsed);
+        }
+
+        // Check if it's wielded as well as worn when equipped (spiked gauntlet for example)
+        if (item.weaponData != null) {
+            switch (item.weaponData.hands) {
+                case 0:
+                    creatureData.weaponChoices.add(item.weaponData, 1);
+                    creatureData.equippedDistinct.add(item);
+                    break;
+                case 1:
+                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_HAND)) {
+                        equip(item, RIGHT);
+                    } else {
+                        equip(item, LEFT);
+                    }
+                    break;
+                case 2:
+                    equip(item, BOTH);
+                    break;
+                case 3:
+                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.HEAD)) {
+                        equip(item, HEAD);
+                    }
+                    break;
+                case 4:
+                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.NECK)) {
+                        equip(item, NECK);
+                    }
+                    break;
+                case 5:
+                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.LEFT_FOOT)
+                        && !creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_FOOT)) {
+                        equip(item, FEET);
+                    }
+                    break;
+            }
         }
     }
 

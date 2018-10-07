@@ -8,6 +8,7 @@ import squidpony.squidmath.GreasedRegion;
  * @author Eben Howard
  */
 public class Castle {
+
     /* Castle notes from real castles
     Average thickness of stone wall: 2m but can be up to 15m
 
@@ -40,14 +41,14 @@ public class Castle {
       - walls thickness is 6m
     
      */
-    
+
     public EpiMap[] buildZone;
     public EpiMap groundLevel;
     public int sky; // how high you can go
     public int width;
     public int height;
     public int mapEdging = 2; // space between the edge of the map and the generation area
-    
+
     GreasedRegion region,
         moat,
         moatBank,
@@ -60,15 +61,15 @@ public class Castle {
         garden,
         pond,
         pondBank;
-    
-    public Castle(EpiMap[] buildZone){
+
+    public Castle(EpiMap[] buildZone) {
         this.buildZone = buildZone;
         sky = buildZone.length;
         groundLevel = buildZone[sky - 1];
         width = buildZone[0].width;
         height = buildZone[1].height;
-        
-                region = new GreasedRegion(width, height);
+
+        region = new GreasedRegion(width, height);
         region.allOn();
         for (int x = 0; x < mapEdging; x++) {
             for (int y = 0; y < height; y++) {

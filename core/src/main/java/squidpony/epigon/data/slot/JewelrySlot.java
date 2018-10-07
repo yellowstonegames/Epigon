@@ -59,8 +59,4 @@ public enum JewelrySlot implements BodySlot {
     
     public static final JewelrySlot[] ALL = values();
 
-    @Override
-    public Coord getLocation() {
-        return location;
-    }
 }

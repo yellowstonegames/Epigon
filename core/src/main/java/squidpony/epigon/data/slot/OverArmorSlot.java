@@ -37,9 +37,4 @@ public enum OverArmorSlot implements BodySlot {
 
     public static final OverArmorSlot[] ALL = values();
 
-    @Override
-    public Coord getLocation() {
-        return location;
-    }
-
 }
