@@ -7,5 +7,5 @@ import squidpony.squidmath.Coord;
  * Created by Tommy Ettinger on 6/7/2018.
  */
 public interface BodySlot extends ConstantKey {
-    Coord getLocation();
+    Coord getLocation(); // Tommy: why is there a getter here?
 }
