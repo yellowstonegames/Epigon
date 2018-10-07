@@ -608,7 +608,7 @@ public class Epigon extends Game {
     }
 
     private void changeLevel(int level, Coord location) {
-        map.contents[player.location.x][player.location.y].contents.remove(player); // remove from old location before moving
+        map.contents[player.location.x][player.location.y].remove(player);
 
         depth = level;
         map = world[depth];
@@ -616,7 +616,6 @@ public class Epigon extends Game {
         for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
-        // TODO - player appearance from before is not being removed, not sure why
 
         setupLevel();
         
@@ -625,13 +624,12 @@ public class Epigon extends Game {
             floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
             do {
                 location = floors2.singleRandom(rng);
-            } while (map.creatures.containsKey(location));
+            } while (map.contents[location.x][location.y].blockage != null);
         }
         
         player.location = location;
         map.contents[player.location.x][player.location.y].add(player);
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
-        //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
 
         fxHandler.seen = map.triFovResult;
         creatures = map.creatures;
@@ -641,7 +639,6 @@ public class Epigon extends Game {
         monsterDijkstra.initialize(simple);
         calcDijkstra();
         contextHandler.setMap(map, world);
-        calcFOV(player.location.x, player.location.y); // TODO - see if this is needed to clear memory of light on level change
     }
 
     private void runTurn() {
@@ -879,13 +876,8 @@ public class Epigon extends Game {
         messageIndex = Math.max(messages.size(), messageCount);
         messages.add(GDXMarkup.instance.colorString("[]" + text));
         updateMessages();
-        /*
-        messages.set(messageIndex++ % messageCount, GDXMarkup.instance.colorString("[]"+text));
-        for (int i = messageIndex % messageCount, c = 0; c < messageCount; i = (i + 1) % messageCount, c++) {
-            messageSLayers.getForegroundLayer().put(1, 1 + c, messages.get(i));
-        }
-         */
     }
+
     /**
      * Adds two 3D arrays produced by {@link SColor#colorLighting(double[][], float)} or this method and modifies the basis
      * parameter so it contains the combined brightnesses and colors of basis and other, in a pair of 2D arrays.
@@ -904,37 +896,26 @@ public class Epigon extends Game {
         flare = flare + 1f;
         for (int x = 0; x < w && x < w2; x++) {
             for (int y = 0; y < h && y < h2; y++) {
-//                if(map.triFovResult[x][y] <= 0.0)
-//                {
-//                    basis[1][x][y] = 0f;
-//                    basis[0][x][y] = 0f;
-//                }
-//                else 
-                {
-                    if(basis[1][x][y] == FLOAT_WHITE)
-                    {
-                        basis[1][x][y] = other[1][x][y];
+                if (basis[1][x][y] == FLOAT_WHITE) {
+                    basis[1][x][y] = other[1][x][y];
+                    basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
+                } else {
+                    if (other[1][x][y] != FLOAT_WHITE) {
+                        float change = (other[0][x][y] - basis[0][x][y]) * 0.5f + 0.5f;
+                        final int s = NumberTools.floatToIntBits(basis[1][x][y]), e = NumberTools.floatToIntBits(other[1][x][y]),
+                            rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
+                            re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
+                        change *= ae * 0.007874016f;
+                        basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
+                            | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
+                            | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
+                            | as);
+                        basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change * flare);
+                    } else {
                         basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
                     }
-                    else
-                    {
-                        if(other[1][x][y] != FLOAT_WHITE)
-                        {
-                            float change = (other[0][x][y] - basis[0][x][y]) * 0.5f + 0.5f;
-                            final int s = NumberTools.floatToIntBits(basis[1][x][y]), e = NumberTools.floatToIntBits(other[1][x][y]),
-                                    rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
-                                    re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
-                            change *= ae * 0.007874016f;
-                            basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
-                                    | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
-                                    | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
-                                    | as);
-                            basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * change * flare);
-                        }
-                        else
-                            basis[0][x][y] = Math.min(1.0f, basis[0][x][y] + other[0][x][y] * flare);
-                    }
                 }
+
             }
         }
         return basis;
@@ -944,65 +925,61 @@ public class Epigon extends Game {
         double sight = player.stats.get(Stat.SIGHT).actual();
         FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, sight, Radius.CIRCLE);
         FOV.reuseLOS(map.triResistances, map.losResult, checkX * 3 + 1, checkY * 3 + 1);
-        FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1,  checkY * 3 + 1, sight * 3, Radius.CIRCLE);
-//        FOV.reuseFOV(map.opacities(), map.losResult, checkX, checkY, sight * 2.0, Radius.SQUARE,
-//                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
-//        FOV.reuseFOV(map.resistances, map.fovResult, checkX, checkY, sight, Radius.CIRCLE,
-//                player.facingAngle, player.directionRanges[0], player.directionRanges[1], player.directionRanges[2], player.directionRanges[3], player.directionRanges[4]);
+        FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1, checkY * 3 + 1, sight * 3, Radius.CIRCLE);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
+
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if((radiance = map.contents[x][y].getAnyRadiance()) != null)
-                {
+                if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
                     FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.range * 3);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
         }
+
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 for (int ix = 0; ix < 3; ix++) {
                     for (int iy = 0; iy < 3; iy++) {
-                        if(map.losResult[x * 3 + ix][y * 3 + iy] > 0.0)
-                        {
-                            map.triFovResult[x * 3 + ix][y * 3 + iy] = 
-                                    MathUtils.clamp(map.triFovResult[x * 3 + ix][y * 3 + iy] + map.colorLighting[0][x * 3 + ix][y * 3 + iy], 0, 1);
-                            map.fovResult[x][y] = 
-                                    Math.max(map.fovResult[x][y], map.triFovResult[x * 3 + ix][y * 3 + iy]);
+                        if (map.losResult[x * 3 + ix][y * 3 + iy] > 0.0) {
+                            map.triFovResult[x * 3 + ix][y * 3 + iy]
+                                = MathUtils.clamp(map.triFovResult[x * 3 + ix][y * 3 + iy] + map.colorLighting[0][x * 3 + ix][y * 3 + iy], 0, 1);
+                            map.fovResult[x][y]
+                                = Math.max(map.fovResult[x][y], map.triFovResult[x * 3 + ix][y * 3 + iy]);
                         }
                     }
                 }
             }
         }
-        
 
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (map.fovResult[x][y] > 0) {
                     //posrng.move(x, y);
-                    
+
                     if (map.remembered[x][y] == null) {
                         map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
                     } else {
                         map.remembered[x][y].remake(map.contents[x][y]);
                     }
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
-                        if (creature.appearance == null)
+                        if (creature.appearance == null) {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
-                        else if (!mapSLayers.glyphs.contains(creature.appearance)) {
+                        } else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
-                            if (creature.overlayAppearance != null)
+                            if (creature.overlayAppearance != null) {
                                 mapSLayers.glyphs.add(creature.overlayAppearance);
+                            }
                         }
                     }
-                }
-                else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
+                } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
-                    if (creature.overlayAppearance != null)
+                    if (creature.overlayAppearance != null) {
                         mapSLayers.removeGlyph(creature.overlayAppearance);
+                    }
                 }
             }
         }
@@ -1184,10 +1161,10 @@ public class Epigon extends Game {
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
         Element element = ao.element;
         Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
-//        player.setAngle(dir);
+
         calcFOV(player.location.x, player.location.y);
         fxHandler.attackEffect(player, target, ao, dir);
-        //mapSLayers.bump(player.appearance, dir, 0.145f);
+
         if (ao.hit) {
             applyStatChange(target, Stat.VIGOR, ao.actualDamage);
             if (target.stats.get(Stat.VIGOR).actual() <= 0) {
@@ -1200,25 +1177,28 @@ public class Epigon extends Game {
                 map.contents[targetX][targetY].remove(target);
                 if (ao.crit) {
                     Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
-                            .map(table -> {
-                                int quantity = table.quantity();
-                                Physical p = RecipeMixer.buildPhysical(table.random());
-                                if (p.groupingData != null) {
-                                    p.groupingData.quantity += quantity;
-                                } else {
-                                    p.groupingData = new Grouping(quantity);
-                                }
-                                return p;
-                            })
-                            .forEach(item -> {
-                                if(item.attached) return;
-                                map.contents[targetX][targetY].add(item);
-                                if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
-                                    map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
-                                }
-                            });
-                    if(target.appearance != null)
+                        .map(table -> {
+                            int quantity = table.quantity();
+                            Physical p = RecipeMixer.buildPhysical(table.random());
+                            if (p.groupingData != null) {
+                                p.groupingData.quantity += quantity;
+                            } else {
+                                p.groupingData = new Grouping(quantity);
+                            }
+                            return p;
+                        })
+                        .forEach(item -> {
+                            if (item.attached) {
+                                return;
+                            }
+                            map.contents[targetX][targetY].add(item);
+                            if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
+                                map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
+                            }
+                        });
+                    if (target.appearance != null) {
                         mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
+                    }
                     message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 } else {
                     Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
@@ -1279,19 +1259,19 @@ public class Epigon extends Game {
         int newY = player.location.y + dir.deltaY;
         Coord newPos = Coord.get(newX, newY);
         if (!map.inBounds(newX, newY)) {
-            return; // can't move, should probably be error or something
+            message("You've reached the edge of the world, you can go no further.");
+            return;
         }
         map.contents[player.location.x][player.location.y].remove(player);
         if (map.contents[newX][newY].blockage == null) {
-            mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () ->
-            {
-//                player.setAngle(dir);
+            mapSLayers.slide(player.appearance, player.location.x, player.location.y, newX, newY, 0.145f, () -> {
                 calcFOV(newX, newY);
                 calcDijkstra();
                 runTurn();
             });
-            if (player.overlayAppearance != null)
+            if (player.overlayAppearance != null) {
                 mapSLayers.slide(player.overlayAppearance, player.location.x, player.location.y, newX, newY, 0.145f, null);
+            }
             player.location = newPos;
             map.contents[player.location.x][player.location.y].add(player);
             sound.playFootstep();
