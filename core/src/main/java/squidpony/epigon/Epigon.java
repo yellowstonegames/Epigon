@@ -616,7 +616,10 @@ public class Epigon extends Game {
         for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
             mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
         }
+        // TODO - player appearance from before is not being removed, not sure why
+
         setupLevel();
+        
         if (location == null) { // set up a valid random start location
             GreasedRegion floors2 = floors.copy();
             floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
@@ -629,7 +632,7 @@ public class Epigon extends Game {
         map.contents[player.location.x][player.location.y].add(player);
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
         //posrng.move(depth, player.location.x, player.location.y); // same results per staircase, different up/down
-        //player.facingAngle = posrng.next(3) * 45.0; // 3 bits, 8 possible angles
+
         fxHandler.seen = map.triFovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
@@ -638,6 +641,7 @@ public class Epigon extends Game {
         monsterDijkstra.initialize(simple);
         calcDijkstra();
         contextHandler.setMap(map, world);
+        calcFOV(player.location.x, player.location.y); // TODO - see if this is needed to clear memory of light on level change
     }
 
     private void runTurn() {
@@ -675,7 +679,6 @@ public class Epigon extends Game {
                             Element element = ao.element;
                             if (map.fovResult[c.x][c.y] > 0.0) {
                                 Direction dir = Direction.getDirection(player.location.x - creature.location.x, player.location.y - creature.location.y);
-//                                creature.setAngle(dir);
                                 fxHandler.attackEffect(creature, player, ao, dir);
                             }
                             if (ao.hit) {
@@ -1091,6 +1094,8 @@ public class Epigon extends Game {
 
             if (item.radiance != null) {
                 player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
+                // TODO - recalc lighting
+                calcFOV(player.location.x, player.location.y);
             }
         }
     }
@@ -2183,27 +2188,36 @@ public class Epigon extends Game {
 
     private final KeyHandler debugKeys = new KeyHandler() {
         @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
+        public void handle(char key, boolean alt, boolean ctrl, boolean shift) { // TODO - only the first 2 seem to be working currently
             if (multiplexer.processedInput) return;
+            Element el;
             switch (key) {
                 case 'x':
-                    fxHandler.sectorBlast(player.location, rng.getRandomElement(Element.allEnergy), 7, Radius.CIRCLE);
+                    el = rng.getRandomElement(Element.allEnergy);
+                    message("Sector blast " + el.styledName);
+                    fxHandler.sectorBlast(player.location, el, 7, Radius.CIRCLE);
                     break;
                 case 'X':
-                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), rng.getRandomElement(Element.allEnergy));
+                    el = rng.getRandomElement(Element.allEnergy);
+                    message("Zap boom " + el.styledName);
+                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), el);
                     break;
                 case 'z':
+                    message("Fritzzzz");
                     fxHandler.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
                     break;
                 case 'Z':
+                    message("Twinkle time");
                     for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
                         fxHandler.twinkle(c, Element.LIGHT);
                     }
                     break;
                 case '=':
+                    message("Layered sparkle small");
                     fxHandler.layeredSparkle(player.location, 4, Radius.CIRCLE);
                     break;
                 case '+':
+                    message("Layered sparkle large");
                     fxHandler.layeredSparkle(player.location, 8, Radius.CIRCLE);
                     break;
                 default:

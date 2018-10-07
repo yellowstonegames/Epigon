@@ -164,8 +164,12 @@ public class ActionOutcome {
             }
             ChangeTable.releasePhysical(actor, actor.statEffects);
             ChangeTable.releasePhysical(target, target.statEffects);
-            actor.statEffects.removeLast();
-            target.statEffects.removeLast();
+            if (!target.statEffects.isEmpty()) {
+                actor.statEffects.removeLast();
+            }
+            if (!target.statEffects.isEmpty()) {
+                target.statEffects.removeLast();
+            }
             if (ao.targetConditioned) {
                 Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element);
                 ChangeTable.strikePhysical(target, c.parent.changes);
