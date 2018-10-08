@@ -100,8 +100,7 @@ public class RecipeMixer {
         List<Physical> result = new ArrayList<>();
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
-//            if(rng != recipe)
-//                System.out.printf("physical: %s with color 0x%08X\r\n", physical.name, Integer.reverseBytes(NumberTools.floatToIntBits(physical.color)));
+
             Modification materialMod = new Modification();
             materialMod.baseValueMultiplier = material.getValue() * 0.01;
             materialMod.color = material.getMaterialColor();
@@ -110,24 +109,19 @@ public class RecipeMixer {
             lvm.baseOverwrite = material.getHardness() * 0.01;
             lvm.actualOverwrite = material.getHardness() * 0.01;
             materialMod.statChanges.put(Stat.STRUCTURE, lvm);
-//            if(rng != recipe)
-//                System.out.printf("material: %s with color 0x%08X\r\n", material.toString(), Integer.reverseBytes(materialMod.color.toIntBits()));
+
             applyModification(physical, materialMod);
             physical.mainMaterial = material;
 
             physical.stats.values().forEach(lv -> lv.actual(lv.base()));// Make sure actual is set to base value on first creation
             physical.calculateStats();
-            if(physical.groupingData != null) {
+            if (physical.groupingData != null) {
                 for (int j = 0; j < physical.groupingData.quantity; j++) {
                     result.add(physical);
                 }
-            }
-            else
+            } else {
                 result.add(physical);
-
-//            if(rng != recipe)
-//                System.out.printf("physical: %s with color 0x%08X\r\n\r\n", physical.name, Integer.reverseBytes(NumberTools.floatToIntBits(physical.color)));
-
+            }
         }
         return result;
     }
@@ -137,9 +131,7 @@ public class RecipeMixer {
             OrderedSet<Material> materials = Weapon.makes.get(weapon.materialTypes[0]);
             Material mat = materials.randomItem(rng);
             return mix(createRecipe(weapon.recipeBlueprint), mat, rng).get(0);
-        }
-        else
-        {
+        } else {
             return createRecipe(weapon.recipeBlueprint).result.firstKey();
         }
     }
@@ -225,7 +217,6 @@ public class RecipeMixer {
 
         return blueprint;
     }
-
 
     /**
      * Builds a new Physical based on the passed in one as exactly as possible.
@@ -322,7 +313,18 @@ public class RecipeMixer {
 
         physical.identification.putAll(blueprint.identification);
 
-        physical.creatureData = createCreature(blueprint.creatureData);
+        if (blueprint.creatureData != null) {
+            physical.creatureData = createCreature(blueprint.creatureData);
+            for (Physical p : blueprint.creatureData.equippedDistinct) {
+                physical.equipItem(p);
+            }
+        }
+
+        if (blueprint.wearableData != null){
+            physical.wearableData = new Wearable();
+            physical.wearableData.slotsUsed = blueprint.wearableData.slotsUsed; // same backing list, if modification happens, that modification should split reference
+            physical.wearableData.worn = blueprint.wearableData.worn;
+        }
 
         physical.weaponData = blueprint.weaponData;
 
@@ -381,16 +383,8 @@ public class RecipeMixer {
         creature.skills.putAll(other.skills);
         creature.abilities.addAll(other.abilities); // TODO - copy into new abilities
 
-        for (int i = other.equippedBySlot.size() - 1; i >= 0; i--) {
-            Physical p = other.equippedBySlot.getAt(i);
-            if (p != null) {
-                p = buildPhysical(p);
-                creature.equippedBySlot.put(other.equippedBySlot.keyAt(i), p);
-                creature.equippedDistinct.add(p);
-            }
-        }
-        
-        creature.weaponChoices = other.weaponChoices.copy();
+        creature.weaponChoices = other.weaponChoices.copy(); // TODO - this needs to be here because the equipping doesn't include innate choices
+
         creature.lastUsedItem = other.lastUsedItem;
         creature.lastWieldedWeapon = other.lastWieldedWeapon;
         return creature;

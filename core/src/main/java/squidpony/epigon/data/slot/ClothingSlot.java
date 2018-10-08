@@ -56,13 +56,15 @@ public enum ClothingSlot implements BodySlot {
         hash = ConstantKey.precomputeHash("slot.clothing", ordinal());
     }
     public final long hash;
+
     @Override
     public long hash64() {
         return hash;
     }
+
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int) (hash & 0xFFFFFFFFL);
     }
 
     @Override
@@ -74,7 +76,7 @@ public enum ClothingSlot implements BodySlot {
     /**
      * Returns the short code for the slot name.
      */
-    public String shortCode(){
+    public String shortCode() {
         return Arrays.stream(name().split("_"))
             .map(s -> s.substring(0, 1))
             .collect(Collectors.joining());

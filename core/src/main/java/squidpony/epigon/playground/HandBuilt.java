@@ -26,6 +26,8 @@ import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
 import static squidpony.epigon.data.Physical.basePhysical;
+import squidpony.epigon.data.quality.Metal;
+import squidpony.epigon.data.trait.Wearable;
 
 /**
  * Contains objects to use to test out connections.
@@ -58,6 +60,7 @@ public class HandBuilt {
     public Recipe hatRecipe;
     public Recipe shirtRecipe;
     public Recipe pantsRecipe;
+    public Recipe glovesRecipe;
 
     public Recipe swordRecipe;
 
@@ -280,25 +283,18 @@ public class HandBuilt {
         // Put on some clothes
         Physical hat = RecipeMixer.mix(hatRecipe, Cloth.LINEN).get(0);
         hat.rarity = Rating.SUPERB;
-        hat.color = SColor.DARK_SPRING_GREEN.toFloatBits();
-        cb.equippedBySlot.put(ClothingSlot.HEAD, hat);
-        cb.equippedDistinct.add(hat);
+        playerBlueprint.equipItem(hat);
+
         Physical shirt = RecipeMixer.mix(shirtRecipe, Cloth.VELVET).get(0);
-        shirt.rarity = Rating.TYPICAL;
-        shirt.color = SColor.CW_FADED_JADE.toFloatBits();
-        cb.equippedBySlot.put(ClothingSlot.TORSO, shirt);
-        cb.equippedBySlot.put(ClothingSlot.LEFT_SHOULDER, shirt);
-        cb.equippedBySlot.put(ClothingSlot.RIGHT_SHOULDER, shirt);
-        cb.equippedBySlot.put(ClothingSlot.LEFT_UPPER_ARM, shirt);
-        cb.equippedBySlot.put(ClothingSlot.RIGHT_UPPER_ARM, shirt);
-        cb.equippedDistinct.add(shirt);
+        playerBlueprint.inventory.add(shirt);
+        shirt = RecipeMixer.mix(shirtRecipe, Cloth.LEATHER).get(0);
+        playerBlueprint.equipItem(shirt);
+
         Physical pants = RecipeMixer.mix(pantsRecipe, Cloth.DENIM).get(0); // jeans, why not
         pants.rarity = Rating.SLIGHT;
-        pants.color = SColor.CW_DRAB_AZURE.toFloatBits(); // blue jeans
-        cb.equippedBySlot.put(ClothingSlot.WAIST, pants);
-        cb.equippedBySlot.put(ClothingSlot.LEFT_LEG, pants);
-        cb.equippedBySlot.put(ClothingSlot.RIGHT_LEG, pants);
-        cb.equippedDistinct.add(pants);
+        playerBlueprint.equipItem(pants);
+
+        playerBlueprint.equipItem(RecipeMixer.mix(glovesRecipe, Cloth.LEATHER).get(0));
 
         cb.skills = new OrderedMap<>();
         int[] ordering = rng.randomOrdering(Skill.combatSkills.size());
@@ -412,9 +408,45 @@ public class HandBuilt {
 
     private void initItems() {
         swordRecipe = createSimpleRecipe("sword", SColor.SILVER.toRandomizedFloat(rng, 0.1f, 0f, 0.2f), '†');
-        hatRecipe = createSimpleRecipe("hat", SColor.CHERRY_BLOSSOM.toFloatBits(), 'ʍ');
-        shirtRecipe = createSimpleRecipe("shirt", SColor.BRASS.toFloatBits(), 'τ');
-        pantsRecipe = createSimpleRecipe("pants", SColor.PINE_GREEN.toFloatBits(), '∏');
+
+        Physical hatBlueprint = Physical.makeBasic("hat", 'ʍ', SColor.DARK_SPRING_GREEN);
+        hatBlueprint.rarity = Rating.TYPICAL;
+        hatBlueprint.wearableData = new Wearable();
+        hatBlueprint.wearableData.slotsUsed.add(ClothingSlot.HEAD);
+        hatRecipe = createBasicConsumptionRecipe(basePhysical, hatBlueprint);
+
+        Physical shirtBlueprint = Physical.makeBasic("shirt", 'τ', SColor.BRASS);
+        shirtBlueprint.rarity = Rating.TYPICAL;
+        shirtBlueprint.wearableData = new Wearable();
+        shirtBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+            ClothingSlot.TORSO,
+            ClothingSlot.NECK,
+            ClothingSlot.LEFT_SHOULDER,
+            ClothingSlot.RIGHT_SHOULDER,
+            ClothingSlot.LEFT_UPPER_ARM,
+            ClothingSlot.RIGHT_UPPER_ARM
+        ));
+        shirtRecipe = createBasicConsumptionRecipe(basePhysical, shirtBlueprint);
+
+        Physical pantsBlueprint = Physical.makeBasic("pants", '∏', SColor.PINE_GREEN);
+        pantsBlueprint.rarity = Rating.TYPICAL;
+        pantsBlueprint.wearableData = new Wearable();
+        pantsBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+            ClothingSlot.WAIST,
+            ClothingSlot.LEFT_LEG,
+            ClothingSlot.RIGHT_LEG
+        ));
+        pantsRecipe = createBasicConsumptionRecipe(basePhysical, pantsBlueprint);
+
+        // TODO - split into left and right versions
+        Physical glovesBlueprint = Physical.makeBasic("gloves", '∏', SColor.MOUSY_WISTERIA);
+        glovesBlueprint.rarity = Rating.TYPICAL;
+        glovesBlueprint.wearableData = new Wearable();
+        glovesBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+            ClothingSlot.LEFT_HAND,
+            ClothingSlot.RIGHT_HAND
+        ));
+        glovesRecipe = createBasicConsumptionRecipe(basePhysical, glovesBlueprint);
 
         // Steak
         Physical pb = new Physical();
@@ -440,29 +472,32 @@ public class HandBuilt {
         steakRecipe = RecipeMixer.createRecipe(rb);
     }
 
-    private Recipe createSimpleRecipe(String name, float color, char symbol){
+    private Recipe createSimpleRecipe(String name, float color, char symbol) {
         Physical blueprint = new Physical();
         blueprint.name = name;
         blueprint.color = color;
         blueprint.symbol = symbol;
+        return createBasicConsumptionRecipe(basePhysical, blueprint);
+    }
 
+    private Recipe createBasicConsumptionRecipe(Physical input, Physical output) {
         RecipeBlueprint recipeBlueprint = new RecipeBlueprint();
-        recipeBlueprint.requiredConsumed.put(basePhysical, 1);
-        recipeBlueprint.result.put(blueprint, 1);
+        recipeBlueprint.requiredConsumed.put(input, 1);
+        recipeBlueprint.result.put(output, 1);
         return RecipeMixer.createRecipe(recipeBlueprint);
     }
 
     public Modification makeAlive() {
         Modification liven = new Modification();
         liven.possiblePrefix = Arrays.asList("living", "animated");
-        liven.symbol = ((char)('s' | Epigon.BOLD | Epigon.ITALIC));
+        liven.symbol = ((char) ('s' | Epigon.BOLD | Epigon.ITALIC));
         liven.large = true;
 
-        for(ConstantKey s : CalcStat.all) {
+        for (ConstantKey s : CalcStat.all) {
             LiveValueModification lvm = new LiveValueModification((rng.next(2) + rng.next(2) + rng.next(1)) + 2); // 0-3 + 0-3 + 0-1 == 0-7 biased centrally
             liven.statChanges.put(s, lvm);
         }
-        for(ConstantKey s : Stat.healths) {
+        for (ConstantKey s : Stat.healths) {
             LiveValueModification lvm = new LiveValueModification(NumberTools.formCurvedFloat(rng.nextLong()) * 8 + 20); // 12 to 28, biased on 20
             liven.statChanges.put(s, lvm);
         }
@@ -476,8 +511,8 @@ public class HandBuilt {
         liven.weaponElementsAdditive = OrderedMap.makeMap(GauntRNG.getRandomElement(++chaos, Element.allDamage), 4.0, GauntRNG.getRandomElement(++chaos, Element.allDamage), 8.0);
         return liven;
     }
-    
-    public Modification makeMeats(){
+
+    public Modification makeMeats() {
         Modification meaten = new Modification();
         meaten.possibleSuffix = Collections.singletonList("meat");
         meaten.countsAs = Collections.singleton(rawMeat);
@@ -489,8 +524,8 @@ public class HandBuilt {
         meaten.quantity = rng.between(1, 3);
         return meaten;
     }
-    public static Modification beamWeaponModification()
-    {
+
+    public static Modification beamWeaponModification() {
         Modification mod = new Modification();
         mod.possiblePrefix.add("beam");
         mod.color = mod.getRandomElement(SColor.COLOR_WHEEL_PALETTE_BRIGHT);

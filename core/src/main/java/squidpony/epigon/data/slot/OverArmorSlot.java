@@ -6,28 +6,30 @@ import squidpony.squidmath.Coord;
 
 public enum OverArmorSlot implements BodySlot {
 
-    BACKPACK(2,2),
-    BANDOLIER(2,3),
-    BELT(2,4);
+    BACKPACK(2, 2),
+    BANDOLIER(2, 3),
+    BELT(2, 4);
 
-    OverArmorSlot(int x, int y)
-    {
+    OverArmorSlot(int x, int y) {
         location = Coord.get(x, y);
         hash = ConstantKey.precomputeHash("slot.jewelry", ordinal());
     }
+
     /**
-     * Meant to match the point on the {@link ClothingSlot} figure where the item is worn. 
+     * Meant to match the point on the {@link ClothingSlot} figure where the item is worn.
      */
     public Coord location;
 
     public final long hash;
+
     @Override
     public long hash64() {
         return hash;
     }
+
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int) (hash & 0xFFFFFFFFL);
     }
 
     @Override

@@ -130,16 +130,10 @@ public class MapOverlayHandler {
     }
 
     private void put(int x, int y, String s) {
-//        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-//            put(sx + x, y, s.charAt(sx));
-//        }
         layers.put(x, y, s, layers.defaultPackedForeground, 0f);
     }
 
     private void put(int x, int y, String s, Color color) {
-//        for (int sx = 0; sx < s.length() && sx + x < width; sx++) {
-//            put(sx + x, y, s.charAt(sx), color);
-//        }
         layers.put(x, y, s, color);
     }
 
@@ -172,12 +166,6 @@ public class MapOverlayHandler {
             put(x + display.length() + 1, y, "x" + quantity);
         }
     }
-//    private Runnable postFlash = new Runnable() {
-//        @Override
-//        public void run() {
-//            layers.fillBackground(layers.defaultPackedBackground);
-//        }
-//    };
 
     private void flashScreen() {
         if(layers.hasActiveAnimations())

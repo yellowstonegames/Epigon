@@ -12,6 +12,7 @@ import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import squidpony.epigon.data.slot.WieldSlot;
 
 /**
@@ -231,6 +232,52 @@ public class Physical extends EpiData {
         return true;
     }
 
+    public void equipItem(Physical item) {
+        if (item == null) {
+            System.err.println("Item requested for equip to " + name + " is null!");
+            return; // How did this happen?
+        }
+
+        if (item.wearableData != null) {
+            equip(item, item.wearableData.slotsUsed);
+        }
+
+        // Check if it's wielded as well as worn when equipped (spiked gauntlet for example)
+        if (item.weaponData != null && creatureData != null) {
+            switch (item.weaponData.hands) {
+                case 0:
+                    creatureData.weaponChoices.add(item.weaponData, 1);
+                    creatureData.equippedDistinct.add(item);
+                    break;
+                case 1:
+                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_HAND)) {
+                        equip(item, Collections.singletonList(WieldSlot.RIGHT_HAND));
+                    } else if (creatureData.equippedBySlot.containsKey(WieldSlot.LEFT_HAND)) {
+                        if (nextBoolean()) {
+                            equip(item, Collections.singletonList(WieldSlot.RIGHT_HAND));
+                        } else {
+                            equip(item, Collections.singletonList(WieldSlot.LEFT_HAND));
+                        }
+                    } else {
+                        equip(item, Collections.singletonList(WieldSlot.LEFT_HAND));
+                    }
+                    break;
+                case 2:
+                    equip(item, Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND));
+                    break;
+                case 3:
+                        equip(item, Collections.singletonList(WieldSlot.HEAD));
+                    break;
+                case 4:
+                        equip(item, Collections.singletonList(WieldSlot.NECK));
+                    break;
+                case 5:
+                        equip(item, Arrays.asList(WieldSlot.LEFT_FOOT, WieldSlot.RIGHT_FOOT));
+                    break;
+            }
+        }
+    }
+
     /**
      * Takes the item out of inventory and places it into equipped areas. Anything already equipped in
      * the areas goes back into inventory.
@@ -243,92 +290,41 @@ public class Physical extends EpiData {
             System.err.println("Can't equip " + item.name + " on " + name);
             return;
         }
-        inventory.remove(item);
-//        if (!inventory.remove(item)) {
-//            System.err.println(name + " does not have " + item.name);
-//            return;
-//        }
 
-        UnorderedSet<Physical> removing = new UnorderedSet<>(6);
+        unequip(slots).stream().forEach(p -> addToInventory(p)); // put old equipment back into inventory
+
+        removeFromInventory(item);
+        if (item.wearableData != null){
+            item.wearableData.worn = true;
+        }
+
         for (BodySlot ws : slots) {
-            Physical p = creatureData.equippedBySlot.get(ws);
-            if (p != null) {
-                removing.add(p);
-                creatureData.weaponChoices.remove(p.weaponData);
-            }
-            if(!item.equals(p))
-                creatureData.weaponChoices.add(item.weaponData, 2);
             creatureData.equippedBySlot.put(ws, item);
             creatureData.equippedDistinct.add(item);
-
         }
 
-        for (Physical p : removing) {
-            inventory.add(p);
-            creatureData.equippedDistinct.remove(p);
-
-            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
-                if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
-                    creatureData.equippedBySlot.remove(subSlot);
-                }
-            }
-        }
+        // TODO - apply changes based on adding equipment
     }
-    public static final List<BodySlot> RIGHT = Collections.singletonList(ClothingSlot.RIGHT_HAND),
-            LEFT = Collections.singletonList(ClothingSlot.LEFT_HAND),
-            BOTH = Arrays.asList(ClothingSlot.RIGHT_HAND, ClothingSlot.LEFT_HAND),
-            HEAD = Collections.singletonList(ClothingSlot.HEAD),
-            NECK = Collections.singletonList(ClothingSlot.NECK),
-            FEET = Arrays.asList(ClothingSlot.LEFT_FOOT, ClothingSlot.RIGHT_FOOT);
 
-    public void equipItem(Physical item) {
-        if (item == null){
-            return; // How did this happen?
+    /**
+     * Unequips a single item if it is being equipped and places it back in inventory
+     *
+     * @param item the item to try to remove
+     */
+    public void unequip(Physical item) {
+        if (item.wearableData != null) {
+            unequip(item.wearableData.slotsUsed);
         }
-        if (item.wearableData == null) {
-            equip(item, item.wearableData.slotsUsed);
-        }
-
-        // Check if it's wielded as well as worn when equipped (spiked gauntlet for example)
-        if (item.weaponData != null) {
-            switch (item.weaponData.hands) {
-                case 0:
-                    creatureData.weaponChoices.add(item.weaponData, 1);
-                    creatureData.equippedDistinct.add(item);
-                    break;
-                case 1:
-                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_HAND)) {
-                        equip(item, RIGHT);
-                    } else {
-                        equip(item, LEFT);
-                    }
-                    break;
-                case 2:
-                    equip(item, BOTH);
-                    break;
-                case 3:
-                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.HEAD)) {
-                        equip(item, HEAD);
-                    }
-                    break;
-                case 4:
-                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.NECK)) {
-                        equip(item, NECK);
-                    }
-                    break;
-                case 5:
-                    if (!creatureData.equippedBySlot.containsKey(WieldSlot.LEFT_FOOT)
-                        && !creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_FOOT)) {
-                        equip(item, FEET);
-                    }
-                    break;
-            }
+        if (item.weaponData != null && creatureData != null) {
+            unequip(Arrays.stream(WieldSlot.values())
+                .filter(ws -> creatureData.equippedBySlot.get(ws).equals(item))
+                .collect(Collectors.toList()));
         }
     }
 
     /**
-     * Takes the item out of inventory and places it into equipped areas. Anything already equipped in
-     * the areas goes back into inventory.
+     * Takes the item out of inventory and places it into equipped areas. Anything already equipped in the areas goes
+     * back into inventory.
      *
      * @param slots All the slots that will be filled when the item is equipped
      * @return a List of the items that were unequipped
@@ -338,10 +334,23 @@ public class Physical extends EpiData {
             System.err.println("Can't unequip from the Physical " + name + "; it is not a creature");
             return Collections.emptyList();
         }
-        List<Physical> removed = new ArrayList<>(slots.size());
+
+        // Make sure all slots that are used by the same thing as the request slot removals are also cleared
+        UnorderedSet<BodySlot> totalSlots = new UnorderedSet<>();
+        totalSlots.addAll(slots);
+        slots.stream()
+            .map(s -> creatureData.equippedBySlot.get(s))
+            .filter(p -> p != null)
+            .map(p -> p.wearableData)
+            .filter(w -> w != null)
+            .map(w -> w.slotsUsed)
+            .filter(w -> w != null)
+            .forEach(w -> totalSlots.addAll(w));
+
+        List<Physical> removed = new ArrayList<>(totalSlots.size());
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
-        for (BodySlot ws : slots) {
+        for (BodySlot ws : totalSlots) {
             Physical p = creatureData.equippedBySlot.remove(ws);
             if (p != null) {
                 removing.add(p);
@@ -349,24 +358,26 @@ public class Physical extends EpiData {
         }
 
         for (Physical p : removing) {
-            if(!p.attached) 
+            if (p.wearableData != null) {
+                p.wearableData.worn = false;
+            }
+
+            if (!p.attached) {
                 removed.add(p);
+            }
+
             creatureData.equippedDistinct.remove(p);
-            for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
+            for (BodySlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
                     creatureData.equippedBySlot.remove(subSlot);
-                    if(p.weaponData != null)
+                    if (p.weaponData != null) {
                         creatureData.weaponChoices.remove(p.weaponData);
+                    }
                 }
             }
         }
-//        if(!(creatureData.equipment.containsKey(WieldSlot.LEFT_HAND) || creatureData.equipment.containsKey(WieldSlot.RIGHT_HAND)))
-//        {
-//            if(statEffects.contains(weaponData.calcStats))
-//                statEffects.alter(weaponData.calcStats, (weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
-//            else
-//                statEffects.add((weaponData = unarmedData != null ? unarmedData.copy() : Weapon.randomUnarmedWeapon(++chaos)).calcStats);
-//        }
+
+        // TODO - apply changes based on unequipping items
         return removed;
     }
 
@@ -391,6 +402,7 @@ public class Physical extends EpiData {
     public void removeFromInventory(Physical removing, int quantity) {
         // TODO - handle negatives
         // TODO - message that requested quantity not found
+        // NOTE - during object creation the quantity may not exist as equipping it might be the first interaction with the item
         if (removing.groupingData == null || removing.groupingData.quantity <= quantity) {
             inventory.remove(removing);
         } else {

@@ -24,6 +24,7 @@ public class ControlMapping {
             (int) '?' | CAPS, HELP,
             (int) F1, HELP,
             (int) 'i', INTERACT,
+            (int) ENTER, INTERACT,
             (int) 'd', DRAW,
             (int) 'D' | CAPS, DROP,
             (int) 'r', REST,

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
-import squidpony.epigon.data.slot.ClothingSlot;
+import squidpony.epigon.data.slot.*;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.squidgrid.gui.gdx.PanelEffect;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -61,10 +61,6 @@ public class InfoHandler {
 
     private final int widestStatSize = Arrays.stream(Stat.values()).mapToInt(s -> s.toString().length()).max().getAsInt();
 
-//    private SquidPanel back;
-//    private SquidPanel front;
-//    private SquidPanel fxBack;
-//    private SquidPanel fx;
     private SparseLayers layers;
     private int width;
     private int height;
@@ -83,10 +79,6 @@ public class InfoHandler {
         height = layers.gridHeight;
         layers.addLayer();
         layers.addLayer();
-//        back = layers.getBackgroundLayer();
-//        front = layers.getForegroundLayer();
-//        fxBack = layers.addExtraLayer().getLayer(3);
-//        fx = layers.addExtraLayer().getLayer(4);
 
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(width - 2, 0);
@@ -281,8 +273,8 @@ public class InfoHandler {
             yOffset += ClothingSlot.height + 4;
 
             // Equipped items
-            Physical equippedRight = physical.creatureData.equippedBySlot.get(ClothingSlot.RIGHT_HAND);
-            Physical equippedLeft = physical.creatureData.equippedBySlot.get(ClothingSlot.LEFT_HAND);
+            Physical equippedRight = physical.creatureData.equippedBySlot.get(WieldSlot.RIGHT_HAND);
+            Physical equippedLeft = physical.creatureData.equippedBySlot.get(WieldSlot.LEFT_HAND);
             Weapon currentWeapon;
             //₩
             put(3, yOffset, "RH:");
@@ -300,7 +292,7 @@ public class InfoHandler {
             } else {
                 put(8, yOffset + 1, "empty", Rating.NONE.color());
             }
-            currentWeapon = physical.creatureData.weaponChoices.items().first();
+            currentWeapon = physical.creatureData.weaponChoices.items().first(); // TODO - handle case with no weapon choices
             put(3, yOffset + 2, "Fighting unarmed using " + currentWeapon.rawWeapon.name + " ₩" +
                     physical.creatureData.skillWithWeapon(currentWeapon));
         }
@@ -333,6 +325,15 @@ public class InfoHandler {
         }
         put(x, titleOffset, "Worn");
         put(x, titleOffset + 1, "Health");
+
+        x += ClothingSlot.width + 4;
+        for (ClothingSlot cs : ClothingSlot.ALL) {
+            Physical p = data.equippedBySlot.get(cs);
+            float color = p == null ? player.color : p.color;
+            put(x + cs.location.x, yOffset + cs.location.y, cs.drawn, color);
+        }
+        put(x, titleOffset, "Worn");
+        put(x, titleOffset + 1, "Appearance");
     }
 
     private void infoSkills(Physical physical) {

@@ -23,9 +23,9 @@ import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
-import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
+import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
@@ -49,7 +49,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static squidpony.epigon.data.Physical.*;
 import static squidpony.squidgrid.gui.gdx.SColor.FLOAT_WHITE;
 import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColorsBlended;
 
@@ -992,6 +991,9 @@ public class Epigon extends Game {
         toPlayerDijkstra.scan(blocked);
     }
 
+    /**
+     * Attempts to equip a random weapon from the player's inventory
+     */
     private void equipItem() {
         if (player.inventory.isEmpty()) {
             message("Nothing equippable found.");
@@ -1006,60 +1008,13 @@ public class Epigon extends Game {
             }
         }
     }
-    
+
     private void equipItem(Physical item) {
         player.equipItem(item);
-        if (item.weaponData == null) {
-            item.equip(item, item.wearableData.slotsUsed);
-        } else {
-            switch (item.weaponData.hands) {
-                case 2:
-                    player.equip(item, BOTH);
-                    break;
-                case 0:
-                    player.creatureData.weaponChoices.add(item.weaponData, 1);
-                    break;
-                case 3:
-                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.HEAD))
-                        player.unequip(HEAD);                     
-                    player.equip(item, HEAD);
-                    break;
-                case 4:
-                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.NECK))
-                        player.unequip(NECK);                     
-                    player.equip(item, NECK);
-                    break;
-                case 5:
-                    if (player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_FOOT) || player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_FOOT))
-                        player.unequip(FEET);                     
-                    player.equip(item, FEET);
-                    break;
-                case 1:
-                    if (!player.creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
-                        player.equip(item, RIGHT);
-                    else if(player.creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_HAND)) {
-                        if(player.nextBoolean())
-                        {
-                            player.unequip(RIGHT);
-                            player.equip(item, RIGHT);
-                        }
-                        else
-                        {
-                            player.unequip(LEFT);
-                            player.equip(item, LEFT);
-                        }
-                    }
-                    else
-                        player.equip(item, LEFT);
-
-                    break;
-            }
-
-            if (item.radiance != null) {
-                player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
-                // TODO - recalc lighting
-                calcFOV(player.location.x, player.location.y);
-            }
+        if (item.weaponData != null && item.radiance != null) { // TODO mix light sources from player held items
+            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
+            // TODO - recalc lighting
+            calcFOV(player.location.x, player.location.y);
         }
     }
 
@@ -1808,7 +1763,7 @@ public class Epigon extends Game {
                     break;
                 case DROP:
                     message("Dropping all held items");
-                    for (Physical dropped : player.unequip(BOTH)) {
+                    for (Physical dropped : player.unequip(Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND))) {
                         for (int i = 0, offset = player.next(3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
                             if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
@@ -1950,9 +1905,9 @@ public class Epigon extends Game {
                     Physical selected = mapOverlayHandler.getSelected();
                     if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
                         message("Interactions for " + selected.name + ": " + selected.interactableData
-                                .stream()
-                                .map(interact -> interact.phrasing)
-                                .collect(Collectors.joining(", ")));
+                            .stream()
+                            .map(interact -> interact.phrasing)
+                            .collect(Collectors.joining(", ")));
                         Interactable interaction = selected.interactableData.get(0);
                         if (interaction.consumes) {
                             player.removeFromInventory(selected);
@@ -1960,12 +1915,20 @@ public class Epigon extends Game {
                         interaction.actorModifications.forEach(mod -> RecipeMixer.applyModification(player, mod));
                         interaction.targetModifications.forEach(mod -> RecipeMixer.applyModification(selected, mod));
                         mapOverlayHandler.updateDisplay();
-                    } else if (selected.countsAs(handBuilt.rawMeat)) {
+                    } else if (selected.countsAs(handBuilt.rawMeat)) { // TODO - move cooking into Interactable system
                         player.removeFromInventory(selected);
                         List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
                         player.inventory.addAll(steaks);
                         mapOverlayHandler.updateDisplay();
                         message("Made " + steaks.size() + " steaks.");
+                    } else if (selected.wearableData != null || selected.weaponData != null) {
+                        if (player.creatureData.equippedDistinct.contains(selected)) {
+                            player.unequip(selected);
+                            player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
+                        } else {
+                            player.equipItem(selected);
+                        }
+                        mapOverlayHandler.updateDisplay();
                     } else {
                         message("No interaction for " + selected.name);
                     }
