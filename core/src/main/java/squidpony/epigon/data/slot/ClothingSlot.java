@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
  */
 public enum ClothingSlot implements BodySlot {
     /*
-    ˬ
-    ◯   //Ὼ
+    ˬ   //◢■◣ ѫ  ╔═╗
+    O   //Ὼ  ◯  ●
   ╭┬╨┬╮
   ││▒││
   ╽╞═╡╽
@@ -21,7 +21,7 @@ public enum ClothingSlot implements BodySlot {
    ┙ ┕
      */
     HEAD("ˬ", 2, 0),
-    FACE("◯", 2, 1),
+    FACE("O", 2, 1),
     NECK("╨", 2, 2),
     LEFT_SHOULDER("┬", 1, 2),
     RIGHT_SHOULDER("┬", 3, 2),
