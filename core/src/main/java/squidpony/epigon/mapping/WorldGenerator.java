@@ -666,13 +666,10 @@ public class WorldGenerator {
     private void generateCastle(EpiMap[] buildZone) {
         Castle castle = new Castle(buildZone);
         buildGroundLevelCastle(castle);
-        for (int i = castle.sky - 2; i >= 0; i++) {
-            //buildHigherLevelCastle(castle);
-        }
     }
 
     private void buildGroundLevelCastle(Castle castle) {
-        EpiMap map = castle.groundLevel;
+        EpiMap map = castle.buildZone[castle.ground];
 
         //choose area for moat
         int distance = 8; // space between points
@@ -736,6 +733,26 @@ public class WorldGenerator {
             placeMud(map.contents[c.x][c.y]);
         }
 
+        buildKeep(castle, courtyardCentroid);
+
+        castle.garden = castle.courtyard.copy().andNot(castle.keepWall).andNot(castle.insideKeep);
+        Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
+
+        castle.pond = castle.garden.copy();
+        Coord pondCenter = castle.pond.singleRandom(rng);
+        castle.pond.and(castle.pond.copy().fill(false).insertCircle(pondCenter, 2));
+        castle.pond.fray(0.4);
+        for (Coord c : castle.pond) {
+            map.contents[c.x][c.y].blockage = null;
+            map.contents[c.x][c.y].floor = pondWater;
+        }
+        castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
+        for (Coord c : castle.pondBank) {
+            placeMud(map.contents[c.x][c.y]);
+        }
+    }
+
+    private void buildKeep(Castle castle, Coord courtyardCentroid) {
         // sketch out a keep's borders
         int top = courtyardCentroid.y;
         int bottom = courtyardCentroid.y;
@@ -788,37 +805,47 @@ public class WorldGenerator {
         }
         castle.keepWall = connectPoints(castle.courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
         for (Coord c : castle.keepWall) {
-            map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
-            map.contents[c.x][c.y].add(getWall(Stone.MARBLE));
+            for (int z = 0; z <= 4; z++) {
+                EpiTile tile = castle.tileAt(c, castle.ground - z);
+                if (tile == null) {
+                    tile = new EpiTile();
+                    castle.setTileAt(c, castle.ground - z, tile);
+                }
+                tile.floor = getFloor(Stone.MARBLE);
+                tile.add(getWall(Stone.MARBLE));
+            }
+
+            if ((c.x + c.y) % 2 == 0) {
+                EpiTile tile = castle.tileAt(c, castle.ground - 5);
+                if (tile == null) {
+                    tile = new EpiTile();
+                    castle.setTileAt(c, castle.ground - 5, tile);
+                }
+                tile.floor = getFloor(Stone.MARBLE);
+                tile.add(getWall(Stone.MARBLE));
+            }
+        }
+
+        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
+            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
+
+        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
+        for (Coord c : castle.insideKeep) {
+            for (int z = 0; z <= 4; z += 2) {
+                EpiTile tile = castle.tileAt(c, castle.ground - z);
+                if (tile == null) {
+                    castle.setTileAt(c, z, new EpiTile(carpet));
+                } else {
+                    tile.floor = carpet;
+                }
+            }
         }
 
         for (Coord c : castle.keepWall.copy().randomScatter(rng, 8, 5)) {
-            map.contents[c.x][c.y].floor = getFloor(Stone.MARBLE);
-            map.contents[c.x][c.y].blockage = null;
-            placeDoor(map.contents[c.x][c.y]);
-        }
-
-        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
-        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
-            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
-        for (Coord c : castle.insideKeep) {
-            map.contents[c.x][c.y].floor = carpet;
-        }
-
-        castle.garden = castle.courtyard.copy().andNot(castle.keepWall).andNot(castle.insideKeep);
-        Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
-
-        castle.pond = castle.garden.copy();
-        Coord pondCenter = castle.pond.singleRandom(rng);
-        castle.pond.and(castle.pond.copy().fill(false).insertCircle(pondCenter, 2));
-        castle.pond.fray(0.4);
-        for (Coord c : castle.pond) {
-            map.contents[c.x][c.y].blockage = null;
-            map.contents[c.x][c.y].floor = pondWater;
-        }
-        castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
-        for (Coord c : castle.pondBank) {
-            placeMud(map.contents[c.x][c.y]);
+            EpiTile tile = castle.tileAt(c, castle.ground);
+            tile.floor = getFloor(Stone.MARBLE);
+            tile.blockage = null;
+            placeDoor(tile);
         }
     }
 

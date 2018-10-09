@@ -575,7 +575,7 @@ public class Epigon extends Game {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int underground = 8;
-        int aboveground = 2;
+        int aboveground = 7;
         world = worldGenerator.buildCastle(worldWidth, worldHeight, underground, aboveground, handBuilt);
         depth = aboveground; // should be the very surface
         map = world[depth];

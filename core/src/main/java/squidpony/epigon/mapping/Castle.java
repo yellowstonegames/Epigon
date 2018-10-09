@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 
 /**
@@ -41,10 +42,9 @@ public class Castle {
       - walls thickness is 6m
     
      */
-
     public EpiMap[] buildZone;
-    public EpiMap groundLevel;
     public int sky; // how high you can go
+    public int ground; // the index of the ground level
     public int width;
     public int height;
     public int mapEdging = 2; // space between the edge of the map and the generation area
@@ -63,11 +63,12 @@ public class Castle {
         pondBank;
 
     public Castle(EpiMap[] buildZone) {
-        this.buildZone = buildZone;
+        this.buildZone = buildZone; // want to keep a direct reference to the backing objects, so no copy
+
         sky = buildZone.length;
-        groundLevel = buildZone[sky - 1];
+        ground = sky - 1;
         width = buildZone[0].width;
-        height = buildZone[1].height;
+        height = buildZone[0].height;
 
         region = new GreasedRegion(width, height);
         region.allOn();
@@ -85,5 +86,21 @@ public class Castle {
         }
 
         moat = region.copy();
+    }
+
+    public EpiTile tileAt(Coord c, int z) {
+        return tileAt(c.x, c.y, z);
+    }
+
+    public EpiTile tileAt(int x, int y, int z) {
+        return buildZone[z].contents[x][y];
+    }
+
+    public void setTileAt(Coord c, int z, EpiTile tile){
+        setTileAt(c.x, c.y, z, tile);
+    }
+
+    public void setTileAt(int x, int y, int z, EpiTile tile){
+        buildZone[z].contents[x][y] = tile;
     }
 }

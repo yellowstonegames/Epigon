@@ -12,7 +12,7 @@ public enum OverArmorSlot implements BodySlot {
 
     OverArmorSlot(int x, int y) {
         location = Coord.get(x, y);
-        hash = ConstantKey.precomputeHash("slot.jewelry", ordinal());
+        hash = ConstantKey.precomputeHash("slot.overarmor", ordinal());
     }
 
     /**
