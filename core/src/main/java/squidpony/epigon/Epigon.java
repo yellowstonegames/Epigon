@@ -171,7 +171,8 @@ public class Epigon extends Game {
     public static final int worldWidth, worldHeight, worldDepth, totalDepth;
     public float startingY, finishY, timeToFall;
 
-    private static final boolean DEBUG = false; 
+    private static final boolean DEBUG = false;
+    private boolean odinView = false;
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
@@ -925,10 +926,12 @@ public class Epigon extends Game {
         FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1, checkY * 3 + 1, sight * 3, Radius.CIRCLE);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
+        Radiance fullRadiance = new Radiance(1f, SColor.FLOAT_WHITE);
 
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
+                radiance = odinView ? fullRadiance : map.contents[x][y].getAnyRadiance(); // slow to do odinView but shows all the colors
+                if (radiance != null) {
                     FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.range * 3);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
@@ -940,7 +943,7 @@ public class Epigon extends Game {
             for (int y = 0; y < map.height; y++) {
                 for (int ix = 0; ix < 3; ix++) {
                     for (int iy = 0; iy < 3; iy++) {
-                        if (map.losResult[x * 3 + ix][y * 3 + iy] > 0.0) {
+                        if (odinView || map.losResult[x * 3 + ix][y * 3 + iy] > 0.0) {
                             map.triFovResult[x * 3 + ix][y * 3 + iy]
                                 = MathUtils.clamp(map.triFovResult[x * 3 + ix][y * 3 + iy] + map.colorLighting[0][x * 3 + ix][y * 3 + iy], 0, 1);
                             map.fovResult[x][y]
@@ -954,14 +957,16 @@ public class Epigon extends Game {
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if (map.fovResult[x][y] > 0) {
+                if (odinView || map.fovResult[x][y] > 0) {
                     //posrng.move(x, y);
 
-                    if (map.remembered[x][y] == null) {
-                        map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
-                    } else {
-                        map.remembered[x][y].remake(map.contents[x][y]);
-                    }
+                    //if (!odinView) { // Don't remember things seen in all-view (or do remember if you need mini-map)
+                        if (map.remembered[x][y] == null) {
+                            map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
+                        } else {
+                            map.remembered[x][y].remake(map.contents[x][y]);
+                        }
+                    //}
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         if (creature.appearance == null) {
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
@@ -2149,6 +2154,15 @@ public class Epigon extends Game {
                     message("Layered sparkle large");
                     fxHandler.layeredSparkle(player.location, 8, Radius.CIRCLE);
                     break;
+                case '|':
+                    if (odinView) {
+                        message("Odinview disabled.");
+                        odinView = false;
+                    } else {
+                        message("Showing all");
+                        odinView = true;
+                    }
+                    calcFOV(player.location.x, player.location.y);
                 default:
                     return;
             }
@@ -2181,6 +2195,7 @@ public class Epigon extends Game {
     });
 
     private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new InputAdapter() {
+
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
         @Override
@@ -2188,14 +2203,12 @@ public class Epigon extends Game {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
             if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height
-                    || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
+                || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
                 return false;
             }
-            if(showingMenu)
-            {
-                if(menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size()
-                        && currentTarget != null  && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f)
-                {
+            if (showingMenu) {
+                if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size()
+                    && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
                     attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
@@ -2210,16 +2223,21 @@ public class Epigon extends Game {
             }
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (awaitedMoves.isEmpty()) {
-                        if (toCursor.isEmpty()) {
-                            cursor = Coord.get(screenX, screenY);
-                            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-                            if (!toCursor.isEmpty()) {
-                                toCursor.remove(0); // Remove cell you're in from list
+                    if (cursor.x == screenX && cursor.y == screenY) {
+                        if (awaitedMoves.isEmpty()) {
+                            if (toCursor.isEmpty()) {
+                                cursor = Coord.get(screenX, screenY);
+                                toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
+                                if (!toCursor.isEmpty()) {
+                                    toCursor.remove(0); // Remove cell you're in from list
+                                }
                             }
+                            awaitedMoves.addAll(toCursor);
+                            return true;
                         }
-                        awaitedMoves.addAll(toCursor);
-                        return true;
+                    } else {
+                        // clear cursor if lifted in space besides went down in
+                        toCursor.clear();
                     }
                     break;
                 case Input.Buttons.RIGHT:
@@ -2243,10 +2261,52 @@ public class Epigon extends Game {
             return mouseMoved(screenX, screenY);
         }
 
+        @Override
+        public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    if (!awaitedMoves.isEmpty()) {
+                        return false;
+                    }
+                    screenX += player.location.x - (mapSize.gridWidth >> 1);
+                    screenY += player.location.y - (mapSize.gridHeight >> 1);
+                    cursor = Coord.get(screenX, screenY);
+
+                    if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
+                        // TODO - also don't show path that crosses unknown areas
+                        toCursor.clear(); // don't show path when mouse moves out of range or view
+                        return false;
+                    }
+                    contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
+                    cursor = Coord.get(screenX, screenY);
+                    toCursor.clear();
+                    toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
+                    if (!toCursor.isEmpty()) {
+                        toCursor.remove(0);
+                    }
+                    return true;
+                case Input.Buttons.RIGHT:
+                    // TODO - add tooltip info for location
+                    break;
+            }
+            return false;
+        }
+
+
+
         // causes the path to the mouse position to become highlighted (toCursor contains a list of points that
         // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
+            screenX += player.location.x - (mapSize.gridWidth >> 1);
+            screenY += player.location.y - (mapSize.gridHeight >> 1);
+
+            // Check if the cursor didn't move in grid space
+            if (cursor.x != screenX || cursor.y != screenY) {
+                toCursor.clear();
+                return true;
+            }
+            /* TESTING - moved to down event
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
@@ -2270,6 +2330,7 @@ public class Epigon extends Game {
             if (!toCursor.isEmpty()) {
                 toCursor.remove(0);
             }
+            */
             return false;
         }
     });

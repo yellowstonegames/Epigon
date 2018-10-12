@@ -7,13 +7,13 @@ import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.mapping.DungeonGenerator;
-import squidpony.squidgrid.mapping.SerpentMapGenerator;
+import squidpony.squidgrid.mapping.*;
 import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import squidpony.squidgrid.mapping.styled.TilesetType;
 
 /**
  * Creates a world.
@@ -167,15 +167,30 @@ public class WorldGenerator {
         EpiTile tile;
         GreasedRegion[] floorWorld = new GreasedRegion[depth];
         GreasedRegion tmp = new GreasedRegion(width, height);
+
         for (int e = 0; e < depth; e++) {
             EpiMap eMap = world[e];
-//            FlowingCaveGenerator flow = new FlowingCaveGenerator(width, height, TilesetType.DEFAULT_DUNGEON, rng);
             DungeonGenerator gen = new DungeonGenerator(width, height, rng);
-            SerpentMapGenerator serpent = new SerpentMapGenerator(width, height, rng, 0.2);
-            serpent.putWalledBoxRoomCarvers(4);
-            serpent.putWalledRoundRoomCarvers(2);
-            serpent.putCaveCarvers(1);
-            char[][] simpleChars = gen.generate(serpent.generate());
+
+            // create vertical "zones" for types of generation
+            if (e < 2) {
+                DenseRoomMapGenerator dense = new DenseRoomMapGenerator(width, height, rng);
+                gen.addDoors(80, true);
+                gen.generate(dense.generate());
+            } else if (e < 4) {
+                FlowingCaveGenerator flowing = new FlowingCaveGenerator(width, height, TilesetType.DEFAULT_DUNGEON, rng);
+                gen.addBoulders(8);
+                gen.addWater(20, 4);
+                gen.generate(flowing.generate());
+            } else {
+                SerpentMapGenerator serpent = new SerpentMapGenerator(width, height, rng, 0.2);
+                serpent.putWalledBoxRoomCarvers(4);
+                serpent.putWalledRoundRoomCarvers(2);
+                serpent.putCaveCarvers(1);
+                gen.generate(serpent.generate());
+            }
+
+            char[][] simpleChars = gen.getDungeon();
             floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
 
             for (int x = 0; x < width; x++) {
@@ -190,7 +205,12 @@ public class WorldGenerator {
                             placeWall(tile);
                             break;
                         case '+':
+                        case '/':
                             placeDoor(tile);
+                            break;
+                        case '~': // TODO - distinguish deep water
+                        case ',':
+                            placeWater(tile);
                             break;
                         default:
                             tile.floor = RecipeMixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
@@ -245,17 +265,27 @@ public class WorldGenerator {
     }
 
     private void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
+        placeStairs(top.contents[c.x][c.y], false);
+        placeStairs(bottom.contents[c.x][c.y], true);
+    }
+
+    private void placeStairs(EpiTile tile, boolean up) {
         Physical adding;
+        if (tile.floor != null) {
+            if (tile.floor.terrainData != null && tile.floor.terrainData.stone != null) {
+                adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
+            } else {
+                adding = tile.floor;
+            }
+        } else {
+            adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
+        }
 
-        EpiTile tile = top.contents[c.x][c.y];
-        Stone stone = tile.floor.terrainData.stone;
-        adding = RecipeMixer.buildPhysical(stone);
-        tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
-
-        tile = bottom.contents[c.x][c.y];
-        stone = tile.floor.terrainData.stone;
-        adding = RecipeMixer.buildPhysical(stone);
-        tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+        if (up) {
+            tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+        } else {
+            tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+        }
     }
 
     private void placeDoor(EpiTile tile) {
@@ -831,7 +861,7 @@ public class WorldGenerator {
 
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
         for (Coord c : castle.insideKeep) {
-            for (int z = 0; z <= 4; z += 2) {
+            for (int z = 0; z <= 4; z++) {
                 EpiTile tile = castle.tileAt(c, castle.ground - z);
                 if (tile == null) {
                     castle.setTileAt(c, z, new EpiTile(carpet));
