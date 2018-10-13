@@ -291,7 +291,7 @@ public class Physical extends EpiData {
             return;
         }
 
-        unequip(slots).stream().forEach(p -> addToInventory(p)); // put old equipment back into inventory
+        unequip(slots).stream().forEach(this::addToInventory); // put old equipment back into inventory
 
         removeFromInventory(item);
         if (item.wearableData != null){
@@ -299,11 +299,14 @@ public class Physical extends EpiData {
         }
 
         for (BodySlot ws : slots) {
-            creatureData.equippedBySlot.put(ws, item);
+            Physical old = creatureData.equippedBySlot.put(ws, item);
+            if(old != null)
+                creatureData.weaponChoices.remove(old.weaponData);
+            if(!item.equals(old) && item.weaponData != null)
+                creatureData.weaponChoices.add(item.weaponData, 2);
             creatureData.equippedDistinct.add(item);
         }
-
-        // TODO - apply changes based on adding equipment
+        // TODO - apply changes based on adding equipment (may be done?)
     }
 
     /**
@@ -316,7 +319,7 @@ public class Physical extends EpiData {
             unequip(item.wearableData.slotsUsed);
         }
         if (item.weaponData != null && creatureData != null) {
-            unequip(Arrays.stream(WieldSlot.values())
+            unequip(Arrays.stream(WieldSlot.ALL)
                 .filter(ws -> item.equals(creatureData.equippedBySlot.get(ws)))
                 .collect(Collectors.toList()));
         }
@@ -367,7 +370,7 @@ public class Physical extends EpiData {
             }
 
             creatureData.equippedDistinct.remove(p);
-            for (BodySlot subSlot : WieldSlot.values()) { // make sure to clear out multi-handed unequips
+            for (BodySlot subSlot : WieldSlot.ALL) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
                     creatureData.equippedBySlot.remove(subSlot);
                     if (p.weaponData != null) {
@@ -377,7 +380,7 @@ public class Physical extends EpiData {
             }
         }
 
-        // TODO - apply changes based on unequipping items
+        // TODO - apply changes based on unequipping items (may be done?)
         return removed;
     }
 

@@ -1017,7 +1017,7 @@ public class Epigon extends Game {
     private void equipItem(Physical item) {
         player.equipItem(item);
         if (item.weaponData != null && item.radiance != null) { // TODO mix light sources from player held items
-            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
+//            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
             // TODO - recalc lighting
             calcFOV(player.location.x, player.location.y);
         }
