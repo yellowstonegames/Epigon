@@ -1071,7 +1071,7 @@ public class Epigon extends Game {
         }
         int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
             startX = target.location.x * 2 + 2;
-        final float smoke = -0x1.fefefep125F;//SColor.CW_GRAY
+        final float smoke = SColor.DB_DARK_LEATHER.toFloatBits();//-0x1.fefefep125F;//SColor.CW_GRAY
 
         if (target.location.x + len + 1 < map.width) {
             for (int i = 0; i < sz; i++) {
@@ -1106,7 +1106,7 @@ public class Epigon extends Game {
         Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
 
         calcFOV(player.location.x, player.location.y);
-        fxHandler.attackEffect(player, target, ao, dir);
+        fxHandler.attackEffect(player, target, ao, dir); // TODO - tie creature glyph removal to appropriate moment in attack effect
 
         if (ao.hit) {
             applyStatChange(target, Stat.VIGOR, ao.actualDamage);
@@ -1222,15 +1222,13 @@ public class Epigon extends Game {
         } else {
             Physical thing = map.contents[newX][newY].getCreature();
             if (thing != null) {
-                awaitedMoves.clear(); // don't keep moving if something hit
-                toCursor.clear();
+                cancelMove();
                 attack(thing);
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
-                awaitedMoves.clear(); // don't keep moving if something hit
-                toCursor.clear();
+                cancelMove();
                 message("Ran into " + thing.name);
                 runTurn();
             } else {
@@ -1239,46 +1237,17 @@ public class Epigon extends Game {
         }
     }
 
-    public void putSolo(int x, int y)
-    {
+    public void cancelMove() {
+        awaitedMoves.clear();
+        toCursor.clear();
+    }
+
+    public void putSolo(int x, int y) {
         mapSLayers.putSingle(x, y, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
     }
+
     public void putWithLight(int x, int y, char c, float foreground) {
-        // The NumberTools.swayTight call here helps increase the randomness in a way that isn't directly linked to the other parameters.
-        // By multiplying noise by pi here, it removes most of the connection between swayTight's result and the other calculations involving noise.
-//        lightAmount = Math.max(0, Math.min(lightAmount - NumberTools.swayTight(noise * 3.141592f) * 0.1f - 0.1f + 0.2f * noise, lightAmount)); // 0.1f * noise for light theme, 0.2f * noise for dark theme
-//        int n = (int) (lightAmount * lightLevels.length);
-//        n = Math.min(Math.max(n, 0), lightLevels.length - 1);
-
-
-        //float back = lightLevels[n]; // background gets both lit and faded to memory
-        //mapSLayers.put(x, y, c, front, back); // "light" theme
-        //mapSLayers.put(x, y, c, lerpFloatColors(foreground, lightLevels[n], 0.5f), RememberedTile.memoryColorFloat); // "dark" theme
-        //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]), RememberedTile.memoryColorFloat); // "dark" theme
-        //mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y]),
-        //        lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
         mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y])); // "dark" theme
-//        x *= 3;
-//        y *= 3;
-//        mapSLayers.putSingle(x  , y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y  ], map.colorLighting[0][x  ][y  ] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x  , y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y+1], map.colorLighting[0][x  ][y+1] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x  , y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x  ][y+2], map.colorLighting[0][x  ][y+2] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+1, y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y  ], map.colorLighting[0][x+1][y  ] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+1, y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y+1], map.colorLighting[0][x+1][y+1] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+1, y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+1][y+2], map.colorLighting[0][x+1][y+2] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+2, y  , lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y  ], map.colorLighting[0][x+2][y  ] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+2, y+1, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y+1], map.colorLighting[0][x+2][y+1] * 0.4f)); // "dark" theme
-//        mapSLayers.putSingle(x+2, y+2, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x+2][y+2], map.colorLighting[0][x+2][y+2] * 0.4f)); // "dark" theme
-
-//        mapSLayers.putSingle(x  , y  , map.triResistances[x  ][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x  , y+1, map.triResistances[x  ][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x  , y+2, map.triResistances[x  ][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+1, y  , map.triResistances[x+1][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+1, y+1, map.triResistances[x+1][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+1, y+2, map.triResistances[x+1][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+2, y  , map.triResistances[x+2][y  ] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+2, y+1, map.triResistances[x+2][y+1] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
-//        mapSLayers.putSingle(x+2, y+2, map.triResistances[x+2][y+2] > 0.5 ? FLOAT_WHITE : FLOAT_BLACK); // "dark" theme
     }
 
     /**
@@ -1287,11 +1256,6 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-//        if ((radiance = handBuilt.playerRadiance) != null) {
-//            FOV.reuseFOV(map.resistances, map.tempFOV, player.location.x, player.location.y, radiance.currentRange());
-//            SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-//            mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
-//        }
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
@@ -1302,9 +1266,6 @@ public class Epigon extends Game {
             }
         }
 
-        // we can use either Noise.querp (quintic Hermite spline) or Noise.cerp (cubic Hermite splne); cerp is cheaper but querp seems to look better.
-        // querp() is extremely close to cos(); see https://www.desmos.com/calculator/l31nflff3g for graphs. It is likely that querp performs better than cos.
-        //float noise = Noise.querp(NumberTools.randomFloatCurved(time0), NumberTools.randomFloatCurved(time0 + 1L), time - time0);
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
@@ -1312,16 +1273,13 @@ public class Epigon extends Game {
                 float sightAmount = 0f;
                 for (int ix = 0; ix < 3; ix++) {
                     for (int iy = 0; iy < 3; iy++) {
-                        if((sight = map.triFovResult[x*3+ix][y*3+iy]) > 0.0)
-                        {
-                            putSolo(x*3+ix,y*3+iy);
-                            sightAmount = Math.max(sightAmount, (float)sight);
+                        if ((sight = map.triFovResult[x * 3 + ix][y * 3 + iy]) > 0.0) {
+                            putSolo(x * 3 + ix, y * 3 + iy);
+                            sightAmount = Math.max(sightAmount, (float) sight);
                         }
                     }
                 }
-//                        (Math.max(map.triFovResult[x*3][y*3], Math.max(map.triFovResult[x*3][y*3+1], Math.max(map.triFovResult[x*3][y*3+2],
-//                                Math.max(map.triFovResult[x*3+1][y*3], Math.max(map.triFovResult[x*3+1][y*3+1], Math.max(map.triFovResult[x*3+1][y*3+2],
-//                                        Math.max(map.triFovResult[x*3+2][y*3], Math.max(map.triFovResult[x*3+2][y*3+1], map.triFovResult[x*3+2][y*3+2])))))))));
+
                 if (sightAmount > 0) {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
@@ -1335,13 +1293,11 @@ public class Epigon extends Game {
                             creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
-                            awaitedMoves.clear();
-                            toCursor.clear();
+                            cancelMove();
                             message(creature.creatureData.culture.messaging.transform(creature.getRandomElement(creature.creatureData.sayings), creature.name, creature.creatureData.genderPronoun, player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         }
                         creature.wasSeen = true;
                     } else {
-                        //posrng.move(x, y);
                         putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor());
                     }
                 } else {
@@ -1468,10 +1424,6 @@ public class Epigon extends Game {
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
-//            boolean acting = mapSLayers.hasActions();
-//            for (int i = 0; !acting && i < mapSLayers.glyphs.size(); i++) {
-//                acting |= mapSLayers.glyphs.get(i).hasActions();
-//            }
             if (!mapSLayers.hasActiveAnimations()) {
                 if(player.creatureData.lastUsedItem != null && 
                         player.creatureData.lastUsedItem.radiance != null && player.creatureData.lastUsedItem.radiance.flare > 0f)
@@ -2196,22 +2148,9 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
+
             if (!map.inBounds(screenX, screenY) || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
                 return false;
-            }
-            if (showingMenu) {
-                if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size() && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
-                    attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
-                    calcFOV(player.location.x, player.location.y);
-                    calcDijkstra();
-                    runTurn();
-                }
-                showingMenu = false;
-                menuLocation = null;
-                maneuverOptions.clear();
-                currentTarget = null;
-                mapHoverSLayers.clear();
-                return true;
             }
 
             Physical thing = null;
@@ -2220,45 +2159,61 @@ public class Epigon extends Game {
             }
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (cursor.x == screenX && cursor.y == screenY) {
-                        if (thing == null) {
-                            if (awaitedMoves.isEmpty()) {
-                                if (toCursor.isEmpty()) {
-                                    cursor = Coord.get(screenX, screenY);
-                                    toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-                                    if (!toCursor.isEmpty()) {
-                                        toCursor.remove(0); // Remove cell you're in from list
-                                    }
-                                }
-                                awaitedMoves.addAll(toCursor);
-                                return true;
-                            } else {
+                    if (showingMenu) {
+                        if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size() && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
+                            attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
+                            calcFOV(player.location.x, player.location.y);
+                            calcDijkstra();
+                            runTurn();
+                        }
+                        showingMenu = false;
+                        menuLocation = null;
+                        maneuverOptions.clear();
+                        currentTarget = null;
+                        mapHoverSLayers.clear();
+                        return true;
+                    }
 
-                            }
-                        } else {
-                            List<Weapon> attackOptions = validAttackOptions(player, thing);
-                            if (attackOptions == null || attackOptions.isEmpty()) {
-                                message("Can't attack the " + thing.name + " from there.");
-                            } else {
-                                Weapon w = rng.getRandomElement(attackOptions);
-                                attack(thing, w);
-                                calcFOV(player.location.x, player.location.y);
-                                calcDijkstra();
-                                runTurn();
+                    if (cursor.x != screenX || cursor.y != screenY) {// clear cursor if lifted in space other than the one it went down in
+                        toCursor.clear();
+                        return false;//cleaned up but not considered "handled"
+                    }
+
+                    if (thing == null) {
+                        if (toCursor.isEmpty()) {
+                            cursor = Coord.get(screenX, screenY);
+                            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
+                            if (!toCursor.isEmpty()) {
+                                toCursor.remove(0); // Remove cell you're in from list
                             }
                         }
+                        awaitedMoves.addAll(toCursor);
+                        return true;
                     } else {
-                        // clear cursor if lifted in space other than the one it went down in
-                        toCursor.clear();
+                        List<Weapon> attackOptions = validAttackOptions(player, thing);
+                        if (attackOptions == null || attackOptions.isEmpty()) {
+                            message("Can't attack the " + thing.name + " from there.");
+                        } else {
+                            Weapon w = rng.getRandomElement(attackOptions);
+                            attack(thing, w);
+                            calcFOV(player.location.x, player.location.y);
+                            calcDijkstra();
+                            runTurn();
+                        }
                     }
-                    break;
+
+                    return true;
                 case Input.Buttons.RIGHT:
                     if (thing == null) {
                         return false;
                     }
                     buildAttackOptions(thing);
-                    menuLocation = showAttackOptions(thing, maneuverOptions);
-                    break;
+                    if (maneuverOptions == null || maneuverOptions.isEmpty()) {
+                        message("No attack options against the " + thing.name + " at this range.");
+                    } else {
+                        menuLocation = showAttackOptions(thing, maneuverOptions);
+                    }
+                    return true;
             }
             return false;
         }
@@ -2270,11 +2225,13 @@ public class Epigon extends Game {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            if (!awaitedMoves.isEmpty()) {
+                cancelMove();
+                return true;
+            }
+
             switch (button) {
                 case Input.Buttons.LEFT:
-                    if (!awaitedMoves.isEmpty()) {
-                        return false;
-                    }
                     screenX += player.location.x - (mapSize.gridWidth >> 1);
                     screenY += player.location.y - (mapSize.gridHeight >> 1);
                     cursor = Coord.get(screenX, screenY);
@@ -2286,6 +2243,10 @@ public class Epigon extends Game {
 
                     if (!map.inBounds(screenX, screenY) || map.fovResult[screenX][screenY] <= 0.0) {
                         // TODO - also don't show path that crosses unknown areas
+                        return false;
+                    }
+
+                    if (showingMenu) {
                         return false;
                     }
 
