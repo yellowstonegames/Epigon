@@ -7,13 +7,13 @@ import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;
 import squidpony.epigon.data.slot.ClothingSlot;
+import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import squidpony.epigon.data.slot.WieldSlot;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -317,7 +317,7 @@ public class Physical extends EpiData {
         }
         if (item.weaponData != null && creatureData != null) {
             unequip(Arrays.stream(WieldSlot.values())
-                .filter(ws -> creatureData.equippedBySlot.get(ws).equals(item))
+                .filter(ws -> item.equals(creatureData.equippedBySlot.get(ws)))
                 .collect(Collectors.toList()));
         }
     }
@@ -340,12 +340,12 @@ public class Physical extends EpiData {
         totalSlots.addAll(slots);
         slots.stream()
             .map(s -> creatureData.equippedBySlot.get(s))
-            .filter(p -> p != null)
+            .filter(Objects::nonNull)
             .map(p -> p.wearableData)
-            .filter(w -> w != null)
+            .filter(Objects::nonNull)
             .map(w -> w.slotsUsed)
-            .filter(w -> w != null)
-            .forEach(w -> totalSlots.addAll(w));
+            .filter(Objects::nonNull)
+            .forEach(totalSlots::addAll);
 
         List<Physical> removed = new ArrayList<>(totalSlots.size());
 
