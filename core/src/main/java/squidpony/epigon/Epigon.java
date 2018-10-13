@@ -2232,29 +2232,7 @@ public class Epigon extends Game {
 
             switch (button) {
                 case Input.Buttons.LEFT:
-                    screenX += player.location.x - (mapSize.gridWidth >> 1);
-                    screenY += player.location.y - (mapSize.gridHeight >> 1);
-                    cursor = Coord.get(screenX, screenY);
-                    toCursor.clear();
-
-                    if (map.contents[screenX][screenY].getCreature() != null) {
-                        return false; // touchUp will handle click on a creature
-                    }
-
-                    if (!map.inBounds(screenX, screenY) || map.fovResult[screenX][screenY] <= 0.0) {
-                        // TODO - also don't show path that crosses unknown areas
-                        return false;
-                    }
-
-                    if (showingMenu) {
-                        return false;
-                    }
-
-                    toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-                    if (!toCursor.isEmpty()) {
-                        toCursor.remove(0);
-                    }
-                    return true;
+                    return false;
                 case Input.Buttons.RIGHT:
                     // TODO - add tooltip info for location
                     break;
@@ -2266,15 +2244,22 @@ public class Epigon extends Game {
         public boolean mouseMoved(int screenX, int screenY) {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
-            if (!map.inBounds(screenX, screenY)){
+            if (!map.inBounds(screenX, screenY) || map.fovResult[screenX][screenY] <= 0.0){
+                toCursor.clear();
                 return false;
             }
             contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
 
-            // Check if the cursor moved in grid space
-            if (cursor.x != screenX || cursor.y != screenY) {
-                toCursor.clear();
-                return true;
+            if (!awaitedMoves.isEmpty()) {
+                return false;
+            }
+
+            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
+            cursor = Coord.get(screenX, screenY);
+            toCursor.clear();
+            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
+            if (!toCursor.isEmpty()) {
+                toCursor.remove(0);
             }
             return false;
         }
