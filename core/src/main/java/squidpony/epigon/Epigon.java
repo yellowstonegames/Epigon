@@ -1027,81 +1027,78 @@ public class Epigon extends Game {
         awaitedMoves.add(player.location.translate(dir));
     }
 
-    private void validAttackOptions(Physical target) {
-        Arrangement<Weapon> table = player.creatureData.weaponChoices.table;
-        Weapon w;
+    private void buildAttackOptions(Physical target) {
         currentTarget = target;
         maneuverOptions.clear();
-        double range;
-        for (int i = 0; i < table.size(); i++) {
-            w = table.keyAt(i);
-            range = Radius.CIRCLE.radius(player.location, target.location);
-            if((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5)
-                continue;
-            if(range <= w.rawWeapon.range + 1.5)
-            {
-                maneuverOptions.put(w.rawWeapon.name + " Attack", w);
-                for (int j = 0; j < w.maneuvers.size(); j++) {
-                    maneuverOptions.put(w.rawWeapon.name + ' ' + w.maneuvers.get(j), w);
-                }
+
+        for (Weapon w : validAttackOptions(player, target)) {
+            maneuverOptions.put(w.rawWeapon.name + " Attack", w);
+            for (int j = 0; j < w.maneuvers.size(); j++) {
+                maneuverOptions.put(w.rawWeapon.name + ' ' + w.maneuvers.get(j), w);
             }
         }
     }
 
     private Weapon chooseValidWeapon(Physical attacker, Physical target) {
+        List<Weapon> weapons = validAttackOptions(attacker, target);
+        return weapons == null || weapons.isEmpty() ? null : rng.getRandomElement(weapons);
+    }
+
+    private List<Weapon> validAttackOptions(Physical attacker, Physical target) {
+        if (attacker == null || attacker.creatureData == null || attacker.creatureData.weaponChoices == null || target == null) {
+            return null;
+        }
+
         Arrangement<Weapon> table = attacker.creatureData.weaponChoices.table;
-        Weapon w;
-        int[] order = attacker.randomOrdering(table.size());
+        List<Weapon> weapons = new ArrayList<>(table.keySet().size());
         double range;
-        for (int i = 0; i < table.size(); i++) {
-            w = table.keyAt(order[i]);
+        for (Weapon w : table.keySet()) {
             range = Radius.CIRCLE.radius(attacker.location, target.location);
-            if((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5)
+            if ((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5) {
                 continue;
-            if(range <= w.rawWeapon.range + 1.5)
-            {
-                return w;
+            }
+            if (range <= w.rawWeapon.range + 1.5) {
+                weapons.add(w);
             }
         }
-        return null;
+        return weapons;
     }
+
     private Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
-        // = validAttackOptions(target);
         int sz = options.size(), len = 0;
         for (int i = 0; i < sz; i++) {
             len = Math.max(options.keyAt(i).length(), len);
         }
         int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
-                startX = target.location.x*2+2;
+            startX = target.location.x * 2 + 2;
         final float smoke = -0x1.fefefep125F;//SColor.CW_GRAY
-        // SColor.translucentColor( -0x1.fefefep125F, 0.777f); //SColor.CW_GRAY
-        if(target.location.x+len+1 < map.width) {
+
+        if (target.location.x + len + 1 < map.width) {
             for (int i = 0; i < sz; i++) {
                 String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
                     mapHoverSLayers.put(startX + j, startY + i, smoke);
                 }
-                mapHoverSLayers.put(startX, startY+i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i*3)&15], null);
+                mapHoverSLayers.put(startX, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null);
             }
-        }
-        else {
+        } else {
             startX = target.location.x * 2 - len;
             for (int i = 0; i < sz; i++) {
                 String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
                     mapHoverSLayers.put(startX + j, startY + i, smoke);
                 }
-                mapHoverSLayers.put(target.location.x*2-name.length(), startY+i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i*3)&15], null);
+                mapHoverSLayers.put(target.location.x * 2 - name.length(), startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null);
             }
         }
         showingMenu = true;
-        return Coord.get(startX-2>>1, startY);
+        return Coord.get(startX - 2 >> 1, startY);
     }
 
-    private void attack(Physical target)
-    {
+    private void attack(Physical target) {
         attack(target, chooseValidWeapon(player, target));
     }
+
     private void attack(Physical target, Weapon choice) {
         int targetX = target.location.x, targetY = target.location.y;
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
@@ -1192,6 +1189,7 @@ public class Epigon extends Game {
             message("Missed the " + target.name + (ao.crit ? ", but just barely." : "..."));
         }
     }
+
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
@@ -1870,10 +1868,6 @@ public class Epigon extends Game {
             }
             if (verb == null) {
                 message("Unknown input for " + m + " mode: " + key);
-//                if(batch.filter == identityFilter)
-//                    batch.setFilter(filter);
-//                else
-//                    batch.setFilter(identityFilter);
             } else {
                 message("Can't " + verb.name + " from " + m + " mode.");
             }
@@ -2202,13 +2196,11 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
-            if (screenX < 0 || screenY < 0 || screenX >= map.width || screenY >= map.height
-                || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
+            if (!map.inBounds(screenX, screenY) || (!showingMenu && map.fovResult[screenX][screenY] <= 0.0)) {
                 return false;
             }
             if (showingMenu) {
-                if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size()
-                    && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
+                if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size() && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
                     attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
                     calcFOV(player.location.x, player.location.y);
                     calcDijkstra();
@@ -2221,36 +2213,51 @@ public class Epigon extends Game {
                 mapHoverSLayers.clear();
                 return true;
             }
+
+            Physical thing = null;
+            if (map.contents[screenX][screenY] != null) {
+                thing = map.contents[screenX][screenY].getCreature();
+            }
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (cursor.x == screenX && cursor.y == screenY) {
-                        if (awaitedMoves.isEmpty()) {
-                            if (toCursor.isEmpty()) {
-                                cursor = Coord.get(screenX, screenY);
-                                toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-                                if (!toCursor.isEmpty()) {
-                                    toCursor.remove(0); // Remove cell you're in from list
+                        if (thing == null) {
+                            if (awaitedMoves.isEmpty()) {
+                                if (toCursor.isEmpty()) {
+                                    cursor = Coord.get(screenX, screenY);
+                                    toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
+                                    if (!toCursor.isEmpty()) {
+                                        toCursor.remove(0); // Remove cell you're in from list
+                                    }
                                 }
+                                awaitedMoves.addAll(toCursor);
+                                return true;
+                            } else {
+
                             }
-                            awaitedMoves.addAll(toCursor);
-                            return true;
+                        } else {
+                            List<Weapon> attackOptions = validAttackOptions(player, thing);
+                            if (attackOptions == null || attackOptions.isEmpty()) {
+                                message("Can't attack the " + thing.name + " from there.");
+                            } else {
+                                Weapon w = rng.getRandomElement(attackOptions);
+                                attack(thing, w);
+                                calcFOV(player.location.x, player.location.y);
+                                calcDijkstra();
+                                runTurn();
+                            }
                         }
                     } else {
-                        // clear cursor if lifted in space besides went down in
+                        // clear cursor if lifted in space other than the one it went down in
                         toCursor.clear();
                     }
                     break;
                 case Input.Buttons.RIGHT:
-                    Physical thing = map.contents[screenX][screenY].getCreature();
-                    if(thing == null)
+                    if (thing == null) {
                         return false;
-                    validAttackOptions(thing);
+                    }
+                    buildAttackOptions(thing);
                     menuLocation = showAttackOptions(thing, maneuverOptions);
-//                    attack(thing);
-//                    calcFOV(player.location.x, player.location.y);
-//                    calcDijkstra();
-//                    runTurn();
-
                     break;
             }
             return false;
@@ -2271,15 +2278,17 @@ public class Epigon extends Game {
                     screenX += player.location.x - (mapSize.gridWidth >> 1);
                     screenY += player.location.y - (mapSize.gridHeight >> 1);
                     cursor = Coord.get(screenX, screenY);
+                    toCursor.clear();
 
-                    if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
+                    if (map.contents[screenX][screenY].getCreature() != null) {
+                        return false; // touchUp will handle click on a creature
+                    }
+
+                    if (!map.inBounds(screenX, screenY) || map.fovResult[screenX][screenY] <= 0.0) {
                         // TODO - also don't show path that crosses unknown areas
-                        toCursor.clear(); // don't show path when mouse moves out of range or view
                         return false;
                     }
-                    contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
-                    cursor = Coord.get(screenX, screenY);
-                    toCursor.clear();
+
                     toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
                     if (!toCursor.isEmpty()) {
                         toCursor.remove(0);
@@ -2292,45 +2301,20 @@ public class Epigon extends Game {
             return false;
         }
 
-
-
-        // causes the path to the mouse position to become highlighted (toCursor contains a list of points that
-        // receive highlighting). Uses DijkstraMap.findPath() to find the path, which is surprisingly fast.
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
             screenX += player.location.x - (mapSize.gridWidth >> 1);
             screenY += player.location.y - (mapSize.gridHeight >> 1);
+            if (!map.inBounds(screenX, screenY)){
+                return false;
+            }
+            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
 
-            // Check if the cursor didn't move in grid space
+            // Check if the cursor moved in grid space
             if (cursor.x != screenX || cursor.y != screenY) {
                 toCursor.clear();
                 return true;
             }
-            /* TESTING - moved to down event
-            if (!awaitedMoves.isEmpty()) {
-                return false;
-            }
-            screenX += player.location.x - (mapSize.gridWidth >> 1);
-            screenY += player.location.y - (mapSize.gridHeight >> 1);
-
-            // Check if the cursor didn't move in grid space
-            if (cursor.x == screenX && cursor.y == screenY) {
-                return false;
-            }
-
-            if (screenX < 0 || screenX >= map.width || screenY < 0 || screenY >= map.height || map.fovResult[screenX][screenY] <= 0.0) {
-                // TODO - also don't show path that crosses unknown areas
-                toCursor.clear(); // don't show path when mouse moves out of range or view
-                return false;
-            }
-            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
-            cursor = Coord.get(screenX, screenY);
-            toCursor.clear();
-            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-            if (!toCursor.isEmpty()) {
-                toCursor.remove(0);
-            }
-            */
             return false;
         }
     });
