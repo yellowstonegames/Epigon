@@ -141,7 +141,7 @@ public class Epigon extends Game {
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
     private FallingHandler fallingHandler;
-    private GreasedRegion blocked, floors;
+    private GreasedRegion blockage, floors;
     private Coord[] floorCells;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private LOS los;
@@ -589,8 +589,7 @@ public class Epigon extends Game {
         toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
         los = new LOS(LOS.BRESENHAM);
-        blocked = new GreasedRegion(map.width, map.height);
-
+        blockage = new GreasedRegion(map.width, map.height);
         player.location = Coord.get(0, 0);
         changeLevel(depth);
 
@@ -992,8 +991,10 @@ public class Epigon extends Game {
         toPlayerDijkstra.resetMap();
         monsterDijkstra.clearGoals();
         monsterDijkstra.resetMap();
+        blockage.refill(map.fovResult, 0.0);
+        blockage.fringe8way();
         toPlayerDijkstra.setGoal(player.location);
-        toPlayerDijkstra.scan(blocked);
+        toPlayerDijkstra.scan(blockage);
     }
 
     /**
