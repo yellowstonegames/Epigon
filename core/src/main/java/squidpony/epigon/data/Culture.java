@@ -24,6 +24,7 @@ public class Culture implements Serializable {
         this.raw = raw;
         name = raw.name;
         messaging = new ProceduralMessaging(raw.hash64(), FakeLanguageGen.get(raw.language));
+        messaging.language.cacheLevel = 0;
     }
     public static final OrderedMap<String, Culture> cultures = new OrderedMap<>(RawCulture.ENTRIES.length);
     static {

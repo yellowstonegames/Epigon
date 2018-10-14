@@ -1295,7 +1295,12 @@ public class Epigon extends Game {
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             cancelMove();
-                            message(creature.creatureData.culture.messaging.transform(creature.getRandomElement(creature.creatureData.sayings), creature.name, creature.creatureData.genderPronoun, player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                            creature.creatureData.culture.messaging.language.shift = creature.nextLong();
+                            message(creature.creatureData.culture.messaging.transform(
+//                                    creature.creatureData.sayings[creature.creatureData.sayings.length - 1], 
+                                    creature.getRandomElement(creature.creatureData.sayings), 
+                                    creature.name, creature.creatureData.genderPronoun, 
+                                    player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         }
                         creature.wasSeen = true;
                     } else {

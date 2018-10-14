@@ -1,11 +1,12 @@
 package squidpony.epigon.data.raw;
 
-import static squidpony.squidmath.OrderedMap.makeMap;
+import squidpony.squidmath.NumberTools;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-import squidpony.squidmath.NumberTools;
+
+import static squidpony.squidmath.OrderedMap.makeMap;
 
 public class RawCreature implements Serializable {
   public static final long serialVersionUID = 1L;
@@ -20,7 +21,7 @@ public class RawCreature implements Serializable {
     new RawCreature("hobgoblin bomber", "A pyromaniac hobgoblin who loves to throw bombs, perhaps to the detriment of his sneakier allies.", "ǵ*", "CW Flush Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("grenade")}, 1, 9, 3, 5, 0, 5, 4, 0, 0, 0, 4, 7, 5, 3, 1, 47, makeMap("jester", 3), new String[] {"Mobyuld"}, new String[] {"The @name burn$ @my own hair a little.", "The @name imitate$ explosion noises!",
     "The @name cackle$ maniacally.", "The @name holler$, “[?]Oh yeah broski![?]”"}),
     new RawCreature("hobgoblin captain", "The boss around here, or so he says. Bigger than other hobgoblins, which is probably why they listen to him.", "ǧ*", "CW Drab Lime", RawWeapon.get("Mobyuld style"), new RawWeapon[] {RawWeapon.get("light crossbow"), RawWeapon.get("musket"), RawWeapon.get("katana")}, 6, 7, 4, 2, 0, 5, 0, 4, 0, 0, 3, 8, 6, 2, 6, 53, makeMap("marksman", 2, "duelist", 2), new String[] {"Mobyuld"}, new String[] {"The @name grumble$ loudly.", "The @name scowl$ at the ground.", "The @name strike$ a pose!",
-    "The @name shouts$, “[?]Get em brochachos![?]”"}),
+    "The @name shout$, “[?]Get em brochachos![?]”"}),
     new RawCreature("Hell lion", "Like a lion... from Hell. Big pointy teeth, serious claws, and fire magic.", "L*", "Coral Red", RawWeapon.get("fire magic"), new RawWeapon[] {RawWeapon.get("raking claws"), RawWeapon.get("mauling bite")}, 3, 9, 3, 2, 2, 6, 0, 0, 0, 0, 5, 20, 7, 6, 7, 70, makeMap("sorcerer", 3, "hunter", 4), new String[] {"Beast"}, new String[] {"The @name growl$...", "The @name hiss$$ with scorching breath!", "The @name purr$ with sinister pleasure.",
     "The @name arch$$ @my back and roar$!"}),
     new RawCreature("squishy", "A mobile slime mold the size of a small dog.", "s", "CW Faded Purple", RawWeapon.get("wriggling cilia"), new RawWeapon[] {RawWeapon.get("lashing tentacles")}, 7, 1, 1, 1, 6, 7, 4, 3, 0, 0, 3, 2, 3, 2, 5, 45, makeMap("scavenger", 3), new String[] {"Vroyuul"}, new String[] {"[/]squish...[/]"}),
