@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import squidpony.ArrayTools;
 import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
@@ -925,17 +926,21 @@ public class Epigon extends Game {
         FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1, checkY * 3 + 1, sight * 3, Radius.CIRCLE);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
-        Radiance fullRadiance = new Radiance(1f, SColor.FLOAT_WHITE);
 
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                radiance = odinView ? fullRadiance : map.contents[x][y].getAnyRadiance(); // slow to do odinView but shows all the colors
+                radiance = map.contents[x][y].getAnyRadiance();
                 if (radiance != null) {
                     FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.range * 3);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
                     mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
+        }
+        if(odinView)
+        {
+            SColor.colorLightingInto(map.tempColorLighting, ArrayTools.fill(0.6, map.width * 3, map.height * 3), FLOAT_WHITE);
+            SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
         }
 
         for (int x = 0; x < map.width; x++) {
@@ -956,7 +961,7 @@ public class Epigon extends Game {
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                if (odinView || map.fovResult[x][y] > 0) {
+                if (map.fovResult[x][y] > 0) {
                     //posrng.move(x, y);
 
                     //if (!odinView) { // Don't remember things seen in all-view (or do remember if you need mini-map)
