@@ -33,5 +33,27 @@ public enum WieldSlot implements BodySlot {
     public String toString() {
         return Utilities.lower(name(), "_");
     }
+
+    public String shortCode() {
+        switch (this) {
+            case FEET:
+                return "FT";
+            case HEAD:
+                return "HD";
+            case LEFT_FOOT:
+                return "LF";
+            case LEFT_HAND:
+                return "LH";
+            case NECK:
+                return "NK";
+            case RIGHT_FOOT:
+                return "RF";
+            case RIGHT_HAND:
+                return "RH";
+        }
+
+        return "NO";
+    }
+
     public static final WieldSlot[] ALL = values();
 }

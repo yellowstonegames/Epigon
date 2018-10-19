@@ -272,30 +272,55 @@ public class InfoHandler {
 
             yOffset += ClothingSlot.height + 4;
 
-            // Equipped items
-            Physical equippedRight = physical.creatureData.equippedBySlot.get(WieldSlot.RIGHT_HAND);
-            Physical equippedLeft = physical.creatureData.equippedBySlot.get(WieldSlot.LEFT_HAND);
-            Weapon currentWeapon;
-            //₩
-            put(3, yOffset, "RH:");
-            if (equippedRight != null && (currentWeapon = equippedRight.weaponData) != null) {
-                put(8, yOffset, equippedRight.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
-                        Utilities.progressiveLighten(equippedRight.color));
-            } else {
-                put(8, yOffset, "empty", Rating.NONE.color());
+            boolean offenseFound = false;
+            for (WieldSlot slot : WieldSlot.ALL) {
+                Physical equipped = physical.creatureData.equippedBySlot.get(slot);
+                if (equipped == null){
+                    continue;
+                }
+                put(3, yOffset, slot.shortCode());
+                putWeaponInfo(8, yOffset, physical, equipped);
+
+                yOffset++;
+                offenseFound = true;
             }
 
-            put(3, yOffset + 1, "LH:");
-            if (equippedLeft != null && (currentWeapon = equippedLeft.weaponData) != null) {
-                put(8, yOffset + 1, equippedLeft.name + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon),
-                        Utilities.progressiveLighten(equippedLeft.color));
-            } else {
-                put(8, yOffset + 1, "empty", Rating.NONE.color());
+            if (physical.creatureData.weaponChoices != null && physical.creatureData.weaponChoices.items() != null && !physical.creatureData.weaponChoices.items().isEmpty()) {
+                Weapon currentWeapon = physical.creatureData.weaponChoices.items().first();
+                put(3, yOffset, "Fighting unarmed using " + currentWeapon.rawWeapon.name + getRangeText(currentWeapon.rawWeapon.range) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
+            } else if (!offenseFound) {
+                put(3, yOffset, "Offenseless");
             }
-            currentWeapon = physical.creatureData.weaponChoices.items().first(); // TODO - handle case with no weapon choices
-            put(3, yOffset + 2, "Fighting unarmed using " + currentWeapon.rawWeapon.name + " ₩" +
-                    physical.creatureData.skillWithWeapon(currentWeapon));
         }
+    }
+
+    private void putWeaponInfo(int x, int y, Physical physical, Physical weapon) {
+        if (weapon == null || weapon.weaponData == null) {
+            put(x, y, "empty", Rating.NONE.color());
+            return;
+        }
+
+        //₩ - for skill annotation
+        Weapon weaponData = weapon.weaponData;
+        // TODO - adjust for width available
+        String rangeText = getRangeText(weaponData.rawWeapon.range);
+        String text = weapon.name + rangeText + " ₩" + physical.creatureData.skillWithWeapon(weaponData);
+        put(x, y, text, Utilities.progressiveLighten(weapon.color));
+    }
+
+    private String getRangeText(Double range) {
+        int intRange = (int) Math.round(range);
+        String rangeText;
+        // Check if it's already an integer or if it would be a 0 after the decimal from rounding
+        if (intRange < 1 || Double.isInfinite(range)) { // TODO - is infinite an error or should it be treated as infinite long range?
+            rangeText = "";// TODO - indicate that it's melee range only?
+        } else if (intRange * 10 % 10 == 0) {
+            rangeText = " R" + Integer.toString(intRange);
+        } else {
+            rangeText = String.format(" R%.1f", range);
+        }
+
+        return rangeText;
     }
 
     private void drawFigure(Creature data, int startY) {
