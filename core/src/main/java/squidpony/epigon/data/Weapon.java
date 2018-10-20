@@ -278,6 +278,7 @@ public class Weapon {
                 technique = new Technique(raw.name + " attack", new ConeAOE(Coord.get(-1, -1),
                         (int) (raw.range), 0.0, raw.area * 22.5 + 25, Radius.SQUARE));
                 break;
+            case MULTI: 
             default:
                 technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
                         1, (int) raw.range));

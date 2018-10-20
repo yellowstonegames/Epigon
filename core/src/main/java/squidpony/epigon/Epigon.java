@@ -682,7 +682,7 @@ public class Epigon extends Game {
                                 amt *= -1; // flip sign for output message
                                 if (player.stats.get(Stat.VIGOR).actual() <= 0.0) {
                                     if (ao.crit) {
-                                        message(Messaging.transform("The " + creature.name + Utilities.colorize(" brutally ", SColor.BLOOD) + "slay$ you with "
+                                        message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
                                         message(Messaging.transform("The " + creature.name + " slay$ you with "
@@ -692,7 +692,7 @@ public class Epigon extends Game {
                                     if (ao.crit) {
                                         if (map.fovResult[c.x][c.y] > 0)
                                             mapSLayers.wiggle(player.appearance, 0.4f);
-                                        message(Messaging.transform("The " + creature.name + Utilities.colorize(" critically ", SColor.CW_BRIGHT_ORANGE) + element.verb + " you for "
+                                        message(Messaging.transform("The " + creature.name + "[CW Bright Orange] critically[] " + element.verb + " you for "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
                                         message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "

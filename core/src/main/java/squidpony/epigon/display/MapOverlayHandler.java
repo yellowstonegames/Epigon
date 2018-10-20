@@ -558,7 +558,7 @@ public class MapOverlayHandler {
         if (p.mainMaterial == null || p.weaponData == null) {
             name = p.name;
         } else {
-            name = p.name + Utilities.getRangeText(p.weaponData.rawWeapon.range) + " ₩" + player.creatureData.skillWithWeapon(p.weaponData);
+            name = p.name + Utilities.getRangeText(p.weaponData) + " ₩" + player.creatureData.skillWithWeapon(p.weaponData);
         }
 
         int length = name.length();

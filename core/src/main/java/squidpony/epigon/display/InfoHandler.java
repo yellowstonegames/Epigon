@@ -296,7 +296,7 @@ public class InfoHandler {
 
             if (physical.creatureData.weaponChoices != null && physical.creatureData.weaponChoices.items() != null && !physical.creatureData.weaponChoices.items().isEmpty()) {
                 Weapon currentWeapon = physical.creatureData.weaponChoices.items().first();
-                put(3, yOffset, "Fighting unarmed using " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon.rawWeapon.range) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
+                put(3, yOffset, "BARE " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
             } else if (!offenseFound) {
                 put(3, yOffset, "Offenseless");
             }
@@ -312,7 +312,7 @@ public class InfoHandler {
         //₩ - for skill annotation
         Weapon weaponData = weapon.weaponData;
         // TODO - adjust for width available
-        String rangeText = Utilities.getRangeText(weaponData.rawWeapon.range);
+        String rangeText = Utilities.getRangeText(weaponData);
         String text = weapon.name + rangeText + " ₩" + physical.creatureData.skillWithWeapon(weaponData);
         put(x, y, text, Utilities.progressiveLighten(weapon.color));
     }

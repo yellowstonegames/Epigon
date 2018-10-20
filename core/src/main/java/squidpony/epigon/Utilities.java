@@ -3,6 +3,8 @@ package squidpony.epigon;
 import com.badlogic.gdx.graphics.Color;
 import regexodus.Matcher;
 import regexodus.Pattern;
+import squidpony.StringKit;
+import squidpony.epigon.data.Weapon;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
@@ -10,7 +12,6 @@ import squidpony.squidmath.LightRNG;
 import squidpony.squidmath.RNG;
 
 import java.util.Collection;
-import squidpony.StringKit;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.
@@ -234,19 +235,10 @@ public class Utilities {
         return SColor.toEditedFloat(color, 0f, 0f, (1.0f - SColor.lumaOfFloat(color)) * 0.4f, 1f);
     }
     
-    public static String getRangeText(Double range) {
-        int intRange = (int) Math.round(range);
-        String rangeText;
-        // Check if it's already an integer or if it would be a 0 after the decimal from rounding
-        if (intRange < 1 || Double.isInfinite(range)) { // TODO - is infinite an error or should it be treated as infinite long range?
-            rangeText = "";// TODO - indicate that it's melee range only?
-        } else if (intRange * 10 % 10 == 0) {
-            rangeText = " R" + Integer.toString(intRange);
-        } else {
-            rangeText = String.format(" R%.1f", range);
-        }
-
-        return rangeText;
+    // I don't think range is ever a non-integer currently...
+    public static String getRangeText(Weapon weapon) {
+        int intRange = (int) Math.round(weapon.rawWeapon.range) + 1;
+        return  " " + Weapon.shapes.keyAt(weapon.shape) + " " + intRange;
     }
 
     /*
