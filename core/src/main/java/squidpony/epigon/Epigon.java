@@ -682,7 +682,7 @@ public class Epigon extends Game {
                                 amt *= -1; // flip sign for output message
                                 if (player.stats.get(Stat.VIGOR).actual() <= 0.0) {
                                     if (ao.crit) {
-                                        message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
+                                        message(Messaging.transform("The " + creature.name + Utilities.colorize(" brutally ", SColor.BLOOD) + "slay$ you with "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
                                         message(Messaging.transform("The " + creature.name + " slay$ you with "
@@ -692,7 +692,7 @@ public class Epigon extends Game {
                                     if (ao.crit) {
                                         if (map.fovResult[c.x][c.y] > 0)
                                             mapSLayers.wiggle(player.appearance, 0.4f);
-                                        message(Messaging.transform("The " + creature.name + " [CW Bright Orange]critically[] " + element.verb + " you for "
+                                        message(Messaging.transform("The " + creature.name + Utilities.colorize(" critically ", SColor.CW_BRIGHT_ORANGE) + element.verb + " you for "
                                                 + amt + " " + element.styledName + " damage!", player.name, Messaging.NounTrait.NO_GENDER));
                                     } else {
                                         message(Messaging.transform("The " + creature.name + " " + element.verb + " you for "
@@ -1700,7 +1700,7 @@ public class Epigon extends Game {
                     calcDijkstra();
                     break;
                 case GATHER: // Pick everything nearby up
-                    message("Picking up all nearby small things");
+                    List<Physical> pickedUp = new ArrayList<>();
                     for (Direction dir : Direction.values()) {
                         Coord c = player.location.translate(dir);
                         if (map.inBounds(c) && map.fovResult[c.x][c.y] > 0) {
@@ -1713,9 +1713,15 @@ public class Epigon extends Game {
                                     continue;
                                 }
                                 player.addToInventory(p);
+                                pickedUp.add(p);
                                 it.remove();
                             }
                         }
+                    }
+                    if (pickedUp.isEmpty()) {
+                        message("Nothing to pick up nearby.");
+                    } else {
+                        message(pickedUp.stream().map(p -> Utilities.colorize(p.name, p.rarity.color())).collect(Collectors.joining(", ", "Picked up ", ".")));
                     }
                     break;
                 case EQUIPMENT:
@@ -2260,12 +2266,12 @@ public class Epigon extends Game {
                 return false;
             }
             contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
+            infoHandler.setTarget(map.contents[screenX][screenY].getCreature());
 
             if (!awaitedMoves.isEmpty()) {
                 return false;
             }
 
-            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
             cursor = Coord.get(screenX, screenY);
             toCursor.clear();
             toPlayerDijkstra.findPathPreScanned(toCursor, cursor);

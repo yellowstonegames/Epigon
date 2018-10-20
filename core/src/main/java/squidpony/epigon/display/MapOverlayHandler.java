@@ -553,9 +553,14 @@ public class MapOverlayHandler {
             quantWidth = (int)(Math.log10(quantity)) +3; // digits in quantity plus 'x' plus space
             allowedWidth -= quantWidth; // log10 gives us the number of digits - 1 in base 10
         }
-        //.creatureData.skillWithWeapon(currentWeapon)
-        String name = p.mainMaterial == null ? p.name : p.weaponData == null ? p.name
-                : p.name + " ₩" + player.creatureData.skillWithWeapon(p.weaponData);  
+
+        String name;
+        if (p.mainMaterial == null || p.weaponData == null) {
+            name = p.name;
+        } else {
+            name = p.name + Utilities.getRangeText(p.weaponData.rawWeapon.range) + " ₩" + player.creatureData.skillWithWeapon(p.weaponData);
+        }
+
         int length = name.length();
         if (length > allowedWidth && quantWidth < 1) {
             return name.substring(0, allowedWidth - 1) + "…";

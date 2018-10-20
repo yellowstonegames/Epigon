@@ -92,7 +92,11 @@ public class InfoHandler {
     }
 
     public void setTarget(Physical target) {
+        if (this.target == target){
+            return;
+        }
         this.target = target;
+        updateDisplay();
     }
 
     private void clear() {
@@ -121,7 +125,7 @@ public class InfoHandler {
             case TARGET_FULL_STATS:
             case TARGET_HEALTH_AND_ARMOR:
                 if (target != null) {
-                    title = target.name + " " + title;
+                    title = title.replace("Target", Utilities.caps(target.name));
                 }
                 break;
         }
@@ -251,7 +255,12 @@ public class InfoHandler {
             return;
         }
         int offset = 1;
-        showStats(offset, Stat.allStats, physical);
+        for (String key : Stat.groups.keySet()) { // TODO - it appear that getting the entry pairs is not typed, should they be?
+            put(width / 2, offset, Utilities.capitalizeFirst(key), SColor.FLAX);
+            offset++;
+            showStats(offset, Stat.groups.get(key), physical);
+            offset += Stat.groups.get(key).length + 1;
+        }
     }
 
     private void infoHealthAndArmor(Physical physical) {
@@ -287,7 +296,7 @@ public class InfoHandler {
 
             if (physical.creatureData.weaponChoices != null && physical.creatureData.weaponChoices.items() != null && !physical.creatureData.weaponChoices.items().isEmpty()) {
                 Weapon currentWeapon = physical.creatureData.weaponChoices.items().first();
-                put(3, yOffset, "Fighting unarmed using " + currentWeapon.rawWeapon.name + getRangeText(currentWeapon.rawWeapon.range) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
+                put(3, yOffset, "Fighting unarmed using " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon.rawWeapon.range) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
             } else if (!offenseFound) {
                 put(3, yOffset, "Offenseless");
             }
@@ -303,24 +312,9 @@ public class InfoHandler {
         //₩ - for skill annotation
         Weapon weaponData = weapon.weaponData;
         // TODO - adjust for width available
-        String rangeText = getRangeText(weaponData.rawWeapon.range);
+        String rangeText = Utilities.getRangeText(weaponData.rawWeapon.range);
         String text = weapon.name + rangeText + " ₩" + physical.creatureData.skillWithWeapon(weaponData);
         put(x, y, text, Utilities.progressiveLighten(weapon.color));
-    }
-
-    private String getRangeText(Double range) {
-        int intRange = (int) Math.round(range);
-        String rangeText;
-        // Check if it's already an integer or if it would be a 0 after the decimal from rounding
-        if (intRange < 1 || Double.isInfinite(range)) { // TODO - is infinite an error or should it be treated as infinite long range?
-            rangeText = "";// TODO - indicate that it's melee range only?
-        } else if (intRange * 10 % 10 == 0) {
-            rangeText = " R" + Integer.toString(intRange);
-        } else {
-            rangeText = String.format(" R%.1f", range);
-        }
-
-        return rangeText;
     }
 
     private void drawFigure(Creature data, int startY) {

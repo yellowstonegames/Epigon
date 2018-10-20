@@ -10,6 +10,7 @@ import squidpony.squidmath.LightRNG;
 import squidpony.squidmath.RNG;
 
 import java.util.Collection;
+import squidpony.StringKit;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.
@@ -76,6 +77,26 @@ public class Utilities {
         }
         return b;
     }
+
+    public static String colorize(String text, Color color) {
+        return colorize(text, color, null);
+    }
+
+    public static String colorize(String text, Color color, Color defaultColor) {
+        if (text == null || text.isEmpty() || color == null) {
+            return "";
+        }
+
+        String ret = "[#" + StringKit.hex(Color.rgba8888(color)) + "]" + text;
+        if (defaultColor != null) {
+            ret += "[#" + StringKit.hex(Color.rgba8888(defaultColor)) + "]";
+        } else {
+            ret += "[]";
+        }
+
+        return ret;
+    }
+
     public static String capitalizeFirst(final CharSequence original)
     {
         if (original == null || original.length() <= 0) {
@@ -146,20 +167,6 @@ public class Utilities {
         return sb.toString();
     }
 
-//    public static String caps(String input, String delimiter) {
-//        if (input == null || input.isEmpty()) {
-//            return input;
-//        }
-//
-//        return Arrays.stream(input.split(delimiter))
-//            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
-//            .collect(Collectors.joining(" "));
-//    }
-//
-//    public static String caps(String input) {
-//        return caps(input, " ");
-//    }
-
     /**
      * Provides a String full of lines appropriate for the direction. If a stable set is desired, using the first
      * character from the set returned will work nicely.
@@ -225,6 +232,21 @@ public class Utilities {
     public static float progressiveLighten(float color)
     {
         return SColor.toEditedFloat(color, 0f, 0f, (1.0f - SColor.lumaOfFloat(color)) * 0.4f, 1f);
+    }
+    
+    public static String getRangeText(Double range) {
+        int intRange = (int) Math.round(range);
+        String rangeText;
+        // Check if it's already an integer or if it would be a 0 after the decimal from rounding
+        if (intRange < 1 || Double.isInfinite(range)) { // TODO - is infinite an error or should it be treated as infinite long range?
+            rangeText = "";// TODO - indicate that it's melee range only?
+        } else if (intRange * 10 % 10 == 0) {
+            rangeText = " R" + Integer.toString(intRange);
+        } else {
+            rangeText = String.format(" R%.1f", range);
+        }
+
+        return rangeText;
     }
 
     /*

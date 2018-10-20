@@ -3,6 +3,7 @@ package squidpony.epigon.data.quality;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.StringKit;
 import squidpony.epigon.Radiance;
+import squidpony.epigon.Utilities;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Modification;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -109,7 +110,7 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     Element(Element parent, String name, String verb, Color color, float flicker, float strobe) {
         this.parent = parent;
         this.name = name == null || name.isEmpty() ? name().toLowerCase() : name;
-        this.styledName = "[#"+ StringKit.hex(Color.rgba8888(color)) + "]" + this.name + "[White]";
+        this.styledName = Utilities.colorize(name, color);
         this.verb = verb;
         this.color = color;
         this.floatColor = color.toFloatBits();

@@ -4,6 +4,7 @@ import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 
 import static squidpony.epigon.data.CalcStat.*;
+import squidpony.squidmath.OrderedMap;
 
 /**
  * Represents all of the possible base stats.
@@ -87,8 +88,19 @@ public enum Stat implements ConstantKey {
 
     public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, /*CHARM, INTELLECT,*/ SPIRIT, ENDURANCE};
 
-    public static final ConstantKey[] allStats = {PRECISION, DAMAGE, INFLUENCE, CRIT, EVASION, DEFENSE,
-            LUCK, STEALTH, QUICKNESS, RANGE, AREA, VIGOR, ENDURANCE, SPIRIT, SANITY};
+    public static final ConstantKey[] combatStats = {PRECISION, DAMAGE, INFLUENCE, CRIT, EVASION, DEFENSE,
+        LUCK, STEALTH, QUICKNESS, RANGE, AREA};
+
+    public static final OrderedMap<String, ConstantKey[]> groups;
+
+    static {
+        groups = new OrderedMap<>();
+        groups.putAll(new String[]{
+            "healths", "needs", "senses", "utilities", "combat"
+        }, new ConstantKey[][]{
+            healths, needs, senses, utilities, combatStats
+        });
+    }
 
     private final String nick;
     private final String description;
