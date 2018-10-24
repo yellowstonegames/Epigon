@@ -35,7 +35,8 @@ public class Radiance {
      * The rate of non-random continuous change to radiance range, like a mechanical strobe effect.
      */
     public float strobe = 0f;
-
+    
+    public float delay = 0f;
     /**
      * A temporary increase to the minimum radiance range, meant to brighten a glow during an effect.
      * This should be a float between 0f and 1f, with 0f meaning no change and 1f meaning always max radius.
@@ -93,9 +94,23 @@ public class Radiance {
         final float time = (System.currentTimeMillis() & 0x3ffffL) * 0x1.9p-9f;
         float current = range;
         if(flicker != 0f) 
-            current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker) * 0.25f + 0.75f;
+            current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker + delay) * 0.25f + 0.75f;
         if(strobe != 0f)
-            current *= NumberTools.swayTight(time * strobe) * 0.25f + 0.75f;
+            current *= NumberTools.swayTight(time * strobe + delay) * 0.25f + 0.75f;
         return Math.max(current, range * flare);
     }
+    
+    public static Radiance[] makeChain(int length, float range, float color, float strobe)
+    {
+        if(length <= 1)
+            return new Radiance[]{new Radiance(range, color, 0f, strobe, 0f)};
+        Radiance[] chain = new Radiance[length];
+        float d = -2f / (length);
+        for (int i = 0; i < length; i++) {
+            chain[i] = new Radiance(range, color, 0f, strobe, 0f);
+            chain[i].delay = d * i;
+        }
+        return chain;
+    }
+    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 1f); 
 }

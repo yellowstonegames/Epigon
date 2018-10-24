@@ -1271,6 +1271,29 @@ public class Epigon extends Game {
                 }
             }
         }
+        if(!showingMenu) {
+            Coord pos;
+            Direction dir;
+            for (int i = 0; i < toCursor.size(); i++) {
+                pos = toCursor.get(i);
+                if(i == 0)
+                    dir = Direction.getRoughDirection(player.location.x - pos.x, player.location.y - pos.y);
+                else 
+                    dir = Direction.getRoughDirection(toCursor.get(i - 1).x - pos.x, toCursor.get(i - 1).y - pos.y);
+                radiance = Radiance.softWhiteChain[i * 3 & 7];
+                FOV.reuseFOV(map.triResistances, map.tempFOV, pos.x * 3 + 1, pos.y * 3 + 1, radiance.currentRange() * 2.0);
+                SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
+                radiance = Radiance.softWhiteChain[i * 3 - 1 & 7];
+                FOV.reuseFOV(map.triResistances, map.tempFOV, pos.x * 3 + 1 + dir.deltaX, pos.y * 3 + 1 + dir.deltaY, radiance.currentRange() * 2.0);
+                SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
+                radiance = Radiance.softWhiteChain[i * 3 - 2 & 7];
+                FOV.reuseFOV(map.triResistances, map.tempFOV, MathUtils.clamp(pos.x * 3 + 1 + dir.deltaX * 2, 0, map.width * 3), MathUtils.clamp(pos.y * 3 + 1 + dir.deltaY * 2, 0, map.height * 3), radiance.currentRange() * 2.0);
+                SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
+                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
+            }
+        }
 
         Physical creature;
         for (int x = 0; x < map.width; x++) {
@@ -1324,20 +1347,20 @@ public class Epigon extends Game {
         mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
-        if (!showingMenu) {
-            for (int i = 0; i < toCursor.size(); i++) {
-                Coord c = toCursor.get(i);
-                Direction dir;
-                if (i == toCursor.size() - 1) {
-                    dir = Direction.NONE; // last spot shouldn't have arrow
-                } else if (i == 0) {
-                    dir = Direction.toGoTo(player.location, c);
-                } else {
-                    dir = Direction.toGoTo(toCursor.get(i - 1), c);
-                }
-                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE.toFloatBits(), 0f, 2);
-            }
-        }
+//        if (!showingMenu) {
+//            for (int i = 0; i < toCursor.size(); i++) {
+//                Coord c = toCursor.get(i);
+//                Direction dir;
+//                if (i == toCursor.size() - 1) {
+//                    dir = Direction.NONE; // last spot shouldn't have arrow
+//                } else if (i == 0) {
+//                    dir = Direction.toGoTo(player.location, c);
+//                } else {
+//                    dir = Direction.toGoTo(toCursor.get(i - 1), c);
+//                }
+//                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE.toFloatBits(), 0f, 2);
+//            }
+//        }
     }
 
     public void showFallingGameOver() {
