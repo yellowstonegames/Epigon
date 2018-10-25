@@ -8,13 +8,9 @@ import squidpony.epigon.GauntRNG;
 import squidpony.epigon.Radiance;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
-import squidpony.epigon.data.RecipeBlueprint;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.ClothingSlot;
-import squidpony.epigon.data.trait.Creature;
-import squidpony.epigon.data.trait.Grouping;
-import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.data.trait.Profession;
+import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
 
@@ -26,8 +22,6 @@ import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
 import static squidpony.epigon.data.Physical.basePhysical;
-import squidpony.epigon.data.quality.Metal;
-import squidpony.epigon.data.trait.Wearable;
 
 /**
  * Contains objects to use to test out connections.
@@ -79,7 +73,7 @@ public class HandBuilt {
     
     public Physical torch;
 
-    public Physical magma;
+    public Physical lava;
 
     // Cooking skills
 //    public Skill cooking = new Skill("cooking");
@@ -129,6 +123,8 @@ public class HandBuilt {
     public Ability cookSteak;
 
     public Profession chef;
+    public Physical water;
+    public Physical mud;
 
     public HandBuilt() {
         this(new RecipeMixer());
@@ -144,7 +140,7 @@ public class HandBuilt {
         nan = Physical.makeBasic("nan", 'ᶯ', SColor.DB_PLATINUM);
         nan.description = "currency of power";
 
-        money = Physical.makeBasic("Gold Coin", '$', SColor.CW_GOLD);
+        money = Physical.makeBasic("gold coin", '$', SColor.CW_GOLD);
         money.groupingData = new Grouping(1);
 
         baseFood = Physical.makeBasic("fūd", '℉', SColor.AMBER_DYE);
@@ -157,9 +153,22 @@ public class HandBuilt {
         torch.description = "burning rags on a stick";
         torch.radiance = new Radiance(6f, SColor.CREAM.toFloatBits(), 0.71f, 0f);
 
-        magma = Physical.makeBasic("magma", '#', Element.FIRE.color);
-        magma.description = "molten stone";
-        magma.radiance = new Radiance(3, magma.color, 0.2f, 0.1f, 0.67f);
+        lava = Physical.makeBasic("lava", '£', Element.FIRE.color);
+        lava.description = "molten stone";
+        lava.radiance = new Radiance(1.6f, lava.color, 0.18f, 0f);
+        lava.attached = true; // pick up the FLESH-SEARING MOLTEN CORE OF THE PLANET? n/n
+        
+        water = Physical.makeBasic("water", '~', SColor.AZUL);
+        water.description = "shallow water";
+        water.attached = true;
+        water.blocking = false;
+        water.stats.put(Stat.OPACITY, LiveValue.ZERO);
+        
+        mud = Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN);
+        mud.description = "dirty slick mud fit for some wrestling";
+        mud.attached = true;
+        mud.blocking = false;
+        mud.stats.put(Stat.OPACITY, LiveValue.ZERO);
 
         initAbilities();
         initProfessions();
@@ -175,7 +184,7 @@ public class HandBuilt {
         makeWall.large = true;
         makeWall.attached = true;
 
-        emptySpace = Physical.makeBasic("ø", ' ', SColor.TRANSPARENT);
+        emptySpace = Physical.makeBasic("∅", ' ', SColor.TRANSPARENT);
     }
 
     private void initAbilities() {

@@ -7,13 +7,16 @@ import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.mapping.*;
+import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
+import squidpony.squidgrid.mapping.DungeonGenerator;
+import squidpony.squidgrid.mapping.FlowingCaveGenerator;
+import squidpony.squidgrid.mapping.SerpentMapGenerator;
+import squidpony.squidgrid.mapping.styled.TilesetType;
 import squidpony.squidmath.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import squidpony.squidgrid.mapping.styled.TilesetType;
 
 /**
  * Creates a world.
@@ -29,8 +32,10 @@ public class WorldGenerator {
     private StatefulRNG rng;
     private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
+    private boolean hellscape = false;
 
     public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
+        hellscape = handBuilt.rng.next(3) == 0;
         EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
         EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
 
@@ -311,19 +316,11 @@ public class WorldGenerator {
     }
 
     private void placeWater(EpiTile tile) {
-        // TODO - make water in HandBuilt to use and check against
-        Physical water = RecipeMixer.buildPhysical(Physical.makeBasic("water", '~', SColor.AZUL));
-        water.blocking = false;
-        water.stats.put(Stat.OPACITY, LiveValue.ZERO);
-        tile.floor = water;
+        tile.floor = RecipeMixer.buildPhysical(hellscape ? handBuilt.lava : handBuilt.water);
     }
 
     private void placeMud(EpiTile tile) {
-        // TODO - make mud in HandBuilt to use and check against
-        Physical mud = RecipeMixer.buildPhysical(Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN));
-        mud.blocking = false;
-        mud.stats.put(Stat.OPACITY, LiveValue.ZERO);
-        tile.floor = mud;
+        tile.floor = RecipeMixer.buildPhysical(handBuilt.mud);
     }
 
     private Physical getWall(Stone stone) {
@@ -704,7 +701,7 @@ public class WorldGenerator {
         //choose area for moat
         int distance = 8; // space between points
         List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
-        castle.moat.fill(false);
+        castle.moat.clear();
         castle.moat = connectPoints(castle.moat, corners);
 
         castle.moat.expand8way();
