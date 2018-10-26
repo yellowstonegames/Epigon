@@ -316,7 +316,8 @@ public class WorldGenerator {
     }
 
     private void placeWater(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(hellscape ? handBuilt.lava : handBuilt.water);
+        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
+//        tile.floor = RecipeMixer.buildPhysical(hellscape ? handBuilt.lava : handBuilt.water);
     }
 
     private void placeMud(EpiTile tile) {
