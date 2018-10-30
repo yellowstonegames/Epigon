@@ -939,8 +939,9 @@ public class Epigon extends Game {
                 h = Math.min(basis[0][0].length, other[0][0].length);
         flare = flare + 1f;
         float b0, b1, o0, o1;
+        centerY = Math.max(0, centerY - (height + 3 >> 1));
         for (int x = Math.max(0, centerX - (width + 3 >> 1)), ix = 0; x < w && ix < width; x++, ix++) {
-            for (int y = Math.max(0, centerY - (height + 3 >> 1)), iy = 0; y < h && iy < height; y++, iy++) {
+            for (int y = centerY, iy = 0; y < h && iy < height; y++, iy++) {
                 b0 = basis[0][x][y];
                 b1 = basis[1][x][y];
                 o0 = other[0][x][y];
@@ -950,11 +951,10 @@ public class Epigon extends Game {
                     basis[0][x][y] = Math.min(1.0f, b0 + o0 * flare);
                 } else {
                     if (o1 != FLOAT_WHITE) {
-                        float change = (o0 - b0) * 0.5f + 0.5f;
                         final int s = NumberTools.floatToIntBits(b1), e = NumberTools.floatToIntBits(o1),
                             rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
                             re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
-                        change *= ae * 0.007874016f;
+                        final float change = ((o0 - b0) * 0.5f + 0.5f) * ae * 0.007874016f;
                         basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
                             | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
                             | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
@@ -1312,7 +1312,7 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3, py = player.location.y * 3;
+        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3+1, py = player.location.y * 3+1;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
