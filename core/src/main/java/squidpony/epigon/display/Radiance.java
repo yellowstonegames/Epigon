@@ -1,6 +1,7 @@
-package squidpony.epigon;
+package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.StringKit;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.NumberTools;
 
@@ -8,8 +9,14 @@ import java.io.Serializable;
 
 /**
  * Grouping of qualities related to glow and light emission. When a Radiance variable in some object is null, it
- * means that object doesn't emit light; if a Radiance variable is non-null, it still might not emit light.  
- * This object has 6 fields:
+ * means that object doesn't emit light; if a Radiance variable is non-null, it will probably emit light unless the
+ * color of light it produces is fully transparent. Light may take up one cell or extend into nearby cells, and the
+ * radius may change over time in up to two patterns (flicker, which randomly increases and decreases lighting radius,
+ * and/or strobe, which increases and decreases lighting radius in an orderly retract-expand-retract-expand pattern).
+ * You can set the {@link #flare} variable to some value between 0.0f and 1.0f to temporarily expand the minimum radius
+ * for strobe and/or flare, useful for gameplay-dependent brightening of a Radiance.
+ * <br>
+ * This object has 6 fields, each a float:
  * <ul>
  * <li>range, how far the light extends; 0f is "just this cell"</li>
  * <li>color, the color of the light as a float; typically opaque and lighter than the glowing object's color</li>
@@ -30,23 +37,23 @@ public class Radiance implements Serializable {
      * How far the radiated light extends; 0f is "just this cell", anything higher can go into neighboring cells.
      * This is permitted to be a non-integer value, which will make this extend into further cells partially.
      */
-    public float range = 0f;
+    public float range;
     /**
      * The color of light as a float; typically opaque and lighter than the glowing object's symbol.
      */
-    public float color = SColor.FLOAT_WHITE;
+    public float color;
     /**
      * The rate of random continuous change to radiance range, like the light from a campfire. The random component of
      * the change is determined by the {@link System#identityHashCode(Object)} of this Radiance, which will probably
      * make all flicker effects different when flicker is non-0.
      */
-    public float flicker = 0f;
+    public float flicker;
     /**
      * The rate of non-random continuous change to radiance range, like a mechanical strobe effect. This looks like a
      * strobe light when the value is high enough, but at lower values it will smoothly pulse, which can be less
      * distracting to players.
      */
-    public float strobe = 0f;
+    public float strobe;
 
     /**
      * A time delay that applies to when the strobe and flicker effects change; useful with strobe to make a strobe
@@ -54,18 +61,19 @@ public class Radiance implements Serializable {
      * range for delay should be considered 0f to 1f, with 0f the default (no delay) and values between 0 and 1f that
      * fraction of a full strobe delayed from that default.
      */
-    public float delay = 0f;
+    public float delay;
     /**
      * A temporary increase to the minimum radiance range, meant to brighten a glow during an effect.
      * This should be a float between 0f and 1f, with 0f meaning no change and 1f meaning always max radius.
      */
-    public float flare = 0f;
+    public float flare;
 
     /**
      * All-default constructor; makes a single-cell unchanging white light.
      */
     public Radiance()
     {
+        this(0f, SColor.FLOAT_WHITE, 0f, 0f, 0f, 0f);
     }
 
     /**
@@ -74,7 +82,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range)
     {
-        this.range = range;
+        this(range, SColor.FLOAT_WHITE, 0f, 0f, 0f, 0f);
     }
 
     /**
@@ -84,8 +92,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range, float color)
     {
-        this.range = range;
-        this.color = color;
+        this(range, color, 0f, 0f, 0f, 0f);
     }
 
     /**
@@ -97,9 +104,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range, float color, float flicker)
     {
-        this.range = range;
-        this.color = color;
-        this.flicker = flicker;
+        this(range, color, flicker, 0f, 0f, 0f);
     }
     /**
      * Makes a flickering light with the given color (as a packed float) and the specified range in cells; the flicker
@@ -113,10 +118,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range, float color, float flicker, float strobe)
     {
-        this.range = range;
-        this.color = color;
-        this.flicker = flicker;
-        this.strobe = strobe;
+        this(range, color, flicker, strobe, 0f, 0f);
     }
     /**
      * Makes a flickering light with the given color (as a libGDX Color) and the specified range in cells; the flicker
@@ -130,7 +132,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range, Color color, float flicker, float strobe)
     {
-        this(range, color.toFloatBits(), flicker, strobe);
+        this(range, color.toFloatBits(), flicker, strobe, 0f, 0f);
     }
     
     /**
@@ -148,11 +150,7 @@ public class Radiance implements Serializable {
      */
     public Radiance(float range, float color, float flicker, float strobe, float delay)
     {
-        this.range = range;
-        this.color = color;
-        this.flicker = flicker;
-        this.strobe = strobe;
-        this.delay = delay;
+        this(range, color, flicker, strobe, delay, 0f);
     }
     /**
      * Makes a flickering light with the given color (as a packed float) and the specified range in cells; the flicker
@@ -177,8 +175,8 @@ public class Radiance implements Serializable {
         this.color = color;
         this.flicker = flicker;
         this.strobe = strobe;
-        this.flare = flare;
         this.delay = delay;
+        this.flare = flare;
     }
 
     /**
@@ -229,5 +227,67 @@ public class Radiance implements Serializable {
         }
         return chain;
     }
-    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 1f); 
+    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 1f);
+
+    @Override
+    public String toString() {
+        return "Radiance{" +
+                "range=" + range +
+                ", color=" + color +
+                ", flicker=" + flicker +
+                ", strobe=" + strobe +
+                ", delay=" + delay +
+                ", flare=" + flare +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Radiance radiance = (Radiance) o;
+
+        if (Float.compare(radiance.range, range) != 0) return false;
+        if (Float.compare(radiance.color, color) != 0) return false;
+        if (Float.compare(radiance.flicker, flicker) != 0) return false;
+        if (Float.compare(radiance.strobe, strobe) != 0) return false;
+        if (Float.compare(radiance.delay, delay) != 0) return false;
+        return Float.compare(radiance.flare, flare) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (range != +0.0f ? NumberTools.floatToIntBits(range) : 0);
+        result = 31 * result + (color != +0.0f ? NumberTools.floatToIntBits(color) : 0) | 0;
+        result = 31 * result + (flicker != +0.0f ? NumberTools.floatToIntBits(flicker) : 0) | 0;
+        result = 31 * result + (strobe != +0.0f ? NumberTools.floatToIntBits(strobe) : 0) | 0;
+        result = 31 * result + (delay != +0.0f ? NumberTools.floatToIntBits(delay) : 0) | 0;
+        result = 31 * result + (flare != +0.0f ? NumberTools.floatToIntBits(flare) : 0) | 0;
+        return result;
+    }
+
+    public String serializeToString()
+    {
+        return  "{" + StringKit.hex(NumberTools.floatToIntBits(range)) +
+                "," + StringKit.hex(NumberTools.floatToIntBits(color)) +
+                "," + StringKit.hex(NumberTools.floatToIntBits(flicker)) +
+                "," + StringKit.hex(NumberTools.floatToIntBits(strobe)) + 
+                "," + StringKit.hex(NumberTools.floatToIntBits(delay)) +
+                "," + StringKit.hex(NumberTools.floatToIntBits(flare)) +
+                "}";
+    }
+    
+    public static Radiance deserializeFromString(String data)
+    {
+        return data != null && data.length() >= 54
+                ? new Radiance(
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 1, 9)),
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 10, 18)),
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 19, 27)),
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 28, 36)),
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 37, 45)),
+                NumberTools.intBitsToFloat(StringKit.intFromHex(data, 46, 54)))
+                : null;
+    }
 }

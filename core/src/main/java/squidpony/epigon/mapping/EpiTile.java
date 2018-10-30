@@ -1,7 +1,7 @@
 package squidpony.epigon.mapping;
 
 import squidpony.epigon.GauntRNG;
-import squidpony.epigon.Radiance;
+import squidpony.epigon.display.Radiance;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;

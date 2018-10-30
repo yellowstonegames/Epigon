@@ -5,7 +5,7 @@ import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
-import squidpony.epigon.Radiance;
+import squidpony.epigon.display.Radiance;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
 import squidpony.epigon.data.quality.Element;
