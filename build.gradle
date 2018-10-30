@@ -13,7 +13,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Epigon"
-        squidlibVersion = '045ff840fe'
+        squidlibVersion = 'b1d1fcdff3'
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
         aiVersion = '1.8.1'
@@ -43,7 +43,7 @@ project(":core") {
     dependencies {
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
+        //compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
         //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         ///// implicitly included by dep on squidlib; don't need to explicitly require
         //compile "com.github.tommyettinger:regexodus:$regexodusVersion"

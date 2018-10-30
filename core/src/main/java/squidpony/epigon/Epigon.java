@@ -975,7 +975,7 @@ public class Epigon extends Game {
         FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1, checkY * 3 + 1, sight * 3, Radius.CIRCLE);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
-        int triWidth = mapSize.gridWidth * 3, triHeight = mapSize.gridHeight * 3, px = player.location.x * 3, py = player.location.y * 3;
+        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3, py = player.location.y * 3;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 radiance = map.contents[x][y].getAnyRadiance();
@@ -988,7 +988,8 @@ public class Epigon extends Game {
         }
         if(odinView)
         {
-            SColor.colorLightingInto(map.tempColorLighting, ArrayTools.fill(0.6, map.width * 3, map.height * 3), FLOAT_WHITE);
+            ArrayTools.fill(map.tempFOV, 0.6);
+            SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, FLOAT_WHITE);
             SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
         }
 
@@ -1311,7 +1312,7 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        int triWidth = mapSize.gridWidth * 3, triHeight = mapSize.gridHeight * 3, px = player.location.x * 3, py = player.location.y * 3;
+        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3, py = player.location.y * 3;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
