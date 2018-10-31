@@ -13,7 +13,6 @@ import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
-import squidpony.squidgrid.gui.gdx.SubcellLayers;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
@@ -67,7 +66,7 @@ public class ContextHandler {
     }
     public Group group;
     private SparseLayers layers;
-    private SubcellLayers mainMap;
+    private SparseLayers mainMap;
     private Actor miniMap;
     private Actor miniMapSideView;
     private int width;
@@ -88,7 +87,7 @@ public class ContextHandler {
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public ContextHandler(SparseLayers layers, SubcellLayers mainMap, Epigon game) {
+    public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game) {
         group = new Group();
         this.layers = layers;
         group.addActor(this.layers);

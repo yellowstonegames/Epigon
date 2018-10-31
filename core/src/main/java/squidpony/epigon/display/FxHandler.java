@@ -11,10 +11,7 @@ import squidpony.epigon.data.quality.Element;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.PanelEffect;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SubcellLayers;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.*;
 
 import java.util.List;
@@ -30,7 +27,7 @@ public class FxHandler {
     private static char[] explosionChars = new char[]{'%', '$', '&', '!'};
     private static char[] zapChars = new char[]{};
 
-    private SubcellLayers fx;
+    private SparseLayers fx;
     private int layer;
     private int width;
     private int height;
@@ -39,7 +36,7 @@ public class FxHandler {
     public double[][] seen;
     private StatefulRNG rng = new StatefulRNG(new LinnormRNG());
 
-    public FxHandler(SubcellLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
+    public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
         width = layers.gridWidth();
         height = layers.gridHeight();

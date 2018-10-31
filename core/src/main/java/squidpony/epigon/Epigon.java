@@ -101,7 +101,7 @@ public class Epigon extends Game {
     public static FloatFilter
             identityFilter = new FloatFilters.IdentityFilter(),
             grayscale = new FloatFilters.YCoCgFilter(0.75f, 0.2f, 0.2f);
-    private SubcellLayers mapSLayers;
+    private SparseLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
@@ -285,7 +285,7 @@ public class Epigon extends Game {
 //        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
-        mapSLayers = new SubcellLayers(
+        mapSLayers = new SparseLayers(
                 worldWidth,
                 worldHeight,
                 mapSize.cellWidth,
@@ -299,7 +299,7 @@ public class Epigon extends Game {
                 filter.coMul = 0.65f;
                 filter.cgMul = 0.65f;
                 filter.yMul = 0.7f;
-                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
+                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
                 int len = layers.size();
                 Frustum frustum = null;
                 Stage stage = getStage();
@@ -348,7 +348,7 @@ public class Epigon extends Game {
                             !glyph.isVisible() ||
                                     (x = Math.round((gxo = glyph.getX() - xo) / font.actualCellWidth)) < 0 || x >= gridWidth ||
                                     (y = Math.round((gyo = glyph.getY() - yo)  / -font.actualCellHeight + gridHeight)) < 0 || y >= gridHeight ||
-                                    backgrounds[x * 3 + 1][y * 3 + 1] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f)))
+                                    backgrounds[x][y] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f)))
                         continue;
                     glyph.draw(batch, 1f);
                 }
@@ -581,7 +581,7 @@ public class Epigon extends Game {
         world = worldGenerator.buildCastle(worldWidth, worldHeight, underground, aboveground, handBuilt);
         depth = aboveground; // should be the very surface
         map = world[depth];
-        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.triFovResult);
+        fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.fovResult);
         floors = new GreasedRegion(map.width, map.height);
 
         simple = new char[map.width][map.height];
@@ -629,7 +629,7 @@ public class Epigon extends Game {
         map.contents[player.location.x][player.location.y].add(player);
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
-        fxHandler.seen = map.triFovResult;
+        fxHandler.seen = map.fovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
         calcFOV(player.location.x, player.location.y);
@@ -971,23 +971,21 @@ public class Epigon extends Game {
     private void calcFOV(int checkX, int checkY) {
         double sight = player.stats.get(Stat.SIGHT).actual();
         FOV.reuseFOV(map.opacities(), map.fovResult, checkX, checkY, sight, Radius.CIRCLE);
-        FOV.reuseLOS(map.triResistances, map.losResult, checkX * 3 + 1, checkY * 3 + 1);
-        FOV.reuseFOV(map.triResistances, map.triFovResult, checkX * 3 + 1, checkY * 3 + 1, sight * 3, Radius.CIRCLE);
+        FOV.reuseLOS(map.resistances, map.losResult, checkX, checkY);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
-        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3, py = player.location.y * 3;
+        int px = player.location.x, py = player.location.y;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 radiance = map.contents[x][y].getAnyRadiance();
                 if (radiance != null) {
-                    FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.range * 3);
+                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, triWidth, triHeight);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
                 }
             }
         }
-        if(odinView)
-        {
+        if (odinView) {
             ArrayTools.fill(map.tempFOV, 0.6);
             SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, FLOAT_WHITE);
             SColor.mixColoredLighting(map.colorLighting, map.tempColorLighting);
@@ -995,15 +993,9 @@ public class Epigon extends Game {
 
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                for (int ix = 0; ix < 3; ix++) {
-                    for (int iy = 0; iy < 3; iy++) {
-                        if (odinView || map.losResult[x * 3 + ix][y * 3 + iy] > 0.0) {
-                            map.triFovResult[x * 3 + ix][y * 3 + iy]
-                                = MathUtils.clamp(map.triFovResult[x * 3 + ix][y * 3 + iy] + map.colorLighting[0][x * 3 + ix][y * 3 + iy], 0, 1);
-                            map.fovResult[x][y]
-                                = Math.max(map.fovResult[x][y], map.triFovResult[x * 3 + ix][y * 3 + iy]);
-                        }
-                    }
+                if (odinView || map.losResult[x][y] > 0.0) {
+                    map.fovResult[x][y]
+                            = MathUtils.clamp(map.fovResult[x][y] + map.colorLighting[0][x][y], 0, 1);
                 }
             }
         }
@@ -1299,7 +1291,7 @@ public class Epigon extends Game {
     }
 
     public void putSolo(int x, int y) {
-        mapSLayers.putSingle(x, y, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
+        mapSLayers.put(x, y, lerpFloatColorsBlended(RememberedTile.memoryColorFloat, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.4f)); // "dark" theme
     }
 
     public void putWithLight(int x, int y, char c, float foreground) {
@@ -1312,65 +1304,43 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        int triWidth = mapSize.gridWidth * 3+3, triHeight = mapSize.gridHeight * 3+3, px = player.location.x * 3+1, py = player.location.y * 3+1;
+        int px = player.location.x, py = player.location.y;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
-                    FOV.reuseFOV(map.triResistances, map.tempFOV, x * 3 + 1, y * 3 + 1, radiance.currentRange() * 3.0);
+                    FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, triWidth, triHeight);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
                 }
             }
         }
         if(!showingMenu) {
             Coord pos;
-            Direction dir;
             for (int i = 0; i < toCursor.size(); i++) {
                 pos = toCursor.get(i);
-                if(i == 0)
-                    dir = Direction.getRoughDirection(player.location.x - pos.x, player.location.y - pos.y);
-                else 
-                    dir = Direction.getRoughDirection(toCursor.get(i - 1).x - pos.x, toCursor.get(i - 1).y - pos.y);
                 radiance = Radiance.softWhiteChain[i * 3 & 7];
-                FOV.reuseFOV(map.triResistances, map.tempFOV, pos.x * 3 + 1, pos.y * 3 + 1, radiance.currentRange() * 2.0);
+                FOV.reuseFOV(map.resistances, map.tempFOV, pos.x, pos.y, radiance.currentRange());
                 SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, triWidth, triHeight);
-                radiance = Radiance.softWhiteChain[i * 3 - 1 & 7];
-                FOV.reuseFOV(map.triResistances, map.tempFOV, pos.x * 3 + 1 + dir.deltaX, pos.y * 3 + 1 + dir.deltaY, radiance.currentRange() * 2.0);
-                SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, triWidth, triHeight);
-                radiance = Radiance.softWhiteChain[i * 3 - 2 & 7];
-                FOV.reuseFOV(map.triResistances, map.tempFOV, MathUtils.clamp(pos.x * 3 + 1 + dir.deltaX * 2, 0, map.width * 3), MathUtils.clamp(pos.y * 3 + 1 + dir.deltaY * 2, 0, map.height * 3), radiance.currentRange() * 2.0);
-                SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, triWidth, triHeight);
+                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
             }
         }
 
         Physical creature;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
-                double sight;
-                float sightAmount = 0f;
-                for (int ix = 0; ix < 3; ix++) {
-                    for (int iy = 0; iy < 3; iy++) {
-                        if ((sight = map.triFovResult[x * 3 + ix][y * 3 + iy]) > 0.0) {
-                            putSolo(x * 3 + ix, y * 3 + iy);
-                            sightAmount = Math.max(sightAmount, (float) sight);
-                        }
-                    }
-                }
-
-                if (sightAmount > 0) {
+                double sight = map.fovResult[x][y];
+                if (sight > 0.0) {
+                    putSolo(x, y);
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         putWithLight(x, y, ' ', 0f);
                         if(creature.appearance == null)
-                            creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount), x, y);                         
+                            creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);                         
                         else
-                            creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * sightAmount));
+                            creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight));
                         if (creature.overlayAppearance != null)
-                            creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * sightAmount));
+                            creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * (float) sight));
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             cancelMove();

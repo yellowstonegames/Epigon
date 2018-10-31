@@ -155,7 +155,7 @@ public class HandBuilt {
 
         lava = Physical.makeBasic("lava", '£', Element.FIRE.color);
         lava.description = "molten stone";
-        lava.radiance = new Radiance(1.6f, lava.color, 0.18f, 0f);
+        lava.radiance = new Radiance(2.6f, lava.color, 0.38f, 0f);
         lava.attached = true; // pick up the FLESH-SEARING MOLTEN CORE OF THE PLANET? n/n
         
         water = Physical.makeBasic("water", '~', SColor.AZUL);
