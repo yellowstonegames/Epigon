@@ -201,9 +201,9 @@ public class Radiance implements Serializable {
         final float time = (System.currentTimeMillis() & 0x3ffffL) * 0x1.9p-9f;
         float current = range;
         if(flicker != 0f) 
-            current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker + delay) * 0.25f + 0.75f;
+            current *= NumberTools.swayRandomized(System.identityHashCode(this), time * flicker + delay) * 0.375f + 0.625f;
         if(strobe != 0f)
-            current *= NumberTools.swayTight(time * strobe + delay) * 0.25f + 0.75f;
+            current *= NumberTools.swayTight(time * strobe + delay) * 0.5f + 0.5f;
         return Math.max(current, range * flare);
     }
 
@@ -227,7 +227,7 @@ public class Radiance implements Serializable {
         }
         return chain;
     }
-    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 1f);
+    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
 
     @Override
     public String toString() {
