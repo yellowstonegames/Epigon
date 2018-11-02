@@ -153,9 +153,9 @@ public class HandBuilt {
         torch.description = "burning rags on a stick";
         torch.radiance = new Radiance(6f, SColor.CREAM.toFloatBits(), 0.71f, 0f);
 
-        lava = Physical.makeBasic("lava", '£', Element.FIRE.color);
+        lava = Physical.makeBasic("lava", '£', SColor.CW_BRIGHT_ORANGE);
         lava.description = "molten stone";
-        lava.radiance = new Radiance(1.8f, lava.color, 0.38f, 0f);
+        lava.radiance = new Radiance(1.8f, lava.color, 0.42f, 0f);
         lava.attached = true; // pick up the FLESH-SEARING MOLTEN CORE OF THE PLANET? n/n
         
         water = Physical.makeBasic("water", '~', SColor.AZUL);

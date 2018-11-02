@@ -640,11 +640,12 @@ public class Epigon extends Game {
     }
 
     private void runTurn() {
-        Set<Coord> creaturePositions = creatures.keySet();
+        OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
         Coord[] pl = {player.location};
         Set<Coord> ps = Collections.singleton(player.location);
-        ArrayList<Coord> path = new ArrayList<>(5);
+        ArrayList<Coord> path = new ArrayList<>(9);
         for (int i = 0; i < creatures.size(); i++) {
+            path.clear();
             final Physical creature = creatures.getAt(i);
             creature.update();
             if (creature.overlayAppearance != null && creature.overlaySymbol == '\uffff') {
@@ -654,8 +655,9 @@ public class Epigon extends Game {
             Coord c = creature.location;
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
                 Weapon weapon = chooseValidWeapon(creature, player);
+                creaturePositions.remove(c);
                 if(weapon == null) {
-                    if (creature.weaponData != null && los.isReachable(simple, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE))
+                    if (creature.weaponData != null && los.isReachable(simple, c.x, c.y, player.location.x, player.location.y))
                     {
                         monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
                     }
@@ -665,9 +667,9 @@ public class Epigon extends Game {
                     }
                 }
                 else
-                    monsterDijkstra.findTechniquePath(path, 1, weapon.technique, simple, los, creaturePositions, null, c, ps);
-                if (monsterDijkstra.path != null && !monsterDijkstra.path.isEmpty()) {
-                    Coord step = monsterDijkstra.path.get(0);
+                    monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), weapon.technique, simple, los, creaturePositions, null, c, ps);
+                if (path != null && !path.isEmpty()) {
+                    Coord step = path.get(0);
                     if (weapon != null) {
                         ActionOutcome ao = ActionOutcome.attack(creature, weapon, player);
                         {
@@ -739,7 +741,7 @@ public class Epigon extends Game {
                             }
                         }
                     }
-
+                    creaturePositions.add(creature.location);
                 }
             }
         }
@@ -1183,8 +1185,10 @@ public class Epigon extends Game {
                                 return;
                             }
                             map.contents[targetX][targetY].add(item);
-                            if (map.resistances[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)] < 0.9) {
-                                map.contents[targetX + player.between(-1, 2)][targetY + player.between(-1, 2)].add(item);
+                            int tx = MathExtras.clamp(targetX + player.between(-1, 2), 0, worldWidth),
+                                    ty = MathExtras.clamp(targetY + player.between(-1, 2), 0, worldHeight);
+                            if (map.resistances[tx][ty] < 0.9) {
+                                map.contents[tx][ty].add(item);
                             }
                         });
                     if (target.appearance != null) {
@@ -1334,7 +1338,7 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
-                        putWithLight(x, y, ' ', 0f);
+                        //putWithLight(x, y, ' ', 0f);
                         if(creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);                         
                         else
