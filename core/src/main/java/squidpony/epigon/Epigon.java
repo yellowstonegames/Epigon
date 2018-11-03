@@ -893,7 +893,7 @@ public class Epigon extends Game {
     public void mixColoredLighting(float[][][] basis, float[][][] other, float flare) {
         int w = Math.min(basis[0].length, other[0].length),
                 h = Math.min(basis[0][0].length, other[0][0].length);
-        flare = flare + 1f;
+        flare += 1f;
         float b0, b1, o0, o1;
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
@@ -976,14 +976,13 @@ public class Epigon extends Game {
         FOV.reuseLOS(map.resistances, map.losResult, checkX, checkY);
         SColor.eraseColoredLighting(map.colorLighting);
         Radiance radiance;
-        int px = player.location.x, py = player.location.y;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 radiance = map.contents[x][y].getAnyRadiance();
                 if (radiance != null) {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.range);
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
         }
@@ -1299,7 +1298,7 @@ public class Epigon extends Game {
     }
 
     public void putWithLight(int x, int y, char c, float foreground) {
-        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y])); // "dark" theme
+        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.colorLighting[1][x][y], map.colorLighting[0][x][y] * 0.6f)); // "dark" theme
     }
 
     /**
@@ -1308,13 +1307,12 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         Radiance radiance;
         SColor.eraseColoredLighting(map.colorLighting);
-        int px = player.location.x, py = player.location.y;
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if ((radiance = map.contents[x][y].getAnyRadiance()) != null) {
                     FOV.reuseFOV(map.resistances, map.tempFOV, x, y, radiance.currentRange());
                     SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
+                    mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
                 }
             }
         }
@@ -1325,7 +1323,7 @@ public class Epigon extends Game {
                 radiance = Radiance.softWhiteChain[i * 3 & 7];
                 FOV.reuseFOV(map.resistances, map.tempFOV, pos.x, pos.y, radiance.currentRange());
                 SColor.colorLightingInto(map.tempColorLighting, map.tempFOV, radiance.color);
-                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare, px, py, map.width, map.height);
+                mixColoredLighting(map.colorLighting, map.tempColorLighting, radiance.flare);
             }
         }
 

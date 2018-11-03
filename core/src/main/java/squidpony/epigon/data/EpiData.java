@@ -25,6 +25,7 @@ import java.io.Serializable;
  * less time than that.
  */
 public abstract class EpiData extends AbstractRNG implements Serializable, StatefulRandomness {
+    protected static final long serialVersionUID = 0L;
 
     public String name;
     public String description;
