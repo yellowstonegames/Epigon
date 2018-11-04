@@ -139,7 +139,7 @@ public class ContextHandler {
                         for (int j = 0; j < epiMap.height; j++) {
                             if ((memory = epiMap.remembered[i][j]) != null) {
                                 miniMapFont.draw(batch, '\u0000',
-                                    (epiMap.fovResult[i][j] > 0)
+                                    (epiMap.lighting.fovResult[i][j] > 0)
                                         ? SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_WHITE, 0.25f)
                                         : SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_BLACK, 0.2f),
                                     xo + widthInc * i, yOff + heightInc * j);

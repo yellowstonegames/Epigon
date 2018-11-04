@@ -1,6 +1,8 @@
 package squidpony.epigon.mapping;
 
 import squidpony.epigon.data.Physical;
+import squidpony.epigon.display.LightingHandler;
+import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.*;
@@ -24,12 +26,7 @@ public class EpiMap {
     public RememberedTile[][] remembered;
     public char[][] simple;
     public char[][] line;
-    public double[][] resistances;
-    public double[][] fovResult;
-    public double[][] losResult;
-    public double[][] tempFOV;
-    public float[][][] colorLighting;
-    public float[][][] tempColorLighting;
+    public LightingHandler lighting;
     public GreasedRegion downStairPositions, upStairPositions;
     public StatefulRNG chaos;
     public OrderedMap<Coord, Physical> creatures;
@@ -38,15 +35,18 @@ public class EpiMap {
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
-        fovResult = new double[width][height];
-        losResult = new double[width][height];
-        tempFOV = new double[width][height];
-        colorLighting = SColor.blankColoredLighting(width, height);
-        tempColorLighting = new float[2][width][height];
+//        fovResult = new double[width][height];
+//        losResult = new double[width][height];
+//        tempFOV = new double[width][height];
+//        colorLighting = SColor.blankColoredLighting(width, height);
+//        tempColorLighting = new float[2][width][height];
+        //resistances = new double[width][height];
+        lighting = new LightingHandler(new double[width][height]);
+        lighting.radiusStrategy = Radius.CIRCLE;
+        lighting.backgroundColor = RememberedTile.memoryColorFloat;
         chaos = new StatefulRNG(new LinnormRNG(rootChaos.nextLong()));
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
-        resistances = new double[width][height];
         downStairPositions = new GreasedRegion(width, height);
         upStairPositions = new GreasedRegion(width, height);
         creatures = new OrderedMap<>();
@@ -67,6 +67,7 @@ public class EpiMap {
     public double[][] opacities() {
 //        double o;
 //        int xx, yy;
+        double[][] resistances = lighting.resistances;
         for (int x = 0; x < width; x++) {
 //            xx = x * 3;
             for (int y = 0; y < height; y++) {

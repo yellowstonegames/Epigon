@@ -27,13 +27,13 @@ public class LightingHandler implements Serializable {
     public double[][] resistances;
     public double[][] fovResult;
     public double[][] losResult;
-    protected transient double[][] tempFOV;
+    public transient double[][] tempFOV;
     public float[][][] colorLighting;
-    protected transient float[][][] tempColorLighting;
+    public transient float[][][] tempColorLighting;
     public int width;
     public int height;
     public float backgroundColor;
-    public double playerVision;
+    public double viewerRange;
     public OrderedMap<Coord, Radiance> lights;
     
     /**
@@ -63,11 +63,11 @@ public class LightingHandler implements Serializable {
      * @param backgroundColor the background color to use, as a libGDX color
      * @param radiusStrategy the shape lights should take, typically {@link Radius#CIRCLE} for "realistic" lights or one
      *                       of {@link Radius#DIAMOND} or {@link Radius#SQUARE} to match game rules for distance
-     * @param playerVisionRange how far the player can see without light, in cells
+     * @param viewerVisionRange how far the player can see without light, in cells
      */
-    public LightingHandler(double[][] resistance, Color backgroundColor, Radius radiusStrategy, double playerVisionRange)
+    public LightingHandler(double[][] resistance, Color backgroundColor, Radius radiusStrategy, double viewerVisionRange)
     {
-        this(resistance, backgroundColor.toFloatBits(), radiusStrategy, playerVisionRange);
+        this(resistance, backgroundColor.toFloatBits(), radiusStrategy, viewerVisionRange);
     }
     /**
      * Given a resistance array as produced by {@link squidpony.squidgrid.mapping.DungeonUtility#generateResistances(char[][])}
@@ -77,12 +77,12 @@ public class LightingHandler implements Serializable {
      * @param backgroundColor the background color to use, as a packed float (produced by {@link Color#toFloatBits()})
      * @param radiusStrategy the shape lights should take, typically {@link Radius#CIRCLE} for "realistic" lights or one
      *                       of {@link Radius#DIAMOND} or {@link Radius#SQUARE} to match game rules for distance
-     * @param playerVisionRange how far the player can see without light, in cells
+     * @param viewerVisionRange how far the player can see without light, in cells
      */
-    public LightingHandler(double[][] resistance, float backgroundColor, Radius radiusStrategy, double playerVisionRange)
+    public LightingHandler(double[][] resistance, float backgroundColor, Radius radiusStrategy, double viewerVisionRange)
     {
         this.radiusStrategy = radiusStrategy;
-        playerVision = playerVisionRange;
+        viewerRange = viewerVisionRange;
         this.backgroundColor = backgroundColor;
         resistances = resistance;
         width = resistances.length;
@@ -90,7 +90,7 @@ public class LightingHandler implements Serializable {
         fovResult = new double[width][height];
         tempFOV = new double[width][height];
         losResult = new double[width][height];
-        colorLighting = new float[2][width][height];
+        colorLighting = SColor.blankColoredLighting(width, height);
         tempColorLighting = new float[2][width][height];
         Coord.expandPoolTo(width, height);
         lights = new OrderedMap<>(32);
@@ -199,78 +199,32 @@ public class LightingHandler implements Serializable {
             }
         }
     }
+
+
     /**
-     * Given a SparseLayers and a position for the viewer (typically the player), fills the SparseLayers with different
-     * colors based on what lights are present in line of sight of the viewer and the various flickering or pulsing
-     * effects that Radiance light sources can do. 
-     * @param layers a SquidPanel used as a background, such as the back Panel of a SquidLayers
+     * Typically called every frame, this updates the flicker and strobe effects of Radiance objects and applies those
+     * changes in lighting color and strength to the various fields of this LightingHandler. This method is usually
+     * called before each call to {@link #draw(float[][], int, int)}, but other code may be between the calls and may
+     * affect the lighting in customized ways.
      * @param viewerPosition the position of the player or other viewer
      */
-    public void draw(SparseLayers layers, Coord viewerPosition)
+    public void update(Coord viewerPosition)
     {
-        draw(layers.backgrounds, viewerPosition.x, viewerPosition.y);
+        update(viewerPosition.x, viewerPosition.y);
     }
 
     /**
-     * Given a SparseLayers and a position for the viewer (typically the player), fills the SparseLayers with different
-     * colors based on what lights are present in line of sight of the viewer and the various flickering or pulsing
-     * effects that Radiance light sources can do. 
-     * @param layers a SquidPanel used as a background, such as the back Panel of a SquidLayers
+     * Typically called every frame, this updates the flicker and strobe effects of Radiance objects and applies those
+     * changes in lighting color and strength to the various fields of this LightingHandler. This method is usually
+     * called before each call to {@link #draw(float[][], int, int)}, but other code may be between the calls and may
+     * affect the lighting in customized ways.
      * @param viewerX the x-position of the player or other viewer
      * @param viewerY the y-position of the player or other viewer
      */
-    public void draw(SparseLayers layers, int viewerX, int viewerY)
-    {
-        draw(layers.backgrounds, viewerX, viewerY);
-    }
-    /**
-     * Given a SquidPanel that should be only solid blocks (such as the background of a SquidLayers) and a position for
-     * the viewer (typically the player), fills the SquidPanel with different colors based on what lights are present in
-     * line of sight of the viewer and the various flickering or pulsing effects that Radiance light sources can do. 
-     * @param background a SquidPanel used as a background, such as the back Panel of a SquidLayers
-     * @param viewerPosition the position of the player or other viewer
-     */
-    public void draw(SquidPanel background, Coord viewerPosition)
-    {
-        draw(background.colors, viewerPosition.x, viewerPosition.y);
-    }
-    /**
-     * Given a SquidPanel that should be only solid blocks (such as the background of a SquidLayers) and a position for
-     * the viewer (typically the player), fills the SquidPanel with different colors based on what lights are present in
-     * line of sight of the viewer and the various flickering or pulsing effects that Radiance light sources can do. 
-     * @param background a SquidPanel used as a background, such as the back Panel of a SquidLayers
-     * @param viewerX the x-position of the player or other viewer
-     * @param viewerY the y-position of the player or other viewer
-     */
-    public void draw(SquidPanel background, int viewerX, int viewerY)
-    {
-        draw(background.colors, viewerX, viewerY);
-    }
-
-    /**
-     * Given a 2D array of packed float colors and a position for the viewer (typically the player), fills the 2D array
-     * with different colors based on what lights are present in line of sight of the viewer and the various flickering
-     * or pulsing effects that Radiance light sources can do. 
-     * @param backgrounds a 2D float array, typically obtained from {@link squidpony.squidgrid.gui.gdx.SquidPanel#colors} or {@link squidpony.squidgrid.gui.gdx.SparseLayers#backgrounds}
-     * @param viewerPosition the position of the player or other viewer
-     */
-    public void draw(float[][] backgrounds, Coord viewerPosition)
-    {
-        draw(backgrounds, viewerPosition.x, viewerPosition.y);
-    }
-
-    /**
-     * Given a 2D array of packed float colors and a position for the viewer (typically the player), fills the 2D array
-     * with different colors based on what lights are present in line of sight of the viewer and the various flickering
-     * or pulsing effects that Radiance light sources can do. 
-     * @param backgrounds a 2D float array, typically obtained from {@link squidpony.squidgrid.gui.gdx.SquidPanel#colors} or {@link squidpony.squidgrid.gui.gdx.SparseLayers#backgrounds}
-     * @param viewerX the x-position of the player or other viewer
-     * @param viewerY the y-position of the player or other viewer
-     */
-    public void draw(float[][] backgrounds, int viewerX, int viewerY)
+    public void update(int viewerX, int viewerY)
     {
         Radiance radiance;
-        FOV.reuseFOV(resistances, fovResult, viewerX, viewerY, playerVision, radiusStrategy);
+        FOV.reuseFOV(resistances, fovResult, viewerX, viewerY, viewerRange, radiusStrategy);
         FOV.reuseLOS(resistances, losResult, viewerX, viewerY);
         SColor.eraseColoredLighting(colorLighting);
         final int sz = lights.size();
@@ -289,19 +243,97 @@ public class LightingHandler implements Serializable {
                 }
             }
         }
+    }
+    
+    /**
+     * Given a SparseLayers, fills the SparseLayers with different colors based on what lights are present in line of
+     * sight of the viewer and the various flicker or strobe effects that Radiance light sources can do. You should
+     * usually call {@link #update(int, int)} before each call to draw(), but you may want to make custom changes to the
+     * lighting in between those two calls (that is the only place those changes will be noticed).
+     * @param layers a SparseLayers that may have existing background colors (these will be mixed in)
+     */
+    public void draw(SparseLayers layers)
+    {
+        draw(layers.backgrounds);
+    }
+    /**
+     * Given a SquidPanel that should be only solid blocks (such as the background of a SquidLayers) and a position for
+     * the viewer (typically the player), fills the SquidPanel with different colors based on what lights are present in
+     * line of sight of the viewer and the various flickering or pulsing effects that Radiance light sources can do. 
+     * Given a SquidPanel that should be only solid blocks (such as the background of a SquidLayers), fills the
+     * SquidPanel with different colors based on what lights are present in line of sight of the viewer and the various
+     * flicker or strobe effects that Radiance light sources can do. You should usually call {@link #update(int, int)}
+     * before each call to draw(), but you may want to make custom changes to the lighting in between those two calls
+     * (that is the only place those changes will be noticed).
+     * @param background a SquidPanel used as a background, such as the back Panel of a SquidLayers
+     */
+    public void draw(SquidPanel background)
+    {
+        draw(background.colors);
+    }
 
+    /**
+     * Given a 2D array of packed float colors, fills the 2D array with different colors based on what lights are
+     * present in line of sight of the viewer and the various flicker or strobe effects that Radiance light sources can
+     * do. You should usually call {@link #update(int, int)} before each call to draw(), but you may want to make custom
+     * changes to the lighting in between those two calls (that is the only place those changes will be noticed).
+     * @param backgrounds a 2D float array, typically obtained from {@link squidpony.squidgrid.gui.gdx.SquidPanel#colors} or {@link squidpony.squidgrid.gui.gdx.SparseLayers#backgrounds}
+     */
+    public void draw(float[][] backgrounds)
+    {
         float current;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if(fovResult[x][y] > 0.0)
-                {
-                    current = backgrounds[x][y];
-                    if(current == 0f)
-                        current = backgroundColor;
-                    backgrounds[x][y] = lerpFloatColorsBlended(current,
-                            colorLighting[1][x][y], colorLighting[0][x][y] * 0.4f);
+                if (losResult[x][y] > 0.0 && fovResult[x][y] > 0.0) {
+                        current = backgrounds[x][y];
+                        if(current == 0f)
+                            current = backgroundColor;
+                        backgrounds[x][y] = lerpFloatColorsBlended(current,
+                                colorLighting[1][x][y], colorLighting[0][x][y] * 0.4f);
                 }
             }
         }
     }
+    /**
+     * Used to calculate what cells are visible as if any flicker or strobe effects were simply constant light sources.
+     * Runs part of the calculations to draw lighting as if all radii are at their widest, but does no actual drawing.
+     * Sets {@link #fovResult} and {@link #losResult} based on the given viewer position and any lights.
+     * @param viewer the position of the player or other viewer
+     */
+    public void calculateFOV(Coord viewer)
+    {
+        calculateFOV(viewer.x, viewer.y);
+    }
+
+    /**
+     * Used to calculate what cells are visible as if any flicker or strobe effects were simply constant light sources.
+     * Runs part of the calculations to draw lighting as if all radii are at their widest, but does no actual drawing.
+     * Sets {@link #fovResult} and {@link #losResult} based on the given viewer position and any lights.
+     * @param viewerX the x-position of the player or other viewer
+     * @param viewerY the y-position of the player or other viewer
+     */
+    public void calculateFOV(int viewerX, int viewerY)
+    {
+        Radiance radiance;
+        FOV.reuseFOV(resistances, fovResult, viewerX, viewerY, viewerRange, radiusStrategy);
+        FOV.reuseLOS(resistances, losResult, viewerX, viewerY);
+        SColor.eraseColoredLighting(colorLighting);
+        final int sz = lights.size();
+        Coord pos;
+        for (int i = 0; i < sz; i++) {
+            pos = lights.keyAt(i);
+            radiance = lights.getAt(i);
+            FOV.reuseFOV(resistances, tempFOV, pos.x, pos.y, radiance.range);
+            SColor.colorLightingInto(tempColorLighting, tempFOV, radiance.color);
+            mixColoredLighting(radiance.flare);
+        }
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (losResult[x][y] > 0.0) {
+                    fovResult[x][y] = MathUtils.clamp(fovResult[x][y] + colorLighting[0][x][y], 0, 1);
+                }
+            }
+        }
+    }
+
 }
