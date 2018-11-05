@@ -24,9 +24,9 @@ import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
+import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
@@ -36,7 +36,6 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
@@ -877,104 +876,15 @@ public class Epigon extends Game {
         messages.add(GDXMarkup.instance.colorString("[]" + text));
         updateMessages();
     }
-
-    /**
-     * Adds two 3D arrays produced by {@link SColor#colorLighting(double[][], float)} or this method and modifies the basis
-     * parameter so it contains the combined brightnesses and colors of basis and other, in a pair of 2D arrays.
-     * Modified to use {@link SColor#lerpFloatColorsBlended(float, float, float)} instead of
-     * {@link SColor#lerpFloatColors(float, float, float)}.
-     *
-     *
-     * @param basis a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
-     *              will be modified to contain its existing contents mixed with other's contents 
-     * @param other a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
-     *              will not be modified
-     */
-    public void mixColoredLighting(float[][][] basis, float[][][] other, float flare) {
-        int w = Math.min(basis[0].length, other[0].length),
-                h = Math.min(basis[0][0].length, other[0][0].length);
-        flare += 1f;
-        float b0, b1, o0, o1;
-        for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                b0 = basis[0][x][y];
-                b1 = basis[1][x][y];
-                o0 = other[0][x][y];
-                o1 = other[1][x][y];
-                if (b1 == FLOAT_WHITE) {
-                    basis[1][x][y] = o1;
-                    basis[0][x][y] = Math.min(1.0f, b0 + o0 * flare);
-                } else {
-                    if (o1 != FLOAT_WHITE) {
-                        float change = (o0 - b0) * 0.5f + 0.5f;
-                        final int s = NumberTools.floatToIntBits(b1), e = NumberTools.floatToIntBits(o1),
-                                rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
-                                re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
-                        change *= ae * 0.007874016f;
-                        basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
-                                | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
-                                | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
-                                | as);
-                        basis[0][x][y] = Math.min(1.0f, b0 + o0 * change * flare);
-                    } else {
-                        basis[0][x][y] = Math.min(1.0f, b0 + o0 * flare);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Adds two 3D arrays produced by {@link SColor#colorLighting(double[][], float)} or this method and modifies the basis
-     * parameter so it contains the combined brightnesses and colors of basis and other, in a pair of 2D arrays.
-     * Modified to use {@link SColor#lerpFloatColorsBlended(float, float, float)} instead of
-     * {@link SColor#lerpFloatColors(float, float, float)}.
-     *
-     *
-     * @param basis a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
-     *              will be modified to contain its existing contents mixed with other's contents 
-     * @param other a 3D float array holding two 2D sub-arrays, as produced by {@link SColor#colorLighting(double[][], float)};
-     *              will not be modified
-     */
-    public void mixColoredLighting(float[][][] basis, float[][][] other, float flare, int centerX, int centerY, int width, int height) {
-        int w = Math.min(basis[0].length, other[0].length),
-                h = Math.min(basis[0][0].length, other[0][0].length);
-        flare = flare + 1f;
-        float b0, b1, o0, o1;
-        centerY = Math.max(0, centerY - (height + 3 >> 1));
-        for (int x = Math.max(0, centerX - (width + 3 >> 1)), ix = 0; x < w && ix < width; x++, ix++) {
-            for (int y = centerY, iy = 0; y < h && iy < height; y++, iy++) {
-                b0 = basis[0][x][y];
-                b1 = basis[1][x][y];
-                o0 = other[0][x][y];
-                o1 = other[1][x][y];
-                if (b1 == FLOAT_WHITE) {
-                    basis[1][x][y] = o1;
-                    basis[0][x][y] = Math.min(1.0f, b0 + o0 * flare);
-                } else {
-                    if (o1 != FLOAT_WHITE) {
-                        final int s = NumberTools.floatToIntBits(b1), e = NumberTools.floatToIntBits(o1),
-                            rs = (s & 0xFF), gs = (s >>> 8) & 0xFF, bs = (s >>> 16) & 0xFF, as = s & 0xFE000000,
-                            re = (e & 0xFF), ge = (e >>> 8) & 0xFF, be = (e >>> 16) & 0xFF, ae = (e >>> 25);
-                        final float change = ((o0 - b0) * 0.5f + 0.5f) * ae * 0.007874016f;
-                        basis[1][x][y] = NumberTools.intBitsToFloat(((int) (rs + change * (re - rs)) & 0xFF)
-                            | ((int) (gs + change * (ge - gs)) & 0xFF) << 8
-                            | (((int) (bs + change * (be - bs)) & 0xFF) << 16)
-                            | as);
-                        basis[0][x][y] = Math.min(1.0f, b0 + o0 * change * flare);
-                    } else {
-                        basis[0][x][y] = Math.min(1.0f, b0 + o0 * flare);
-                    }
-                }
-            }
-        }
-    }
-
+    
     private void calcFOV(int checkX, int checkY) {
         map.lighting.viewerRange = player.stats.get(Stat.SIGHT).actual();
+        // this is really important; it sets the resistances of the map's lighting
         map.opacities();
+        //we'll search for lights every time we move
         map.lighting.lights.clear();
         Radiance radiance;
+        // adds the most relevant Radiance in each cell to the collection of lights in map.lighting
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 radiance = map.contents[x][y].getAnyRadiance();
@@ -985,11 +895,15 @@ public class Epigon extends Game {
         }
         map.lighting.calculateFOV(checkX, checkY);
         if (odinView) {
+            //choice of tempFOV is arbitrary; we just need a 2D array of all 0.6
             ArrayTools.fill(map.lighting.tempFOV, 0.6);
+            //makes tempColorLighting filled with 0.6-strength white light
             SColor.colorLightingInto(map.lighting.tempColorLighting, map.lighting.tempFOV, FLOAT_WHITE);
+            //mixes the full screen of 0.6-strength white light with existing lights
             SColor.mixColoredLighting(map.lighting.colorLighting, map.lighting.tempColorLighting);
             for (int x = 0; x < map.width; x++) {
                 for (int y = 0; y < map.height; y++) {
+                    //all of colorLighting will be lit now, so all of fovResult will have a value greater than 0.
                     map.lighting.fovResult[x][y]
                             = MathUtils.clamp(map.lighting.fovResult[x][y] + map.lighting.colorLighting[0][x][y], 0, 1);
                 }
@@ -1000,8 +914,6 @@ public class Epigon extends Game {
         for (int x = 0; x < map.width; x++) {
             for (int y = 0; y < map.height; y++) {
                 if (map.lighting.fovResult[x][y] > 0) {
-                    //posrng.move(x, y);
-
                     //if (!odinView) { // Don't remember things seen in all-view (or do remember if you need mini-map)
                         if (map.remembered[x][y] == null) {
                             map.remembered[x][y] = new RememberedTile(map.contents[x][y]);
@@ -1299,14 +1211,8 @@ public class Epigon extends Game {
         ArrayTools.fill(mapSLayers.backgrounds, map.lighting.backgroundColor);
         map.lighting.update(player.location);
         if(!showingMenu) {
-            Radiance radiance;
-            Coord pos;
             for (int i = 0; i < toCursor.size(); i++) {
-                pos = toCursor.get(i);
-                radiance = Radiance.softWhiteChain[i * 3 & 7];
-                FOV.reuseFOV(map.lighting.resistances, map.lighting.tempFOV, pos.x, pos.y, radiance.currentRange());
-                SColor.colorLightingInto(map.lighting.tempColorLighting, map.lighting.tempFOV, radiance.color);
-                mixColoredLighting(map.lighting.colorLighting, map.lighting.tempColorLighting, radiance.flare);
+                map.lighting.updateAlone(toCursor.get(i), Radiance.softWhiteChain[i * 3 & 7]);
             }
         }
         map.lighting.draw(mapSLayers);
@@ -1318,7 +1224,6 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
-                        //putWithLight(x, y, ' ', 0f);
                         if(creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);                         
                         else

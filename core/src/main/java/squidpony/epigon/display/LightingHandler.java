@@ -204,7 +204,7 @@ public class LightingHandler implements Serializable {
     /**
      * Typically called every frame, this updates the flicker and strobe effects of Radiance objects and applies those
      * changes in lighting color and strength to the various fields of this LightingHandler. This method is usually
-     * called before each call to {@link #draw(float[][], int, int)}, but other code may be between the calls and may
+     * called before each call to {@link #draw(float[][])}, but other code may be between the calls and may
      * affect the lighting in customized ways.
      * @param viewerPosition the position of the player or other viewer
      */
@@ -216,7 +216,7 @@ public class LightingHandler implements Serializable {
     /**
      * Typically called every frame, this updates the flicker and strobe effects of Radiance objects and applies those
      * changes in lighting color and strength to the various fields of this LightingHandler. This method is usually
-     * called before each call to {@link #draw(float[][], int, int)}, but other code may be between the calls and may
+     * called before each call to {@link #draw(float[][])}, but other code may be between the calls and may
      * affect the lighting in customized ways.
      * @param viewerX the x-position of the player or other viewer
      * @param viewerY the y-position of the player or other viewer
@@ -244,7 +244,37 @@ public class LightingHandler implements Serializable {
             }
         }
     }
-    
+    /**
+     * Updates the flicker and strobe effects of a Radiance object and applies the lighting from just that Radiance to
+     * just the {@link #colorLighting} field, without changing FOV. This method is meant to be used for GUI effects that
+     * aren't representative of something a character in the game could interact with. It is usually called after
+     * {@link #update(Coord)} and before each call to {@link #draw(float[][])}, but other code may be between the calls
+     * and may affect the lighting in customized ways.
+     * @param pos the position of the light effect
+     * @param radiance the Radiance to update standalone, which does not need to be already added to this 
+     */
+    public void updateAlone(Coord pos, Radiance radiance)
+    {
+        updateAlone(pos.x, pos.y, radiance);
+    }
+
+    /**
+     * Updates the flicker and strobe effects of a Radiance object and applies the lighting from just that Radiance to
+     * just the {@link #colorLighting} field, without changing FOV. This method is meant to be used for GUI effects that
+     * aren't representative of something a character in the game could interact with. It is usually called after
+     * {@link #update(Coord)} and before each call to {@link #draw(float[][])}, but other code may be between the calls
+     * and may affect the lighting in customized ways.
+     * @param lightX the x-position of the light effect
+     * @param lightY the y-position of the light effect
+     * @param radiance the Radiance to update standalone, which does not need to be already added to this 
+     */
+    public void updateAlone(int lightX, int lightY, Radiance radiance)
+    {
+        FOV.reuseFOV(resistances, tempFOV, lightX, lightY, radiance.currentRange());
+        SColor.colorLightingInto(tempColorLighting, tempFOV, radiance.color);
+        mixColoredLighting(radiance.flare);
+    }
+
     /**
      * Given a SparseLayers, fills the SparseLayers with different colors based on what lights are present in line of
      * sight of the viewer and the various flicker or strobe effects that Radiance light sources can do. You should
