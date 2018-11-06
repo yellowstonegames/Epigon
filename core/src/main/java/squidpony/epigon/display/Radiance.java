@@ -227,7 +227,6 @@ public class Radiance implements Serializable {
         }
         return chain;
     }
-    public static final Radiance[] softWhiteChain = makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
 
     @Override
     public String toString() {

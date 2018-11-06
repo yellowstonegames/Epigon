@@ -176,6 +176,7 @@ public class Epigon extends Game {
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
+    public static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
 
     // Set up sizing all in one place
     static {
@@ -1212,7 +1213,7 @@ public class Epigon extends Game {
         map.lighting.update(player.location);
         if(!showingMenu) {
             for (int i = 0; i < toCursor.size(); i++) {
-                map.lighting.updateAlone(toCursor.get(i), Radiance.softWhiteChain[i * 3 & 7]);
+                map.lighting.updateUI(toCursor.get(i), softWhiteChain[i * 3 & 7]);
             }
         }
         map.lighting.draw(mapSLayers);
