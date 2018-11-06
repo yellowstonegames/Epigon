@@ -1,7 +1,7 @@
 package squidpony.epigon.data.quality;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.display.Radiance;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Modification;

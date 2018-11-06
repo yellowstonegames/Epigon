@@ -2,7 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.display.Radiance;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;

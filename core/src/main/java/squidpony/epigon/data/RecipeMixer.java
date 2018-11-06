@@ -2,7 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Colors;
 import squidpony.Messaging;
-import squidpony.epigon.display.Radiance;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.quality.Stone;
