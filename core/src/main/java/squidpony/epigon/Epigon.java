@@ -132,8 +132,8 @@ public class Epigon extends Game {
     private SquidInput infoInput;
     private SquidInput debugInput;
     private SquidInput fallbackInput;
-    private Color bgColor, unseenColor;
-    private float bgColorFloat, unseenColorFloat, unseenCreatureColorFloat;
+    private Color unseenColor;
+    private float unseenCreatureColorFloat;
     private ArrayList<Coord> toCursor;
     private TextCellFactory font;
 
@@ -168,7 +168,6 @@ public class Epigon extends Game {
     private ArrayList<Coord> awaitedMoves;
     private OrderedMap<Coord, Physical> creatures;
     private int autoplayTurns = 0;
-    private boolean processingCommand = true;
 
     // Timing
     private long fallDelay = 300;
@@ -241,11 +240,8 @@ public class Epigon extends Game {
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
 
-        bgColor = SColor.WHITE;
         unseenColor = SColor.BLACK_DYE;
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
-        bgColorFloat = bgColor.toFloatBits();
-        unseenColorFloat = unseenColor.toFloatBits();
         //FilterBatch is new, and automatically filters all text colors and image tints with a FloatFilter
         batch = new FilterBatch(filter);
         // uncomment the line below to see the game with no filters
@@ -491,8 +487,7 @@ public class Epigon extends Game {
         prepCrawl();
         putCrawlMap();
 //        prepFall();
-
-        processingCommand = false; // let the player do input
+        
     }
 
     private void initPlayer() {

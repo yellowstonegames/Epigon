@@ -157,7 +157,7 @@ public class ContextHandler {
                         //glyph.act(Gdx.graphics.getDeltaTime());
                         if ((x = mainMap.gridX(glyph.getX())) < 0 || x >= mainMap.gridWidth
                             || (y = mainMap.gridY(glyph.getY())) < 0 || y >= mainMap.gridHeight
-                            || mainMap.backgrounds[x * 3 + 1][y * 3 + 1] == 0f) {
+                            || mainMap.backgrounds[x][y] == 0f) {
                             continue;
                         }
                         miniMapFont.draw(batch, '\u0000', game.player != null
