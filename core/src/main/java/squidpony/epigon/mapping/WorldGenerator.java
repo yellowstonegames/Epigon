@@ -317,6 +317,9 @@ public class WorldGenerator {
 
     private void placeWater(EpiTile tile) {
         tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
+        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
+                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
+        tile.floor.radiance.delay = tile.floor.nextFloat();
 //        tile.floor = RecipeMixer.buildPhysical(hellscape ? handBuilt.lava : handBuilt.water);
     }
 

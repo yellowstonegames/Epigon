@@ -1228,7 +1228,7 @@ public class Epigon extends Game {
      */
     public void putCrawlMap() {
         ArrayTools.fill(mapSLayers.backgrounds, map.lighting.backgroundColor);
-        map.lighting.update(player.location);
+        map.lighting.update();
         if(!showingMenu) {
             for (int i = 0; i < toCursor.size(); i++) {
                 map.lighting.updateUI(toCursor.get(i), softWhiteChain[i * 3 & 7]);
