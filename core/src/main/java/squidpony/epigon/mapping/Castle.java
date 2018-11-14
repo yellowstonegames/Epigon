@@ -71,20 +71,7 @@ public class Castle {
         height = buildZone[0].height;
 
         region = new GreasedRegion(width, height);
-        region.allOn();
-        for (int x = 0; x < mapEdging; x++) {
-            for (int y = 0; y < height; y++) {
-                region.set(false, x, y);
-                region.set(false, width - 1 - x, y);
-            }
-        }
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < mapEdging; y++) {
-                region.set(false, x, y);
-                region.set(false, x, height - 1 - y);
-            }
-        }
-
+        region.allOn().retract(mapEdging);
         moat = region.copy();
     }
 

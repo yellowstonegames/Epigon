@@ -50,7 +50,7 @@ public enum Stone implements Material {
     GANISTER(SColor.GRAY, SColor.DARK_GRAY, false, true, false, false, 200, 1000),
     GNEISS(SColor.GRAY, SColor.DARK_GRAY, true, false, false, false, 100, 1000),
     GOSSAN(SColor.RUST, SColor.DARK_RED, false, true, false, false, 100, 1000),
-    GRANITE(SColor.DEEP_PINK, SColor.DARK_GRAY, false, false, true, false, 600, 1000),
+    GRANITE(SColor.AURORA_CHIPPED_GRANITE, SColor.DARK_GRAY, false, false, true, false, 600, 1000),
     GRANODIORITE(SColor.GRAY_ASPARAGUS, SColor.DARK_GRAY, false, false, true, false, 150, 1000),
     GRANOPHYRE(SColor.GRAY, SColor.GRAY_ASPARAGUS, false, false, true, true, 100, 1000),
     GRANULITE(SColor.LIGHT_GRAY, SColor.BEIGE, true, false, false, false, 100, 1000),

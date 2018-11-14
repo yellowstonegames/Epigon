@@ -11,6 +11,7 @@ import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.FlowingCaveGenerator;
 import squidpony.squidgrid.mapping.SerpentMapGenerator;
+import squidpony.squidgrid.mapping.styled.DungeonBoneGen;
 import squidpony.squidgrid.mapping.styled.TilesetType;
 import squidpony.squidmath.*;
 
@@ -843,10 +844,10 @@ public class WorldGenerator {
                     castle.setTileAt(c, castle.ground - z, tile);
                 }
                 tile.floor = getFloor(Stone.MARBLE);
-                tile.add(getWall(Stone.MARBLE));
+                //tile.add(getWall(Stone.MARBLE));
             }
 
-            if ((c.x + c.y) % 2 == 0) {
+            if ((c.x + c.y & 1) == 0) {
                 EpiTile tile = castle.tileAt(c, castle.ground - 5);
                 if (tile == null) {
                     tile = new EpiTile();
@@ -861,23 +862,50 @@ public class WorldGenerator {
             .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
 
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
+        Physical insideFloor = getFloor(Stone.GRANITE), insideWall = getWall(Stone.GRANITE);
+        DungeonBoneGen dbg = new DungeonBoneGen(rng);
+        DungeonGenerator dungeonGenerator = new DungeonGenerator(width, height, rng);
+        dungeonGenerator.addDoors(30, true);
+        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width, height);
+        GreasedRegion gr = dbg.region.copy();
+        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width + 5, height + 5);
+        gr.insert(-5, -5, dbg.region);
+        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width + 3, height + 3);
+        gr.not().insert(-2, -2, dbg.region);
+        char[][] interior = dungeonGenerator.generate(gr.toChars());
         for (Coord c : castle.insideKeep) {
-            for (int z = 0; z <= 4; z++) {
-                EpiTile tile = castle.tileAt(c, castle.ground - z);
-                if (tile == null) {
-                    castle.setTileAt(c, z, new EpiTile(carpet));
-                } else {
-                    tile.floor = carpet;
-                }
-            }
-        }
-
-        for (Coord c : castle.keepWall.copy().randomScatter(rng, 8, 5)) {
             EpiTile tile = castle.tileAt(c, castle.ground);
-            tile.floor = getFloor(Stone.MARBLE);
-            tile.blockage = null;
-            placeDoor(tile);
+            if(tile == null) {
+                castle.setTileAt(c, castle.ground, tile = new EpiTile(insideFloor));
+            }
+            else {
+                tile.floor = insideFloor;
+            }
+            if(interior[c.x][c.y] == '+' || interior[c.x][c.y] == '/')
+            {
+                tile.blockage = null;
+                placeDoor(tile);
+            }
+            else if(interior[c.x][c.y] != '.')
+                tile.add(insideWall);
         }
+//        for (Coord c : castle.insideKeep) {
+//            for (int z = 0; z <= 4; z++) {
+//                EpiTile tile = castle.tileAt(c, castle.ground - z);
+//                if (tile == null) {
+//                    castle.setTileAt(c, castle.ground - z, new EpiTile(carpet));
+//                } else {
+//                    tile.floor = carpet;
+//                }
+//            }
+//        }
+//        GreasedRegion doors = castle.keepWall.copy().randomScatter(rng, 8, 5);
+//        for (Coord c : doors) {
+//            EpiTile tile = castle.tileAt(c, castle.ground);
+//            tile.floor = getFloor(Stone.MARBLE);
+//            tile.blockage = null;
+//            placeDoor(tile);
+//        }
     }
 
     private Coord findCentroid(List<Coord> coords) {
