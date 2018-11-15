@@ -325,7 +325,9 @@ public class HandBuilt {
         }
 
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
-        Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
+        Weapon unarmed = Weapon.getWeapons().get("sinister magic");
+//        Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
+        
         if(unarmed.kind == Weapon.MAGIC)
         {
             Element elem = unarmed.elements.items.get(0);

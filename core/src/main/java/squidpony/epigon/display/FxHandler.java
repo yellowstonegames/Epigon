@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
+import squidpony.StringKit;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.Physical;
@@ -23,14 +24,9 @@ import java.util.stream.Collectors;
  * @author Eben Howard
  */
 public class FxHandler {
-
-    private static char[] explosionChars = new char[]{'%', '$', '&', '!'};
-    private static char[] zapChars = new char[]{};
-
+    
     private SparseLayers fx;
     private int layer;
-    private int width;
-    private int height;
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
     public double[][] seen;
@@ -38,8 +34,6 @@ public class FxHandler {
 
     public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
-        width = layers.gridWidth();
-        height = layers.gridHeight();
         layer = layerNumber;
         this.colorCenter = colorCenter;
         viable = new GreasedRegion(visible.length, visible[0].length);
@@ -137,8 +131,9 @@ public class FxHandler {
         @Override
         protected void update(float percent) {
             float f, color;
-            int idx, seed = System.identityHashCode(this);
-            f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed) * 0.125f + percent;
+            int idx;
+            FastNoise.instance.setSeed(System.identityHashCode(this));
+            f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) * 0.125f + percent;
             idx = (int) (f * colors.length);
             if (idx >= colors.length - 1) {
                 color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
@@ -205,7 +200,7 @@ public class FxHandler {
         public double[][] resMap,
             lightMap;
 
-        public List<Coord> affected;
+        public Coord[] affected;
 
         public DustEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, List<? extends Color> coloring) {
             super(fx, duration, valid);
@@ -215,7 +210,7 @@ public class FxHandler {
             FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
-            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).asCoords();
             colors = new float[coloring.size()];
             for (int i = 0; i < colors.length; i++) {
                 colors[i] = coloring.get(i).toFloatBits();
@@ -224,17 +219,18 @@ public class FxHandler {
 
         @Override
         protected void update(float percent) {
-            int len = affected.size();
+            int len = affected.length;
             Coord c;
             float f, color;
             int idx, seed = System.identityHashCode(this), seed2 = seed;
+            FastNoise.instance.setSeed(seed);
             for (int i = 0; i < len; i++) {
-                c = affected.get(i);
+                c = affected[i];
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
                 }
-                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
-                    * 0.125f + percent;
+                f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) 
+                        * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
                 }
@@ -284,7 +280,7 @@ public class FxHandler {
          * show as exploding (it usually has some false positives), but shouldn't exclude any cells that should show as
          * such (no false negatives). You can edit this if you need to, but it isn't recommended.
          */
-        public List<Coord> affected;
+        public Coord[] affected;
 
         public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius) {
             super(fx, duration, valid);
@@ -294,7 +290,7 @@ public class FxHandler {
             FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius, angle, 75.0);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
-            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).asCoords();
         }
 
         public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, Color... coloring) {
@@ -315,18 +311,19 @@ public class FxHandler {
          */
         @Override
         protected void update(float percent) {
-            int len = affected.size();
+            int len = affected.length;
             Coord c;
-            float f, color;
-            int idx, seed = System.identityHashCode(this);
+            float f;
+            int idx;
+            FastNoise.instance.setSeed(System.identityHashCode(this));
             for (int i = 0; i < len; i++) {
-                c = affected.get(i);
+                c = affected[i];
                 if (lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                 {
                     continue;
                 }
-                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
-                    * 0.17f + percent * 1.2f;
+                f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 5f) 
+                        * 0.17f + percent * 1.2f;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
                 }
@@ -349,9 +346,8 @@ public class FxHandler {
     public class ColorSparkleEffect extends PanelEffect {
 
         public float[][] colors;
-        public double[][] resMap,
-            lightMap;
-        public List<Coord> affected;
+        public double[][] resMap, lightMap;
+        public Coord[] affected;
         private final char[] dots = "⠁⠂⠄⠈⠐⠠⡀⢀".toCharArray();
 
         public ColorSparkleEffect(float duration, GreasedRegion valid, Coord center, int distance, Radius radius, RNG rng) {
@@ -366,12 +362,14 @@ public class FxHandler {
             FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
-            affected = new GreasedRegion(lightMap, 0.01, 999.0).getAll();
+            affected = new GreasedRegion(lightMap, 0.01, 999.0).asCoords();
             colors = new float[8][];
+            int mod;
             for (int i = 0; i < 8; i++) {
-                colors[i] = new float[coloring[i % coloring.length].length];
-                for (int j = 0; j < coloring[i % coloring.length].length; j++) {
-                    colors[i][j] = coloring[i % coloring.length][j].toFloatBits();
+                mod = i % coloring.length;
+                colors[i] = new float[coloring[mod].length];
+                for (int j = 0; j < coloring[mod].length; j++) {
+                    colors[i][j] = coloring[mod][j].toFloatBits();
                 }
             }
         }
@@ -386,17 +384,18 @@ public class FxHandler {
 
         @Override
         protected void update(float percent) {
-            int len = affected.size();
+            int len = affected.length;
             Coord c;
             float f, color;
-            int idx, seed = System.identityHashCode(this);
+            int idx;
+            FastNoise.instance.setSeed(System.identityHashCode(this));
             for (int i = 0; i < len; i++) {
-                c = affected.get(i);
+                c = affected[i];
                 if (lightMap[c.x][c.y] <= 0.0) {// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
                 }
-                f = (float) WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 0.015, seed)
-                    * 0.125f + percent;
+                f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) 
+                        * 0.125f + percent;
                 if (f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4) {
                     continue;
                 }
@@ -451,11 +450,12 @@ public class FxHandler {
             float f, color;
             int idx, seed = System.identityHashCode(this), clen = choices.length;
             final long tick = LightRNG.determine((System.currentTimeMillis() >>> 8) * seed);
+            FastNoise.instance.setSeed(seed);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
                 if(lightMap[c.x][c.y] <= 0.0)// || 0.6 * (lightMap[c.x][c.y] + percent) < 0.25)
                     continue;
-                f = (float)WhirlingNoise.noise(c.x * 1.5, c.y * 1.5, percent * 5, seed)
+                f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 5f)
                         * 0.17f + percent * 1.2f;
                 if(f < 0f || 0.5 * lightMap[c.x][c.y] + f < 0.4)
                     continue;
@@ -468,6 +468,73 @@ public class FxHandler {
             }
         }
 
+    }
+    public class WheelEffect extends PanelEffect {
+
+        public float color;
+        public Coord center;
+        public String upper = StringKit.CYRILLIC_LETTERS_UPPER, lower = StringKit.GREEK_LETTERS_LOWER;
+
+        public WheelEffect(float duration, Coord center, float color) {
+            super(fx, duration);
+            this.center = center;
+            this.color = color;
+        }
+
+        @Override
+        protected void end() {
+            super.end();
+            fx.clear(center.x - 1, center.y + 1, layer);
+            fx.clear(center.x - 1, center.y + 1, layer + 1);
+            fx.clear(center.x, center.y + 1, layer);
+            fx.clear(center.x, center.y + 1, layer + 1);
+            fx.clear(center.x + 1, center.y + 1, layer);
+            fx.clear(center.x + 1, center.y + 1, layer + 1);
+            fx.clear(center.x - 1, center.y, layer);
+            fx.clear(center.x - 1, center.y, layer + 1);
+            fx.clear(center.x, center.y, layer);
+            fx.clear(center.x, center.y, layer + 1);
+            fx.clear(center.x + 1, center.y, layer);
+            fx.clear(center.x + 1, center.y, layer + 1);
+            fx.clear(center.x - 1, center.y - 1, layer);
+            fx.clear(center.x - 1, center.y - 1, layer + 1);
+            fx.clear(center.x, center.y - 1, layer);
+            fx.clear(center.x, center.y - 1, layer + 1);
+            fx.clear(center.x + 1, center.y - 1, layer);
+            fx.clear(center.x + 1, center.y - 1, layer + 1);
+        }
+
+        @Override
+        protected void update(float percent) {
+            float pathPercent = 11 * percent;
+            int pathIndex = Math.min(8, Math.round(pathPercent));
+            pathPercent %= 1f; // get just the fractional part
+            if(pathIndex == 8)
+            {
+                fx.put(center.x - 1, center.y - 1, '┼', color, 0f, layer);
+                fx.put(center.x, center.y - 1, '┴', color, 0f, layer);
+                fx.put(center.x + 1, center.y - 1, '┼', color, 0f, layer);
+                fx.put(center.x - 1, center.y, '┤', color, 0f, layer);
+                fx.put(center.x - 1, center.y, '├', color, 0f, layer);
+                fx.put(center.x - 1, center.y + 1, '┼', color, 0f, layer);
+                fx.put(center.x, center.y + 1, '┬', color, 0f, layer);
+                fx.put(center.x + 1, center.y + 1, '┼', color, 0f, layer);
+                fx.put(center.x, center.y, upper.charAt(LinnormRNG.determineBounded(System.currentTimeMillis(), upper.length())), color, 0f, layer);
+                fx.put(center.x, center.y, lower.charAt(LinnormRNG.determineBounded(System.currentTimeMillis(), lower.length())), color, 0f, layer + 1);
+                return;
+            }
+            final int seed = System.identityHashCode(this);
+            Coord current;
+            for (int i = 0; i < pathIndex - 1; i++) {
+                current = center.translate(Direction.CLOCKWISE[i]);
+                fx.put(current.x, current.y, upper.charAt(LinnormRNG.determineBounded(seed+i, upper.length())), color, 0f, layer);
+                fx.put(current.x, current.y, lower.charAt(LinnormRNG.determineBounded(seed+i, lower.length())), color, 0f, layer + 1);
+            }
+            current = center.translate(Direction.CLOCKWISE[pathIndex]);
+            final float partial = SColor.translucentColor(color, pathPercent);
+            fx.put(current.x, current.y, upper.charAt(LinnormRNG.determineBounded(seed+pathIndex, upper.length())), partial, 0f, layer);
+            fx.put(current.x, current.y, lower.charAt(LinnormRNG.determineBounded(seed+pathIndex, lower.length())), partial, 0f, layer + 1);
+        }
     }
 
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
@@ -491,6 +558,7 @@ public class FxHandler {
                     break;
                 case TEMPORAL:
                     fx.tint(target.appearance, ao.element.floatColor, 0.5f);
+                    // no break here intentionally
                 case EARTH:
                     fx.wiggle(0f, target.appearance, 0.5f, () -> target.appearance.setPosition(
                             fx.worldX(target.location.x), fx.worldY(target.location.y)));
@@ -503,6 +571,9 @@ public class FxHandler {
                     break;
                 case CAUSTIC:
                     fx.burst(target.location.x, target.location.y, 1, Radius.CIRCLE, '○', ao.element.floatColor, SColor.translucentColor(ao.element.floatColor, 0f), 0.525f);
+                    break;
+                case SINISTER:
+                    fx.addAction(new WheelEffect(0.7f, target.location, ao.element.floatColor));
                     break;
                 case SLASHING:
                     fx.addAction(new GibberishEffect2(0.5f, viable.refill(seen, 0.001, 999), target.location, 0, ao.element, SLASHING_CHARS));
