@@ -197,8 +197,8 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 60;
-        worldHeight = 60;
+        worldWidth = 100;
+        worldHeight = 100;
         worldDepth = 100;
         totalDepth = worldDepth + World.DIVE_HEADER.length;
         int bigW = 102;//World.DIVE_HEADER[0].length() + 2;

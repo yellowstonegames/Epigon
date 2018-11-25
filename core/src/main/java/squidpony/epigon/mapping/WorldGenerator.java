@@ -33,10 +33,8 @@ public class WorldGenerator {
     private StatefulRNG rng;
     private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
-    private boolean hellscape = false;
 
     public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
-        hellscape = handBuilt.rng.next(3) == 0;
         EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
         EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
 
@@ -317,11 +315,11 @@ public class WorldGenerator {
     }
 
     private void placeWater(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
-        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
-                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
-        tile.floor.radiance.delay = tile.floor.nextFloat();
-//        tile.floor = RecipeMixer.buildPhysical(hellscape ? handBuilt.lava : handBuilt.water);
+//        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
+//        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
+//                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
+//        tile.floor.radiance.delay = tile.floor.nextFloat();
+        tile.floor = RecipeMixer.buildPhysical(handBuilt.water);
     }
 
     private void placeMud(EpiTile tile) {
@@ -705,6 +703,7 @@ public class WorldGenerator {
 
         //choose area for moat
         int distance = 8; // space between points
+        castle.moat.surface8way(8);
         List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
         castle.moat.clear();
         castle.moat = connectPoints(castle.moat, corners);
@@ -735,10 +734,15 @@ public class WorldGenerator {
         }
 
         corners = findInternalPolygonCorners(castle.insideMoat, distance / 2, 4);
-        castle.outerWall = castle.insideMoat.copy();
-        castle.outerWall.fill(false);
-        castle.outerWall = connectPoints(castle.outerWall, corners);
-        castle.holes = castle.outerWall.copy().randomScatter(rng, 8); // find the holes before the expansion so that they're in the middle of the wall
+        Coord courtyardCentroid = findCentroid(corners);
+        castle.outerWall = new GreasedRegion(courtyardCentroid, castle.insideMoat.width, castle.insideMoat.height);
+        while (!castle.outerWall.intersects(castle.moat))
+        {
+            castle.outerWall.expand8way();
+        }
+        castle.outerWall.surface8way(3);
+//        castle.outerWall = connectPoints(castle.outerWall, corners);
+        castle.holes = castle.outerWall.copy().randomScatter(rng, 8).expand(); // find the holes before the expansion so that they're in the middle of the wall
         castle.outerWall.expand();
 
         for (Coord c : castle.outerWall) {
@@ -746,7 +750,6 @@ public class WorldGenerator {
             map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
         }
 
-        Coord courtyardCentroid = findCentroid(corners);
         castle.courtyard = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
             .flood8way(castle.insideMoat.copy().andNot(castle.outerWall), castle.region.width * castle.region.height);
 
@@ -786,56 +789,65 @@ public class WorldGenerator {
 
     private void buildKeep(Castle castle, Coord courtyardCentroid) {
         // sketch out a keep's borders
-        int top = courtyardCentroid.y;
-        int bottom = courtyardCentroid.y;
-        int left = courtyardCentroid.x;
-        int right = courtyardCentroid.x;
-        int lastChoice = 0;
-        expandKeep:
-        while (true) {
-            lastChoice = rng.nextInt(4);
-            switch (lastChoice) {
-                case 0:
-                    top--;
-                    break;
-                case 1:
-                    right++;
-                    break;
-                case 2:
-                    left--;
-                    break;
-                case 3:
-                default:
-                    bottom++;
-                    break;
-            }
-            for (int x = left; x <= right; x++) {
-                if (!castle.courtyard.contains(x, top) || !castle.courtyard.contains(x, bottom)) {
-                    break expandKeep;
-                }
-            }
-            for (int y = top; y <= bottom; y++) {
-                if (!castle.courtyard.contains(left, y) || !castle.courtyard.contains(right, y)) {
-                    break expandKeep;
-                }
-            }
+        
+//        int top = courtyardCentroid.y;
+//        int bottom = courtyardCentroid.y;
+//        int left = courtyardCentroid.x;
+//        int right = courtyardCentroid.x;
+//        int lastChoice = 0;
+//        expandKeep:
+//        while (true) {
+//            lastChoice = rng.nextInt(4);
+//            switch (lastChoice) {
+//                case 0:
+//                    top--;
+//                    break;
+//                case 1:
+//                    right++;
+//                    break;
+//                case 2:
+//                    left--;
+//                    break;
+//                case 3:
+//                default:
+//                    bottom++;
+//                    break;
+//            }
+//            for (int x = left; x <= right; x++) {
+//                if (!castle.courtyard.contains(x, top) || !castle.courtyard.contains(x, bottom)) {
+//                    break expandKeep;
+//                }
+//            }
+//            for (int y = top; y <= bottom; y++) {
+//                if (!castle.courtyard.contains(left, y) || !castle.courtyard.contains(right, y)) {
+//                    break expandKeep;
+//                }
+//            }
+//        }
+//        switch (lastChoice) {
+//            case 0:
+//                top++;
+//                break;
+//            case 1:
+//                right--;
+//                break;
+//            case 2:
+//                left++;
+//                break;
+//            case 3:
+//            default:
+//                bottom--;
+//                break;
+//        }
+        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.courtyard.width, castle.courtyard.height);
+        while (!castle.insideKeep.intersects(castle.outerWall))
+        {
+            castle.insideKeep.expand8way();
         }
-        switch (lastChoice) {
-            case 0:
-                top++;
-                break;
-            case 1:
-                right--;
-                break;
-            case 2:
-                left++;
-                break;
-            case 3:
-            default:
-                bottom--;
-                break;
-        }
-        castle.keepWall = connectPoints(castle.courtyard.copy().fill(false), Coord.get(left, top), Coord.get(right, top), Coord.get(right, bottom), Coord.get(left, bottom));
+        castle.insideKeep.retract(6);
+        
+        castle.keepWall = connectPoints(new GreasedRegion(castle.courtyard.width, castle.courtyard.height),
+                castle.insideKeep.copy().andNot(castle.insideKeep.copy().removeCorners()).asCoords());
         for (Coord c : castle.keepWall) {
             for (int z = 0; z <= 4; z++) {
                 EpiTile tile = castle.tileAt(c, castle.ground - z);
@@ -858,8 +870,8 @@ public class WorldGenerator {
             }
         }
 
-        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
-            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
+//        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
+//            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
 
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
         Physical insideFloor = getFloor(Stone.GRANITE), insideWall = getWall(Stone.GRANITE);
