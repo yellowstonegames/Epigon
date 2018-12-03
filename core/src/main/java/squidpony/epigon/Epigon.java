@@ -654,7 +654,6 @@ public class Epigon extends Game {
 
     private void runTurn() {
         OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
-        Coord[] pl = {player.location};
         Set<Coord> ps = Collections.singleton(player.location);
         ArrayList<Coord> path = new ArrayList<>(9);
         for (int i = 0; i < creatures.size(); i++) {
@@ -672,16 +671,18 @@ public class Epigon extends Game {
                 if(weapon == null) {
                     if (creature.weaponData != null && los.isReachable(simple, c.x, c.y, player.location.x, player.location.y))
                     {
+//                        message(creature.name + " has sight " + creature.stats.get(Stat.SIGHT).actual());
                         monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
-                    }
-                    else {
-                        pl[0] = creature.getRandomElement(floorCells);
-                        monsterDijkstra.findPath(path, 1, 3, creaturePositions, null, c, pl);
                     }
                 }
                 else
                     monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), weapon.technique, simple, los, creaturePositions, null, c, ps);
-                if (path != null && !path.isEmpty()) {
+                if(path.isEmpty()) {
+                    Coord next = c.translateCapped(creature.between(-1, 2), creature.between(-1, 2), map.width, map.height);
+                    if(!map.creatures.containsKey(next) && map.contents[next.x][next.y].blockage == null)
+                        path.add(next);
+                }
+                if (!path.isEmpty()) {
                     Coord step = path.get(0);
                     if (weapon != null) {
                         ActionOutcome ao = ActionOutcome.attack(creature, weapon, player);
@@ -694,7 +695,7 @@ public class Epigon extends Game {
                             if (ao.hit) {
                                 int amt = ao.actualDamage >> 1;
                                 applyStatChange(player, Stat.VIGOR, amt);
-                                amt *= -1; // flip sign for output message
+                                amt = -amt; // flip sign for output message
                                 if (player.stats.get(Stat.VIGOR).actual() <= 0.0) {
                                     if (ao.crit) {
                                         message(Messaging.transform("The " + creature.name + " [Blood]brutally[] slay$ you with "
@@ -747,11 +748,18 @@ public class Epigon extends Game {
                             //creatures.putAt(step, creatures.remove(c), i);
                             creature.location = step;
                             map.contents[step.x][step.y].add(creature);
-                            if (map.lighting.fovResult[c.x][c.y] > 0) {
+                            if (creature.appearance != null) {
+//                            if (map.lighting.fovResult[c.x][c.y] > 0) {
                                 mapSLayers.slide(creature.appearance, c.x, c.y, step.x, step.y, 0.145f, null);
                                 if (creature.overlayAppearance != null)
                                     mapSLayers.slide(creature.overlayAppearance, c.x, c.y, step.x, step.y, 0.145f, null);
                             }
+//                            else if() 
+//                            {
+//                                creature.appearance.setPosition(mapSLayers.worldX(step.x), mapSLayers.worldY(step.y));
+//                                if(creature.overlayAppearance != null)
+//                                    creature.overlayAppearance.setPosition(mapSLayers.worldX(step.x), mapSLayers.worldY(step.y));
+//                            }
                         }
                     }
                     creaturePositions.add(creature.location);
