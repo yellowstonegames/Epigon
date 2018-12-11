@@ -43,21 +43,8 @@ import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Radius;
-import squidpony.squidgrid.gui.gdx.DefaultResources;
-import squidpony.squidgrid.gui.gdx.FilterBatch;
-import squidpony.squidgrid.gui.gdx.FloatFilter;
-import squidpony.squidgrid.gui.gdx.FloatFilters;
-import squidpony.squidgrid.gui.gdx.GDXMarkup;
-import squidpony.squidgrid.gui.gdx.Radiance;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SparseLayers;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidgrid.gui.gdx.SquidLayers;
-import squidpony.squidgrid.gui.gdx.SquidMouse;
-import squidpony.squidgrid.gui.gdx.SubcellLayers;
-import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.time.Instant;
@@ -152,7 +139,9 @@ public class Epigon extends Game {
     private EpiMap[] world;
     private EpiMap map;
     private char[][] simple;
-
+    private char[][] lineDungeon, prunedDungeon;
+    private float[][] wallColors, walls;
+    
     private int depth;
     private FxHandler fxHandler;
     private MapOverlayHandler mapOverlayHandler;
@@ -160,7 +149,6 @@ public class Epigon extends Game {
     private InfoHandler infoHandler;
     private FallingHandler fallingHandler;
     private GreasedRegion blockage, floors;
-    private Coord[] floorCells;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private LOS los;
     private Coord cursor;
@@ -336,6 +324,9 @@ public class Epigon extends Game {
                 filter.coMul = 0.95f;
                 filter.cgMul = 0.95f;
                 filter.yMul = 0.9f;
+
+                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
+
                 font.configureShader(batch);
                 if(frustum == null) {
                     for (int i = 0; i < len; i++) {
@@ -536,8 +527,10 @@ public class Epigon extends Game {
         }
 
         simple = map.simpleChars();
+        lineDungeon = map.line;
+        wallColors = new float[map.width][map.height];
+        walls = MapUtility.generateLinesToBoxes(lineDungeon, wallColors);
         floors.refill(map.opacities(), 0.999);
-        floorCells = floors.asCoords();
 
         if (map.populated) {
             return;
@@ -645,6 +638,7 @@ public class Epigon extends Game {
         fxHandler.seen = map.lighting.fovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
+        lineDungeon = map.line;
         calcFOV(player.location.x, player.location.y);
         toPlayerDijkstra.initialize(simple);
         monsterDijkstra.initialize(simple);
@@ -1223,7 +1217,11 @@ public class Epigon extends Game {
     }
     
     public void putWithLight(int x, int y, char c, float foreground) {
-        mapSLayers.put(x, y, c, lerpFloatColorsBlended(foreground, map.lighting.colorLighting[1][x][y], map.lighting.colorLighting[0][x][y] * 0.6f)); // "dark" theme
+        foreground = lerpFloatColorsBlended(foreground, map.lighting.colorLighting[1][x][y], map.lighting.colorLighting[0][x][y] * 0.6f);
+        if(c == '#')
+            wallColors[x][y] = foreground;
+        else
+            mapSLayers.put(x, y, c, foreground); // "dark" theme
     }
 
     /**
@@ -1270,12 +1268,15 @@ public class Epigon extends Game {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
                         mapSLayers.clear(x, y, 0);
-                        mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 0);
+                        if(rt.symbol == '#')
+                            wallColors[x][y] = rt.front;
+                        else 
+                            mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 0);
                     }
                 }
             }
         }
-
+        MapUtility.fillLinesToBoxes(walls, lineDungeon, wallColors);
         mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
