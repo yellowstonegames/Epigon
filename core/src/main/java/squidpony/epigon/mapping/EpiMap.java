@@ -24,6 +24,7 @@ public class EpiMap {
     public int width, height;
     public EpiTile[][] contents;
     public RememberedTile[][] remembered;
+    public GreasedRegion seen, tempSeen;
     public char[][] simple;
     public char[][] line;
     public LightingHandler lighting;
@@ -35,12 +36,6 @@ public class EpiMap {
     public EpiMap(int width, int height) {
         this.width = width;
         this.height = height;
-//        fovResult = new double[width][height];
-//        losResult = new double[width][height];
-//        tempFOV = new double[width][height];
-//        colorLighting = SColor.blankColoredLighting(width, height);
-//        tempColorLighting = new float[2][width][height];
-        //resistances = new double[width][height];
         lighting = new LightingHandler(new double[width][height]);
         lighting.radiusStrategy = Radius.CIRCLE;
         lighting.backgroundColor = RememberedTile.memoryColorFloat;
@@ -49,6 +44,8 @@ public class EpiMap {
         remembered = new RememberedTile[width][height];
         downStairPositions = new GreasedRegion(width, height);
         upStairPositions = new GreasedRegion(width, height);
+        seen = new GreasedRegion(width, height);
+        tempSeen = new GreasedRegion(width,height);
         creatures = new OrderedMap<>();
     }
 

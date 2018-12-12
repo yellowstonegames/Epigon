@@ -27,13 +27,8 @@ import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.display.ContextHandler;
-import squidpony.epigon.display.FallingHandler;
-import squidpony.epigon.display.FxHandler;
-import squidpony.epigon.display.InfoHandler;
-import squidpony.epigon.display.MapOverlayHandler;
+import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
-import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.*;
@@ -45,6 +40,7 @@ import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.mapping.LineKit;
 import squidpony.squidmath.*;
 
 import java.time.Instant;
@@ -528,8 +524,9 @@ public class Epigon extends Game {
 
         simple = map.simpleChars();
         lineDungeon = map.line;
+        prunedDungeon = ArrayTools.copy(lineDungeon);
         wallColors = new float[map.width][map.height];
-        walls = MapUtility.generateLinesToBoxes(lineDungeon, wallColors);
+        walls = MapUtility.generateLinesToBoxes(prunedDungeon, wallColors);
         floors.refill(map.opacities(), 0.999);
 
         if (map.populated) {
@@ -924,6 +921,14 @@ public class Epigon extends Game {
                             = MathUtils.clamp(map.lighting.fovResult[x][y] + map.lighting.colorLighting[0][x][y], 0, 1);
                 }
             }
+            map.seen.allOn();
+            ArrayTools.insert(lineDungeon, prunedDungeon, 0, 0);
+        }
+        else 
+        {
+            map.seen.or(map.tempSeen.refill(map.lighting.fovResult, 0.0001, Double.POSITIVE_INFINITY));
+            LineKit.pruneLines(lineDungeon, map.seen, LineKit.lightAlt, prunedDungeon);
+
         }
 
         Physical creature;
@@ -1276,7 +1281,7 @@ public class Epigon extends Game {
                 }
             }
         }
-        MapUtility.fillLinesToBoxes(walls, lineDungeon, wallColors);
+        MapUtility.fillLinesToBoxes(walls, prunedDungeon, wallColors);
         mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
