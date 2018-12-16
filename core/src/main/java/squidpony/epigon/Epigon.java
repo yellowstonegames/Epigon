@@ -84,7 +84,7 @@ public class Epigon extends Game {
     // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
     //public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final LinnormRNG rootChaos = new LinnormRNG();
+    public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
     public HandBuilt handBuilt;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
@@ -474,7 +474,7 @@ public class Epigon extends Game {
         prepCrawl();
         putCrawlMap();
 //        prepFall();
-        
+        //message("Starting with " + EpiData.count + " EpiData instances.");
     }
 
     private void initPlayer() {

@@ -39,7 +39,7 @@ public class EpiMap {
         lighting = new LightingHandler(new double[width][height]);
         lighting.radiusStrategy = Radius.CIRCLE;
         lighting.backgroundColor = RememberedTile.memoryColorFloat;
-        chaos = new StatefulRNG(new LinnormRNG(rootChaos.nextLong()));
+        chaos = new StatefulRNG(new DiverRNG(rootChaos.nextLong()));
         contents = new EpiTile[width][height];
         remembered = new RememberedTile[width][height];
         downStairPositions = new GreasedRegion(width, height);

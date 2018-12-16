@@ -148,10 +148,10 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
 
 
         protected void regenerate(int startX, int startY, int usedWidth, int usedHeight,
-                                  double waterMod, double coolMod, long state)
+                                  double waterMod, double coolMod, int stateA, int stateB)
         {
             boolean fresh = false;
-            if(cachedState != state || waterMod != landModifier || coolMod != coolingModifier)
+            if(cacheA != stateA || cacheB != stateB || waterMod != landModifier || coolMod != coolingModifier)
             {
                 minHeight = Double.POSITIVE_INFINITY;
                 maxHeight = Double.NEGATIVE_INFINITY;
@@ -165,10 +165,11 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
                 maxWet0 = Double.NEGATIVE_INFINITY;
                 minWet = Double.POSITIVE_INFINITY;
                 maxWet = Double.NEGATIVE_INFINITY;
-                cachedState = state;
+                cacheA = stateA;
+                cacheB = stateB;
                 fresh = true;
             }
-            rng.setState(state);
+            rng.setState(stateA, stateB);
             long seedA = rng.nextLong(), seedB = rng.nextLong(), seedC = rng.nextLong();
             int t;
 
@@ -787,7 +788,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
         //world.setCenterLongitude((System.currentTimeMillis() & 0xFFFFFFF) * 0.0002);
         //world.setCenterLongitude(++counter * 0.02);
         world.generate(1.0 + NumberTools.formCurvedDouble((seed ^ 0x123456789ABCDL) * 0x12345689ABL) * 0.3,
-                LinnormRNG.determineDouble(seed * 0x12345L + 0x54321L) * 0.35 + 0.9, seed);
+                DiverRNG.determineDouble(seed * 0x12345L + 0x54321L) * 0.35 + 0.9, seed);
         dbm.makeBiomes(world);
         //randomizeColors(seed);
         //political = fpm.generate(seed + 1000L, world, dbm, null, 50, 1.0);

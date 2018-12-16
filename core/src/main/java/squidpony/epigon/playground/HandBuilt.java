@@ -132,7 +132,7 @@ public class HandBuilt {
 
     public HandBuilt(RecipeMixer mixer) {
         chaos = rootChaos.nextLong();
-        rng = new StatefulRNG(new LinnormRNG(chaos));
+        rng = new StatefulRNG(new DiverRNG(chaos));
         this.mixer = mixer;
         baseOpenDoor = Physical.makeBasic("base open door", '/', Color.CLEAR);
         baseClosedDoor = Physical.makeBasic("base closed door", '+', Color.CLEAR);

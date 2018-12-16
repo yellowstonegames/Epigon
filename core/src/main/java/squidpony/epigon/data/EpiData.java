@@ -17,7 +17,7 @@ import java.io.Serializable;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is OverdriveRNG from Sarong. It is slightly faster than TangleRNG or LinnormRNG and has very
+ * algorithm this uses is OverdriveRNG from Sarong. It is slightly faster than TangleRNG or DiverRNG and has very
  * strong quality, but takes some time to initialize (instead of almost none for Linnorm). Overdrive is a combination of
  * two subcycle generators, so some states will be on a low-period cycle and others will be on a higher-period cycle;
  * the longer initialization ensures a high-enough period (minimum 2 to the 47, probably much higher). The time to
@@ -34,8 +34,8 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     private String id;
     private final int idHash;
     private long state;
-    
-    private static int uniqueIntGen = (int) LinnormRNG.determine(System.nanoTime());
+//    public static int count = 0;
+    private static int uniqueIntGen = (int) DiverRNG.determine(System.nanoTime());
 
 //    private static final long[] startingA = {
 //            0x0000000000000001L, 0x770391C6587202CDL, 0x0148D0D6B055DE19L, 0x2CFFDEE4C4C8654FL, 0x3669291DE218F372L, 0x5B744ACB07F3D380L, 0x103F93C86BDF21D0L, 0x9A1D980831BCF2ABL,
@@ -89,6 +89,7 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     public EpiData() {
         idHash = (uniqueIntGen += 0x632BE5AB);
         setState(idHash);
+        //count++;
     }
     public EpiData(final String name)
     {

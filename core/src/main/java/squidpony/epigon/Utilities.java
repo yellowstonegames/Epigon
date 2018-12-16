@@ -8,7 +8,7 @@ import squidpony.epigon.data.Weapon;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
-import squidpony.squidmath.LightRNG;
+import squidpony.squidmath.DiverRNG;
 import squidpony.squidmath.RNG;
 
 import java.util.Collection;
@@ -38,7 +38,7 @@ public class Utilities {
 
     public static char randomBraille(long seed, int dots) {
         String s = brailleByDots[dots % 9];
-        return s.charAt(LightRNG.determineBounded(seed, s.length()));
+        return s.charAt(DiverRNG.determineBounded(seed, s.length()));
     }
 
     public static char brailleFor(Collection<Coord> coords) {

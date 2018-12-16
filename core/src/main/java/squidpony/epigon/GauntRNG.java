@@ -6,7 +6,7 @@ import squidpony.squidmath.NumberTools;
 
 import java.util.Collections;
 import java.util.List;
-import static squidpony.squidmath.LinnormRNG.*; // comment this out if using custom determine()
+import static squidpony.squidmath.DiverRNG.*; // comment this out if using custom determine()
 import static squidpony.squidgrid.gui.gdx.SColor.floatGet;
 /**
  * Created by Tommy Ettinger on 1/4/2018.

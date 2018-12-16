@@ -30,7 +30,7 @@ public class FxHandler {
     private SquidColorCenter colorCenter;
     private GreasedRegion viable;
     public double[][] seen;
-    private StatefulRNG rng = new StatefulRNG(new LinnormRNG());
+    private StatefulRNG rng = new StatefulRNG(new DiverRNG());
 
     public FxHandler(SparseLayers layers, int layerNumber, SquidColorCenter colorCenter, double[][] visible) {
         fx = layers;
@@ -169,7 +169,7 @@ public class FxHandler {
         protected void update(float percent) {
             float pathPercent = path.length * percent;
             int pathIndex = Math.min(path.length - 1, Math.round(pathPercent));
-            pathPercent %= 1f; // get just the fractional part
+            pathPercent -= (int)pathPercent; // get just the fractional part
             Coord c = path[pathIndex];
             String lines;
 
@@ -449,7 +449,7 @@ public class FxHandler {
             Coord c;
             float f, color;
             int idx, seed = System.identityHashCode(this), clen = choices.length;
-            final long tick = LightRNG.determine((System.currentTimeMillis() >>> 8) * seed);
+            final long tick = DiverRNG.determine((System.currentTimeMillis() >>> 8) * seed);
             FastNoise.instance.setSeed(seed);
             for (int i = 0; i < len; i++) {
                 c = affected.get(i);
@@ -464,7 +464,7 @@ public class FxHandler {
                     color = SColor.lerpFloatColors(colors[colors.length-1], NumberTools.setSelectedByte(colors[colors.length-1], 3, (byte)0), (Math.min(0.99f, f) * colors.length) % 1f);
                 else
                     color = SColor.lerpFloatColors(colors[idx], colors[idx+1], (f * colors.length) % 1f);
-                fx.put(c.x, c.y, choices[LightRNG.determineBounded(tick + i, clen)], color, 0f, 3);
+                fx.put(c.x, c.y, choices[DiverRNG.determineBounded(tick + i, clen)], color, 0f, 3);
             }
         }
 
@@ -484,56 +484,41 @@ public class FxHandler {
         @Override
         protected void end() {
             super.end();
-            fx.clear(center.x - 1, center.y + 1, layer);
-            fx.clear(center.x - 1, center.y + 1, layer + 1);
-            fx.clear(center.x, center.y + 1, layer);
-            fx.clear(center.x, center.y + 1, layer + 1);
-            fx.clear(center.x + 1, center.y + 1, layer);
-            fx.clear(center.x + 1, center.y + 1, layer + 1);
-            fx.clear(center.x - 1, center.y, layer);
-            fx.clear(center.x - 1, center.y, layer + 1);
-            fx.clear(center.x, center.y, layer);
-            fx.clear(center.x, center.y, layer + 1);
-            fx.clear(center.x + 1, center.y, layer);
-            fx.clear(center.x + 1, center.y, layer + 1);
-            fx.clear(center.x - 1, center.y - 1, layer);
-            fx.clear(center.x - 1, center.y - 1, layer + 1);
-            fx.clear(center.x, center.y - 1, layer);
-            fx.clear(center.x, center.y - 1, layer + 1);
-            fx.clear(center.x + 1, center.y - 1, layer);
-            fx.clear(center.x + 1, center.y - 1, layer + 1);
+            fx.clear(layer);
+            fx.clear(layer + 1);
         }
 
         @Override
         protected void update(float percent) {
             float pathPercent = 11 * percent;
             int pathIndex = Math.min(8, Math.round(pathPercent));
-            pathPercent %= 1f; // get just the fractional part
+            pathPercent -= (int)pathPercent; // get just the fractional part
             if(pathIndex == 8)
             {
-                fx.put(center.x - 1, center.y - 1, '┼', color, 0f, layer);
-                fx.put(center.x, center.y - 1, '┴', color, 0f, layer);
-                fx.put(center.x + 1, center.y - 1, '┼', color, 0f, layer);
-                fx.put(center.x - 1, center.y, '┤', color, 0f, layer);
-                fx.put(center.x - 1, center.y, '├', color, 0f, layer);
-                fx.put(center.x - 1, center.y + 1, '┼', color, 0f, layer);
-                fx.put(center.x, center.y + 1, '┬', color, 0f, layer);
-                fx.put(center.x + 1, center.y + 1, '┼', color, 0f, layer);
-                fx.put(center.x, center.y, upper.charAt(LinnormRNG.determineBounded(System.currentTimeMillis(), upper.length())), color, 0f, layer);
-                fx.put(center.x, center.y, lower.charAt(LinnormRNG.determineBounded(System.currentTimeMillis(), lower.length())), color, 0f, layer + 1);
+//                fx.put(center.x - 1, center.y - 1, '┼', color, 0f, layer);
+//                fx.put(center.x, center.y - 1, '┴', color, 0f, layer);
+//                fx.put(center.x + 1, center.y - 1, '┼', color, 0f, layer);
+//                fx.put(center.x - 1, center.y, '┤', color, 0f, layer);
+//                fx.put(center.x - 1, center.y, '├', color, 0f, layer);
+//                fx.put(center.x - 1, center.y + 1, '┼', color, 0f, layer);
+//                fx.put(center.x, center.y + 1, '┬', color, 0f, layer);
+//                fx.put(center.x + 1, center.y + 1, '┼', color, 0f, layer);
+                final int r = (int) DiverRNG.determine(System.currentTimeMillis() >>> 5);
+                fx.put(center.x + (r & 15) - (r >>> 4 & 15), center.y + (r >>> 8 & 15) - (r >>> 12 & 15), 
+                        '⍟', color, 0f, layer);
                 return;
             }
             final int seed = System.identityHashCode(this);
             Coord current;
             for (int i = 0; i < pathIndex - 1; i++) {
                 current = center.translate(Direction.CLOCKWISE[i]);
-                fx.put(current.x, current.y, upper.charAt(LinnormRNG.determineBounded(seed+i, upper.length())), color, 0f, layer);
-                fx.put(current.x, current.y, lower.charAt(LinnormRNG.determineBounded(seed+i, lower.length())), color, 0f, layer + 1);
+                fx.put(current.x, current.y, upper.charAt(DiverRNG.determineBounded(seed+i, upper.length())), color, 0f, layer);
+                fx.put(current.x, current.y, lower.charAt(DiverRNG.determineBounded(seed+i ^ 0x9E3779B97F4A7C15L, lower.length())), color, 0f, layer + 1);
             }
             current = center.translate(Direction.CLOCKWISE[pathIndex]);
             final float partial = SColor.translucentColor(color, pathPercent);
-            fx.put(current.x, current.y, upper.charAt(LinnormRNG.determineBounded(seed+pathIndex, upper.length())), partial, 0f, layer);
-            fx.put(current.x, current.y, lower.charAt(LinnormRNG.determineBounded(seed+pathIndex, lower.length())), partial, 0f, layer + 1);
+            fx.put(current.x, current.y, upper.charAt(DiverRNG.determineBounded(seed+pathIndex, upper.length())), partial, 0f, layer);
+            fx.put(current.x, current.y, lower.charAt(DiverRNG.determineBounded(seed+pathIndex ^ 0x9E3779B97F4A7C15L, lower.length())), partial, 0f, layer + 1);
         }
     }
 
