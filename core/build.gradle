@@ -1,4 +1,4 @@
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceSets {
