@@ -31,7 +31,7 @@ public interface ConstantKey {
      */
     static long precomputeHash(String namespace, long unique)
     {
-        return GauntRNG.nextLong(CrossHash.Jolt.hash64(namespace) + unique);
+        return GauntRNG.nextLong(CrossHash.hash64(namespace) + unique);
     }
 
     /**
