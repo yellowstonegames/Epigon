@@ -276,7 +276,7 @@ public class HandBuilt {
         }
         for (ConstantKey s : Stat.senses) {
             Rating rating = Rating.NONE;
-            LiveValue lv = new LiveValue(9);
+            LiveValue lv = new LiveValue(12);
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }

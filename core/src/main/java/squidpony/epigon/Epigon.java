@@ -552,7 +552,9 @@ public class Epigon extends Game {
                 }
                 //Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 //RecipeMixer.applyModification(p, handBuilt.makeAlive());
-                Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[rootChaos.nextInt(RawCreature.ENTRIES.length)]);
+                Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[
+                        10//rootChaos.nextInt(RawCreature.ENTRIES.length)
+                        ]);
                 p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);
                 RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
@@ -659,8 +661,9 @@ public class Epigon extends Game {
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
                 Weapon weapon = chooseValidWeapon(creature, player);
                 creaturePositions.remove(c);
+                monsterDijkstra.resetTargetMap();
                 if(weapon == null) {
-                    if (creature.weaponData != null && los.isReachable(simple, c.x, c.y, player.location.x, player.location.y))
+                    if (creature.weaponData != null && los.isReachable(map.lighting.resistances, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE))
                     {
 //                        message(creature.name + " has sight " + creature.stats.get(Stat.SIGHT).actual());
                         monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
@@ -668,13 +671,17 @@ public class Epigon extends Game {
                 }
                 else
                     monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), weapon.technique, simple, los, creaturePositions, null, c, ps);
-                if(path.isEmpty()) {
+                if(weapon == null && path.isEmpty() && monsterDijkstra.targetMap[c.x][c.y] == null) {
                     Coord next = c.translateCapped(creature.between(-1, 2), creature.between(-1, 2), map.width, map.height);
                     if(!map.creatures.containsKey(next) && map.contents[next.x][next.y].blockage == null)
                         path.add(next);
                 }
-                if (!path.isEmpty()) {
-                    Coord step = path.get(0);
+                if (weapon != null || !path.isEmpty()) {
+                    Coord step;
+                    if(!path.isEmpty()) 
+                        step = path.get(0);
+                    else
+                        step = c;
                     if (weapon != null) {
                         ActionOutcome ao = ActionOutcome.attack(creature, weapon, player);
                         {
@@ -712,7 +719,7 @@ public class Epigon extends Game {
                                             if (player.overlayAppearance != null) {
                                                 mapSLayers.removeGlyph(player.overlayAppearance);
                                             }
-                                            player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, step.x, step.y);
+                                            player.overlayAppearance = mapSLayers.glyph(player.overlaySymbol, player.overlayColor, player.location.x, player.location.y);
                                         }
                                     }
                                 }
@@ -724,7 +731,8 @@ public class Epigon extends Game {
                                 }
                             }
                         }
-                    } else {
+                    }
+                    else {
                         if (creature.creatureData != null &&
                                 creature.creatureData.lastUsedItem != null &&
                                 creature.creatureData.lastUsedItem.radiance != null)
@@ -732,6 +740,7 @@ public class Epigon extends Game {
                         if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step) && creatures.alterAtCarefully(i, step) != null) {
                             map.contents[c.x][c.y].remove(creature);
                             if (creature.appearance == null && (/* map.lighting.fovResult[step.x][step.y] > 0 || */ map.lighting.fovResult[c.x][c.y] > 0)) {
+                                System.out.println("runTurn: recreating appearance of " + creature);
                                 creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
                                 if (creature.overlayAppearance != null && creature.overlaySymbol != '\uffff')
                                     creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
@@ -944,19 +953,25 @@ public class Epigon extends Game {
                     //}
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         if (creature.appearance == null) {
+                            message("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
+                            System.out.println("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
-                        } else if (!mapSLayers.glyphs.contains(creature.appearance)) {
+                        } /*else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
                             if (creature.overlayAppearance != null) {
                                 mapSLayers.glyphs.add(creature.overlayAppearance);
                             }
-                        }
+                        }*/
                     }
                 } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
                     mapSLayers.removeGlyph(creature.appearance);
                     if (creature.overlayAppearance != null) {
                         mapSLayers.removeGlyph(creature.overlayAppearance);
+                        creature.overlayAppearance = null;
                     }
+                    message("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
+                    System.out.println("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
+                    creature.appearance = null;
                 }
             }
         }
@@ -1089,9 +1104,13 @@ public class Epigon extends Game {
             applyStatChange(target, Stat.VIGOR, ao.actualDamage);
             if (target.stats.get(Stat.VIGOR).actual() <= 0) {
                 if(target.appearance != null)
+                {
                     mapSLayers.removeGlyph(target.appearance);
+                    target.appearance = null;
+                }
                 if (target.overlayAppearance != null) {
                     mapSLayers.removeGlyph(target.overlayAppearance);
+                    target.overlayAppearance = null;
                 }
                 creatures.remove(target.location);
                 map.contents[targetX][targetY].remove(target);
