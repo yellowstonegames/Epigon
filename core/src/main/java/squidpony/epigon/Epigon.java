@@ -484,11 +484,11 @@ public class Epigon extends Game {
         player.stats.get(Stat.HUNGER).min(0);
         //player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
-
+        
         infoHandler.setPlayer(player);
         mapOverlayHandler.setPlayer(player);
         fallingHandler.setPlayer(player);
-
+        
         infoHandler.showPlayerHealthAndArmor();
     }
 
@@ -573,6 +573,8 @@ public class Epigon extends Game {
                 p.physicalDrops.add(pt);
                 p.location = coord;
                 map.contents[coord.x][coord.y].add(p);
+                p.appearance = mapSLayers.glyph(p.symbol, p.color, coord.x, coord.y);
+                p.appearance.setVisible(false);
                 map.creatures.put(coord, p);
             }
         }
@@ -648,6 +650,7 @@ public class Epigon extends Game {
     private void runTurn() {
         OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
         Set<Coord> ps = Collections.singleton(player.location);
+        Coord[] pa = new Coord[]{player.location};
         ArrayList<Coord> path = new ArrayList<>(9);
         for (int i = 0; i < creatures.size(); i++) {
             path.clear();
@@ -666,11 +669,12 @@ public class Epigon extends Game {
                     if (creature.weaponData != null && los.isReachable(map.lighting.resistances, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE))
                     {
 //                        message(creature.name + " has sight " + creature.stats.get(Stat.SIGHT).actual());
-                        monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
+//                        monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
+                        monsterDijkstra.findAttackPath(path, (int) creature.stats.get(Stat.SIGHT).actual() + 2,  creature.weaponData.technique.aoe.getMinRange(), creature.weaponData.technique.aoe.getMaxRange(), los, creaturePositions, null, c, pa);
                     }
                 }
                 else
-                    monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), weapon.technique, simple, los, creaturePositions, null, c, ps);
+                    monsterDijkstra.findAttackPath(path, (int) creature.stats.get(Stat.SIGHT).actual() + 2, weapon.technique.aoe.getMinRange(), weapon.technique.aoe.getMaxRange(), los, creaturePositions, null, c, pa);
                 if(weapon == null && path.isEmpty() && monsterDijkstra.targetMap[c.x][c.y] == null) {
                     Coord next = c.translateCapped(creature.between(-1, 2), creature.between(-1, 2), map.width, map.height);
                     if(!map.creatures.containsKey(next) && map.contents[next.x][next.y].blockage == null)
@@ -739,13 +743,16 @@ public class Epigon extends Game {
                             creature.creatureData.lastUsedItem.radiance.flare = 0f;
                         if (map.contents[step.x][step.y].blockage == null && !creatures.containsKey(step) && creatures.alterAtCarefully(i, step) != null) {
                             map.contents[c.x][c.y].remove(creature);
-                            if (creature.appearance == null && (/* map.lighting.fovResult[step.x][step.y] > 0 || */ map.lighting.fovResult[c.x][c.y] > 0)) {
+                            if (creature.appearance == null) {
                                 System.out.println("runTurn: recreating appearance of " + creature);
                                 creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, c.x, c.y);
                                 if (creature.overlayAppearance != null && creature.overlaySymbol != '\uffff')
                                     creature.overlayAppearance = mapSLayers.glyph(creature.overlaySymbol, creature.overlayColor, c.x, c.y);
                             }
+                            if(map.lighting.fovResult[c.x][c.y] > 0)
+                                creature.appearance.setVisible(true);
                             //creatures.putAt(step, creatures.remove(c), i);
+
                             creature.location = step;
                             map.contents[step.x][step.y].add(creature);
                             if (creature.appearance != null) {
@@ -953,8 +960,8 @@ public class Epigon extends Game {
                     //}
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         if (creature.appearance == null) {
-                            message("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
-                            System.out.println("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
+//                            message("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
+//                            System.out.println("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
                         } /*else if (!mapSLayers.glyphs.contains(creature.appearance)) {
                             mapSLayers.glyphs.add(creature.appearance);
@@ -962,16 +969,20 @@ public class Epigon extends Game {
                                 mapSLayers.glyphs.add(creature.overlayAppearance);
                             }
                         }*/
+                        
+                        creature.appearance.setVisible(true);
                     }
-                } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null) {
-                    mapSLayers.removeGlyph(creature.appearance);
+                } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null 
+                        && creature.appearance.isVisible()) {
+                    creature.appearance.setVisible(false);
+                    //mapSLayers.removeGlyph(creature.appearance);
                     if (creature.overlayAppearance != null) {
-                        mapSLayers.removeGlyph(creature.overlayAppearance);
-                        creature.overlayAppearance = null;
+                        //mapSLayers.removeGlyph(creature.overlayAppearance);
+                        creature.overlayAppearance.setVisible(false);
                     }
-                    message("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
-                    System.out.println("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
-                    creature.appearance = null;
+//                    message("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
+//                    System.out.println("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
+                    //creature.appearance = null;
                 }
             }
         }
@@ -1137,7 +1148,7 @@ public class Epigon extends Game {
                                 map.contents[tx][ty].add(item);
                             }
                         });
-                    if (target.appearance != null) {
+                    if (target.appearance != null && target.appearance.isVisible()) {
                         mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                     }
                     message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
@@ -1157,14 +1168,14 @@ public class Epigon extends Game {
                                 if(item.attached) return;
                                 map.contents[targetX][targetY].add(item);
                             });
-                    if(target.appearance != null)
+                    if(target.appearance != null && target.appearance.isVisible())
                         mapSLayers.burst(targetX, targetY, 1, Radius.CIRCLE, target.appearance.shown, target.color, SColor.translucentColor(target.color, 0f), 1);
                     message("You defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 }
             } else {
                 String amtText = String.valueOf(-ao.actualDamage);
                 if (ao.crit) {
-                    if(target.appearance != null)
+                    if(target.appearance != null && target.appearance.isVisible())
                         mapSLayers.wiggle(0.0f, target.appearance, 0.4f, () -> target.appearance.setPosition(
                             mapSLayers.worldX(target.location.x), mapSLayers.worldY(target.location.y)));
                     message(Messaging.transform("You [CW Bright Orange]critically[] " + element.verb + " the " + target.name + " for " +
@@ -1271,9 +1282,15 @@ public class Epigon extends Game {
                         if(creature.appearance == null)
                             creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);                         
                         else
+                        {
+                            creature.appearance.setVisible(true);
                             creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight));
+                        }
                         if (creature.overlayAppearance != null)
+                        {
+                            creature.overlayAppearance.setVisible(true);
                             creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * (float) sight));
+                        }
                         mapSLayers.clear(x, y, 0);
                         if (!creature.wasSeen) { // stop auto-move if a new creature pops into view
                             cancelMove();

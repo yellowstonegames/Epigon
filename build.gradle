@@ -13,7 +13,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Epigon"
-        squidlibVersion = '3a8778cb58'
+        squidlibVersion = '2ff1896877'
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
         aiVersion = '1.8.1'
