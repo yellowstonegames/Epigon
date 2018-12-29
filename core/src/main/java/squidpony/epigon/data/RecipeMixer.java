@@ -2,6 +2,7 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Colors;
 import squidpony.Messaging;
+import squidpony.epigon.data.quality.Vegetable;
 import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Material;
@@ -215,6 +216,17 @@ public class RecipeMixer {
         materialMod.statChanges.put(Stat.STRUCTURE, lvm);
         blueprint.whenUsedAsMaterial.add(materialMod);
 
+        return blueprint;
+    }
+
+    public static Physical buildVegetable(Vegetable material) {
+        Physical blueprint = new Physical();
+        blueprint.color = material.color().toFloatBits();
+        blueprint.name = material.prettyName();
+        blueprint.baseValue = 5;
+        blueprint.rarity = Rating.SLIGHT;
+        blueprint.symbol = material.symbol();
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(2));
         return blueprint;
     }
 

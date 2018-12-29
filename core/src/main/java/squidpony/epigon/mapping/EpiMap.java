@@ -1,8 +1,8 @@
 package squidpony.epigon.mapping;
 
 import squidpony.epigon.data.Physical;
-import squidpony.squidgrid.gui.gdx.LightingHandler;
 import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.gui.gdx.LightingHandler;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.*;

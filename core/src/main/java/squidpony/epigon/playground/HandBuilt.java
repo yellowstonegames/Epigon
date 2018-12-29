@@ -125,6 +125,7 @@ public class HandBuilt {
     public Profession chef;
     public Physical water;
     public Physical mud;
+    public Physical grass;
 
     public HandBuilt() {
         this(new RecipeMixer());
@@ -169,7 +170,13 @@ public class HandBuilt {
         mud.attached = true;
         mud.blocking = false;
         mud.stats.put(Stat.OPACITY, LiveValue.ZERO);
-
+        
+        grass = Physical.makeBasic("grass", '¸', SColor.CW_RICH_GREEN);
+        grass.description = "scraggly, patchy grass that's somehow growing here";
+        grass.attached = true;
+        grass.blocking = false;
+        grass.stats.put(Stat.OPACITY, LiveValue.ZERO);
+        
         initAbilities();
         initProfessions();
         initItems();

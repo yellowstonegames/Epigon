@@ -4,6 +4,7 @@ import squidpony.StringKit;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
+import squidpony.epigon.data.quality.Vegetable;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.playground.HandBuilt;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
  */
 public class WorldGenerator {
 
+    public static final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -33,6 +35,19 @@ public class WorldGenerator {
     private StatefulRNG rng;
     private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
+    
+    public WorldGenerator()
+    {
+        Vegetable[] vegetables = Vegetable.ALL;
+        for (int v = 0; v < vegetables.length; v++) {
+            String terrains = vegetables[v].terrains();
+            for (int i = 0; i < terrains.length(); i++) {
+                if (!vegetablesByTerrain.containsKey(terrains.charAt(i)))
+                    vegetablesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(vegetables[v]));
+                vegetablesByTerrain.get(terrains.charAt(i)).add(vegetables[v]);
+            }
+        }
+    }
 
     public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
         EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
@@ -175,7 +190,6 @@ public class WorldGenerator {
         for (int e = 0; e < depth; e++) {
             EpiMap eMap = world[e];
             DungeonGenerator gen = new DungeonGenerator(width, height, rng);
-
             // create vertical "zones" for types of generation
             if (e < 2) {
                 DenseRoomMapGenerator dense = new DenseRoomMapGenerator(width, height, rng);
@@ -184,7 +198,8 @@ public class WorldGenerator {
             } else if (e < 4) {
                 FlowingCaveGenerator flowing = new FlowingCaveGenerator(width, height, TilesetType.DEFAULT_DUNGEON, rng);
                 gen.addBoulders(8);
-                gen.addWater(20, 4);
+                gen.addWater(14, 4);
+                gen.addGrass(17);
                 gen.generate(flowing.generate());
             } else {
                 SerpentMapGenerator serpent = new SerpentMapGenerator(width, height, rng, 0.2);
@@ -194,12 +209,12 @@ public class WorldGenerator {
                 gen.generate(serpent.generate());
             }
 
-            char[][] simpleChars = gen.getDungeon();
+            char[][] dungeonChars = gen.getDungeon();
             floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    char c = simpleChars[x][y];
+                    char c = dungeonChars[x][y];
                     tile = eMap.contents[x][y];
                     tile.blockage = null;
                     switch (c) {
@@ -223,6 +238,10 @@ public class WorldGenerator {
                             tile.floor.name = "modified " + c;
                             break;
                     }
+                    if(vegetablesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(5) == 0)
+                        // 1 in 32 chance
+                        tile.contents.add(RecipeMixer.buildVegetable(vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
+
                 }
             }
         }
@@ -711,7 +730,7 @@ public class WorldGenerator {
         castle.moat.expand8way();
         castle.moatBank = castle.moat.copy();
         GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
-        for (Coord c : nonMoat) {
+        for (Coord c : nonMoat) {             
             map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
         }
 
@@ -784,6 +803,25 @@ public class WorldGenerator {
         castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
         for (Coord c : castle.pondBank) {
             placeMud(map.contents[c.x][c.y]);
+        }
+        GreasedRegion outside = castle.region.copy().not().flood(castle.insideMoat.copy().not(), castle.width * castle.height);
+        for(GreasedRegion area : new GreasedRegion[]{
+                castle.garden, castle.pond, castle.pondBank, outside
+        })
+        {
+            for(Coord c : area) {
+                float noise = FastNoise.instance.getSimplex(c.x * 0.6f, c.y * 0.6f);
+                if (noise > -0.1f && noise < 0.35f) {
+                    if(map.contents[c.x][c.y].floor.symbol == '.') 
+                        map.contents[c.x][c.y].floor = RecipeMixer.buildPhysical(handBuilt.grass);
+                    if (map.contents[c.x][c.y].floor.next(3) == 0 && vegetablesByTerrain.containsKey(map.contents[c.x][c.y].floor.symbol)) {
+                        // 1 in 8 chance
+                        map.contents[c.x][c.y].contents.add(RecipeMixer.buildVegetable(
+                                vegetablesByTerrain.get(map.contents[c.x][c.y].floor.symbol).randomItem(map.contents[c.x][c.y].floor)));
+                    }
+                }
+            }
+
         }
     }
 
