@@ -553,7 +553,7 @@ public class Epigon extends Game {
                 //Physical p = RecipeMixer.buildPhysical(GauntRNG.getRandomElement(rootChaos.nextLong(), Inclusion.values()));
                 //RecipeMixer.applyModification(p, handBuilt.makeAlive());
                 Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[
-                        10//rootChaos.nextInt(RawCreature.ENTRIES.length)
+                        rootChaos.nextInt(RawCreature.ENTRIES.length)
                         ]);
                 p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);

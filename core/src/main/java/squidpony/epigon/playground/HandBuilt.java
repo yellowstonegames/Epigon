@@ -172,7 +172,7 @@ public class HandBuilt {
         mud.stats.put(Stat.OPACITY, LiveValue.ZERO);
         
         grass = Physical.makeBasic("grass", '¸', SColor.CW_RICH_GREEN);
-        grass.description = "scraggly, patchy grass that's somehow growing here";
+        grass.description = "scraggly, patchy grass";
         grass.attached = true;
         grass.blocking = false;
         grass.stats.put(Stat.OPACITY, LiveValue.ZERO);
@@ -332,13 +332,13 @@ public class HandBuilt {
         }
 
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
-        Weapon unarmed = Weapon.getWeapons().get("sinister magic");
-//        Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
+//        Weapon unarmed = Weapon.getWeapons().get("sinister magic");
+        Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
         
         if(unarmed.kind == Weapon.MAGIC)
         {
             Element elem = unarmed.elements.items.get(0);
-            playerBlueprint.radiance = new Radiance((float) playerBlueprint.stats.get(Stat.SIGHT).actual(), elem.floatColor, elem.flicker, elem.strobe);
+            playerBlueprint.radiance = new Radiance(6f, elem.floatColor, elem.flicker, elem.strobe);
         }
         else
         {
