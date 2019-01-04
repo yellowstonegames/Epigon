@@ -334,11 +334,11 @@ public class WorldGenerator {
     }
 
     private void placeWater(EpiTile tile) {
-//        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
-//        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
-//                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
-//        tile.floor.radiance.delay = tile.floor.nextFloat();
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.water);
+        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
+        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
+                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
+        tile.floor.radiance.delay = tile.floor.nextFloat();
+//        tile.floor = RecipeMixer.buildPhysical(handBuilt.water);
     }
 
     private void placeMud(EpiTile tile) {
@@ -734,7 +734,7 @@ public class WorldGenerator {
             map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
         }
 
-        castle.moat.fray(0.3).fray(0.1);
+        castle.moat.fray(0.3).fray(0.2);
         for (Coord c : castle.moat) {
             placeWater(map.contents[c.x][c.y]);
         }
@@ -994,12 +994,14 @@ public class WorldGenerator {
     }
 
     private GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {
-        Elias elias = new Elias();
-        GreasedRegion lines = region.copy();
         for (int i = 0; i < points.size(); i++) {
-            lines.addAll(elias.line(points.get(i), points.get((i + 1) % points.size())));
+            region.addAll(DDALine.line(points.get(i), points.get((i + 1) % points.size())));
         }
-        return lines;
+//        GreasedRegion lines = region.copy();
+//        region.or(lines.neighborDown());
+//        lines.remake(region);
+//        region.or(lines.neighborLeft());
+        return region;
     }
 
     private boolean pointsInLine(GreasedRegion points) {

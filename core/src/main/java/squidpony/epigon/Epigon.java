@@ -922,7 +922,9 @@ public class Epigon extends Game {
                 }
             }
         }
-        map.lighting.calculateFOV(checkX, checkY);
+        map.lighting.calculateFOV(checkX, checkY,
+                checkX - 1 - (mapSize.gridWidth >>> 1), checkY - 1 - (mapSize.gridHeight >>> 1),
+                checkX + 1 + (mapSize.gridWidth >>> 1), checkY + 1 + (mapSize.gridHeight >>> 1));
         if (odinView) {
             //choice of tempFOV is arbitrary; we just need a 2D array of all 0.6
             ArrayTools.fill(map.lighting.tempFOV, 0.6);
