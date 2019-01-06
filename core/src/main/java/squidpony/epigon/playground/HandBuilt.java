@@ -473,15 +473,19 @@ public class HandBuilt {
         pb.color = SColor.DB_MUD.toFloatBits();
         pb.countsAs.add(baseFood);
 
-        Modification hungerUp = new Modification();
-        LiveValueModification lvm = LiveValueModification.add(20);
-        hungerUp.statChanges.put(Stat.HUNGER, lvm);
+//        Modification hungerUp = new Modification();
+//        LiveValueModification lvm = LiveValueModification.add(20);
+//        hungerUp.statChanges.put(Stat.HUNGER, lvm);
 
         Interactable eat = new Interactable();
         eat.phrasing = "eat";
-        eat.actorModifications = Maker.makeList(hungerUp);
         eat.consumes = true;
-        pb.interactableData = new ArrayList<>();
+        //eat.actorModifications = Maker.makeList(hungerUp);
+        eat.interaction = (actor, target, level) -> {
+            actor.stats.get(Stat.HUNGER).addActual(20);
+            return "@Name eat$ the " + target.name + ", and feel$ less hungry.";
+        };
+        pb.interactableData = new ArrayList<>(1);
         pb.interactableData.add(eat);
 
         RecipeBlueprint rb = new RecipeBlueprint();

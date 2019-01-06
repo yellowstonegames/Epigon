@@ -1879,8 +1879,7 @@ public class Epigon extends Game {
                         if (interaction.consumes) {
                             player.removeFromInventory(selected);
                         }
-                        interaction.actorModifications.forEach(mod -> RecipeMixer.applyModification(player, mod));
-                        interaction.targetModifications.forEach(mod -> RecipeMixer.applyModification(selected, mod));
+                        message(Messaging.transform(interaction.interaction.interact(player, selected, map), player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         mapOverlayHandler.updateDisplay();
                     } else if (selected.countsAs(handBuilt.rawMeat)) { // TODO - move cooking into Interactable system
                         player.removeFromInventory(selected);
