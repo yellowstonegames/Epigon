@@ -1881,12 +1881,12 @@ public class Epigon extends Game {
                         }
                         message(Messaging.transform(interaction.interaction.interact(player, selected, map), player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         mapOverlayHandler.updateDisplay();
-                    } else if (selected.countsAs(handBuilt.rawMeat)) { // TODO - move cooking into Interactable system
-                        player.removeFromInventory(selected);
-                        List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
-                        player.inventory.addAll(steaks);
-                        mapOverlayHandler.updateDisplay();
-                        message("Made " + steaks.size() + " steaks.");
+//                    } else if (selected.countsAs(handBuilt.rawMeat)) { // TODO - move cooking into Interactable system
+//                        player.removeFromInventory(selected);
+//                        List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
+//                        player.inventory.addAll(steaks);
+//                        mapOverlayHandler.updateDisplay();
+//                        message("Made " + steaks.size() + " steaks.");
                     } else if (selected.wearableData != null || selected.weaponData != null) {
                         if (player.creatureData.equippedDistinct.contains(selected)) {
                             player.unequip(selected);

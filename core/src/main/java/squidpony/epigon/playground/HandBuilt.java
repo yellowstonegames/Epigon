@@ -67,13 +67,17 @@ public class HandBuilt {
     public Physical baseFood; // base item for anything edible
 
     public Physical rawMeat; // base item for dead animal chunks
-    public Recipe steakRecipe;
+    public Physical steak; // may need some larger storage for this stuff
+//    public Recipe steakRecipe;
 
-    public Physical carrotOfTruth; // when eaten the player can see through walls for a while
+//    public Physical carrotOfTruth; // when eaten the player can see through walls for a while
     
     public Physical torch;
 
     public Physical lava;
+
+    public Interactable eat;
+    public Interactable cookSteak;
 
     // Cooking skills
 //    public Skill cooking = new Skill("cooking");
@@ -118,9 +122,9 @@ public class HandBuilt {
 //    public Skill hammer = new Skill("hammer", armedCombat);
 //    public Skill smallClub = new Skill("club (small)", hammer);
 
-    public Ability unarmedStrike;
-    public Ability armedStrike;
-    public Ability cookSteak;
+//    public Ability unarmedStrike;
+//    public Ability armedStrike;
+//    public Ability cookSteak;
 
     public Profession chef;
     public Physical water;
@@ -143,12 +147,34 @@ public class HandBuilt {
 
         money = Physical.makeBasic("gold coin", '$', SColor.CW_GOLD);
         money.groupingData = new Grouping(1);
-
+        
         baseFood = Physical.makeBasic("fūd", '℉', SColor.AMBER_DYE);
-        baseFood.description = "base food item";
-
         rawMeat = Physical.makeBasic("meat", 'ₘ', SColor.DB_FAWN);
+        steak = Physical.makeBasic("steak", 'ᴤ', SColor.DB_MUD);
+        eat = new Interactable("eat", true, false, (actor, target, level) -> {
+            actor.stats.get(Stat.HUNGER).addActual(target.stats.getOrDefault(Stat.VIGOR, LiveValue.ONE).actual());
+            return "@Name eat$ the " + target.name + ", and feel$ less hungry.";
+        });
+        
+        cookSteak = new Interactable("cook steak", true, false, (actor, target, level) -> {
+            actor.inventory.add(RecipeMixer.buildPhysical(steak));
+            return "@Name cook$ the " + target.name + " into a steak.";
+        });
+
+        baseFood.description = "base food item";
+        baseFood.interactableData = new ArrayList<>(1);
+        baseFood.interactableData.add(eat);
+
         rawMeat.description = "chunk of something";
+        rawMeat.stats.put(Stat.VIGOR, new LiveValue(2.0));
+        rawMeat.interactableData = new ArrayList<>(2);
+        rawMeat.interactableData.add(cookSteak);
+        rawMeat.interactableData.add(eat);
+
+        steak.countsAs.add(baseFood);
+        steak.stats.put(Stat.VIGOR, new LiveValue(20.0));
+        steak.interactableData = new ArrayList<>(1);
+        steak.interactableData.add(eat);
 
         torch = Physical.makeBasic("torch", 'ῗ', SColor.CREAM);
         torch.description = "burning rags on a stick";
@@ -195,12 +221,12 @@ public class HandBuilt {
     }
 
     private void initAbilities() {
-        cookSteak = new Ability();
-        cookSteak.name = "cook steak";
-        cookSteak.maxTargets = 1;
-        cookSteak.mustHaveSkillRatings.put(Skill.COOKING, Rating.TYPICAL);
-        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(rawMeat, 1));
-        cookSteak.validTargets.add(rawMeat);
+//        cookSteak = new Ability();
+//        cookSteak.name = "cook steak";
+//        cookSteak.maxTargets = 1;
+//        cookSteak.mustHaveSkillRatings.put(Skill.COOKING, Rating.TYPICAL);
+//        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(rawMeat, 1));
+//        cookSteak.validTargets.add(rawMeat);
     }
 
     private static RatingValueModification rvmSkill(Rating rating)
@@ -235,8 +261,8 @@ public class HandBuilt {
         mod.skillChanges.put(Skill.FOOD_PREP, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(Skill.FOOD_CHOPPING, rvmSkill(Rating.SLIGHT));
         mod.skillChanges.put(Skill.FOOD_MIXING, rvmSkill(Rating.SLIGHT));
-        mod.abilitiesAdditive = new ArrayList<>();
-        mod.abilitiesAdditive.add(cookSteak);
+//        mod.abilitiesAdditive = new ArrayList<>();
+//        mod.abilitiesAdditive.add(cookSteak);
 
         mod.name = "chef slight";
         chef.improvements.put(Rating.SLIGHT, mod);
@@ -465,33 +491,15 @@ public class HandBuilt {
             ClothingSlot.RIGHT_HAND
         ));
         glovesRecipe = createBasicConsumptionRecipe(basePhysical, glovesBlueprint);
-
-        // Steak
-        Physical pb = new Physical();
-        pb.name = "steak";
-        pb.symbol = 'ᴤ';
-        pb.color = SColor.DB_MUD.toFloatBits();
-        pb.countsAs.add(baseFood);
-
+        
 //        Modification hungerUp = new Modification();
 //        LiveValueModification lvm = LiveValueModification.add(20);
 //        hungerUp.statChanges.put(Stat.HUNGER, lvm);
-
-        Interactable eat = new Interactable();
-        eat.phrasing = "eat";
-        eat.consumes = true;
-        //eat.actorModifications = Maker.makeList(hungerUp);
-        eat.interaction = (actor, target, level) -> {
-            actor.stats.get(Stat.HUNGER).addActual(20);
-            return "@Name eat$ the " + target.name + ", and feel$ less hungry.";
-        };
-        pb.interactableData = new ArrayList<>(1);
-        pb.interactableData.add(eat);
-
-        RecipeBlueprint rb = new RecipeBlueprint();
-        rb.requiredConsumed.put(rawMeat, 1);
-        rb.result.put(pb, 1);
-        steakRecipe = RecipeMixer.createRecipe(rb);
+        
+//        RecipeBlueprint rb = new RecipeBlueprint();
+//        rb.requiredConsumed.put(rawMeat, 1);
+//        rb.result.put(steak, 1);
+//        steakRecipe = RecipeMixer.createRecipe(rb);
     }
 
     private Recipe createSimpleRecipe(String name, float color, char symbol) {
@@ -538,6 +546,7 @@ public class HandBuilt {
         Modification meaten = new Modification();
         meaten.possibleSuffix = Collections.singletonList("meat");
         meaten.countsAs = Collections.singleton(rawMeat);
+        meaten.interactable = rawMeat.interactableData;
         meaten.symbol = 'ₘ';
         meaten.large = false;
         meaten.removeCreature = true;
