@@ -1870,7 +1870,6 @@ public class Epigon extends Game {
                     break;
                 case DRAW:
                     equipItem(mapOverlayHandler.getSelected());
-                    mapOverlayHandler.updateDisplay();
                     break;
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
@@ -1885,13 +1884,6 @@ public class Epigon extends Game {
                         }
                         message(Messaging.transform(interaction.interaction.interact(player, selected, map),
                                 player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                        mapOverlayHandler.updateDisplay();
-//                    } else if (selected.countsAs(handBuilt.rawMeat)) { // moved into Interactable system
-//                        player.removeFromInventory(selected);
-//                        List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
-//                        player.inventory.addAll(steaks);
-//                        mapOverlayHandler.updateDisplay();
-//                        message("Made " + steaks.size() + " steaks.");
                     } else if (selected.wearableData != null || selected.weaponData != null) {
                         if (player.creatureData.equippedDistinct.contains(selected)) {
                             player.unequip(selected);
@@ -1899,7 +1891,6 @@ public class Epigon extends Game {
                         } else {
                             player.equipItem(selected);
                         }
-                        mapOverlayHandler.updateDisplay();
                     } else {
                         message("No interaction for " + selected.name);
                     }
@@ -2136,21 +2127,45 @@ public class Epigon extends Game {
         }
     };
 
-    private final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    private final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            return false; // No-op for now
+            if(!mapOverlayHandler.setSelection(screenX, screenY)) 
+                return false;
+            Physical selected = mapOverlayHandler.getSelected();
+            if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
+                message("Interactions for " + selected.name + ": " + selected.interactableData
+                        .stream()
+                        .map(interact -> interact.phrasing)
+                        .collect(Collectors.joining(", ")));
+                Interactable interaction = selected.interactableData.get(0);
+                if (interaction.consumes) {
+                    player.removeFromInventory(selected);
+                }
+                message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+            } else if (selected.wearableData != null || selected.weaponData != null) {
+                if (player.creatureData.equippedDistinct.contains(selected)) {
+                    player.unequip(selected);
+                    player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
+                } else {
+                    player.equipItem(selected);
+                }
+            } else {
+                message("No interaction for " + selected.name);
+            }
+            return true;
         }
 
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
-            mapOverlayHandler.setSelection(screenX << 1, screenY);
+            mapOverlayHandler.setSelection(screenX, screenY);
             return false;
         }
     });
 
-    private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {

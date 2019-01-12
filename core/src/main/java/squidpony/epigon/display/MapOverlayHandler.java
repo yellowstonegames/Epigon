@@ -274,10 +274,20 @@ public class MapOverlayHandler {
         this.selection = Coord.get(1 + (selection.x < halfWidth ? 0 : halfWidth), selection.y);
     }
 
-    public void setSelection(int x, int y) {
+    /**
+     * 
+     * @param x in grid cells
+     * @param y in grid cells
+     * @return true if the x,y coordinate corresponded to a valid selection, false if a default was used 
+     */
+    public boolean setSelection(int x, int y) {
         Coord selection = Coord.get((x < halfWidth ? 1 : halfWidth + 1), y);
-        if(selectables.containsKey(selection))
+        if (selectables.containsKey(selection))
+        {
             this.selection = selection;
+            return true;
+        }
+        return false;
     }
 
     public Physical getSelected(){
