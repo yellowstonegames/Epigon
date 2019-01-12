@@ -1,7 +1,9 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.ArrayTools;
+import squidpony.epigon.Epigon;
 import squidpony.epigon.Prefs;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.Physical;
@@ -10,6 +12,7 @@ import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 
 import java.util.ArrayList;
@@ -76,8 +79,6 @@ public class MapOverlayHandler {
 
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(layers.gridWidth - 2, 0);
-
-        ArrayTools.fill(this.layers.backgrounds, layers.defaultPackedBackground);
         hide();
     }
 
@@ -173,8 +174,8 @@ public class MapOverlayHandler {
         final float time = 0.625f;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                layers.tint(0f, x, y, -0x1.fefefep125F, time, () ->{});
-                layers.tint(0f, x, y, -0x1.d5bf64p126F, time, () ->{}); //SColor.CW_PALE_AZURE
+                layers.tint(0f, x, y, -0x1.fefefep125F, time, null);
+                layers.tint(0f, x, y, -0x1.d5bf64p126F, time, null); //SColor.CW_PALE_AZURE
             }
         }
     }
@@ -265,6 +266,19 @@ public class MapOverlayHandler {
                 break;
         }
     }
+    public Coord getSelection() {
+        return selection;
+    }
+
+    public void setSelection(Coord selection) {
+        this.selection = Coord.get(1 + (selection.x < halfWidth ? 0 : halfWidth), selection.y);
+    }
+
+    public void setSelection(int x, int y) {
+        Coord selection = Coord.get((x < halfWidth ? 1 : halfWidth + 1), y);
+        if(selectables.containsKey(selection))
+            this.selection = selection;
+    }
 
     public Physical getSelected(){
         return selectables.get(selection);
@@ -276,6 +290,8 @@ public class MapOverlayHandler {
     }
 
     private void showHelp(int startY) {
+        ArrayTools.fill(this.layers.backgrounds, layers.defaultPackedBackground);
+
         int y = startY + 1;
 
         put(1, y, "Game Overview", headingColor);
@@ -381,9 +397,11 @@ public class MapOverlayHandler {
     }
 
     private void showEquipment(Direction moveSelection){
+        ArrayTools.fill(layers.backgrounds, layers.defaultPackedBackground);
+
         // Clear out selection tracking
-        if (moveSelection == Direction.NONE) {
-            selection = null;
+        if (moveSelection == null) {
+            moveSelection = Direction.NONE;
         }
         leftSelectables.clear();
         rightSelectables.clear();
@@ -534,14 +552,14 @@ public class MapOverlayHandler {
                         }
                     }
                     break;
-                case NONE:
-                default:
-                    selection = selectables.firstKey();
             }
         }
         
         if (selection != null){
             put(selection.x, selection.y, '↣');
+            for (int i = selection.x; i != halfWidth && i < width - 1; i++) {
+                layers.put(i, selection.y, SColor.lerpFloatColors(layers.defaultPackedBackground, SColor.CW_LIGHT_HONEYDEW.toFloatBits(), NumberTools.zigzag(TimeUtils.timeSinceMillis(Epigon.startMillis) * 0x1p-9f) * 0x3p-4f + 0x5p-4f));
+            }
         }
     }
     

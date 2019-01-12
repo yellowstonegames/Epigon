@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -124,6 +125,7 @@ public class Epigon extends Game {
     private Coord menuLocation = null;
     private Physical currentTarget = null;
     private OrderedMap<String, Weapon> maneuverOptions = new OrderedMap<>(12);
+    private OrderedMap<String, Interactable> interactionOptions = new OrderedMap<>(8);
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
@@ -154,6 +156,7 @@ public class Epigon extends Game {
     private int autoplayTurns = 0;
 
     // Timing
+    public static final long startMillis = TimeUtils.millis();
     private long fallDelay = 300;
     private Instant nextFall = Instant.now();
     private boolean paused = true;
@@ -1483,11 +1486,13 @@ public class Epigon extends Game {
                 mapViewport.unproject(screenPosition);
                 font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
             }
-            mapOverlayStage.act();
-            batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
-            mapOverlayStage.getRoot().draw(batch, 1f);
+            if (mapOverlaySLayers.isVisible()) {
+                mapOverlayStage.act();
+                mapOverlayHandler.updateDisplay();
+                batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
+                mapOverlayStage.getRoot().draw(batch, 1f);
+            }
             batch.end();
-
         } else {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
             fallingViewport.apply(false);
@@ -1594,14 +1599,13 @@ public class Epigon extends Game {
         @Override
         public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
             if (multiplexer.processedInput) return;
-            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            if (combined == (0x60000 | SquidInput.BACKSPACE)) // ctrl-shift-backspace
+            if (ctrl && shift && key == SquidInput.BACKSPACE && !alt) // ctrl-shift-backspace
             {
                 multiplexer.processedInput = true;
                 startGame();
                 return;
             }
-            Verb verb = ControlMapping.allMappings.get(combined);
+            Verb verb = ControlMapping.allMappings.get(SquidInput.combineModifiers(key, alt, ctrl, shift));
             if (!ControlMapping.defaultMapViewMapping.contains(verb)) {
                 return;
             }
@@ -1780,7 +1784,7 @@ public class Epigon extends Game {
                     break;
                 case INTERACT:
                     Optional<Physical> t;
-                    if((t= player.inventory.stream().filter(ph -> ph.symbol == 'ῗ').findFirst()).isPresent())
+                    if((t = player.inventory.stream().filter(ph -> ph.symbol == 'ῗ').findFirst()).isPresent())
                     {
                         if(player.creatureData.lastUsedItem != null && player.creatureData.lastUsedItem.symbol == 'ῗ')
                             player.creatureData.lastUsedItem = null;
@@ -1879,9 +1883,10 @@ public class Epigon extends Game {
                         if (interaction.consumes) {
                             player.removeFromInventory(selected);
                         }
-                        message(Messaging.transform(interaction.interaction.interact(player, selected, map), player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         mapOverlayHandler.updateDisplay();
-//                    } else if (selected.countsAs(handBuilt.rawMeat)) { // TODO - move cooking into Interactable system
+//                    } else if (selected.countsAs(handBuilt.rawMeat)) { // moved into Interactable system
 //                        player.removeFromInventory(selected);
 //                        List<Physical> steaks = RecipeMixer.mix(handBuilt.steakRecipe, Collections.singletonList(selected), Collections.emptyList());
 //                        player.inventory.addAll(steaks);
@@ -2137,6 +2142,12 @@ public class Epigon extends Game {
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             return false; // No-op for now
         }
+
+        @Override
+        public boolean mouseMoved(int screenX, int screenY) {
+            mapOverlayHandler.setSelection(screenX << 1, screenY);
+            return false;
+        }
     });
 
     private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
@@ -2175,7 +2186,9 @@ public class Epigon extends Game {
             switch (button) {
                 case Input.Buttons.LEFT:
                     if (showingMenu) {
-                        if (menuLocation.x <= screenX && menuLocation.y <= screenY && screenY - menuLocation.y < maneuverOptions.size() && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
+                        if (menuLocation.x <= screenX && menuLocation.y <= screenY 
+                                && screenY - menuLocation.y < maneuverOptions.size() 
+                                && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
                             attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
                             calcFOV(player.location.x, player.location.y);
                             calcDijkstra();
