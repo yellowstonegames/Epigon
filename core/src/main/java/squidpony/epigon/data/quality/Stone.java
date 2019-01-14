@@ -116,20 +116,20 @@ public enum Stone implements Material {
     SKARN(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     SLATE(SColor.SLATE_GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     SOAPSTONE(SColor.INDIGO_WHITE, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    SYENITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TACHYLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TACONITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    SYENITE(SColor.LIGHT_GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TACHYLITE(SColor.CW_ALMOST_BLACK, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TACONITE(SColor.CW_ALMOST_WHITE, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     TEPHRITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TEZONTLE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TEZONTLE(SColor.RED_BEAN, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     THERALITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TONALITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TONALITE(SColor.CW_ALMOST_WHITE, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
     TRACHYTE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TROCTOLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TRONDHJEMITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    TUFF(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    UNAKITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    VARIOLITE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
-    WACKESTONE(SColor.GRAY, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000);
+    TROCTOLITE(SColor.AURORA_CRICKET, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TRONDHJEMITE(SColor.AURORA_DUN, SColor.GORYEO_STOREROOM, false, false, false, false, 100, 1000),
+    TUFF(SColor.SANDY_BROWN, SColor.GORYEO_STOREROOM, false, false, false, false, 60, 400),
+    UNAKITE(SColor.AURORA_FROG_GREEN, SColor.AURORA_BRICK, false, false, false, false, 240, 1000),
+    VARIOLITE(SColor.AURORA_SILVER_GREEN, SColor.CW_ALMOST_WHITE, false, false, false, false, 100, 1000),
+    WACKESTONE(SColor.OLIVE_DRAB, SColor.AURORA_SILVER, false, false, false, false, 100, 1000);
 
     public Color front, back;
     public int value;//base material is 100
