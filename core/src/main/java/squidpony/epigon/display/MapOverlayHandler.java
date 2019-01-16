@@ -295,7 +295,6 @@ public class MapOverlayHandler {
     }
 
     private void showHelp() {
-        scrollOffsetY = 0;
         showHelp(scrollOffsetY);
     }
 
@@ -431,6 +430,8 @@ public class MapOverlayHandler {
             int x = 2;
             put(x, y, p.symbol, p.color);
             Coord select = Coord.get(x - 1, y);
+            if(selection == null)
+                selection = select;
             leftSelectables.add(select);
             selectables.put(select, p);
             x += 2;
@@ -518,10 +519,10 @@ public class MapOverlayHandler {
         if (selectables.isEmpty()) {
             selection = null;
         } else {
-            int  i = selectables.indexOf(selection);
+            int i = selectables.indexOf(selection);
             switch (moveSelection) {
                 case DOWN:
-                    if (i >= 0 && i < selectables.size() - 1){
+                    if (i < selectables.size() - 1){
                         selection = selectables.keyAt(i + 1);
                     }
                     break;
@@ -568,7 +569,10 @@ public class MapOverlayHandler {
         if (selection != null){
             put(selection.x, selection.y, '↣');
             for (int i = selection.x; i != halfWidth && i < width - 1; i++) {
-                layers.put(i, selection.y, SColor.lerpFloatColors(layers.defaultPackedBackground, SColor.CW_LIGHT_HONEYDEW.toFloatBits(), NumberTools.zigzag(TimeUtils.timeSinceMillis(Epigon.startMillis) * 0x1p-9f) * 0x3p-4f + 0x5p-4f));
+                layers.put(i, selection.y, SColor.lerpFloatColors(
+                        layers.defaultPackedBackground,
+                        SColor.CW_BRIGHT_HONEYDEW.toFloatBits(),
+                        NumberTools.zigzag(TimeUtils.timeSinceMillis(Epigon.startMillis) * 0x1p-9f) * 0x3p-4f + 0x5p-4f));
             }
         }
     }
@@ -620,7 +624,11 @@ public class MapOverlayHandler {
     }
 
     public void setMode(PrimaryMode mode) {
-        this.mode = mode;
+        if(this.mode != mode)
+        {
+            scrollOffsetY = 0;
+            this.mode = mode;
+        }
         updateDisplay();
     }
 
@@ -630,7 +638,6 @@ public class MapOverlayHandler {
 
     public void updateDisplay() { // TODO - add version that doesn't disrupt selection
         layers.setVisible(true);
-        scrollOffsetY = 0;
         clear();
         switch (mode) {
             case CRAFTING:

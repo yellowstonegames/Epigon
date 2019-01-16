@@ -372,6 +372,8 @@ public class Epigon extends Game {
                 font);
         mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
+        mapOverlaySLayers.addLayer();
+        mapOverlaySLayers.addLayer();
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         fallingSLayers = new SubcellLayers(
@@ -1078,7 +1080,7 @@ public class Epigon extends Game {
             len = Math.max(options.keyAt(i).length(), len);
         }
         int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
-            startX = target.location.x * 2 + 2;
+                startX = target.location.x * 2 + 2;
         final float smoke = SColor.DB_DARK_LEATHER.toFloatBits();//-0x1.fefefep125F;//SColor.CW_GRAY
 
         if (target.location.x + len + 1 < map.width) {
@@ -1101,6 +1103,46 @@ public class Epigon extends Game {
         }
         showingMenu = true;
         return Coord.get(startX - 2 >> 1, startY);
+    }
+    private Coord showInteractOptions(Physical interactable, Physical user, Coord target, EpiMap map) {
+        if(interactable.interactableData == null || interactable.interactableData.isEmpty())
+            return null;
+        int sz = interactable.interactableData.size(), len = 0;
+        for (int i = 0; i < sz; i++) {
+            len = Math.max(interactable.interactableData.get(i).phrasing.length(), len);
+        }
+        int startY = MathUtils.clamp(target.y - (sz >> 1), 0, map.height - sz - 1),
+                startX = target.x + 2;
+        final float smoke = SColor.DB_DARK_LEATHER.toFloatBits();//-0x1.fefefep125F;//SColor.CW_GRAY
+
+        if (target.x + len + 1 < map.width) {
+            for (int i = 0; i < sz; i++) {
+                String name = interactable.interactableData.get(i).phrasing;
+                for (int j = 0; j < len; j++) {
+                    mapOverlaySLayers.put(startX + j, startY + i, '\0', smoke, smoke, 1);
+                }
+                mapOverlaySLayers.put(startX, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
+            }
+        } else {
+            startX = target.x - len + 2;
+            for (int i = 0; i < sz; i++) {
+                String name = interactable.interactableData.get(i).phrasing;
+                for (int j = 0; j < len; j++) {
+                    mapOverlaySLayers.put(startX + j, startY + i, '\0', smoke, smoke, 1);
+                }
+                mapOverlaySLayers.put(target.x - name.length(), startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
+            }
+        }
+        showingMenu = true;
+        return Coord.get(startX, startY);
+    }
+    private void buildInteractOptions(Physical interactable) {
+        interactionOptions.clear();
+        if(interactable.interactableData == null || interactable.interactableData.isEmpty())
+            return;
+        for (Interactable inter : interactable.interactableData) {
+            interactionOptions.put(inter.phrasing, inter);
+        }
     }
 
     private void attack(Physical target) {
@@ -1473,25 +1515,25 @@ public class Epigon extends Game {
             //then we start a batch and manually draw the stage without having it handle its batch...
             batch.begin();
             mapSLayers.font.configureShader(batch);
-            mapStage.getRoot().draw(batch, 1f);
-            //so we can draw the actors independently of the stage while still in the same batch
-            //player.appearance.draw(batch, 1.0f);
-            if(DEBUG)
-            {
-                int drawCalls = glp.getDrawCalls();
-                int textureBindings = glp.getTextureBindings();
-                tempSB.setLength(0);
-                tempSB.append(Gdx.graphics.getFramesPerSecond()).append(" FPS, Draw Calls: ").append(drawCalls).append(", Texture Binds: ").append(textureBindings);
-                screenPosition.set(16, 8);
-                mapViewport.unproject(screenPosition);
-                font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
-            }
             if (mapOverlaySLayers.isVisible()) {
                 mapOverlayStage.act();
                 mapOverlayHandler.updateDisplay();
                 batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
                 mapOverlayStage.getRoot().draw(batch, 1f);
             }
+            else {
+                mapSLayers.draw(batch, 1f);
+                if (DEBUG) {
+                    int drawCalls = glp.getDrawCalls();
+                    int textureBindings = glp.getTextureBindings();
+                    tempSB.setLength(0);
+                    tempSB.append(Gdx.graphics.getFramesPerSecond()).append(" FPS, Draw Calls: ").append(drawCalls).append(", Texture Binds: ").append(textureBindings);
+                    screenPosition.set(16, 8);
+                    mapViewport.unproject(screenPosition);
+                    font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
+                }
+            }
+            mapHoverSLayers.draw(batch, 1f);
             batch.end();
         } else {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
@@ -1509,7 +1551,6 @@ public class Epigon extends Game {
             batch.end();
         }
         //uncomment the upcoming line if you want to see how fast this can run at top speed...
-        //for me, tommyettinger, on a laptop with recent integrated graphics, I get about 500 FPS.
         //this needs vsync set to false in DesktopLauncher.
         Gdx.graphics.setTitle(Gdx.graphics.getFramesPerSecond() + " FPS");
     }
@@ -1874,16 +1915,17 @@ public class Epigon extends Game {
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
                     if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
-                        message("Interactions for " + selected.name + ": " + selected.interactableData
-                            .stream()
-                            .map(interact -> interact.phrasing)
-                            .collect(Collectors.joining(", ")));
-                        Interactable interaction = selected.interactableData.get(0);
-                        if (interaction.consumes) {
-                            player.removeFromInventory(selected);
-                        }
-                        message(Messaging.transform(interaction.interaction.interact(player, selected, map),
-                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
+//                        message("Interactions for " + selected.name + ": " + selected.interactableData
+//                            .stream()
+//                            .map(interact -> interact.phrasing)
+//                            .collect(Collectors.joining(", ")));
+//                        Interactable interaction = selected.interactableData.get(0);
+//                        if (interaction.consumes) {
+//                            player.removeFromInventory(selected);
+//                        }
+//                        message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+//                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                     } else if (selected.wearableData != null || selected.weaponData != null) {
                         if (player.creatureData.equippedDistinct.contains(selected)) {
                             player.unequip(selected);
@@ -2131,20 +2173,52 @@ public class Epigon extends Game {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            if (showingMenu) {
+                if (menuLocation.x <= screenX + 2 && menuLocation.y <= screenY
+                        && screenY - menuLocation.y < interactionOptions.size()
+                        && mapOverlaySLayers.getLayer(1).getChar(screenX + 2, screenY, '\uFFFF') != '\uFFFF') {
+                    Interactable interaction = interactionOptions.getAt(screenY - menuLocation.y);
+                    if (interaction == null)
+                        return false;
+                    Physical selected = mapOverlayHandler.getSelected();
+                    if (interaction.consumes) {
+                        player.removeFromInventory(selected);
+                    }
+                    message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                            player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                }
+                showingMenu = false;
+                menuLocation = null;
+                maneuverOptions.clear();
+                interactionOptions.clear();
+                currentTarget = null;
+                mapOverlaySLayers.clear(1);
+                mapOverlaySLayers.clear(2);
+                return true;
+            }
+
             if(!mapOverlayHandler.setSelection(screenX, screenY)) 
                 return false;
             Physical selected = mapOverlayHandler.getSelected();
             if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
-                message("Interactions for " + selected.name + ": " + selected.interactableData
-                        .stream()
-                        .map(interact -> interact.phrasing)
-                        .collect(Collectors.joining(", ")));
-                Interactable interaction = selected.interactableData.get(0);
-                if (interaction.consumes) {
-                    player.removeFromInventory(selected);
+                buildInteractOptions(selected);
+                if (interactionOptions == null || interactionOptions.isEmpty()) {
+                    message("Cannot interact with the " + selected.name);
+                } else {
+                    menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
                 }
-                message(Messaging.transform(interaction.interaction.interact(player, selected, map),
-                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                return true;
+
+//                message("Interactions for " + selected.name + ": " + selected.interactableData
+//                        .stream()
+//                        .map(interact -> interact.phrasing)
+//                        .collect(Collectors.joining(", ")));
+//                Interactable interaction = selected.interactableData.get(0);
+//                if (interaction.consumes) {
+//                    player.removeFromInventory(selected);
+//                }
+//                message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+//                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
             } else if (selected.wearableData != null || selected.weaponData != null) {
                 if (player.creatureData.equippedDistinct.contains(selected)) {
                     player.unequip(selected);
@@ -2160,7 +2234,8 @@ public class Epigon extends Game {
 
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
-            mapOverlayHandler.setSelection(screenX, screenY);
+            if(!showingMenu) 
+                mapOverlayHandler.setSelection(screenX, screenY);
             return false;
         }
     });
@@ -2203,7 +2278,8 @@ public class Epigon extends Game {
                     if (showingMenu) {
                         if (menuLocation.x <= screenX && menuLocation.y <= screenY 
                                 && screenY - menuLocation.y < maneuverOptions.size() 
-                                && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
+                                && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) 
+                        {
                             attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
                             calcFOV(player.location.x, player.location.y);
                             calcDijkstra();
@@ -2212,6 +2288,7 @@ public class Epigon extends Game {
                         showingMenu = false;
                         menuLocation = null;
                         maneuverOptions.clear();
+                        interactionOptions.clear();
                         currentTarget = null;
                         mapHoverSLayers.clear();
                         return true;
