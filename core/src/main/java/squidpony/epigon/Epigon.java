@@ -51,8 +51,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static squidpony.squidgrid.gui.gdx.SColor.FLOAT_WHITE;
-import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColorsBlended;
+import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
  * The main class of the game, constructed once in each of the platform-specific Launcher classes.
@@ -1107,30 +1106,41 @@ public class Epigon extends Game {
     private Coord showInteractOptions(Physical interactable, Physical user, Coord target, EpiMap map) {
         if(interactable.interactableData == null || interactable.interactableData.isEmpty())
             return null;
+        mapOverlaySLayers.clear(1);
+        mapOverlaySLayers.clear(2);
         int sz = interactable.interactableData.size(), len = 0;
         for (int i = 0; i < sz; i++) {
             len = Math.max(interactable.interactableData.get(i).phrasing.length(), len);
         }
+        len += 2;
         int startY = MathUtils.clamp(target.y - (sz >> 1), 0, map.height - sz - 1),
                 startX = target.x + 2;
         final float smoke = SColor.DB_DARK_LEATHER.toFloatBits();//-0x1.fefefep125F;//SColor.CW_GRAY
-
+        final float highlight = SColor.lerpFloatColors(
+                smoke,
+                AURORA_EMBERS.toFloatBits(),
+                NumberTools.zigzag(TimeUtils.timeSinceMillis(Epigon.startMillis) * 0x1.2p-9f) * 0x3p-4f + 0x5p-4f);
+        int sub = mapOverlayHandler.getSubselection() == null ? -1 : mapOverlayHandler.getSubselection().y;
         if (target.x + len + 1 < map.width) {
             for (int i = 0; i < sz; i++) {
                 String name = interactable.interactableData.get(i).phrasing;
                 for (int j = 0; j < len; j++) {
-                    mapOverlaySLayers.put(startX + j, startY + i, '\0', smoke, smoke, 1);
+                    mapOverlaySLayers.put(startX + j, startY + i, '\0', i == sub ? highlight : smoke, 0f, 1);
                 }
-                mapOverlaySLayers.put(startX, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
+                if(i == sub)
+                    mapOverlaySLayers.put(startX, startY + i, '→', SColor.CW_BRIGHT_GREEN, null, 2);
+                mapOverlaySLayers.put(startX + 2, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
             }
         } else {
             startX = target.x - len + 2;
             for (int i = 0; i < sz; i++) {
                 String name = interactable.interactableData.get(i).phrasing;
                 for (int j = 0; j < len; j++) {
-                    mapOverlaySLayers.put(startX + j, startY + i, '\0', smoke, smoke, 1);
+                    mapOverlaySLayers.put(startX + j, startY + i, '\0', i == sub ? highlight : smoke, 0f, 1);
                 }
-                mapOverlaySLayers.put(target.x - name.length(), startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
+                if(i == sub)
+                    mapOverlaySLayers.put(startX, startY + i, '→', SColor.CW_BRIGHT_GREEN, null, 2);
+                mapOverlaySLayers.put(target.x - name.length() + 2, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null, 2);
             }
         }
         showingMenu = true;
@@ -1518,6 +1528,8 @@ public class Epigon extends Game {
             if (mapOverlaySLayers.isVisible()) {
                 mapOverlayStage.act();
                 mapOverlayHandler.updateDisplay();
+                if(mapOverlayHandler.getSubselection() != null)
+                    showInteractOptions(mapOverlayHandler.getSelected(), player, mapOverlayHandler.getSelection(), map);
                 batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
                 mapOverlayStage.getRoot().draw(batch, 1f);
             }
@@ -1896,6 +1908,77 @@ public class Epigon extends Game {
             if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) {
                 return;
             }
+            if (showingMenu) {
+                if(mapOverlayHandler.getSelected() == null || mapOverlayHandler.getSelected().interactableData == null
+                        || mapOverlayHandler.getSelected().interactableData.isEmpty())
+                {
+                    showingMenu = false;
+                    menuLocation = null;
+                    mapOverlayHandler.setSubselection(null);
+                    maneuverOptions.clear();
+                    interactionOptions.clear();
+                    currentTarget = null;
+                    mapOverlaySLayers.clear(1);
+                    mapOverlaySLayers.clear(2);
+                    multiplexer.processedInput = true;
+                    infoHandler.updateDisplay();
+                    return;
+                }
+                List<Interactable> interactableData = mapOverlayHandler.getSelected().interactableData;
+                Coord sub = mapOverlayHandler.getSubselection();
+                switch (verb)
+                {
+                    case MOVE_DOWN:
+                        if(sub.y + 1 < interactableData.size())
+                            mapOverlayHandler.setSubselection(sub.x, sub.y + 1);
+                        break;
+                    case MOVE_UP:
+                        if(sub.y > 0)
+                            mapOverlayHandler.setSubselection(sub.x, sub.y - 1);
+                        break;
+                    case CLOSE_SCREEN:
+                    case MOVE_LEFT:
+                        showingMenu = false;
+                        menuLocation = null;
+                        mapOverlayHandler.setSubselection(null);
+                        maneuverOptions.clear();
+                        interactionOptions.clear();
+                        currentTarget = null;
+                        mapOverlaySLayers.clear(1);
+                        mapOverlaySLayers.clear(2);
+                        multiplexer.processedInput = true;
+                        infoHandler.updateDisplay();
+                        return;
+                    case MOVE_RIGHT:
+                    case INTERACT:
+                        if (mapOverlayHandler.getSubselection() != null) {
+                            Interactable interaction = interactionOptions.getAt(sub.y);
+                            if (interaction == null)
+                                break;
+                            Physical selected = mapOverlayHandler.getSelected();
+                            if (interaction.consumes) {
+                                player.removeFromInventory(selected);
+                            }
+                            message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                                    player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                            showingMenu = false;
+                            menuLocation = null;
+                            mapOverlayHandler.setSubselection(null);
+                            maneuverOptions.clear();
+                            interactionOptions.clear();
+                            currentTarget = null;
+                            mapOverlaySLayers.clear(1);
+                            mapOverlaySLayers.clear(2);
+                        }
+                        break;
+                    default:
+                        return;
+                }
+
+                multiplexer.processedInput = true;
+                infoHandler.updateDisplay();
+                return;
+            }
             switch (verb) {
                 case MOVE_DOWN:
                     mapOverlayHandler.move(Direction.DOWN);
@@ -1915,7 +1998,9 @@ public class Epigon extends Game {
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
                     if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
+                        buildInteractOptions(selected);
                         menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
+                        mapOverlayHandler.setSubselection(0, 0);
 //                        message("Interactions for " + selected.name + ": " + selected.interactableData
 //                            .stream()
 //                            .map(interact -> interact.phrasing)
@@ -2176,7 +2261,7 @@ public class Epigon extends Game {
             if (showingMenu) {
                 if (menuLocation.x <= screenX + 2 && menuLocation.y <= screenY
                         && screenY - menuLocation.y < interactionOptions.size()
-                        && mapOverlaySLayers.getLayer(1).getChar(screenX + 2, screenY, '\uFFFF') != '\uFFFF') {
+                        && mapOverlaySLayers.getLayer(1).getChar(screenX + 2, screenY, '\uFFFF') == '\0') {
                     Interactable interaction = interactionOptions.getAt(screenY - menuLocation.y);
                     if (interaction == null)
                         return false;
@@ -2206,6 +2291,7 @@ public class Epigon extends Game {
                     message("Cannot interact with the " + selected.name);
                 } else {
                     menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
+                    mapOverlayHandler.setSubselection(0, 0);
                 }
                 return true;
 

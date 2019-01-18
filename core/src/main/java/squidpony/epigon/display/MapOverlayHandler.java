@@ -1,6 +1,7 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
@@ -64,6 +65,7 @@ public class MapOverlayHandler {
     private int helpHeight;
 
     private Coord selection;
+    private Coord subselection;
     private List<Coord> leftSelectables = new ArrayList<>(); // track left and right for future using of right and left arrow keys
     private List<Coord> rightSelectables = new ArrayList<>();
     private OrderedMap<Coord, Physical> selectables = new OrderedMap<>();
@@ -271,7 +273,22 @@ public class MapOverlayHandler {
     }
 
     public void setSelection(Coord selection) {
-        this.selection = Coord.get(1 + (selection.x < halfWidth ? 0 : halfWidth), selection.y);
+        setSelection(selection.x, selection.y);
+    }
+
+    public Coord getSubselection() {
+        return subselection;
+    }
+
+    public void setSubselection(Coord subselection) {
+        if(subselection == null)
+            this.subselection = null;
+        else 
+            setSubselection(subselection.x, subselection.y);
+    }
+
+    public void setSubselection(int x, int y) {
+        subselection = Coord.get(MathUtils.clamp(x, 0, width), MathUtils.clamp(y, 0, height));
     }
 
     /**
@@ -636,7 +653,7 @@ public class MapOverlayHandler {
         this.player = player;
     }
 
-    public void updateDisplay() { // TODO - add version that doesn't disrupt selection
+    public void updateDisplay() {
         layers.setVisible(true);
         clear();
         switch (mode) {
