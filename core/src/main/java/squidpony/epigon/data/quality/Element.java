@@ -72,13 +72,14 @@ public enum Element { // TODO - make this a full EpiData class with external dat
     allCosmic = {SOLAR, LUNAR, STELLAR, COMETARY, PLANETARY, METEORIC},
     allDamage = {BLUNT, PIERCING, SLASHING,
             EARTH, CRYSTAL, FIRE, AIR, SOUND, WATER, ICE, LIGHTNING, POISON, ACID, CAUSTIC, DISEASE,
-            DEATH, LIFE, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
+            DEATH, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
             GRAVITY, VACUOUS, WARP, RADIATION},
     /**
-     * Different from allDamage because it only contains magic-based elements, no blunt or slashing. Meant for mods.
+     * Different from allDamage because it only contains magic-based elements, no blunt, slashing, or life.
+     * Meant for Modifications.
      */
     allEnergy = {EARTH, CRYSTAL, FIRE, AIR, SOUND, WATER, ICE, LIGHTNING, POISON, ACID, CAUSTIC, DISEASE,
-            DEATH, LIFE, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
+            DEATH, SHINING, SHADOW, TEMPORAL, FATEFUL, PURE, PRIMAL, CONTRACTUAL, SINISTER, DIVINE,
             GRAVITY, VACUOUS, WARP, RADIATION};
 
     public Element parent;

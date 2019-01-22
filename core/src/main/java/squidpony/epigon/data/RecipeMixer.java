@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Colors;
+import squidpony.Maker;
 import squidpony.Messaging;
 import squidpony.epigon.data.quality.Vegetable;
 import squidpony.squidgrid.gui.gdx.Radiance;
@@ -227,6 +228,8 @@ public class RecipeMixer {
         blueprint.rarity = Rating.SLIGHT;
         blueprint.symbol = material.symbol();
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(2));
+        if(material.interactables().length > 0) 
+            blueprint.interactableData = Maker.makeList(material.interactables());
         return blueprint;
     }
 

@@ -1,7 +1,5 @@
 package squidpony.epigon.data.trait;
 
-import squidpony.epigon.Interaction;
-
 /**
  * Holds what to do when a Physical is interacted with. This allows for doors, stairs, levers,
  * and such in terrain as well as consumption of items.

@@ -3,6 +3,9 @@ package squidpony.epigon.data.quality;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
+import squidpony.epigon.data.ConditionBlueprint;
+import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.trait.Interactable;
 import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
@@ -18,10 +21,22 @@ import squidpony.squidgrid.gui.gdx.SColor;
 //˔ fungus
 //∝ cress
 public enum Vegetable implements ConstantKey {
-    BITTER_YARROW('∗', SColor.COSMIC_LATTE, "a small flower on a long stem"),
-    MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁"),
+    BITTER_YARROW('∗', SColor.COSMIC_LATTE, "a small flower on a long stem",
+            new Interactable("chew", true, false, (actor, target, level) -> 
+                    actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Afflict"))
+                            ? "Chewing the bitter yarrow cures @my poison affliction."
+                            : "@Name chew$ the bitter yarrow and make$ a face.")),
+    MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁",
+            new Interactable("eat", true, false, (actor, target, level) ->
+            {
+                actor.stats.get(Stat.HUNGER).addActual(10);
+                return "@Name eat$ the mossmelon with gusto.";})),
     SAINT_JOHNʼS_WORT('ˬ', SColor.AURORA_ASPARAGUS, "a squat, round-leafed plant"),
-    ANGELCRESS('∝', SColor.AURORA_SAGE_GREEN, "a water plant with lobes that suggest angel wings", "~≁"),
+    ANGELCRESS('∝', SColor.AURORA_SAGE_GREEN, "a water plant with lobes that suggest angel wings", "~≁",
+            new Interactable("worship", true, false, (actor, target, level) ->
+                    actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Curse"))
+                            ? "Saying a prayer to the angelcress lifts @my curse."
+                            : "@Name look$ crazy, talking to a plant.")),
     SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture."),
     GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves"),
     RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁"),
@@ -41,16 +56,18 @@ public enum Vegetable implements ConstantKey {
     private final String description;
     private final String prettyName;
     private final String terrains;
+    private final Interactable[] interactables;
     
-    Vegetable(char symbol, Color color, String description) {
-        this(symbol, color, description, "¸");
+    Vegetable(char symbol, Color color, String description, Interactable... interactables) {
+        this(symbol, color, description, "¸", interactables);
     }
-    Vegetable(char symbol, Color color, String description, String terrains) {
+    Vegetable(char symbol, Color color, String description, String terrains, Interactable... interactables) {
         this.symbol = symbol;
         this.color = color;
         this.description = description;
         prettyName = Utilities.lower(name(), "_").replace('ˉ', '-');
         this.terrains = terrains;
+        this.interactables = interactables == null ? new Interactable[0] : interactables;
         hash = ConstantKey.precomputeHash("creature.Vegetable", ordinal());
     }
     public final long hash;
@@ -81,6 +98,11 @@ public enum Vegetable implements ConstantKey {
     {
         return terrains;
     }
+
+    public Interactable[] interactables() {
+        return interactables;
+    }
+
     public static final Vegetable[] ALL = values();
 
 }

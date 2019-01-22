@@ -66,7 +66,7 @@ public class Physical extends EpiData {
 
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>(); // The change to incoming damage
 
-    public List<Condition> conditions = new ArrayList<>();
+    public OrderedSet<Condition> conditions = new OrderedSet<>();
     private ArrayList<Condition> conditionsToRemove = new ArrayList<>();
 
     // initial stats on instantiation come from required modification
@@ -197,7 +197,7 @@ public class Physical extends EpiData {
      * @param condition
      * @return
      */
-    public boolean immune(ConditionBlueprint condition) {
+    public boolean immuneToCondition(ConditionBlueprint condition) {
         for (Condition c : conditions) {
             if (c.suppressors.isEmpty() && c.parent != null) {//only active conditions can provide immunity //TODO -- ensure that when they become unsuppressed they remove things they provide immunity against
                 for (ConditionBlueprint cb : c.parent.immunizes) {
@@ -219,7 +219,7 @@ public class Physical extends EpiData {
      * @return
      */
     public boolean applyCondition(Condition condition) {
-        if (immune(condition.parent)) {//make sure it's not immune
+        if (immuneToCondition(condition.parent)) {//make sure it's not immune
             return false;
         } else {
             for (Condition c : conditions) {
@@ -230,6 +230,19 @@ public class Physical extends EpiData {
         }         
         condition.attach(this);
         return true;
+    }
+    
+    public boolean removeCondition(ConditionBlueprint condition)
+    {
+        boolean removed = false;
+        for (int i = 0; i < conditions.size(); i++) {
+            if (conditions.getAt(i).hasParent(condition)) {
+                conditions.removeAt(i--);
+                removed = true;
+            }
+        }
+        return removed;
+
     }
 
     public void equipItem(Physical item) {

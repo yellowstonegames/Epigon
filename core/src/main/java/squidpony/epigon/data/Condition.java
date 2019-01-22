@@ -95,6 +95,10 @@ public class Condition extends EpiData {
             return wearOff();
         }
         return false;
+    }
 
+    @Override
+    public int hashCode() {
+        return parent.hashCode();
     }
 }

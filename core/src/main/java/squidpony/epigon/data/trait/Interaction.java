@@ -1,4 +1,4 @@
-package squidpony.epigon;
+package squidpony.epigon.data.trait;
 
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.mapping.EpiMap;
