@@ -402,11 +402,11 @@ public class Physical extends EpiData {
         if (owned == null){
             inventory.add(adding);
         } else { // This is meant to work with groupingData not counting in equality comparison
-            int quantity = owned.groupingData == null ? 1 : owned.groupingData.quantity;
+            int quantity = adding.groupingData == null ? 1 : adding.groupingData.quantity;
             if (adding.groupingData == null){
-                adding.groupingData = new Grouping(1 + quantity);
+                owned.groupingData = new Grouping(1 + quantity);
             } else {
-                adding.groupingData.quantity += quantity;
+                owned.groupingData.quantity += quantity;
             }
         }
     }

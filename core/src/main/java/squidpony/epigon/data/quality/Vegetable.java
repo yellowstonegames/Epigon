@@ -35,7 +35,7 @@ public enum Vegetable implements ConstantKey {
     ANGELCRESS('∝', SColor.AURORA_SAGE_GREEN, "a water plant with lobes that suggest angel wings", "~≁",
             new Interactable("worship", true, false, (actor, target, level) ->
                     actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Curse"))
-                            ? "Saying a prayer to the angelcress lifts @my curse."
+                            ? "Saying a prayer to the angelcress lifts @name_s curse."
                             : "@Name look$ crazy, talking to a plant.")),
     SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture."),
     GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves"),

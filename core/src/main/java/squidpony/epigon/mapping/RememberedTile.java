@@ -31,10 +31,11 @@ public class RememberedTile {
         front = tile.getForegroundColor();
         front = front == 0f ? 0f :
                 tile.contents.isEmpty()
-                        ? SColor.floatGetHSV(0, 0, SColor.valueOfFloat(front), 1f)
+                        ? SColor.floatGetYCbCr(SColor.lumaOfFloat(front), 0, 0, 1f)
                         : SColor.lerpFloatColorsBlended(front, memoryColorFloat, frontFade);
-        back = tile.getBackgroundColor();
-        back = back == 0f ? 0f : SColor.translucentColor(memoryColorFloat, backFade);
+        //back = tile.getBackgroundColor();
+        back = //back == 0f ? 0f : 
+                SColor.translucentColor(memoryColorFloat, backFade);
 //        if 
 //                (tile.getCreature() != null){
 //            miniMapColor = SColor.SCARLET.toFloatBits();
