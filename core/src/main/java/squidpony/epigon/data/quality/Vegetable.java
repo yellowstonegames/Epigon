@@ -42,14 +42,26 @@ public enum Vegetable implements ConstantKey {
     RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁"),
     RASPUTINʼS_SORROW('˛', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death"),
     DESERT_SAGE('¸', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass"),
-    ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts"),
+    ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts",
+            new Interactable("eat", true, false, (actor, target, level) ->
+            {
+                actor.stats.get(Stat.HUNGER).addActual(1);
+                actor.stats.get(Stat.THIRST).addActual(9);
+                return "@Name slurp$ the clear, pure gel from the aloe vera.";}),
+            new Interactable("apply to skin", true, false, (actor, target, level) ->
+                actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Ignite"))
+                        ? "@Name rub$ aloe vera sap on @my skin, soothing @my burns." 
+                        : "@Name decide$ a nice aloe vera spa treatment is the appropriate course of action."
+            )),
     FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent"),
     FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell"),
     SKULLMALLOW('∝', SColor.CW_ALMOST_WHITE, "a reed that oozes a sticky white sap in the pattern of a skull", "¸≁"),
     NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~"),
     BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey"),
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
-    LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~");
+    LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~",
+            new Interactable("wear", false, false, (actor, target, level) ->
+                    "@Name put$ the sopping-wet lordʼs lily on @my head@s! @Name@m the lord@s of the nitwits!"));
     
     private final Color color;
     private final char symbol;
