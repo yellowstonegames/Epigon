@@ -3,6 +3,7 @@ package squidpony.epigon.data.quality;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
+import squidpony.epigon.data.Condition;
 import squidpony.epigon.data.ConditionBlueprint;
 import squidpony.epigon.data.Stat;
 import squidpony.epigon.data.trait.Interactable;
@@ -27,8 +28,7 @@ public enum Vegetable implements ConstantKey {
                             ? "Chewing the bitter yarrow cures @my poison affliction."
                             : "@Name chew$ the bitter yarrow and make$ a face.")),
     MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁",
-            new Interactable("eat", true, false, (actor, target, level) ->
-            {
+            new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(10);
                 return "@Name eat$ the mossmelon with gusto.";})),
     SAINT_JOHNʼS_WORT('ˬ', SColor.AURORA_ASPARAGUS, "a squat, round-leafed plant"),
@@ -55,7 +55,10 @@ public enum Vegetable implements ConstantKey {
             )),
     FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent"),
     FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell"),
-    SKULLMALLOW('∝', SColor.CW_ALMOST_WHITE, "a reed that oozes a sticky white sap in the pattern of a skull", "¸≁"),
+    SKULLMALLOW('∝', SColor.CW_ALMOST_WHITE, "a reed that oozes a sticky white sap in the pattern of a skull", "¸≁",
+            new Interactable("eat", true, false, (actor, target, level) -> {
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Wither"), actor));
+                return "@Name turn$ deathly pale after eating the skullmallow, as one might expect.";})),
     NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~"),
     BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey"),
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),

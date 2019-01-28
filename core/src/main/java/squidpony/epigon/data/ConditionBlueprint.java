@@ -81,6 +81,33 @@ public class ConditionBlueprint extends EpiData {
             return parent.hasParent(blueprint);
         }
     }
+
+    /*
+"Afflict", 
+"Bleed", 
+"Blind", 
+"Chill", 
+"Confound", 
+"Corrode", 
+"Curse", 
+"Disable", 
+"Disarm", 
+"Electrify", 
+"Energize",  //helpful
+"Favor",  //helpful
+"Flare", 
+"Ignite", 
+"Impale", 
+"Irradiate", 
+"Punish", 
+"Regenerate", //helpful
+"Sever", 
+"Silence", 
+"Slay", 
+"Sunder", 
+"Trip", 
+"Wither", 
+     */
     public static OrderedMap<String, ConditionBlueprint> CONDITIONS = OrderedMap.makeMap(
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
@@ -88,12 +115,30 @@ public class ConditionBlueprint extends EpiData {
             , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
                     null, null, null)
-            , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff', ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
+            , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff',
+                    ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
                     null, null, null)
-            , "Afflict", new ConditionBlueprint("afflict", "afflict$", 6, 1, Element.POISON, '\uffff', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.5, CalcStat.PRECISION, (int)'-', 3.0), null, null, null)
-            , "Bleed", new ConditionBlueprint("bleed", "cut$", 3, 1, Element.SLASHING, '\uffff', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.DAMAGE, (int)'-', 1.0), null, null, null)
-            , "Chill", new ConditionBlueprint("chill", "chill$", 3, 1, Element.ICE, '▯', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0), null, null, null)
-            , "Curse", new ConditionBlueprint("curse", "curse$", 3, 1, Element.FATEFUL, '\uffff', ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0), null, null, null)
-            , "Ignite", new ConditionBlueprint("ignite", "ignite$", 2, 1, Element.FIRE, 'ˇ', ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5), null, null, null)
+            , "Afflict", new ConditionBlueprint("afflict", "afflict$", 6, 1, Element.POISON, '\uffff',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.5, CalcStat.PRECISION, (int)'-', 3.0),
+                    null, null, null)
+            , "Bleed", new ConditionBlueprint("bleed", "cut$", 3, 1, Element.SLASHING, '\uffff',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.DAMAGE, (int)'-', 1.0),
+                    null, null, null)
+            , "Chill", new ConditionBlueprint("chill", "chill$", 3, 1, Element.ICE, '▯',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0),
+                    null, null, null)
+            , "Curse", new ConditionBlueprint("curse", "curse$", 3, 0, Element.FATEFUL, '\uffff',
+                    ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0),
+                    null, null, null)
+            , "Ignite", new ConditionBlueprint("ignite", "ignite$", 2, 1, Element.FIRE, 'ˇ',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5),
+                    null, null, null)
+            , "Blind", new ConditionBlueprint("blind", "blind$", 3, 0, Element.SHADOW, '\uffff',
+                    ChangeTable.makeCT(Stat.SIGHT, (int)'-', 7.0, CalcStat.PRECISION, (int)'-', 3.0),
+                    null, null, null)
+            , "Wither", new ConditionBlueprint("wither", "wither$", 15, 2, Element.DEATH, '\uffff',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0),
+                    null, null, null)
+
     );
 }
