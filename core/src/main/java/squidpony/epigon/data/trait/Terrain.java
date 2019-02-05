@@ -1,8 +1,8 @@
 package squidpony.epigon.data.trait;
 
-import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
+import squidpony.squidmath.FastNoise;
 
 /**
  * A specific instance of a terrain unit.
@@ -14,7 +14,8 @@ import squidpony.epigon.data.quality.Stone;
  */
 public class Terrain {
 
-    public Color background;
+    public float background;
+    public FastNoise noise;
 
     public Stone stone;
     public Inclusion inclusion;

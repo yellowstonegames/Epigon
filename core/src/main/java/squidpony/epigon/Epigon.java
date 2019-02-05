@@ -226,7 +226,12 @@ public class Epigon extends Game {
 
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
 
-        unseenColor = SColor.BLACK_DYE;
+        // this matches the background color outside the map to the background color of unseen areas inside the map,
+        // using the same filter (reducing brightness and saturation using YCoCg) as that stage of the map draw.
+        float unseenY = luminanceYCoCg(DB_INK) * 0.7f,
+                unseenCo = chrominanceOrange(DB_INK) * 0.65f,
+                unseenCg = chrominanceGreen(DB_INK) * 0.65f;
+        unseenColor = colorFromFloat(floatGetYCoCg(unseenY, unseenCo, unseenCg, 1f));
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
         //FilterBatch is new, and automatically filters all text colors and image tints with a FloatFilter
         batch = new FilterBatch(filter);
@@ -369,7 +374,7 @@ public class Epigon extends Game {
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
-        mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
+        mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
         mapOverlaySLayers.addLayer();
         mapOverlaySLayers.addLayer();
@@ -381,7 +386,7 @@ public class Epigon extends Game {
                 mapSize.cellWidth,
                 mapSize.cellHeight,
                 font);
-        fallingSLayers.setDefaultBackground(colorCenter.desaturate(SColor.DB_INK, 0.8));
+        fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
         fallingSLayers.setDefaultForeground(SColor.LIME);
         fallingHandler = new FallingHandler(fallingSLayers);
         mapSLayers.font.tweakWidth(15f).tweakHeight(28f).initBySize();
@@ -1308,8 +1313,9 @@ public class Epigon extends Game {
         toCursor.clear();
     }
     
-    public void putWithLight(int x, int y, char c, float foreground) {
+    public void putWithLight(int x, int y, char c, float foreground, float background) {
         foreground = lerpFloatColorsBlended(foreground, map.lighting.colorLighting[1][x][y], map.lighting.colorLighting[0][x][y] * 0.6f);
+        mapSLayers.backgrounds[x][y] = SColor.lerpFloatColorsBlended(mapSLayers.backgrounds[x][y], background, 0.3f);
         if(c == '#')
             wallColors[x][y] = foreground;
         else
@@ -1360,7 +1366,7 @@ public class Epigon extends Game {
                         }
                         creature.wasSeen = true;
                     } else {
-                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor());
+                        putWithLight(x, y, tile.getSymbol(), tile.getForegroundColor(), tile.getBackgroundColor(x, y, TimeUtils.timeSinceMillis(startMillis)));
                     }
                 } else {
                     RememberedTile rt = map.remembered[x][y];

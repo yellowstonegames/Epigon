@@ -158,7 +158,7 @@ public class RecipeMixer {
         blueprint.whenUsedAsMaterial.add(stoneMod);
 
         Terrain terrain = new Terrain();
-        terrain.background = stone.back;
+        terrain.background = SColor.toEditedFloat(stone.back, 0f, -0.4f, -0.4f, -0.4f);
         terrain.stone = stone;
         terrain.extrusive = stone.extrusive;
         terrain.intrusive = stone.intrusive;
@@ -188,7 +188,7 @@ public class RecipeMixer {
         blueprint.whenUsedAsMaterial.add(inclusionMod);
 
         Terrain terrain = new Terrain();
-        terrain.background = inclusion.back;
+        terrain.background = SColor.toEditedFloat(inclusion.back, 0f, -0.4f, -0.4f, -0.4f);
         terrain.extrusive = inclusion.extrusive;
         terrain.intrusive = inclusion.intrusive;
         terrain.metamorphic = inclusion.metamorphic;

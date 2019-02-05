@@ -101,9 +101,11 @@ public class EpiTile {
      *
      * @return
      */
-    public float getBackgroundColor() {
-        return 0x1.fffffep-126f; // fully transparent, but not equal to 0 (0 is used to leave the current background)
-                //floor != null && floor.terrainData != null ? floor.terrainData.background : SColor.TRANSPARENT ;
+    public float getBackgroundColor(int x, int y, long time) {
+        return //0x1.fffffep-126f; // fully transparent, but not equal to 0 (0 is used to leave the current background)
+                floor != null && floor.terrainData != null
+                        ? floor.terrainData.noise == null ? floor.terrainData.background : SColor.toEditedFloat(floor.terrainData.background, 0f, 0f, floor.terrainData.noise.getConfiguredNoise(x * 5f, y * 5f, time * 0x1p-7f) * 0.8f, 0f)
+                        : 0x1.fffffep-126f ;
     }
 
     public static final float[] dbColors = {

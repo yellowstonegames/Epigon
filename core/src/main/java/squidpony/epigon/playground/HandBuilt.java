@@ -189,6 +189,9 @@ public class HandBuilt {
         water.description = "shallow water";
         water.attached = true;
         water.blocking = false;
+        water.terrainData = new Terrain();
+        water.terrainData.background = SColor.translucentColor(SColor.LAPIS_LAZULI, 0.9f);
+        water.terrainData.noise = new FastNoise(1234567, 0.03f, FastNoise.SIMPLEX_FRACTAL, 2);
         water.stats.put(Stat.OPACITY, LiveValue.ZERO);
         
         mud = Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN);
