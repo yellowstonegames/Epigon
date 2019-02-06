@@ -78,11 +78,8 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
     public static final int messageCount;
-    public static final long seed = 0xBEEFEED0DBA77L;
+    public static final long seed = 0xBEEFEEDADBA77L;
     public final StatefulRNG rng = new StatefulRNG(seed);
-    // used for certain calculations where the state changes per-tile
-    // allowed to be static because posrng is expected to have its move() method called before each use, which seeds it
-    //public static final PositionRNG posrng = new PositionRNG(seed ^ seed >>> 1);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
@@ -113,6 +110,7 @@ public class Epigon extends Game {
     private SquidInput mapInput;
     private SquidInput contextInput;
     private SquidInput infoInput;
+    private SquidInput messageInput;
     private SquidInput debugInput;
     private SquidInput fallbackInput;
     private Color unseenColor;
@@ -128,9 +126,7 @@ public class Epigon extends Game {
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
-
-    private ControlMapping currentMapping;
-
+    
     // World
     private WorldGenerator worldGenerator;
     private EpiMap[] world;
@@ -419,9 +415,10 @@ public class Epigon extends Game {
         mapInput = new SquidInput(mapKeys, mapMouse);
         contextInput = new SquidInput(contextMouse);
         infoInput = new SquidInput(infoMouse);
+        messageInput = new SquidInput(messageMouse);
         debugInput = new SquidInput(debugKeys);
         fallbackInput = new SquidInput(fallbackKeys);
-        multiplexer = new InputSpecialMultiplexer(mapInput, contextInput, infoInput, debugInput, fallbackInput); //mapStage, messageStage, 
+        multiplexer = new InputSpecialMultiplexer(mapInput, messageInput, contextInput, infoInput, debugInput, fallbackInput); //mapStage, messageStage, 
         Gdx.input.setInputProcessor(multiplexer);
 
         mapStage.addActor(mapSLayers);
@@ -895,7 +892,25 @@ public class Epigon extends Game {
     }
 
     public void updateMessages() {
-        clearAndBorder(messageSLayers, SColor.APRICOT, unseenColor);
+        clearContents(messageSLayers, unseenColor);
+
+        int w = messageSLayers.getGridWidth();
+        int h = messageSLayers.getGridHeight();
+        for (int x = 0; x < w; x++) {
+            messageSLayers.put(x, 0, ((x & 7) == 4) ? '↑' : '─', APRICOT, unseenColor);
+            messageSLayers.put(x, h - 1, ((x & 7) == 4) ? '↓' : '─', APRICOT, unseenColor);
+        }
+        String text = "Click to Scroll ";
+        messageSLayers.putString(w - 7 - text.length(), 0, text + "Up──", APRICOT, unseenColor);
+        messageSLayers.putString(w - 7 - text.length(), h - 1, text + "Down", APRICOT, unseenColor);
+        for (int y = 0; y < h; y++) {
+            messageSLayers.put(0, y, '│', APRICOT, unseenColor);
+            messageSLayers.put(w - 1, y, '│', APRICOT, unseenColor);
+        }
+        messageSLayers.put(0, 0, '┌', APRICOT, unseenColor);
+        messageSLayers.put(w - 1, 0, '┐', APRICOT, unseenColor);
+        messageSLayers.put(0, h - 1, '└', APRICOT, unseenColor);
+        messageSLayers.put(w - 1, h - 1, '┘', APRICOT, unseenColor);
         for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
             messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
         }
@@ -1602,6 +1617,10 @@ public class Epigon extends Game {
                 infoSize.gridWidth, infoSize.gridHeight,
                 (infoSize.gridWidth & 1) * (int) (infoSize.cellWidth * currentZoomX * 0.5f) - (int)(Gdx.graphics.getWidth() - currentZoomX * infoSize.pixelWidth()),
                 (~infoSize.gridHeight & 1) * (int) (infoSize.cellHeight * currentZoomY * -0.5f));
+        messageMouse.reinitialize(currentZoomX * messageSize.cellWidth, currentZoomY * messageSize.cellHeight,
+                messageSize.gridWidth, messageSize.gridHeight,
+                (int) (messageSize.cellWidth * currentZoomX * -0.5),
+                (messageSize.gridHeight & 1) * (int) (messageSize.cellHeight * currentZoomY * 0.5f) - (int) (mapSize.gridHeight * mapSize.cellHeight * currentZoomY));
 // - (int) (infoSize.cellHeight * currentZoomY)
         contextViewport.update(width, height, false);
         contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
@@ -2521,6 +2540,36 @@ public class Epigon extends Game {
                         infoHandler.prior();
                     } else if (screenX == infoHandler.arrowRight.x && screenY == infoHandler.arrowRight.y) {
                         infoHandler.next();
+                    }
+                    return true;
+                case Input.Buttons.RIGHT:
+                default:
+                    return false;
+            }
+        }
+
+
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            return mouseMoved(screenX, screenY);
+        }
+
+        @Override
+        public boolean mouseMoved(int screenX, int screenY) {
+            return false;
+        }
+    });
+    private final SquidMouse messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
+            messageSize.cellWidth, mapSize.pixelHeight(), new InputAdapter() {
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            //System.out.println("message: " + screenX + ", " + screenY);
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    if (screenY <= 0) {
+                        scrollMessages(-1);
+                    } else if (screenY >= messageSize.gridHeight - 1) {
+                        scrollMessages(1);
                     }
                     return true;
                 case Input.Buttons.RIGHT:
