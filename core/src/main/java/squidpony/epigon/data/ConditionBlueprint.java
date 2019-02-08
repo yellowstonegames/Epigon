@@ -112,8 +112,17 @@ public class ConditionBlueprint extends EpiData {
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
                     null, null, null)
+            , "Corrode", new ConditionBlueprint("corrode", "corrode$", 4, 1, Element.ACID, '\uffff',
+                    ChangeTable.makeCT(null, ~'s', 4.0, Stat.VIGOR, (int)'<', 2.0),
+                    null, null, null)
             , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
+                    null, null, null)
+            , "Disable", new ConditionBlueprint("disable", "disable$", 2, 1, Element.PIERCING, '\uffff',
+                    ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 13.0),
+                    null, null, null)
+            , "Electrify", new ConditionBlueprint("electrify", "electrif$$$", 3, 1, Element.LIGHTNING, '⚡',
+                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.STEALTH, (int)'-', 2.0, CalcStat.EVASION, (int)'-', 2.0),
                     null, null, null)
             , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),

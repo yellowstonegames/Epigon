@@ -724,7 +724,7 @@ public class Epigon extends Game {
                                     }
                                     if (ao.targetConditioned) {
                                         message(Messaging.transform("The " + creature.name + " "
-                                                + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
+                                                + ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.randomValue(creature)).verb + " you with @my attack!", creature.name, Messaging.NounTrait.NO_GENDER));
                                         if (player.overlaySymbol != '\uffff') {
                                             if (player.overlayAppearance != null) {
                                                 mapSLayers.removeGlyph(player.overlayAppearance);
@@ -1263,7 +1263,7 @@ public class Epigon extends Game {
                 }
                 if (ao.targetConditioned) {
                     message(Messaging.transform("You " +
-                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)).verb +
+                            ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.randomValue(player)).verb +
                             " the " + target.name + " with your attack!", "you", Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                     if (target.overlaySymbol != '\uffff') {
                         if (target.overlayAppearance != null) mapSLayers.removeGlyph(target.overlayAppearance);

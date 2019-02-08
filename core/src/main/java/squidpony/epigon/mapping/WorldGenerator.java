@@ -810,7 +810,7 @@ public class WorldGenerator {
         })
         {
             for(Coord c : area) {
-                float noise = FastNoise.instance.getSimplex(c.x * 0.6f, c.y * 0.6f);
+                float noise = FastNoise.instance.getSimplex(c.x * 1.6f, c.y * 1.6f);
                 if (noise > -0.1f && noise < 0.35f) {
                     if(map.contents[c.x][c.y].floor.symbol == '.') 
                         map.contents[c.x][c.y].floor = RecipeMixer.buildPhysical(handBuilt.grass);
