@@ -446,7 +446,8 @@ public class RecipeMixer {
         blueprint.creatureData.weaponChoices = new ProbabilityTable<>(blueprint.nextLong());
         blueprint.weaponData = Weapon.getWeapons().get(raw.baseWeapon.name);
         for (int i = 0, idx = blueprint.nextInt(raw.weapons.length); i < raw.weapons.length; i++, idx = (idx+1)%raw.weapons.length) {
-            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get(raw.weapons[idx].name), blueprint));
+            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get("holy symbol"), blueprint));
+//            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get(raw.weapons[idx].name), blueprint));
         }
         blueprint.creatureData.culture = Culture.cultures.getOrDefault(blueprint.getRandomElement(raw.culture), blueprint.creatureData.culture);
         if(raw.sayings == null || raw.sayings.length == 0)

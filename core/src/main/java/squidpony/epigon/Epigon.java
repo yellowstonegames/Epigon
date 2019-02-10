@@ -296,10 +296,22 @@ public class Epigon extends Game {
             @Override
             public void draw(Batch batch, float parentAlpha) {
                 //super.draw(batch, parentAlpha);
-                float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo;
-                filter.coMul = 0.65f;
-                filter.cgMul = 0.65f;
-                filter.yMul = 0.7f;
+                float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo,
+                        conditionY = 1f, conditionCo = 1f, conditionCg = 1f;
+                final int clen = player.conditions.size();
+                for (int i = clen - 1; i >= 0; i--) {
+                    VisualCondition vis = player.conditions.getAt(i).parent.visual;
+                    if(vis != null)
+                    {
+                        conditionY = vis.lumaChange;
+                        conditionCo = vis.orangeChange;
+                        conditionCg = vis.greenChange;
+                        break;
+                    }
+                }
+                filter.coMul = 0.65f * conditionCo;
+                filter.cgMul = 0.65f * conditionCg;
+                filter.yMul = 0.7f   * conditionY;
                 font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
                 int len = layers.size();
                 Frustum frustum = null;
@@ -320,9 +332,9 @@ public class Epigon extends Game {
                         }
                     }
                 }
-                filter.coMul = 0.95f;
-                filter.cgMul = 0.95f;
-                filter.yMul = 0.9f;
+                filter.coMul = 0.95f * conditionCo;
+                filter.cgMul = 0.95f * conditionCg;
+                filter.yMul = 0.9f   * conditionY; 
 
                 font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
 
@@ -339,9 +351,9 @@ public class Epigon extends Game {
                         layers.get(i).draw(batch, font, frustum, xo, yOff);
                     }
                 }
-                filter.coMul = 1.4f;
-                filter.cgMul = 1.4f;
-                filter.yMul = 1.05f;
+                filter.coMul = 1.4f * conditionCo;
+                filter.cgMul = 1.4f * conditionCg;
+                filter.yMul = 1.05f * conditionY; 
                 int x, y;
                 for (int i = 0; i < glyphs.size(); i++) {
                     TextCellFactory.Glyph glyph = glyphs.get(i);

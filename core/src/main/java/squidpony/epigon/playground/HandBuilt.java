@@ -293,19 +293,20 @@ public class HandBuilt {
 
         Rating[] ratingChoices = new Rating[]{Rating.SLIGHT, Rating.TYPICAL, Rating.GOOD, Rating.HIGH};
         for (ConstantKey s : CalcStat.all) {
-            Rating rating = rng.getRandomElement(ratingChoices);
-            LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel(rng));
+            Rating rating = playerBlueprint.getRandomElement(ratingChoices);
+            LiveValue lv = new LiveValue(Formula.randomizedStartingStatLevel(playerBlueprint));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
+        playerBlueprint.stats.put(CalcStat.LUCK, new LiveValue(1));
         for (ConstantKey s : Stat.healths) {
-            Rating rating = rng.getRandomElement(ratingChoices);
+            Rating rating = playerBlueprint.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.healthForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
         }
         for (ConstantKey s : Stat.needs) {
-            Rating rating = rng.getRandomElement(ratingChoices);
+            Rating rating = playerBlueprint.getRandomElement(ratingChoices);
             LiveValue lv = new LiveValue(Formula.needForLevel(1, rating));
             playerBlueprint.stats.put(s, lv);
             playerBlueprint.statProgression.put(s, rating);
@@ -317,7 +318,7 @@ public class HandBuilt {
             playerBlueprint.statProgression.put(s, rating);
         }
         for (ConstantKey s : Stat.utilities) {
-            Rating rating = rng.getRandomElement(ratingChoices);
+            Rating rating = playerBlueprint.getRandomElement(ratingChoices);
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }

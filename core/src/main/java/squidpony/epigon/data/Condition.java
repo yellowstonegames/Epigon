@@ -69,10 +69,10 @@ public class Condition extends EpiData {
     public boolean wearOff()
     {
         if(attachedTo == null) return false;
-        for (Modification m : parent.wearOffEffects)
-        {             
-            RecipeMixer.applyModification(attachedTo, m);
-        }
+//        for (Modification m : parent.wearOffEffects)
+//        {             
+//            RecipeMixer.applyModification(attachedTo, m);
+//        }
         if(parent.changes != null)
         {
             ChangeTable.releasePhysical(attachedTo, parent.changes);
@@ -84,12 +84,12 @@ public class Condition extends EpiData {
     }
     public boolean update()
     {
-        if(parent.period != 0 && currentTick % parent.period == 0) {
-            for (Modification m : parent.tickEffects)
-            {
-                RecipeMixer.applyModification(attachedTo, m);
-            }
-        }
+//        if(parent.period != 0 && currentTick % parent.period == 0) {
+//            for (Modification m : parent.tickEffects)
+//            {
+//                RecipeMixer.applyModification(attachedTo, m);
+//            }
+//        }
         if(++currentTick >= parent.duration)
         {
             return wearOff();

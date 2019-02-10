@@ -1,6 +1,6 @@
 package squidpony.epigon.data;
 
-import squidpony.squidmath.RNG;
+import squidpony.squidmath.IRNG;
 
 /**
  * A way to describe what calculations should be performed at run time.
@@ -15,8 +15,12 @@ public class Formula {
     private Formula() {
     }
 
-    public static int randomizedStartingStatLevel(RNG rng){
-        return rng.maxIntOf(8, 4) + 1;
+    public static int randomizedStartingStatLevel(IRNG rng){
+        int value = rng.next(3); // 3 bits, so 0 to 8
+        for (int i = 1; i < 4; i++) {
+            value = Math.max(value, rng.next(3));
+        }
+        return value;
 //        int n = GauntRNG.nextInt(seed, 100);
 //        if (n < 45){
 //            return 1;

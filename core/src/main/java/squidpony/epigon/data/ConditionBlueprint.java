@@ -4,9 +4,6 @@ import squidpony.epigon.data.quality.Element;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.UnorderedSet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,15 +32,16 @@ public class ConditionBlueprint extends EpiData {
     public char overlaySymbol = '\uffff';
     public String verb;
     public ChangeTable changes;
-    public List<Modification> tickEffects = new ArrayList<>();
-    public List<Modification> wearOffEffects = new ArrayList<>();//what happens when it wears off
-    public List<Modification> canceledEffects = new ArrayList<>();//what happens when it's cancelled
+    public VisualCondition visual;
+//    public List<Modification> tickEffects = new ArrayList<>();
+//    public List<Modification> wearOffEffects = new ArrayList<>();//what happens when it wears off
+//    public List<Modification> canceledEffects = new ArrayList<>();//what happens when it's cancelled
     public Set<ConditionBlueprint> conflicts = new UnorderedSet<>();//can't exist at the same time, new one cancels the old one
     public Set<ConditionBlueprint> immunizes = new UnorderedSet<>();//can't exist at the same time, old one prevents the new one from being applies
     public Set<ConditionBlueprint> suppresses = new UnorderedSet<>();//can both exist, but only newest one has effect
-
-    public ConditionBlueprint(String name, String verb, int duration, int period, Element baseElement, char overlay, ChangeTable changes,
-                              Collection<Modification> onTick, Collection<Modification> onWearOff, Collection<Modification> onCancel)
+    
+    public ConditionBlueprint(String name, String verb, int duration, int period,
+                              Element baseElement, char overlay, ChangeTable changes, VisualCondition visual)
     {
         super();
         this.name = name;
@@ -53,13 +51,7 @@ public class ConditionBlueprint extends EpiData {
         this.baseElement = baseElement;
         this.overlaySymbol = overlay;
         this.changes = changes;
-        if(onTick != null)
-            tickEffects.addAll(onTick);
-        if(onWearOff != null)
-            wearOffEffects.addAll(onWearOff);
-        if(onCancel != null)
-            canceledEffects.addAll(onCancel);
-
+        this.visual = visual;
     }
     public boolean conflictsWith(ConditionBlueprint check) {
         ConditionBlueprint working = check;
@@ -111,43 +103,43 @@ public class ConditionBlueprint extends EpiData {
     public static OrderedMap<String, ConditionBlueprint> CONDITIONS = OrderedMap.makeMap(
             "Confound", new ConditionBlueprint("confound", "confound$", 3, 0, Element.BLUNT, 'ˀ',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
-                    null, null, null)
+                    null)
             , "Corrode", new ConditionBlueprint("corrode", "corrode$", 4, 1, Element.ACID, '\uffff',
                     ChangeTable.makeCT(null, ~'s', 4.0, Stat.VIGOR, (int)'<', 2.0),
-                    null, null, null)
+                    null)
             , "Disarm", new ConditionBlueprint("disarm", "disarm$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
-                    null, null, null)
+                    null)
             , "Disable", new ConditionBlueprint("disable", "disable$", 2, 1, Element.PIERCING, '\uffff',
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 13.0),
-                    null, null, null)
+                    null)
             , "Electrify", new ConditionBlueprint("electrify", "electrif$$$", 3, 1, Element.LIGHTNING, '⚡',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.STEALTH, (int)'-', 2.0, CalcStat.EVASION, (int)'-', 2.0),
-                    null, null, null)
+                    null)
             , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
-                    null, null, null)
+                    null)
             , "Afflict", new ConditionBlueprint("afflict", "afflict$", 6, 1, Element.POISON, '\uffff',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.5, CalcStat.PRECISION, (int)'-', 3.0),
-                    null, null, null)
+                    null)
             , "Bleed", new ConditionBlueprint("bleed", "cut$", 3, 1, Element.SLASHING, '\uffff',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.DAMAGE, (int)'-', 1.0),
-                    null, null, null)
+                    null)
             , "Chill", new ConditionBlueprint("chill", "chill$", 3, 1, Element.ICE, '▯',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0),
-                    null, null, null)
+                    null)
             , "Curse", new ConditionBlueprint("curse", "curse$", 3, 0, Element.FATEFUL, '\uffff',
                     ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0),
-                    null, null, null)
+                    null)
             , "Ignite", new ConditionBlueprint("ignite", "ignite$", 2, 1, Element.FIRE, 'ˇ',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5),
-                    null, null, null)
+                    null)
             , "Blind", new ConditionBlueprint("blind", "blind$", 3, 0, Element.SHADOW, '\uffff',
                     ChangeTable.makeCT(Stat.SIGHT, (int)'-', 7.0, CalcStat.PRECISION, (int)'-', 3.0),
-                    null, null, null)
+                    new VisualCondition(0.5f, 0.4f, 0.4f))
             , "Wither", new ConditionBlueprint("wither", "wither$", 15, 2, Element.DEATH, '\uffff',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0),
-                    null, null, null)
+                    null)
 
     );
 }
