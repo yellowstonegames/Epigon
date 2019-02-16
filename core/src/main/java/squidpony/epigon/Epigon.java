@@ -303,6 +303,7 @@ public class Epigon extends Game {
                     VisualCondition vis = player.conditions.getAt(i).parent.visual;
                     if(vis != null)
                     {
+                        vis.update();
                         conditionY = vis.lumaChange;
                         conditionCo = vis.orangeChange;
                         conditionCg = vis.greenChange;

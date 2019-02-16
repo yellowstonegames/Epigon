@@ -54,7 +54,12 @@ public enum Vegetable implements ConstantKey {
                         : "@Name decide$ a nice aloe vera spa treatment is the appropriate course of action."
             )),
     FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent"),
-    FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell"),
+    FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell",
+            new Interactable("eat", true, false, (actor, target, level) -> {
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Afflict"), actor));
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Intoxicate"), actor));
+                return "@Name begin$ to... uggh... woah... AsCeNd InTo A hIgHeR pLaNe Of ExIsTeNcE!";
+            })),
     SKULLMALLOW('∝', SColor.CW_ALMOST_WHITE, "a reed that oozes a sticky white sap in the pattern of a skull", "¸≁",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Wither"), actor));

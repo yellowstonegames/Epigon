@@ -1,6 +1,9 @@
 package squidpony.epigon.data;
 
+import com.badlogic.gdx.utils.TimeUtils;
+import squidpony.epigon.Epigon;
 import squidpony.epigon.data.quality.Element;
+import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.UnorderedSet;
 
@@ -140,6 +143,15 @@ public class ConditionBlueprint extends EpiData {
             , "Wither", new ConditionBlueprint("wither", "wither$", 15, 2, Element.DEATH, '\uffff',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0),
                     null)
+            , "Intoxicate", new ConditionBlueprint("intoxicate", "intoxicate$", 6, 0, Element.POISON, '\uffff',
+                    ChangeTable.makeCT(CalcStat.INFLUENCE, (int)'+', 4.0, CalcStat.PRECISION, (int)'-', 8.0, CalcStat.STEALTH, (int)'-', 7.0),
+                    new VisualCondition(1.3f, 1, 1){
+                        @Override
+                        public void update() {
+                            orangeChange = NumberTools.swayRandomized(-123456789, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
+                            greenChange = NumberTools.swayRandomized(987654321, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
+                        }
+                    })
 
     );
 }

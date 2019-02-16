@@ -7,9 +7,9 @@ public class VisualCondition extends EpiData {
     public float lumaChange, orangeChange, greenChange;
     public VisualCondition()
     {
-        lumaChange = 0f;
-        orangeChange = 0f;
-        greenChange = 0f;
+        lumaChange = 1f;
+        orangeChange = 1f;
+        greenChange = 1f;
     }
     public VisualCondition(float luma, float orange, float green)
     {
