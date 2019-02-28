@@ -42,7 +42,16 @@ import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.mapping.LineKit;
-import squidpony.squidmath.*;
+import squidpony.squidmath.Arrangement;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.DiverRNG;
+import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.MathExtras;
+import squidpony.squidmath.NumberTools;
+import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.OrderedSet;
+import squidpony.squidmath.RNG;
+import squidpony.squidmath.StatefulRNG;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

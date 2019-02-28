@@ -40,7 +40,19 @@ public enum Vegetable implements ConstantKey {
     SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture."),
     GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves"),
     RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁"),
-    RASPUTINʼS_SORROW('˛', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death"),
+    RASPUTINʼS_SORROW('˛', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death",
+            new Interactable("eat", true, false, (actor, target, level) -> {
+                if(actor.stats.get(Stat.VIGOR).actual() * 10.0 < actor.stats.get(Stat.VIGOR).max())
+                {
+                    actor.stats.get(Stat.VIGOR).set(actor.stats.get(Stat.VIGOR).max() * 0.4);
+                    return "@Name_s heart race$ as @i gobble$ down the Rasputin's sorrow, and @my wounds begin to close!";
+                }
+                else 
+                {
+                    actor.stats.get(Stat.VIGOR).multiplyActual(0.5);
+                    return "@Name eat$ the Rasputin's sorrow, only to feel agonizing pain!";
+                }
+            })),
     DESERT_SAGE('¸', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass"),
     ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts",
             new Interactable("eat", true, false, (actor, target, level) ->
@@ -53,7 +65,19 @@ public enum Vegetable implements ConstantKey {
                         ? "@Name rub$ aloe vera sap on @my skin, soothing @my burns." 
                         : "@Name decide$ a nice aloe vera spa treatment is the appropriate course of action."
             )),
-    FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent"),
+    FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent", new Interactable(
+            "eat", true, false, (actor, target, level) -> {
+                if(actor.nextBoolean())
+                {
+                    actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Afflict"), actor));
+                    return "@Name eat$ the fragrant clove-hazel, only to find part of it was dog poo...";
+                }
+                else
+                {
+                    actor.stats.get(Stat.REST).addActual(20);
+                    return "@Name eat$ the fragrant clove-hazel and feel$ a surge of energy!";
+                }
+    })),
     FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Afflict"), actor));
@@ -64,8 +88,17 @@ public enum Vegetable implements ConstantKey {
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Wither"), actor));
                 return "@Name turn$ deathly pale after eating the skullmallow, as one might expect.";})),
-    NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~"),
-    BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey"),
+    NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~", new Interactable("contemplate",
+            false, false, (actor, target, level) -> {
+        actor.stats.get(Stat.SANITY).addActual(5);
+        return "@Name pause$ to marvel at the perfection of the noble lotus, and calm$ down.";
+    })),
+    BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey", new Interactable(
+            "chew", true, false, (actor, target, level) -> {
+        actor.stats.get(Stat.SLEEP).addActual(8);
+        actor.stats.get(Stat.HUNGER).addActual(2);
+        return "@Name chew$ on the tasty, tasty blue sweetleaf and feel$ more awake!";
+    })),
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
     LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~",
             new Interactable("wear", false, false, (actor, target, level) ->

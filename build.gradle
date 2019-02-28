@@ -9,11 +9,11 @@ buildscript {
 
 allprojects {
     apply plugin: "java"
-    sourceCompatibility = 11
+    sourceCompatibility = 8
     version = '1.0'
     ext {
         appName = "Epigon"
-        squidlibVersion = 'b795cdc1e1'
+        squidlibVersion = '2e19d31364'//'b795cdc1e1'
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
         aiVersion = '1.8.1'
