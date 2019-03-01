@@ -15,7 +15,9 @@ public enum Wood implements Material {
     WALNUT(SColor.WALNUT, SColor.WILLOW_GREY),
     KOA(SColor.FLATTERY_BROWN, SColor.DB_SEAL_BROWN, 150, 200),
     WILLOW(SColor.WILLOW_LEAVES_UNDERSIDE, SColor.WILLOW_DYE, 80, 80),
-    MANZANITA(SColor.RUSSET, SColor.GREEN_BAMBOO, 90, 300);
+    MANZANITA(SColor.RUSSET, SColor.GREEN_BAMBOO, 90, 300),
+    OAK(SColor.GOLDEN_OAK, SColor.WHITE_OAK, 90, 90),
+    APPLE(SColor.BRUSHWOOD_DYED, SColor.SAPPANWOOD_INCENSE, 110, 140);
 
     public Color front, back;
     public int value; //base material is 100

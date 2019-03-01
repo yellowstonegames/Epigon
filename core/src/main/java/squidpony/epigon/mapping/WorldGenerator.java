@@ -1,12 +1,16 @@
 package squidpony.epigon.mapping;
 
 import squidpony.StringKit;
-import squidpony.epigon.data.*;
+import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.RecipeMixer;
+import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
+import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.playground.HandBuilt;
+import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
 import squidpony.squidgrid.mapping.DungeonGenerator;
@@ -28,6 +32,7 @@ import java.util.stream.Stream;
 public class WorldGenerator {
 
     public static final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
+    public static final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
@@ -45,6 +50,15 @@ public class WorldGenerator {
                 if (!vegetablesByTerrain.containsKey(terrains.charAt(i)))
                     vegetablesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(vegetables[v]));
                 vegetablesByTerrain.get(terrains.charAt(i)).add(vegetables[v]);
+            }
+        }
+        Tree[] trees = Tree.ALL;
+        for (int t = 0; t < trees.length; t++) {
+            String terrains = trees[t].terrains();
+            for (int i = 0; i < terrains.length(); i++) {
+                if (!treesByTerrain.containsKey(terrains.charAt(i)))
+                    treesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(trees[t]));
+                treesByTerrain.get(terrains.charAt(i)).add(trees[t]);
             }
         }
     }
@@ -211,7 +225,7 @@ public class WorldGenerator {
 
             char[][] dungeonChars = gen.getDungeon();
             floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
-
+            Direction[] dirs = new Direction[8];
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     char c = dungeonChars[x][y];
@@ -231,6 +245,8 @@ public class WorldGenerator {
                         case ',':
                             placeWater(tile);
                             break;
+                        case '&': // should never occur naturally
+                            break;
                         default:
                             tile.floor = RecipeMixer.buildPhysical(tile.floor); // Copy out the old floor before modifying it
                             tile.floor.symbol = eMap.altSymbolOf(c);
@@ -241,7 +257,20 @@ public class WorldGenerator {
                     if(vegetablesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(5) == 0)
                         // 1 in 32 chance
                         tile.contents.add(RecipeMixer.buildVegetable(vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-
+                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
+                        Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
+                        tree.shuffle(Direction.OUTWARDS, dirs);
+                        for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
+                            if(eMap.inBounds(x + dirs[i].deltaX, y + dirs[i].deltaY)
+                                    && (dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] == '.' || dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] == '"'))
+                            {
+                                dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] = '&';
+                                eMap.contents[x + dirs[i].deltaX][y+ dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
+                                eMap.contents[x + dirs[i].deltaX][y+ dirs[i].deltaY].contents.add(tree.inventory.remove(0));
+                            }
+                        }
+                        tile.contents.add(tree);
+                    }
                 }
             }
         }
@@ -809,16 +838,33 @@ public class WorldGenerator {
                 castle.garden, castle.pond, castle.pondBank, outside
         })
         {
+            Direction[] dirs = new Direction[8];
+            EpiTile tile;
             for(Coord c : area) {
                 float noise = FastNoise.instance.getSimplex(c.x * 1.6f, c.y * 1.6f);
                 if (noise > -0.1f && noise < 0.35f) {
-                    if(map.contents[c.x][c.y].floor.symbol == '.') 
-                        map.contents[c.x][c.y].floor = RecipeMixer.buildPhysical(handBuilt.grass);
-                    if (map.contents[c.x][c.y].floor.next(3) == 0 && vegetablesByTerrain.containsKey(map.contents[c.x][c.y].floor.symbol)) {
+                    tile = map.contents[c.x][c.y];
+                    if(tile.floor.symbol == '.') 
+                        tile.floor = RecipeMixer.buildPhysical(handBuilt.grass);
+                    if (tile.floor.next(3) == 0 && vegetablesByTerrain.containsKey(tile.floor.symbol)) {
                         // 1 in 8 chance
-                        map.contents[c.x][c.y].contents.add(RecipeMixer.buildVegetable(
-                                vegetablesByTerrain.get(map.contents[c.x][c.y].floor.symbol).randomItem(map.contents[c.x][c.y].floor)));
+                        tile.contents.add(RecipeMixer.buildVegetable(
+                                vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
                     }
+                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
+                        Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
+                        tree.shuffle(Direction.OUTWARDS, dirs);
+                        for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
+                            if(map.inBounds(c.x + dirs[i].deltaX, c.y + dirs[i].deltaY)
+                                    && (map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '.' || map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '¸'))
+                            {
+                                map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
+                                map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].contents.add(tree.inventory.remove(0));
+                            }
+                        }
+                        tile.contents.add(tree);
+                    }
+
                 }
             }
 

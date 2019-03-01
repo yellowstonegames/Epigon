@@ -102,7 +102,15 @@ public enum Vegetable implements ConstantKey {
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
     LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~",
             new Interactable("wear", false, false, (actor, target, level) ->
-                    "@Name put$ the sopping-wet lordʼs lily on @my head@s! @Name@m the lord@s of the nitwits!"));
+                    "@Name put$ the sopping-wet lordʼs lily on @my head@s! @Name@m the lord@s of the nitwits!")),
+    GHOST_ACORN('˳', SColor.AURORA_CELADON, "an acorn that seems almost weightless", "¸",
+            new Interactable("eat", true, false, (actor, target, level) -> {
+                actor.stats.get(Stat.HUNGER).addActual(-1);
+                return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
+    LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
+            new Interactable("eat", true, false, (actor, target, level) -> {
+                actor.stats.get(Stat.HUNGER).addActual(10);
+                return "@Name eat$ the lobster apple, ignoring the bits of rind in @my teeth.";}));
     
     private final Color color;
     private final char symbol;
@@ -121,7 +129,7 @@ public enum Vegetable implements ConstantKey {
         prettyName = Utilities.lower(name(), "_").replace('ˉ', '-');
         this.terrains = terrains;
         this.interactables = interactables == null ? new Interactable[0] : interactables;
-        hash = ConstantKey.precomputeHash("creature.Vegetable", ordinal());
+        hash = ConstantKey.precomputeHash("material.Vegetable", ordinal());
     }
     public final long hash;
     @Override

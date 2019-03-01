@@ -3,14 +3,11 @@ package squidpony.epigon.data;
 import com.badlogic.gdx.graphics.Colors;
 import squidpony.Maker;
 import squidpony.Messaging;
-import squidpony.epigon.data.quality.Vegetable;
-import squidpony.squidgrid.gui.gdx.Radiance;
-import squidpony.epigon.data.quality.Inclusion;
-import squidpony.epigon.data.quality.Material;
-import squidpony.epigon.data.quality.Stone;
+import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.GDXMarkup;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
 
@@ -228,8 +225,26 @@ public class RecipeMixer {
         blueprint.rarity = Rating.SLIGHT;
         blueprint.symbol = material.symbol();
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(2));
-        if(material.interactables().length > 0) 
+        if(material.interactables().length > 0)
             blueprint.interactableData = Maker.makeList(material.interactables());
+        return blueprint;
+    }
+
+    public static Physical buildTree(Tree material) {
+        Physical blueprint = new Physical();
+        blueprint.color = material.color().toFloatBits();
+        blueprint.name = material.prettyName();
+        blueprint.baseValue = material.lumber() == null ? 50 : material.lumber().value;
+        blueprint.rarity = Rating.SLIGHT;
+        blueprint.symbol = material.symbol();
+        blueprint.attached = true;
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(100));
+        blueprint.stats.put(Stat.TOUGHNESS, new LiveValue(20 + (material.lumber() == null ? 100 : material.lumber().hardness)));
+        if(material.fruit() != null) {
+            for (int i = blueprint.next(3); i < 4; i++) {
+                blueprint.inventory.add(buildVegetable(material.fruit()));
+            }
+        }
         return blueprint;
     }
 
