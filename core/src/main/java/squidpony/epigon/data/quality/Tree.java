@@ -20,7 +20,10 @@ import squidpony.squidgrid.gui.gdx.SColor;
 public enum Tree implements ConstantKey {
 
     OAK('¥', SColor.GOLDEN_OAK, "A gnarled tree that could be bearing some acorns", Wood.OAK, Vegetable.GHOST_ACORN),
-    APPLE('¥', SColor.BRUSHWOOD_DYED, "A small tree bearing bright-red apples", Wood.OAK, Vegetable.LOBSTER_APPLE);    
+    PECAN('¥', SColor.TAN, "A tall tree with some little green nuts in it", Wood.PECAN, Vegetable.RAW_PECAN),
+    MAPLE('¥', SColor.CLOVE_BROWN, "A tree with some beautiful leaves and thick branches", Wood.MAPLE, null),
+    WALNUT('¥', SColor.WALNUT, "A large tree with dark wood and some small round nuts high up on it", Wood.WALNUT, Vegetable.RAW_WALNUT),
+    APPLE('¥', SColor.BRUSHWOOD_DYED, "A small tree bearing bright-red apples", Wood.OAK, Vegetable.LOBSTER_APPLE);
     private final Color color;
     private final char symbol;
     private final String description;

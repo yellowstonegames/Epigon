@@ -107,6 +107,8 @@ public enum Vegetable implements ConstantKey {
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(-1);
                 return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
+    RAW_WALNUT('˳', SColor.AURORA_DUSTY_GREEN, "an unripe, very hard walnut; inedible", ""),
+    RAW_PECAN('˳', SColor.AURORA_APPLE_GREEN, "an unripe pecan in a hard shell; inedible", ""),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(10);
