@@ -5,17 +5,16 @@ import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
-import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.*;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -235,7 +234,7 @@ public class HandBuilt {
 //        cookSteak.name = "cook steak";
 //        cookSteak.maxTargets = 1;
 //        cookSteak.mustHaveSkillRatings.put(Skill.COOKING, Rating.TYPICAL);
-//        cookSteak.mustPossess = Collections.singletonList(Collections.singletonMap(rawMeat, 1));
+//        cookSteak.mustPossess = Maker.makeList(Collections.singletonMap(rawMeat, 1));
 //        cookSteak.validTargets.add(rawMeat);
     }
 
@@ -401,15 +400,15 @@ public class HandBuilt {
 
     private void initDoors() {
         openDoor = new Modification();
-        openDoor.countsAsLost = Collections.singleton(baseClosedDoor);
-        openDoor.countsAsGained = Collections.singleton(baseOpenDoor);
+        openDoor.countsAsLost = Maker.makeUOS(baseClosedDoor);
+        openDoor.countsAsGained = Maker.makeUOS(baseOpenDoor);
         openDoor.symbol = '/';
         openDoor.large = false;
         openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(0.0));
 
         closeDoor = new Modification();
-        closeDoor.countsAsLost = Collections.singleton(baseOpenDoor);
-        closeDoor.countsAsGained = Collections.singleton(baseClosedDoor);
+        closeDoor.countsAsLost = Maker.makeUOS(baseOpenDoor);
+        closeDoor.countsAsGained = Maker.makeUOS(baseClosedDoor);
         closeDoor.symbol = '+';
         closeDoor.large = true;
         closeDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(1.0));
@@ -473,7 +472,7 @@ public class HandBuilt {
         Physical shirtBlueprint = Physical.makeBasic("shirt", 'τ', SColor.BRASS);
         shirtBlueprint.rarity = Rating.TYPICAL;
         shirtBlueprint.wearableData = new Wearable();
-        shirtBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+        shirtBlueprint.wearableData.slotsUsed.addAll(Maker.makeList(
             ClothingSlot.TORSO,
             ClothingSlot.NECK,
             ClothingSlot.LEFT_SHOULDER,
@@ -486,7 +485,7 @@ public class HandBuilt {
         Physical pantsBlueprint = Physical.makeBasic("pants", '∏', SColor.PINE_GREEN);
         pantsBlueprint.rarity = Rating.TYPICAL;
         pantsBlueprint.wearableData = new Wearable();
-        pantsBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+        pantsBlueprint.wearableData.slotsUsed.addAll(Maker.makeList(
             ClothingSlot.WAIST,
             ClothingSlot.LEFT_LEG,
             ClothingSlot.RIGHT_LEG
@@ -497,7 +496,7 @@ public class HandBuilt {
         Physical glovesBlueprint = Physical.makeBasic("gloves", '∏', SColor.MOUSY_WISTERIA);
         glovesBlueprint.rarity = Rating.TYPICAL;
         glovesBlueprint.wearableData = new Wearable();
-        glovesBlueprint.wearableData.slotsUsed.addAll(Arrays.asList(
+        glovesBlueprint.wearableData.slotsUsed.addAll(Maker.makeList(
             ClothingSlot.LEFT_HAND,
             ClothingSlot.RIGHT_HAND
         ));
@@ -530,7 +529,7 @@ public class HandBuilt {
 
     public Modification makeAlive() {
         Modification liven = new Modification();
-        liven.possiblePrefix = Arrays.asList("living", "animated");
+        liven.possiblePrefix = Maker.makeList("living", "animated");
         liven.symbol = ((char) ('s' | Epigon.BOLD | Epigon.ITALIC));
         liven.large = true;
 
@@ -555,8 +554,8 @@ public class HandBuilt {
 
     public Modification makeMeats() {
         Modification meaten = new Modification();
-        meaten.possibleSuffix = Collections.singletonList("meat");
-        meaten.countsAs = Collections.singleton(rawMeat);
+        meaten.possibleSuffix = Maker.makeList("meat");
+        meaten.countsAs = Maker.makeUOS(rawMeat);
         meaten.interactable = rawMeat.interactableData;
         meaten.symbol = 'ₘ';
         meaten.large = false;

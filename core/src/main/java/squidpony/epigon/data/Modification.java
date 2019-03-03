@@ -2,19 +2,14 @@ package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
-import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.data.trait.Profession;
-import squidpony.squidmath.CrossHash;
-import squidpony.squidmath.EnumOrderedMap;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.OrderedSet;
+import squidpony.squidgrid.gui.gdx.Radiance;
+import squidpony.squidmath.*;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a modification to another object.
@@ -31,18 +26,18 @@ import java.util.Set;
 public class Modification extends EpiData {
 
     // Only one string out of the set of prefixes and suffixes should be used
-    public List<String> possiblePrefix = new ArrayList<>();
-    public List<String> possibleSuffix = new ArrayList<>();
-    public List<String> possibleAliases;
-    public List<String> possibleAliasesAdd = new ArrayList<>();
+    public ArrayList<String> possiblePrefix = new ArrayList<>();
+    public ArrayList<String> possibleSuffix = new ArrayList<>();
+    public ArrayList<String> possibleAliases;
+    public ArrayList<String> possibleAliasesAdd = new ArrayList<>();
     
     // Modification might change the effective hierarchy
     public Physical parent;
     public Boolean parentBecomesNull; // For something that should no longer be considered a subset of some other thing
     public Boolean retainPreviousParent; // When true the previous parent gets added to the countsAs list
-    public Set<Physical> countsAs;
-    public Set<Physical> countsAsGained;
-    public Set<Physical> countsAsLost;
+    public UnorderedSet<Physical> countsAs;
+    public UnorderedSet<Physical> countsAsGained;
+    public UnorderedSet<Physical> countsAsLost;
 
     public Boolean attached;
     public Boolean generic;
@@ -59,28 +54,25 @@ public class Modification extends EpiData {
 
     public Boolean large;
 
-    public List<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used
-    public List<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
-
-    public List<Modification> requiredModifications;
-    public List<Modification> requiredModificationsAdditive;
-    public List<Modification> requiredModificationsSubtractive;
-
-    public List<Modification> optionalModifications;
-    public List<Modification> optionalModificationsAdditive;
-    public List<Modification> optionalModificationsSubtractive;
+    public ArrayList<Modification> whenUsedAsMaterial; // TODO - this might not make sense when more than one material is used
+    public ArrayList<Modification> whenUsedAsMaterialAdditive; // In addition to the recipe's result
+    public ArrayList<Modification> requiredModifications;
+    public ArrayList<Modification> requiredModificationsAdditive;
+    public ArrayList<Modification> requiredModificationsSubtractive;
+    public ArrayList<Modification> optionalModifications;
+    public ArrayList<Modification> optionalModificationsAdditive;
+    public ArrayList<Modification> optionalModificationsSubtractive;
 
 //    public OrderedMap<Element, LiveValue> passthroughResistances = new OrderedMap<>(); // TODO - this needs to be different than Element probably
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>();
     public OrderedMap<Element, LiveValueModification> elementDamageMultiplierChanges = new OrderedMap<>();
 
-    public List<Condition> conditions;
-    public List<Condition> conditionsAdditive;
-    public List<Condition> conditionsSubtractive;
-
-    public List<Condition> optionalConditions;
-    public List<Condition> optionalConditionsAdditive;
-    public List<Condition> optionalConditionsSubtractive;
+    public ArrayList<Condition> conditions;
+    public ArrayList<Condition> conditionsAdditive;
+    public ArrayList<Condition> conditionsSubtractive;
+    public ArrayList<Condition> optionalConditions;
+    public ArrayList<Condition> optionalConditionsAdditive;
+    public ArrayList<Condition> optionalConditionsSubtractive;
 
     public OrderedMap<ConstantKey, LiveValue> stats = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
     public OrderedMap<ConstantKey, LiveValueModification> statChanges = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
@@ -88,43 +80,43 @@ public class Modification extends EpiData {
     public OrderedMap<ConstantKey, RatingValueModification> statProgressionChanges = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
     public OrderedSet<ChangeTable> statEffectsAdditive = new OrderedSet<>(CrossHash.identityHasher);
     public OrderedSet<ChangeTable> statEffectsSubtractive = new OrderedSet<>(CrossHash.identityHasher);
-    public List<Physical> inventory;
-    public List<Physical> inventoryAdditive;
-    public List<Physical> inventorySubtractive; // Removes everything that counts as an item in this list
-    public List<Physical> optionalInventory;
-    public List<Physical> optionalInventoryAdditive;
-    public List<Physical> optionalInventorySubtractive;
+    public ArrayList<Physical> inventory;
+    public ArrayList<Physical> inventoryAdditive;
+    public ArrayList<Physical> inventorySubtractive; // Removes everything that counts as an item in this list
+    public ArrayList<Physical> optionalInventory;
+    public ArrayList<Physical> optionalInventoryAdditive;
+    public ArrayList<Physical> optionalInventorySubtractive;
 
     // When destroyed, note that probability table entries can only be fully overwritten, not modified in place
-    public List<WeightedTableWrapper<Physical>> physicalDrops;
-    public EnumOrderedMap<Element, List<WeightedTableWrapper<Physical>>> elementDrops;
+    public ArrayList<WeightedTableWrapper<Physical>> physicalDrops;
+    public EnumOrderedMap<Element, ArrayList<WeightedTableWrapper<Physical>>> elementDrops;
 
     public OrderedMap<Skill, OrderedMap<Rating, String>> identifications;
     public OrderedMap<Skill, OrderedMap<Rating, String>> identificationsAdditive;
 
-    public EnumOrderedMap<Rating, List<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class); // Only for blueprints
-    public EnumOrderedMap<Rating, List<Modification>> rarityModificationsAdditive = new EnumOrderedMap<>(Rating.class); // Only for blueprints
+    public EnumOrderedMap<Rating, ArrayList<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class); // Only for blueprints
+    public EnumOrderedMap<Rating, ArrayList<Modification>> rarityModificationsAdditive = new EnumOrderedMap<>(Rating.class); // Only for blueprints
 
     // Creature changes
     public Creature creature; // Become a new creature (or become one for the first time)
     public Boolean removeCreature; // No longer a creature
     public OrderedMap<Skill, RatingValueModification> skillChanges = new OrderedMap<>();
     public OrderedMap<Skill, RatingValueModification> skillProgressionChanges = new OrderedMap<>();
-    public List<Ability> abilities;
-    public List<Ability> abilitiesAdditive;
-    public List<Ability> abilitiesSubtractive;
+    public ArrayList<Ability> abilities;
+    public ArrayList<Ability> abilitiesAdditive;
+    public ArrayList<Ability> abilitiesSubtractive;
 
-    public List<RecipeBlueprint> knownRecipesAdditive; // Can only gain known recipes, never lose them
+    public ArrayList<RecipeBlueprint> knownRecipesAdditive; // Can only gain known recipes, never lose them
 
-    public List<Profession> professionsAdditive; // Can only gain professions, never lose them
+    public ArrayList<Profession> professionsAdditive; // Can only gain professions, never lose them
 
     // Ammunition changes
-    public List<ConditionBlueprint> ammunitionCauses;
-    public List<ConditionBlueprint> ammunitionCausesAdditive;
-    public List<ConditionBlueprint> ammunitionCausesSubtractive;
-    public List<Physical> ammunitionLaunchers;
-    public List<Physical> ammunitionLaunchersAdditive;
-    public List<Physical> ammunitionLaunchersSubtractive;
+    public ArrayList<ConditionBlueprint> ammunitionCauses;
+    public ArrayList<ConditionBlueprint> ammunitionCausesAdditive;
+    public ArrayList<ConditionBlueprint> ammunitionCausesSubtractive;
+    public ArrayList<Physical> ammunitionLaunchers;
+    public ArrayList<Physical> ammunitionLaunchersAdditive;
+    public ArrayList<Physical> ammunitionLaunchersSubtractive;
     public Boolean ammunitionThrowable;
     public Double ammunitionDistance;
     public Double ammunitionDistanceAdditive;
@@ -139,18 +131,18 @@ public class Modification extends EpiData {
     // Container changes
     public Double capacity;
     public Double capacityDelta;
-    public List<Physical> contents;
-    public List<Physical> contentsAdditive;
-    public List<Physical> contentsSubtractive;
+    public ArrayList<Physical> contents;
+    public ArrayList<Physical> contentsAdditive;
+    public ArrayList<Physical> contentsSubtractive;
 
     // Grouping changes
     public Integer quantity;
     public Integer quantityDelta;
 
     // Interactable changes
-    public List<Interactable> interactable;
-    public List<Interactable> interactableAdditive;
-    public List<Interactable> interactableSubtractive;
+    public ArrayList<Interactable> interactable;
+    public ArrayList<Interactable> interactableAdditive;
+    public ArrayList<Interactable> interactableSubtractive;
 
     // Wearable changes
     public Boolean worn;
@@ -168,10 +160,10 @@ public class Modification extends EpiData {
 //    public Integer wieldableRangeOverwrite;
 //    public Integer wieldableRangeDelta;
     public Weapon weaponData;
-    public List<String> weaponStatusesAdditive;
-    public List<String> weaponStatusesSubtractive;
-    public List<String> weaponManeuversAdditive;
-    public List<String> weaponManeuversSubtractive;
+    public ArrayList<String> weaponStatusesAdditive;
+    public ArrayList<String> weaponStatusesSubtractive;
+    public ArrayList<String> weaponManeuversAdditive;
+    public ArrayList<String> weaponManeuversSubtractive;
 
     public static Modification makeBasicChangeTable(ChangeTable changes)
     {

@@ -1,19 +1,19 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
-import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.*;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidmath.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Base class for all instantiated physical objects in the world.
@@ -54,15 +54,15 @@ public class Physical extends EpiData {
     public boolean unique; // should only have one in existence of exactly this type
     public boolean buildingBlock; // can be used as a building block
 
-    public List<String> possibleAliases = new ArrayList<>(); // One of these is picked when instantiated (maybe choice locked by world region?)
+    public ArrayList<String> possibleAliases = new ArrayList<>(); // One of these is picked when instantiated (maybe choice locked by world region?)
 
     public double baseValue;
     public boolean blocking;
     
-    public List<Modification> whenUsedAsMaterial = new ArrayList<>();
-    public List<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
-    public List<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
-    public List<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
+    public ArrayList<Modification> whenUsedAsMaterial = new ArrayList<>();
+    public ArrayList<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
+    public ArrayList<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
+    public ArrayList<Modification> optionalModifications = new ArrayList<>(); // Zero or more of these may be applied on instantiation
 
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>(); // The change to incoming damage
 
@@ -73,19 +73,19 @@ public class Physical extends EpiData {
     public OrderedMap<ConstantKey, LiveValue> stats = new OrderedMap<ConstantKey, LiveValue>(32, 0.5f, ConstantKey.ConstantKeyHasher.instance);
     public OrderedSet<ChangeTable> statEffects = new OrderedSet<>(8, CrossHash.identityHasher);
     public OrderedMap<ConstantKey, Rating> statProgression = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
-    public List<Physical> inventory = new ArrayList<>();
-    public List<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
+    public ArrayList<Physical> inventory = new ArrayList<>();
+    public ArrayList<Physical> optionalInventory = new ArrayList<>(); // For use when this is a blueprint item
 
     /**
      * The list of physical objects it drops on destruction no matter what the damage source.
      */
-    public List<WeightedTableWrapper<Physical>> physicalDrops = new ArrayList<>();
+    public ArrayList<WeightedTableWrapper<Physical>> physicalDrops = new ArrayList<>();
 
     /**
      * A list of what the item might drop when a given element is used on it. This is in addition to
      * the regular drop table.
      */
-    public OrderedMap<Element, List<WeightedTableWrapper<Physical>>> elementDrops = new OrderedMap<>();
+    public OrderedMap<Element, ArrayList<WeightedTableWrapper<Physical>>> elementDrops = new OrderedMap<>();
 
     /**
      * If the given skill is possessed then a given string will be presented as the identification.
@@ -104,7 +104,7 @@ public class Physical extends EpiData {
      * the compounded application of all rarity levels up to and including that level's
      * modification.
      */
-    public EnumOrderedMap<Rating, List<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class);
+    public EnumOrderedMap<Rating, ArrayList<Modification>> rarityModifications = new EnumOrderedMap<>(Rating.class);
 
     public Creature creatureData;
 
@@ -113,7 +113,7 @@ public class Physical extends EpiData {
     public Ammunition ammunitionData;
     public Container containerData;
     public Grouping groupingData;
-    public List<Interactable> interactableData;
+    public ArrayList<Interactable> interactableData;
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
@@ -264,28 +264,28 @@ public class Physical extends EpiData {
                     break;
                 case 1:
                     if (!creatureData.equippedBySlot.containsKey(WieldSlot.RIGHT_HAND)) {
-                        equip(item, Collections.singletonList(WieldSlot.RIGHT_HAND));
-                    } else if (creatureData.equippedBySlot.containsKey(WieldSlot.LEFT_HAND)) {
+                        equip(item, Maker.makeList(WieldSlot.RIGHT_HAND));
+                    } else if (!creatureData.equippedBySlot.containsKey(WieldSlot.LEFT_HAND)) {
                         if (nextBoolean()) {
-                            equip(item, Collections.singletonList(WieldSlot.RIGHT_HAND));
+                            equip(item, Maker.makeList(WieldSlot.RIGHT_HAND));
                         } else {
-                            equip(item, Collections.singletonList(WieldSlot.LEFT_HAND));
+                            equip(item, Maker.makeList(WieldSlot.LEFT_HAND));
                         }
                     } else {
-                        equip(item, Collections.singletonList(WieldSlot.LEFT_HAND));
+                        equip(item, Maker.makeList(WieldSlot.LEFT_HAND));
                     }
                     break;
                 case 2:
-                    equip(item, Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND));
+                    equip(item, Maker.makeList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND));
                     break;
                 case 3:
-                        equip(item, Collections.singletonList(WieldSlot.HEAD));
+                        equip(item, Maker.makeList(WieldSlot.HEAD));
                     break;
                 case 4:
-                        equip(item, Collections.singletonList(WieldSlot.NECK));
+                        equip(item, Maker.makeList(WieldSlot.NECK));
                     break;
                 case 5:
-                        equip(item, Arrays.asList(WieldSlot.LEFT_FOOT, WieldSlot.RIGHT_FOOT));
+                        equip(item, Maker.makeList(WieldSlot.LEFT_FOOT, WieldSlot.RIGHT_FOOT));
                     break;
             }
         }
@@ -298,7 +298,7 @@ public class Physical extends EpiData {
      * @param item The item to equip
      * @param slots All the slots that will be filled when the item is equipped
      */
-    public void equip(Physical item, List<BodySlot> slots) {
+    public void equip(Physical item, ArrayList<BodySlot> slots) {
         if (creatureData == null) {
             System.err.println("Can't equip " + item.name + " on " + name);
             return;
@@ -331,11 +331,12 @@ public class Physical extends EpiData {
         if (item.wearableData != null) {
             unequip(item.wearableData.slotsUsed);
         }
+        
         if (item.weaponData != null && creatureData != null) {
             unequip(Arrays.stream(WieldSlot.ALL)
                 .filter(ws -> item.equals(creatureData.equippedBySlot.get(ws)))
-                .collect(Collectors.toList()));
-        }
+                .<ArrayList<BodySlot>>collect(ArrayList::new, ArrayList::add, ArrayList::addAll));
+        } 
     }
 
     /**
@@ -343,12 +344,12 @@ public class Physical extends EpiData {
      * back into inventory.
      *
      * @param slots All the slots that will be filled when the item is equipped
-     * @return a List of the items that were unequipped
+     * @return an ArrayList of the items that were unequipped
      */
-    public List<Physical> unequip(List<BodySlot> slots) {
+    public ArrayList<Physical> unequip(ArrayList<BodySlot> slots) {
         if (creatureData == null) {
             System.err.println("Can't unequip from the Physical " + name + "; it is not a creature");
-            return Collections.emptyList();
+            return new ArrayList<>(0);
         }
 
         // Make sure all slots that are used by the same thing as the request slot removals are also cleared
@@ -363,7 +364,7 @@ public class Physical extends EpiData {
             .filter(Objects::nonNull)
             .forEach(totalSlots::addAll);
 
-        List<Physical> removed = new ArrayList<>(totalSlots.size());
+        ArrayList<Physical> removed = new ArrayList<>(totalSlots.size());
 
         UnorderedSet<Physical> removing = new UnorderedSet<>(6);
         for (BodySlot ws : totalSlots) {

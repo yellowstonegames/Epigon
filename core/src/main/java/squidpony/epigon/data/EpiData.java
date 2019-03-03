@@ -17,8 +17,7 @@ import java.io.Serializable;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is MiniMover64RNG from Sarong. It is very, very fast and passes 32TB of PractRand, but probably
- * has statistical issues if its output bits are reversed (I don't know when this would ever happen in Epigon).
+ * algorithm this uses is MiniMover64RNG from Sarong. It is very, very fast and passes 32TB of PractRand.
  * About 33 million seeds are possible for this variant of MiniMover64RNG, which have a chance of being on different
  * subcycles with periods from 1,048,575 to 18,446,744,073,709,551,615. By restricting the seeds to a range that is
  * known to have no cycles shorter than a million states, seeding gets to be much faster.
@@ -105,17 +104,17 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
      * @return the current internal state of this object.
      */
     @Override
-    public long getState() {
+    public final long getState() {
         return state;
     }
 
     /**
-     * Set the current internal state of this StatefulRandomness with a long.
+     * Set the current internal state of this StatefulRandomness with a long, which must not be 0.
      *
-     * @param state a 64-bit long. You can safely pass 0 here, or any long.
+     * @param state a 64-bit long. You must not pass 0 here.
      */
     @Override
-    public void setState(long state) {
+    public final void setState(long state) {
         this.state = state;
     }
 

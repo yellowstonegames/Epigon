@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.ArrayTools;
+import squidpony.Maker;
 import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
@@ -42,16 +43,7 @@ import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.mapping.LineKit;
-import squidpony.squidmath.Arrangement;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.DiverRNG;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.MathExtras;
-import squidpony.squidmath.NumberTools;
-import squidpony.squidmath.OrderedMap;
-import squidpony.squidmath.OrderedSet;
-import squidpony.squidmath.RNG;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -677,7 +669,7 @@ public class Epigon extends Game {
 
     private void runTurn() {
         OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
-        Set<Coord> ps = Collections.singleton(player.location);
+        UnorderedSet<Coord> ps = Maker.makeUOS(player.location);
         Coord[] pa = new Coord[]{player.location};
         ArrayList<Coord> path = new ArrayList<>(9);
         for (int i = 0; i < creatures.size(); i++) {
@@ -1225,7 +1217,7 @@ public class Epigon extends Game {
                 creatures.remove(target.location);
                 map.contents[targetX][targetY].remove(target);
                 if (ao.crit) {
-                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, new ArrayList<>(0)).stream())
                         .map(table -> {
                             int quantity = table.quantity();
                             Physical p = RecipeMixer.buildPhysical(table.random());
@@ -1252,7 +1244,7 @@ public class Epigon extends Game {
                     }
                     message("You [Blood]brutally[] defeat the " + target.name + " with " + -ao.actualDamage + " " + element.styledName + " damage!");
                 } else {
-                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, Collections.emptyList()).stream())
+                    Stream.concat(target.physicalDrops.stream(), target.elementDrops.getOrDefault(element, new ArrayList<>()).stream())
                             .map(table -> {
                                 int quantity = table.quantity();
                                 Physical p = RecipeMixer.buildPhysical(table.random());
@@ -1838,7 +1830,7 @@ public class Epigon extends Game {
                     break;
                 case DROP:
                     message("Dropping all held items");
-                    for (Physical dropped : player.unequip(Arrays.asList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND))) {
+                    for (Physical dropped : player.unequip(Maker.makeList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND))) {
                         for (int i = 0, offset = player.next(3); i < 8; i++) {
                             Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
                             if (map.inBounds(c) && map.lighting.fovResult[c.x][c.y] > 0) {

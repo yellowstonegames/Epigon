@@ -3,7 +3,7 @@ package squidpony.epigon.data;
 /**
  * Created by Tommy Ettinger on 2/9/2019.
  */
-public class VisualCondition extends EpiData {
+public class VisualCondition {
     public float lumaChange, orangeChange, greenChange;
     public VisualCondition()
     {

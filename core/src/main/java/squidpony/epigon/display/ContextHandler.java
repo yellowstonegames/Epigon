@@ -20,7 +20,6 @@ import squidpony.squidmath.EnumOrderedSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -311,7 +310,7 @@ public class ContextHandler {
         } else {
             switch (mode) {
                 case INVENTORY:
-                    contextInventory(Collections.emptyList());
+                    contextInventory(new ArrayList<>(0));
                     break;
                 case MESSAGE:
                     message("");

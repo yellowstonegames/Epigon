@@ -13,7 +13,6 @@ import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,12 +64,12 @@ public class RecipeMixer {
         return recipe;
     }
 
-    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
+    public static ArrayList<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst) {
         return mix(recipe, consumed, catalyst, recipe);
     }
 
-    public static List<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, IRNG rng) {
-        List<Physical> result = new ArrayList<>();
+    public static ArrayList<Physical> mix(Recipe recipe, List<Physical> consumed, List<Physical> catalyst, IRNG rng) {
+        ArrayList<Physical> result = new ArrayList<>();
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
             Stream.of(consumed.stream(), catalyst.stream())
@@ -91,19 +90,19 @@ public class RecipeMixer {
         return result;
     }
 
-    public static List<Physical> mix(Recipe recipe, Material material) {
+    public static ArrayList<Physical> mix(Recipe recipe, Material material) {
         return mix(recipe, material, recipe);
     }
 
-    public static List<Physical> mix(Recipe recipe, Material material, IRNG rng) {
-        List<Physical> result = new ArrayList<>();
+    public static ArrayList<Physical> mix(Recipe recipe, Material material, IRNG rng) {
+        ArrayList<Physical> result = new ArrayList<>();
         for (int i = 0; i < recipe.result.size(); i++) {
             Physical physical = buildPhysical(recipe.result.keyAt(i));
 
             Modification materialMod = new Modification();
             materialMod.baseValueMultiplier = material.getValue() * 0.01;
             materialMod.color = material.getMaterialColor();
-            materialMod.possiblePrefix = Collections.singletonList(material.toString());
+            materialMod.possiblePrefix = Maker.makeList(material.toString());
             LiveValueModification lvm = new LiveValueModification();
             lvm.baseOverwrite = material.getHardness() * 0.01;
             lvm.actualOverwrite = material.getHardness() * 0.01;
@@ -147,7 +146,7 @@ public class RecipeMixer {
         Modification stoneMod = new Modification();
         stoneMod.baseValueMultiplier = stone.value * 0.01;
         stoneMod.color = stone.front;
-        stoneMod.possiblePrefix = Collections.singletonList(stone.toString());
+        stoneMod.possiblePrefix = Maker.makeList(stone.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = stone.hardness * 0.01;
         lvm.actualOverwrite = stone.getHardness() * 0.01;
@@ -177,7 +176,7 @@ public class RecipeMixer {
         Modification inclusionMod = new Modification();
         inclusionMod.baseValueMultiplier = inclusion.value * 0.01;
         inclusionMod.color = inclusion.front;
-        inclusionMod.possiblePrefix = Collections.singletonList(inclusion.toString());
+        inclusionMod.possiblePrefix = Maker.makeList(inclusion.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = inclusion.hardness * 0.01;
         lvm.actualOverwrite = inclusion.getHardness() * 0.01;
@@ -207,7 +206,7 @@ public class RecipeMixer {
         Modification materialMod = new Modification();
         materialMod.baseValueMultiplier = material.getValue() * 0.01;
         materialMod.color = material.getMaterialColor();
-        materialMod.possiblePrefix = Collections.singletonList(material.toString());
+        materialMod.possiblePrefix = Maker.makeList(material.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = material.getHardness() * 0.01;
         lvm.actualOverwrite = material.getHardness() * 0.01;
@@ -298,7 +297,7 @@ public class RecipeMixer {
 
         physical.attached = blueprint.attached;
 
-        List<String> possibleNames = new ArrayList<>(blueprint.possibleAliases);
+        ArrayList<String> possibleNames = new ArrayList<>(blueprint.possibleAliases);
         possibleNames.add(blueprint.name);
         physical.name = physical.getRandomElement(possibleNames);
         physical.possibleAliases.addAll(blueprint.possibleAliases); // TODO - lock it to the one made once it's made?
@@ -382,7 +381,7 @@ public class RecipeMixer {
 
         physical.rarity = rarity;
         for (Rating rating : Rating.values()) {
-            List<Modification> mods = blueprint.rarityModifications.get(rating);
+            ArrayList<Modification> mods = blueprint.rarityModifications.get(rating);
             if (mods != null) {
                 for (Modification m : mods) {
                     applyModification(physical, m);
@@ -636,13 +635,13 @@ public class RecipeMixer {
         if (modification.inventory != null) {
             physical.inventory = modification.inventory
                 .stream()
-                .map(i -> buildPhysical(i))
-                .collect(Collectors.toList());
+                .map(RecipeMixer::buildPhysical)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         }
         if (modification.inventoryAdditive != null) {
             physical.inventory.addAll(modification.inventoryAdditive
                 .stream()
-                .map(i -> buildPhysical(i))
+                .map(RecipeMixer::buildPhysical)
                 .collect(Collectors.toList()));
         }
         if (modification.inventorySubtractive != null) {
@@ -654,13 +653,13 @@ public class RecipeMixer {
         if (modification.optionalInventory != null) {
             physical.optionalInventory = modification.optionalInventory
                 .stream()
-                .map(i -> buildPhysical(i))
-                .collect(Collectors.toList());
+                .map(RecipeMixer::buildPhysical)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         }
         if (modification.optionalInventoryAdditive != null) {
             physical.optionalInventory.addAll(modification.optionalInventoryAdditive
                 .stream()
-                .map(i -> buildPhysical(i))
+                .map(RecipeMixer::buildPhysical)
                 .collect(Collectors.toList()));
         }
         if (modification.optionalInventorySubtractive != null) {

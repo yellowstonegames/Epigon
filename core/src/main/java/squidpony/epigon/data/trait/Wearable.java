@@ -1,8 +1,8 @@
 package squidpony.epigon.data.trait;
 
-import java.util.ArrayList;
-import java.util.List;
 import squidpony.epigon.data.slot.BodySlot;
+
+import java.util.ArrayList;
 
 /**
  * Holds the data for things that can be worn. Basically similar to wielding except that generally the
@@ -14,5 +14,5 @@ public class Wearable {
 
     public boolean worn;
 
-    public List<BodySlot> slotsUsed = new ArrayList<>();
+    public ArrayList<BodySlot> slotsUsed = new ArrayList<>();
 }

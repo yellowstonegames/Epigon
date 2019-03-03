@@ -1,5 +1,6 @@
 package squidpony.epigon.mapping;
 
+import squidpony.Maker;
 import squidpony.StringKit;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.RecipeMixer;
@@ -20,7 +21,11 @@ import squidpony.squidgrid.mapping.styled.DungeonBoneGen;
 import squidpony.squidgrid.mapping.styled.TilesetType;
 import squidpony.squidmath.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -334,17 +339,17 @@ public class WorldGenerator {
         }
 
         if (up) {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+            tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
         } else {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Collections.singletonList(adding), Collections.emptyList()));
+            tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
         }
     }
 
     private void placeDoor(EpiTile tile) {
         Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-        List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Collections.singletonList(adding), Collections.emptyList());
+        List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
         Physical door = adds.get(0);
-        setDoorOpen(door, rng.nextBoolean());
+        setDoorOpen(door, adding.nextBoolean());
         tile.add(door);
     }
 
@@ -656,8 +661,8 @@ public class WorldGenerator {
                     }
 
                     test_for_change:
-                    for (Physical testing1[][] : near) {
-                        for (Physical testing2[] : testing1) {
+                    for (Physical[][] testing1 : near) {
+                        for (Physical[] testing2 : testing1) {
                             for (Physical test : testing2) {
                                 if (test == null || test.terrainData == null) {
                                     continue;
@@ -709,8 +714,8 @@ public class WorldGenerator {
                     }
 
                     test_for_change:
-                    for (Physical testing1[][] : near) {
-                        for (Physical testing2[] : testing1) {
+                    for (Physical[][] testing1 : near) {
+                        for (Physical[] testing2 : testing1) {
                             for (Physical test : testing2) {
                                 if (test == null || test.terrainData == null) {
                                     continue;
@@ -754,7 +759,7 @@ public class WorldGenerator {
         castle.moat.surface8way(8);
         List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
         castle.moat.clear();
-        castle.moat = connectPoints(castle.moat, corners);
+        connectPoints(castle.moat, corners);
 
         castle.moat.expand8way();
         castle.moatBank = castle.moat.copy();
