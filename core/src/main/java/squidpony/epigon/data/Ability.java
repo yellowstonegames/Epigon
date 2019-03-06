@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import squidpony.squidmath.OrderedMap;
+import squidpony.squidmath.UnorderedSet;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public class Ability extends EpiData {
     public boolean randomChoiceInRange;
     public boolean requiresConfirmation;
     public int maxTargets = Integer.MAX_VALUE;
-    public Set<Physical> validTargets = new HashSet<>(); // an empty set means no restriction of validity
+    public UnorderedSet<Physical> validTargets = new UnorderedSet<>(); // an empty set means no restriction of validity
 
     public OrderedMap<Skill, Rating> mustHaveSkillRatings = new OrderedMap<>();
     public List<String> effectsString = new ArrayList<>();

@@ -48,8 +48,8 @@ public class Physical extends EpiData {
     public Radiance radiance = null;
     // backing data
     public Physical parent;
-    public Set<Physical> countsAs = new HashSet<>();
-    public Set<Physical> createdFrom = new HashSet<>();//only important items should track this since it will cause object lifetimes to extend
+    public UnorderedSet<Physical> countsAs = new UnorderedSet<>();
+    public UnorderedSet<Physical> createdFrom = new UnorderedSet<>();//only important items should track this since it will cause object lifetimes to extend
     public boolean generic; // should not be directly used, only available as a building block object
     public boolean unique; // should only have one in existence of exactly this type
     public boolean buildingBlock; // can be used as a building block

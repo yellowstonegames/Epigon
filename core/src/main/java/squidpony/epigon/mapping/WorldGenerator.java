@@ -349,7 +349,7 @@ public class WorldGenerator {
         Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
         List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
         Physical door = adds.get(0);
-        setDoorOpen(door, adding.nextBoolean());
+        setDoorOpen(door, rng.nextBoolean());
         tile.add(door);
     }
 

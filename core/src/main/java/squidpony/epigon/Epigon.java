@@ -669,7 +669,6 @@ public class Epigon extends Game {
 
     private void runTurn() {
         OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
-        UnorderedSet<Coord> ps = Maker.makeUOS(player.location);
         Coord[] pa = new Coord[]{player.location};
         ArrayList<Coord> path = new ArrayList<>(9);
         for (int i = 0; i < creatures.size(); i++) {
@@ -934,7 +933,7 @@ public class Epigon extends Game {
      * @param amount negative to scroll to previous messages, positive for later messages
      */
     private void scrollMessages(int amount) {
-        messageIndex = MathExtras.clamp(messageIndex + amount, messageCount, messages.size() - 1);
+        messageIndex = MathUtils.clamp(messageIndex + amount, messageCount, messages.size() - 1);
         updateMessages();
     }
 
@@ -1233,8 +1232,8 @@ public class Epigon extends Game {
                                 return;
                             }
                             map.contents[targetX][targetY].add(item);
-                            int tx = MathExtras.clamp(targetX + player.between(-1, 2), 0, worldWidth),
-                                    ty = MathExtras.clamp(targetY + player.between(-1, 2), 0, worldHeight);
+                            int tx = MathUtils.clamp(targetX + player.between(-1, 2), 0, worldWidth - 1),
+                                    ty = MathUtils.clamp(targetY + player.between(-1, 2), 0, worldHeight - 1);
                             if (map.lighting.resistances[tx][ty] < 0.9) {
                                 map.contents[tx][ty].add(item);
                             }

@@ -1,8 +1,8 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.MathExtras;
 
 /**
  * This enum represents a rating of none to high, in order, for use in skills and any other relative
@@ -125,7 +125,7 @@ public enum Rating {
         }
 
         if (rvm.deltaLevel != null) {
-            return allRatings[MathExtras.clamp(
+            return allRatings[MathUtils.clamp(
                     ordinal() + rvm.deltaLevel,
                     Math.max(0, rvm.deltaMin.ordinal()),
                     Math.min(7, rvm.deltaMax.ordinal()))];
