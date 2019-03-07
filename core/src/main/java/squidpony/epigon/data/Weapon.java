@@ -4,10 +4,7 @@ import squidpony.Maker;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawWeapon;
-import squidpony.squidai.ConeAOE;
-import squidpony.squidai.LineAOE;
-import squidpony.squidai.PointAOE;
-import squidpony.squidai.Technique;
+import squidpony.squidai.*;
 import squidpony.squidgrid.Radius;
 import squidpony.squidmath.*;
 
@@ -258,13 +255,17 @@ public class Weapon {
     {
         switch (shape) {
             case ARC:
-                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
-                        2, (int) raw.range));
+                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1), 
+                        3, (int) raw.range + 1));
                 break;
-            case THROUGH:
-                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
-                        1, (int) raw.range));
+            case BURST:
+                technique = new Technique(raw.name + " attack", new BurstAOE(Coord.get(-1, -1),
+                        1, Radius.CIRCLE, 3, (int) raw.range + 1));
                 break;
+//            case THROUGH:
+//                technique = new Technique(raw.name + " attack", new PointAOE(Coord.get(-1, -1),
+//                        1, (int) raw.range));
+//                break;
             case BEAM:
                 technique = new Technique(raw.name + " attack", new LineAOE(Coord.get(-1, -1),
                         Coord.get(-1, -1), (int) (raw.range + raw.area), Radius.CIRCLE,

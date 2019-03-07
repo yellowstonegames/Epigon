@@ -683,7 +683,7 @@ public class Epigon extends Game {
             if (creature.stats.get(Stat.MOBILITY).actual() > 0) {
                 Weapon weapon = chooseValidWeapon(creature, player);
                 creaturePositions.remove(c);
-                monsterDijkstra.resetTargetMap();
+                monsterDijkstra.reset();
                 if(weapon == null) {
                     if (creature.weaponData != null && los.isReachable(map.lighting.resistances, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE))
                     {
@@ -694,10 +694,20 @@ public class Epigon extends Game {
                 }
                 else
                     monsterDijkstra.findAttackPath(path, (int) creature.stats.get(Stat.SIGHT).actual() + 2, weapon.technique.aoe.getMinRange(), weapon.technique.aoe.getMaxRange(), los, creaturePositions, null, c, pa);
-                if(weapon == null && path.isEmpty() && monsterDijkstra.targetMap[c.x][c.y] == null) {
+                if(!path.isEmpty())
+                {
+                    messageIndex = Math.max(messages.size(), messageCount);
+                    messages.add(IColoredString.Impl.create(creature.name + " #" + StringKit.hex(((EpiData)creature).hashCode())
+                            + " has a path! " + path.toString(), Color.WHITE));
+                    updateMessages();
+                }
+                if(weapon == null && path.isEmpty()) // && monsterDijkstra.targetMap[c.x][c.y] == null
+                {
                     Coord next = c.translateCapped(creature.between(-1, 2), creature.between(-1, 2), map.width, map.height);
                     if(!map.creatures.containsKey(next) && map.contents[next.x][next.y].blockage == null)
                         path.add(next);
+                    if(map.lighting.fovResult[c.x][c.y] > 0.0) 
+                        message(creature.name + " #" + StringKit.hex(((EpiData)creature).hashCode()) + " moved randomly.");
                 }
                 if (weapon != null || !path.isEmpty()) {
                     Coord step;
@@ -1096,10 +1106,13 @@ public class Epigon extends Game {
         double range;
         for (Weapon w : table.keySet()) {
             range = Radius.CIRCLE.radius(attacker.location, target.location);
-            if ((w.shape == Weapon.ARC || w.shape == Weapon.BURST) && range < 1.5) {
-                continue;
+            if ((w.shape == Weapon.ARC || w.shape == Weapon.BURST)) {
+                if(range < 2.5) continue;
+                if (range <= w.rawWeapon.range + 2.5) {
+                    weapons.add(w);
+                }
             }
-            if (range <= w.rawWeapon.range + 1.5) {
+            else if (range <= w.rawWeapon.range + 1.5) {
                 weapons.add(w);
             }
         }
