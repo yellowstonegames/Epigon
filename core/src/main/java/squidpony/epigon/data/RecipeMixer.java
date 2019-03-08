@@ -458,15 +458,14 @@ public class RecipeMixer {
                     Rating.allRatings[((OrderedMap<String, Integer>)raw.training).getAt(i)]);
         }
         blueprint.creatureData.weaponChoices = new ProbabilityTable<>(blueprint.nextLong());
-        //blueprint.weaponData = Weapon.getWeapons().get(raw.baseWeapon.name);
-        Physical weapon = buildWeapon(Weapon.getWeapons().get(blueprint.getRandomElement(raw.weapons).name), blueprint);
-        blueprint.inventory.add(weapon);
-        blueprint.equipItem(weapon);
-//        for (int i = 0, idx = blueprint.nextInt(raw.weapons.length); i < raw.weapons.length; i++, idx = (idx+1)%raw.weapons.length) {
-////            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get("holy symbol"), blueprint));
-//            
-//            blueprint.equipItem();
-//        }
+        blueprint.weaponData = Weapon.getWeapons().get(raw.baseWeapon.name);
+//        blueprint.weaponData = weapon.weaponData;
+        for (int i = 0, idx = blueprint.nextInt(raw.weapons.length); i < raw.weapons.length && idx < raw.weapons.length; i++, idx++) {
+//            blueprint.equipItem(buildWeapon(Weapon.getWeapons().get("holy symbol"), blueprint));
+            Physical weapon = buildWeapon(Weapon.getWeapons().get(blueprint.getRandomElement(raw.weapons).name), blueprint);
+            blueprint.inventory.add(weapon);
+            blueprint.equipItem(weapon);
+        }
         blueprint.creatureData.culture = Culture.cultures.getOrDefault(blueprint.getRandomElement(raw.culture), blueprint.creatureData.culture);
         if(raw.sayings == null || raw.sayings.length == 0)
             blueprint.creatureData.sayings = new String[]{"The @name stare$ blankly..."};
