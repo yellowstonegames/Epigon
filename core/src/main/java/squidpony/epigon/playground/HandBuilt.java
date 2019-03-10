@@ -370,17 +370,9 @@ public class HandBuilt {
         cb.skills.put(Skill.COOKING, Rating.TYPICAL);
 //        Weapon unarmed = Weapon.getWeapons().get("sinister magic");
         Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
-        
-        if(unarmed.kind == Weapon.MAGIC)
-        {
-            Element elem = unarmed.elements.items.get(0);
-            playerBlueprint.radiance = new Radiance(6f, elem.floatColor, elem.flicker, elem.strobe);
-        }
-        else
-        {
-            playerBlueprint.inventory.add(torch);
-            playerBlueprint.creatureData.lastUsedItem = torch;
-        }
+        playerBlueprint.inventory.add(torch);
+                 
+        //playerBlueprint.creatureData.lastUsedItem = torch;
         //Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
         playerBlueprint.creatureData.weaponChoices.add(unarmed, 1);

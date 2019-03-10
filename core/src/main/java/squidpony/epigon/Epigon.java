@@ -38,6 +38,7 @@ import squidpony.epigon.playground.HandBuilt;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
+import squidpony.squidgrid.FOV;
 import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.*;
@@ -680,7 +681,9 @@ public class Epigon extends Game {
                 creature.overlayAppearance = null;
             }
             Coord c = creature.location;
-            if (creature.stats.get(Stat.MOBILITY).actual() > 0 && los.isReachable(map.lighting.resistances, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE)) {
+            if (creature.stats.get(Stat.MOBILITY).actual() > 0
+                    && map.lighting.colorLighting[0][player.location.x][player.location.y] > 0.1
+                    && los.isReachable(map.lighting.resistances, c.x, c.y, player.location.x, player.location.y, Radius.CIRCLE)) {
                 Weapon weapon = chooseValidWeapon(creature, player);
                 creaturePositions.remove(c);
                 monsterDijkstra.reset();
@@ -954,7 +957,7 @@ public class Epigon extends Game {
     }
     
     private void calcFOV(int checkX, int checkY) {
-        map.lighting.viewerRange = player.stats.get(Stat.SIGHT).actual();
+        //map.lighting.viewerRange = player.stats.get(Stat.SIGHT).actual();
         // this is really important; it sets the resistances of the map's lighting
         map.opacities();
         //we'll search for lights every time we move
@@ -972,6 +975,8 @@ public class Epigon extends Game {
         map.lighting.calculateFOV(checkX, checkY,
                 checkX - 1 - (mapSize.gridWidth >>> 1), checkY - 1 - (mapSize.gridHeight >>> 1),
                 checkX + 1 + (mapSize.gridWidth >>> 1), checkY + 1 + (mapSize.gridHeight >>> 1));
+        FOV.addFOVsInto(map.lighting.fovResult, FOV.reuseFOV(map.lighting.resistances, map.lighting.tempFOV,
+                checkX, checkY, 4.0, Radius.CIRCLE));
         if (odinView) {
             //choice of tempFOV is arbitrary; we just need a 2D array of all 0.6
             ArrayTools.fill(map.lighting.tempFOV, 0.6);
