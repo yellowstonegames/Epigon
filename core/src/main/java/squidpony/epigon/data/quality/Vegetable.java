@@ -3,6 +3,7 @@ package squidpony.epigon.data.quality;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
+import squidpony.epigon.data.CalcStat;
 import squidpony.epigon.data.Condition;
 import squidpony.epigon.data.ConditionBlueprint;
 import squidpony.epigon.data.Stat;
@@ -107,8 +108,16 @@ public enum Vegetable implements ConstantKey {
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(-1);
                 return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
-    RAW_WALNUT('˳', SColor.AURORA_DUSTY_GREEN, "an unripe, very hard walnut; inedible", ""),
-    RAW_PECAN('˳', SColor.AURORA_APPLE_GREEN, "an unripe pecan in a hard shell; inedible", ""),
+    FROST_WALNUT('˳', SColor.AURORA_AQUAMARINE, "an ripe but very hard walnut that feels icy-cold to the touch", "",
+            new Interactable("open", true, false, (actor, target, level) -> {
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Chill"), actor));
+                actor.stats.get(CalcStat.DEFENSE).addActual(1.0);
+                return "@Name shiver$ with wintry cold after cracking open the frost walnut!";})),
+    ROASTERʼS_PECAN('˳', SColor.CW_RICH_ORANGE, "an ripe pecan in a hard shell that seems hot to the touch", "",
+            new Interactable("open", true, false, (actor, target, level) -> {
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Ignite"), actor));
+                actor.stats.get(CalcStat.DAMAGE).addActual(1.0);
+                return "@Name catch$$ on fire after cracking open the roasterʼs pecan!";})),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(10);

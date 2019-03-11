@@ -130,13 +130,22 @@ public class ConditionBlueprint extends EpiData {
                     null)
             , "Chill", new ConditionBlueprint("chill", "chill$", 3, 1, Element.ICE, '▯',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0),
-                    null)
+                    new VisualCondition(1.3f, 0.9f, 0.9f, 0.2f, -0.1f, 0f))
             , "Curse", new ConditionBlueprint("curse", "curse$", 3, 0, Element.FATEFUL, '\uffff',
                     ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0),
                     null)
             , "Ignite", new ConditionBlueprint("ignite", "ignite$", 2, 1, Element.FIRE, 'ˇ',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5),
-                    null)
+                    new VisualCondition(1.1f, 1f, 1f, 0f, 0.25f, 0f){
+                        @Override
+                        public void update() {
+                            float time = TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f;
+                            warmAdd = NumberTools.swayRandomized(12345, time) * 0.1f + 0.2f;
+                            time = NumberTools.swayRandomized(9876543, time);
+                            lumaMul = 1.1f + time * 0.2f;
+                            mildAdd = 0.05f + time * 0.05f;
+                        }
+                    })
             , "Blind", new ConditionBlueprint("blind", "blind$", 3, 0, Element.SHADOW, '\uffff',
                     ChangeTable.makeCT(Stat.SIGHT, (int)'-', 7.0, CalcStat.PRECISION, (int)'-', 3.0),
                     new VisualCondition(0.5f, 0.4f, 0.4f))
@@ -148,8 +157,8 @@ public class ConditionBlueprint extends EpiData {
                     new VisualCondition(1.3f, 1, 1){
                         @Override
                         public void update() {
-                            orangeChange = NumberTools.swayRandomized(-123456789, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
-                            greenChange = NumberTools.swayRandomized(987654321, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
+                            warmMul = NumberTools.swayRandomized(-123456789, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
+                            mildMul = NumberTools.swayRandomized(987654321, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
                         }
                     })
 

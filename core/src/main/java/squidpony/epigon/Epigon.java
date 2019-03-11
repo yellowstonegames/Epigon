@@ -96,10 +96,10 @@ public class Epigon extends Game {
     // Display
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
-    public static final FloatFilters.YCoCgFilter filter = new FloatFilters.YCoCgFilter(0.9f, 1.3f, 1.3f);
+    public static final FloatFilters.YCwCmFilter filter = new FloatFilters.YCwCmFilter(0.9f, 1.3f, 1.3f);
     public static FloatFilter
             identityFilter = new FloatFilters.IdentityFilter(),
-            grayscale = new FloatFilters.YCoCgFilter(0.75f, 0.2f, 0.2f);
+            grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
     private SparseLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
@@ -225,11 +225,11 @@ public class Epigon extends Game {
         Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + World.DIVE_HEADER.length) + 1);
 
         // this matches the background color outside the map to the background color of unseen areas inside the map,
-        // using the same filter (reducing brightness and saturation using YCoCg) as that stage of the map draw.
-        float unseenY = luminanceYCoCg(DB_INK) * 0.7f,
-                unseenCo = chrominanceOrange(DB_INK) * 0.65f,
-                unseenCg = chrominanceGreen(DB_INK) * 0.65f;
-        unseenColor = colorFromFloat(floatGetYCoCg(unseenY, unseenCo, unseenCg, 1f));
+        // using the same filter (reducing brightness and saturation using YCwCm) as that stage of the map draw.
+        float unseenY = lumaYCwCm(DB_INK) * 0.7f,
+                unseenCw = chromaWarm(DB_INK) * 0.65f,
+                unseenCm = chromaMild(DB_INK) * 0.65f;
+        unseenColor = colorFromFloat(floatGetYCwCm(unseenY, unseenCw, unseenCm, 1f));
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
         //FilterBatch is new, and automatically filters all text colors and image tints with a FloatFilter
         batch = new FilterBatch(filter);
@@ -299,22 +299,29 @@ public class Epigon extends Game {
             public void draw(Batch batch, float parentAlpha) {
                 //super.draw(batch, parentAlpha);
                 float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo,
-                        conditionY = 1f, conditionCo = 1f, conditionCg = 1f;
+                        conditionY = 1f, conditionCw = 1f, conditionCm = 1f,
+                        conditionYAdd = 0f, conditionCwAdd = 0f, conditionCmAdd = 0f;
                 final int clen = player.conditions.size();
                 for (int i = clen - 1; i >= 0; i--) {
                     VisualCondition vis = player.conditions.getAt(i).parent.visual;
                     if(vis != null)
                     {
                         vis.update();
-                        conditionY = vis.lumaChange;
-                        conditionCo = vis.orangeChange;
-                        conditionCg = vis.greenChange;
+                        conditionY *= vis.lumaMul;
+                        conditionCw *= vis.warmMul;
+                        conditionCm *= vis.mildMul;
+                        conditionYAdd += vis.lumaAdd;
+                        conditionCwAdd += vis.warmAdd;
+                        conditionCmAdd += vis.mildAdd;
                         break;
                     }
                 }
-                filter.coMul = 0.65f * conditionCo;
-                filter.cgMul = 0.65f * conditionCg;
-                filter.yMul = 0.7f   * conditionY;
+                filter.yMul  = 0.7f  * conditionY;
+                filter.cwMul = 0.65f * conditionCw;
+                filter.cmMul = 0.65f * conditionCm;
+                filter.yAdd  = 0.7f  * conditionYAdd;
+                filter.cwAdd = 0.65f * conditionCwAdd;
+                filter.cmAdd = 0.65f * conditionCmAdd;
                 font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
                 int len = layers.size();
                 Frustum frustum = null;
@@ -335,9 +342,12 @@ public class Epigon extends Game {
                         }
                     }
                 }
-                filter.coMul = 0.95f * conditionCo;
-                filter.cgMul = 0.95f * conditionCg;
-                filter.yMul = 0.9f   * conditionY; 
+                filter.yMul  = 0.9f  * conditionY;
+                filter.cwMul = 0.95f * conditionCw;
+                filter.cmMul = 0.95f * conditionCm;
+                filter.yAdd  = 0.9f  * conditionYAdd;
+                filter.cwAdd = 0.95f * conditionCwAdd;
+                filter.cmAdd = 0.95f * conditionCmAdd;
 
                 font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
 
@@ -354,9 +364,12 @@ public class Epigon extends Game {
                         layers.get(i).draw(batch, font, frustum, xo, yOff);
                     }
                 }
-                filter.coMul = 1.4f * conditionCo;
-                filter.cgMul = 1.4f * conditionCg;
-                filter.yMul = 1.05f * conditionY; 
+                filter.yMul  = 1.05f * conditionY;
+                filter.cwMul = 1.4f  * conditionCw;
+                filter.cmMul = 1.4f  * conditionCm;
+                filter.yAdd  = 1.05f * conditionYAdd;
+                filter.cwAdd = 1.4f  * conditionCwAdd;
+                filter.cmAdd = 1.4f  * conditionCmAdd;
                 int x, y;
                 for (int i = 0; i < glyphs.size(); i++) {
                     TextCellFactory.Glyph glyph = glyphs.get(i);

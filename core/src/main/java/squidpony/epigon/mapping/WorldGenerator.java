@@ -856,7 +856,7 @@ public class WorldGenerator {
                         tile.contents.add(RecipeMixer.buildVegetable(
                                 vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
                     }
-                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
+                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 9) {    // 9 in 256 chance
                         Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
                         tree.shuffle(Direction.OUTWARDS, dirs);
                         for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
