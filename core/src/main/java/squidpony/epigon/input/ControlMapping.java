@@ -41,6 +41,8 @@ public class ControlMapping {
             (int) DOWN_RIGHT_ARROW, MOVE_DOWN_RIGHT,
             (int) PAGE_UP, MESSAGE_PRIOR,
             (int) PAGE_DOWN, MESSAGE_NEXT,
+//            (int) '-', MESSAGE_PRIOR,
+//            (int) '+', MESSAGE_NEXT,
             (int) 'h', MOVE_LEFT,
             (int) 'j', MOVE_DOWN,
             (int) 'k', MOVE_UP,

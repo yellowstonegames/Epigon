@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -105,7 +106,7 @@ public class Epigon extends Game {
     private SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
     private SparseLayers contextSLayers;
-    private SquidLayers messageSLayers;
+    private TextPanel<Color> messageSLayers;
     private SubcellLayers fallingSLayers;
 
     private InputSpecialMultiplexer multiplexer;
@@ -259,13 +260,24 @@ public class Epigon extends Game {
         font = DefaultResources.getCrispLeanFamily();
         TextCellFactory smallFont = font.copy();
         messageIndex = messageCount;
-        messageSLayers = new SquidLayers(
+        IColoredString<Color> emptyICS = IColoredString.Impl.create();
+        for (int i = 0; i <= messageCount; i++) {
+            messages.add(emptyICS);
+        }
+
+        messageSLayers = new TextPanel<Color>(GDXMarkup.instance, DefaultResources.getCrispCarvedFont());
+        messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
+        messageSLayers.backgroundColor = unseenColor;
+        messageSLayers.getTextActor().setHeight(messageSize.pixelHeight());
+        messageSLayers.getScrollPane().setHeight(messageSize.pixelHeight());
+        messageSLayers.getScrollPane().setStyle(new ScrollPane.ScrollPaneStyle());
+/*
                 messageSize.gridWidth,
                 messageSize.gridHeight,
                 messageSize.cellWidth,
                 messageSize.cellHeight,
-                font);
 
+ */
         infoSLayers = new SparseLayers(
                 infoSize.gridWidth,
                 infoSize.gridHeight,
@@ -420,7 +432,7 @@ public class Epigon extends Game {
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
 
-        messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        messageSLayers.getScrollPane().setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
         contextSLayers.setBounds(0, 0, contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlaySLayers.setBounds(0, 0, mapSize.pixelWidth(), mapSize.pixelWidth());
@@ -453,7 +465,8 @@ public class Epigon extends Game {
         mapStage.addActor(mapHoverSLayers);
         mapOverlayStage.addActor(mapOverlaySLayers);
         fallingStage.addActor(fallingSLayers);
-        messageStage.addActor(messageSLayers);
+        messageStage.addActor(messageSLayers.getScrollPane());
+        //messageSLayers.getScrollPane().layout();
         infoStage.addActor(infoSLayers);
         contextStage.addActor(contextHandler.group);
 
@@ -477,6 +490,7 @@ public class Epigon extends Game {
     }
 
     private void startGame() {
+        messages.clear();
         mapSLayers.clear();
         mapSLayers.glyphs.clear();
         mapSLayers.clearActions();
@@ -491,11 +505,6 @@ public class Epigon extends Game {
 //        mapSLayers.addLayer();//level 3, backgrounds for hovering menus
 //        mapSLayers.addLayer();//level 4, text for hovering menus
         
-        IColoredString<Color> emptyICS = IColoredString.Impl.create();
-        for (int i = 0; i <= messageCount; i++) {
-            messages.add(emptyICS);
-        }
-
         worldGenerator = new WorldGenerator();
         contextHandler.message("Have fun!",
                 style("Bump into statues ([*][/]s[,]) and stuff."),
@@ -931,42 +940,47 @@ public class Epigon extends Game {
     }
 
     public void updateMessages() {
-        clearContents(messageSLayers, unseenColor);
-
-        int w = messageSLayers.getGridWidth();
-        int h = messageSLayers.getGridHeight();
-        for (int x = 0; x < w; x++) {
-            messageSLayers.put(x, 0, ((x & 7) == 4) ? '↑' : '─', APRICOT, unseenColor);
-            messageSLayers.put(x, h - 1, ((x & 7) == 4) ? '↓' : '─', APRICOT, unseenColor);
-        }
-        String text = "Click to Scroll ";
-        messageSLayers.putString(w - 7 - text.length(), 0, text + "Up──", APRICOT, unseenColor);
-        messageSLayers.putString(w - 7 - text.length(), h - 1, text + "Down", APRICOT, unseenColor);
-        for (int y = 0; y < h; y++) {
-            messageSLayers.put(0, y, '│', APRICOT, unseenColor);
-            messageSLayers.put(w - 1, y, '│', APRICOT, unseenColor);
-        }
-        messageSLayers.put(0, 0, '┌', APRICOT, unseenColor);
-        messageSLayers.put(w - 1, 0, '┐', APRICOT, unseenColor);
-        messageSLayers.put(0, h - 1, '└', APRICOT, unseenColor);
-        messageSLayers.put(w - 1, h - 1, '┘', APRICOT, unseenColor);
-        for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
-            messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
-        }
+        messageSLayers.getScrollPane().setScrollY(messageIndex * 8f);
+//        clearContents(messageSLayers, unseenColor);
+//
+//        int w = messageSLayers.getGridWidth();
+//        int h = messageSLayers.getGridHeight();
+//        for (int x = 0; x < w; x++) {
+//            messageSLayers.put(x, 0, ((x & 7) == 4) ? '↑' : '─', APRICOT, unseenColor);
+//            messageSLayers.put(x, h - 1, ((x & 7) == 4) ? '↓' : '─', APRICOT, unseenColor);
+//        }
+//        String text = "Click to Scroll ";
+//        messageSLayers.putString(w - 7 - text.length(), 0, text + "Up──", APRICOT, unseenColor);
+//        messageSLayers.putString(w - 7 - text.length(), h - 1, text + "Down", APRICOT, unseenColor);
+//        for (int y = 0; y < h; y++) {
+//            messageSLayers.put(0, y, '│', APRICOT, unseenColor);
+//            messageSLayers.put(w - 1, y, '│', APRICOT, unseenColor);
+//        }
+//        messageSLayers.put(0, 0, '┌', APRICOT, unseenColor);
+//        messageSLayers.put(w - 1, 0, '┐', APRICOT, unseenColor);
+//        messageSLayers.put(0, h - 1, '└', APRICOT, unseenColor);
+//        messageSLayers.put(w - 1, h - 1, '┘', APRICOT, unseenColor);
+//        for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
+//            messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
+//        }
     }
 
     /**
      * @param amount negative to scroll to previous messages, positive for later messages
      */
     private void scrollMessages(int amount) {
-        messageIndex = MathUtils.clamp(messageIndex + amount, messageCount, messages.size() - 1);
+        messageSLayers.typesetText();
+        messageSLayers.getScrollPane().layout();
+        messageIndex = Math.min(messageIndex + amount, (int) messageSLayers.getScrollPane().getMaxY() >> 3);
         updateMessages();
     }
 
     private void message(String text) {
-        messageIndex = Math.max(messages.size(), messageCount);
-        messages.add(GDXMarkup.instance.colorString("[]" + text));
-        updateMessages();
+        messageSLayers.typesetText();
+        messageSLayers.getScrollPane().layout();
+        messageIndex = (int) messageSLayers.getScrollPane().getMaxY() >> 3;
+        messages.add(GDXMarkup.instance.colorString("[White]" + text));
+        messageSLayers.getScrollPane().setScrollPercentY(1f);
     }
     
     private void calcFOV(int checkX, int checkY) {
@@ -1639,7 +1653,7 @@ public class Epigon extends Game {
         float currentZoomX = (float) width / totalPixelWidth();
         float currentZoomY = (float) height / totalPixelHeight();
 
-        messageSLayers.setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
+        messageSLayers.getScrollPane().setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
