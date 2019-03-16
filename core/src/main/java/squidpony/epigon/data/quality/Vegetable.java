@@ -137,7 +137,7 @@ public enum Vegetable implements ConstantKey {
         this.symbol = symbol;
         this.color = color;
         this.description = description;
-        prettyName = Utilities.lower(name(), "_").replace('ˉ', '-');
+        prettyName = Utilities.lower(name(), "_").replace('ˉ', '-').replace('ʼ', '\'');
         this.terrains = terrains;
         this.interactables = interactables == null ? new Interactable[0] : interactables;
         hash = ConstantKey.precomputeHash("material.Vegetable", ordinal());

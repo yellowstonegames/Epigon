@@ -31,6 +31,7 @@ import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
+import squidpony.epigon.display.TextPanel;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
@@ -265,7 +266,8 @@ public class Epigon extends Game {
             messages.add(emptyICS);
         }
 
-        messageSLayers = new TextPanel<Color>(GDXMarkup.instance, DefaultResources.getCrispCarvedFont());
+        TextCellFactory carved = DefaultResources.getCrispCarvedFont();
+        messageSLayers = new TextPanel<Color>(GDXMarkup.instance, carved);
         messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
         messageSLayers.backgroundColor = unseenColor;
         messageSLayers.getTextActor().setHeight(messageSize.pixelHeight());
@@ -940,7 +942,6 @@ public class Epigon extends Game {
     }
 
     public void updateMessages() {
-        messageSLayers.getScrollPane().setScrollY(messageIndex * 8f);
 //        clearContents(messageSLayers, unseenColor);
 //
 //        int w = messageSLayers.getGridWidth();
@@ -971,16 +972,19 @@ public class Epigon extends Game {
     private void scrollMessages(int amount) {
         messageSLayers.typesetText();
         messageSLayers.getScrollPane().layout();
-        messageIndex = Math.min(messageIndex + amount, (int) messageSLayers.getScrollPane().getMaxY() >> 3);
+        messageSLayers.getScrollPane().setScrollY(messageSLayers.getScrollPane().getScrollY() + amount * 20f);
+        messageSLayers.getScrollPane().updateVisualScroll();
+        //messageIndex = Math.min(messageIndex + amount, (int) (messageSLayers.getScrollPane().getMaxY() * 0.125f));
         updateMessages();
     }
 
     private void message(String text) {
         messageSLayers.typesetText();
         messageSLayers.getScrollPane().layout();
-        messageIndex = (int) messageSLayers.getScrollPane().getMaxY() >> 3;
+        //messageIndex = (int) (messageSLayers.getScrollPane().getMaxY() * 0.125f);
         messages.add(GDXMarkup.instance.colorString("[White]" + text));
         messageSLayers.getScrollPane().setScrollPercentY(1f);
+        messageSLayers.getScrollPane().updateVisualScroll();
     }
     
     private void calcFOV(int checkX, int checkY) {
