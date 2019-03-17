@@ -129,7 +129,6 @@ public class Epigon extends Game {
     private OrderedMap<String, Interactable> interactionOptions = new OrderedMap<>(8);
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
-    private int messageIndex;
     
     // World
     private WorldGenerator worldGenerator;
@@ -260,14 +259,13 @@ public class Epigon extends Game {
 
         font = DefaultResources.getCrispLeanFamily();
         TextCellFactory smallFont = font.copy();
-        messageIndex = messageCount;
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
         }
 
-        TextCellFactory carved = DefaultResources.getCrispCarvedFont();
-        messageSLayers = new TextPanel<Color>(GDXMarkup.instance, carved);
+        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().width(20).height(36).tweakHeight(28).initBySize();
+        messageSLayers = new TextPanel<>(GDXMarkup.instance, messageFont);
         messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
         messageSLayers.backgroundColor = unseenColor;
         messageSLayers.getTextActor().setHeight(messageSize.pixelHeight());
@@ -970,21 +968,12 @@ public class Epigon extends Game {
      * @param amount negative to scroll to previous messages, positive for later messages
      */
     private void scrollMessages(int amount) {
-        messageSLayers.typesetText();
-        messageSLayers.getScrollPane().layout();
-        messageSLayers.getScrollPane().setScrollY(messageSLayers.getScrollPane().getScrollY() + amount * 20f);
-        messageSLayers.getScrollPane().updateVisualScroll();
-        //messageIndex = Math.min(messageIndex + amount, (int) (messageSLayers.getScrollPane().getMaxY() * 0.125f));
-        updateMessages();
+        messageSLayers.scroll(amount);
     }
 
     private void message(String text) {
-        messageSLayers.typesetText();
-        messageSLayers.getScrollPane().layout();
-        //messageIndex = (int) (messageSLayers.getScrollPane().getMaxY() * 0.125f);
         messages.add(GDXMarkup.instance.colorString("[White]" + text));
-        messageSLayers.getScrollPane().setScrollPercentY(1f);
-        messageSLayers.getScrollPane().updateVisualScroll();
+        messageSLayers.scrollToEdge(false);
     }
     
     private void calcFOV(int checkX, int checkY) {

@@ -133,25 +133,25 @@ public class TextPanel<T extends Color> {
     }
 
     /**
-     * The text to display MUST be set later on with
-     * {@link #init(float, float, Collection)}.
+     * The text to display MUST be set later on with {@link #init(float, float, Collection)} (which can't be updated) or
+	 * {@link #initShared(float, float, ArrayList)} (which reflects changes in the given ArrayList).
      *
      * @param markup
      *            An optional way to compute markup.
-     * @param distanceFieldFont
-     *            A distance field font as a TextCellFactory to use.
-     *            Won't be used for drawing in cells, just the distance field code it has matters.
+     * @param font
+     *            A TextCellFactory, typically holding a distance field font ("stretchable" or "crisp" in
+	 *            DefaultResources). This won't force glyphs into same-size cells, despite the name.
      */
-    public TextPanel(/* @Nullable */IMarkup<T> markup, /* @Nullable */ TextCellFactory distanceFieldFont) {
+    public TextPanel(/* @Nullable */IMarkup<T> markup, /* @Nullable */ TextCellFactory font) {
         if (markup != null)
             setMarkup(markup);
-        if (distanceFieldFont != null)
+        if (font != null)
         {
-            tcf = distanceFieldFont;
+            tcf = font;
             tcf.initBySize();
-            font = tcf.font();
+            this.font = tcf.font();
             if (markup != null)
-                font.getData().markupEnabled = true;
+                this.font.getData().markupEnabled = true;
         }
         builder = new StringBuilder(512);
         textActor = new TextActor();
@@ -169,19 +169,34 @@ public class TextPanel<T extends Color> {
 	}
 
 	/**
-	 * Sets the font to use. This method should be called once before
-	 * {@link #init(float, float, Collection)} if the font wasn't given at
-	 * creation-time.
-	 * 
-	 * @param font
-	 *            The font to use.
+	 * Sets the font to use. This method should be called once before {@link #init(float, float, Collection)} if the
+	 * font wasn't given at creation-time.
+	 *
+	 * @param font The font to use as a BitmapFont.
 	 */
 	public void setFont(BitmapFont font) {
 		this.font = font;
-        tcf = new TextCellFactory().font(font).height(MathUtils.ceil(font.getLineHeight()))
-                .width(MathUtils.round(font.getSpaceWidth()));
+		tcf = new TextCellFactory().font(font).height(MathUtils.ceil(font.getLineHeight()))
+				.width(MathUtils.round(font.getSpaceWidth()));
 		if (markup != null)
 			font.getData().markupEnabled = true;
+	}
+
+	/**
+	 * Sets the font to use. This method should be called once before {@link #init(float, float, Collection)} if the
+	 * font wasn't given at creation-time.
+	 *
+	 * @param font The font to use as a TextCellFactory.
+	 */
+	public void setFont(TextCellFactory font) {
+		if (font != null)
+		{
+			tcf = font;
+			tcf.initBySize();
+			this.font = tcf.font();
+			if (markup != null)
+				this.font.getData().markupEnabled = true;
+		}
 	}
 
 	/**
@@ -196,7 +211,7 @@ public class TextPanel<T extends Color> {
 	 * @param text
 	 */
 	public void init(float width, float maxHeight, Collection<? extends IColoredString<T>> text) {
-		this.text = new ArrayList<IColoredString<T>>(text);
+		this.text = new ArrayList<>(text);
 
 		scrollPane.setWidth(width);
 		textActor.setWidth(width);
@@ -205,7 +220,7 @@ public class TextPanel<T extends Color> {
 			throw new NullPointerException(
 					"The font should be set before calling TextPanel.init()");
 
-		typesetText();
+		prepareText();
 		final boolean yscroll = maxHeight < textActor.getHeight();
 		scrollPane.setHeight(/* Maybe not the entire height */ Math.min(textActor.getHeight(), maxHeight));
 		scrollPane.setActor(textActor);
@@ -214,7 +229,8 @@ public class TextPanel<T extends Color> {
 	}
 
 	/**
-	 * This method sets the sizes of {@link #scrollPane} and {@link #textActor}.
+	 * This method sets the sizes of {@link #scrollPane} and {@link #textActor}, and shares a direct reference to
+	 * {@code text} so changes to that ArrayList will also be picked up here and rendered.
 	 * This method MUST be called before rendering.
 	 *
 	 * @param maxHeight
@@ -235,7 +251,7 @@ public class TextPanel<T extends Color> {
 			throw new NullPointerException(
 					"The font should be set before calling TextPanel.init()");
 
-		typesetText();
+		prepareText();
 		final boolean yscroll = maxHeight < textActor.getHeight();
 		scrollPane.setHeight(/* Maybe not the entire height */ Math.min(textActor.getHeight(), maxHeight));
 		scrollPane.setActor(textActor);
@@ -248,7 +264,7 @@ public class TextPanel<T extends Color> {
         ArrayList<IColoredString.Impl<T>> coll = new ArrayList<>(text.length);
         for(String t : text)
         {
-            coll.add(new IColoredString.Impl<T>(t, color));
+            coll.add(new IColoredString.Impl<>(t, color));
         }
         init(width, maxHeight, coll);
     }
@@ -256,7 +272,7 @@ public class TextPanel<T extends Color> {
 	/**
 	 * Draws the border. You have to call this method manually, because the
 	 * border is outside the actor and hence should be drawn at the very end,
-	 * otherwise it can get overwritten by UI element.
+	 * otherwise it can get overwritten by UI elements.
 	 * 
 	 * @param batch
 	 */
@@ -287,7 +303,7 @@ public class TextPanel<T extends Color> {
 	public /* @Nullable */ List<String> getTypesetText() {
 		if (text == null)
 			return null;
-		builder.delete(0, builder.length());
+		builder.setLength(0);
 		final List<String> result = new ArrayList<>();
 		for (IColoredString<T> line : text) {
 			/* This code must be consistent with #draw in the custom Actor */
@@ -301,8 +317,13 @@ public class TextPanel<T extends Color> {
 			builder.deleteCharAt(builder.length() - 1);
 		return result;
 	}
-	
-	public void typesetText() {
+
+	/**
+	 * Updates the text this will show based on the current contents of the ArrayList of IColoredString values that may
+	 * be shared due to {@link #initShared(float, float, ArrayList)}, then resizes the {@link #getTextActor()} to fit
+	 * the current text and lays out the {@link #getScrollPane()} to match. Called in the text actor's draw() method. 
+	 */
+	protected void prepareText() {
 		if (text == null)
 			return;
 		builder.setLength(0);
@@ -315,14 +336,35 @@ public class TextPanel<T extends Color> {
 		}
 		if(builder.length() > 0)
 			builder.deleteCharAt(builder.length() - 1);
-		float totalTextHeight = tcf.height();
+		float totalTextHeight = tcf.actualCellHeight;
 		GlyphLayout layout = font.getCache().addText(builder, 0, 0, 0, builder.length(),
 				textActor.getWidth(), Align.left, true);
 		totalTextHeight += layout.height;
 		if(totalTextHeight < 0)
 			totalTextHeight = 0;
 		textActor.setHeight(/* Entire height */ totalTextHeight);
+		scrollPane.layout();
 
+	}
+
+	/**
+	 * Scrolls the scroll pane this holds down by some number of rows (which may be fractional, and may be negative to
+	 * scroll up). This is not a smooth scroll, and will not be animated.
+	 * @param downDistance The distance in rows to scroll down, which can be negative to scroll up instead
+	 */
+	public void scroll(final float downDistance)
+	{
+		scrollPane.setScrollY(scrollPane.getScrollY() + downDistance * tcf.actualCellHeight);
+	}
+
+	/**
+	 * If the parameter is true, scrolls to the top of this scroll pane; otherwise scrolls to the bottom. This is not a
+	 * smooth scroll, and will not be animated.
+	 * @param goToTop If true, will scroll to the top edge; if false, will scroll to the bottom edge.
+	 */
+	public void scrollToEdge(final boolean goToTop)
+	{
+		scrollPane.setScrollPercentY(goToTop ? 0f : 1f);
 	}
 
 	/**
@@ -341,10 +383,10 @@ public class TextPanel<T extends Color> {
 	}
 
 	/**
-	 * @return The font used, if set.
+	 * @return The font used, if set, as a TextCellFactory (one is always created even if only given a BitmapFont).
 	 */
-	public /* @Nullable */ BitmapFont getFont() {
-		return font;
+	public /* @Nullable */ TextCellFactory getFont() {
+		return tcf;
 	}
 
 	public void dispose() {
@@ -410,7 +452,7 @@ public class TextPanel<T extends Color> {
         }
         @Override
         public void draw(Batch batch, float parentAlpha) {
-			typesetText();
+			prepareText();
             final float tx = 0;//getX();
             final float ty = 0;//getY();
 			final float twidth = getWidth();
@@ -445,8 +487,8 @@ public class TextPanel<T extends Color> {
             if (tcf != null) {
                 tcf.configureShader(batch);
             }
-            final float offY = (tcf != null) ? tcf.height() * 0.5f : 0;
-            font.draw(batch, builder, tx, scrollPane.getHeight() + scrollPane.getScrollY() + offY,
+            final float offY = (tcf != null) ? tcf.actualCellHeight * 0.5f : 0;
+            font.draw(batch, builder, tx, scrollPane.getHeight() + scrollPane.getScrollY() - offY,
                     0, builder.length(), twidth, Align.left, true);
 
         }
