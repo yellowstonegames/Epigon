@@ -31,7 +31,7 @@ import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
-import squidpony.epigon.display.TextPanel;
+import squidpony.squidgrid.gui.gdx.TextPanel;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
@@ -264,11 +264,15 @@ public class Epigon extends Game {
             messages.add(emptyICS);
         }
 
-        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().width(20).height(36).tweakHeight(28).initBySize();
+        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().width(25).height(40).initBySize();
         messageSLayers = new TextPanel<>(GDXMarkup.instance, messageFont);
+        messageFont.bmpFont.getData().setLineHeight(30); // unfortunate, but helps make lines a reasonable size
+        messageFont.initBySize();
         messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
         messageSLayers.backgroundColor = unseenColor;
-        messageSLayers.getTextActor().setHeight(messageSize.pixelHeight());
+//        messageSLayers.borderColor = CW_LIGHT_APRICOT;
+//        messageSLayers.borderSize = 2f;
+//        messageSLayers.borderStyle = UIUtil.CornerStyle.ROUNDED;
         messageSLayers.getScrollPane().setHeight(messageSize.pixelHeight());
         messageSLayers.getScrollPane().setStyle(new ScrollPane.ScrollPaneStyle());
 /*
@@ -1587,6 +1591,7 @@ public class Epigon extends Game {
         messageViewport.apply(false);
         messageStage.act();
         messageStage.draw();
+//        messageSLayers.drawBorder(batch);
 
         if (mode.equals(GameMode.CRAWL)) {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
