@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
@@ -108,6 +109,7 @@ public class Epigon extends Game {
     private SparseLayers infoSLayers;
     private SparseLayers contextSLayers;
     private TextPanel<Color> messageSLayers;
+    private ShapeRenderer shaper;
     private SubcellLayers fallingSLayers;
 
     private InputSpecialMultiplexer multiplexer;
@@ -264,10 +266,9 @@ public class Epigon extends Game {
             messages.add(emptyICS);
         }
 
-        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().width(25).height(40).initBySize();
+        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().initBySize();
         messageSLayers = new TextPanel<>(GDXMarkup.instance, messageFont);
-        messageFont.bmpFont.getData().setLineHeight(30); // unfortunate, but helps make lines a reasonable size
-        messageFont.initBySize();
+//        messageFont.bmpFont.getData().setLineHeight(30); // unfortunate, but helps make lines a reasonable size
         messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
         messageSLayers.backgroundColor = unseenColor;
 //        messageSLayers.borderColor = CW_LIGHT_APRICOT;
@@ -275,6 +276,8 @@ public class Epigon extends Game {
 //        messageSLayers.borderStyle = UIUtil.CornerStyle.ROUNDED;
         messageSLayers.getScrollPane().setHeight(messageSize.pixelHeight());
         messageSLayers.getScrollPane().setStyle(new ScrollPane.ScrollPaneStyle());
+        
+        shaper = new ShapeRenderer();
 /*
                 messageSize.gridWidth,
                 messageSize.gridHeight,
@@ -1591,6 +1594,9 @@ public class Epigon extends Game {
         messageViewport.apply(false);
         messageStage.act();
         messageStage.draw();
+        shaper.setProjectionMatrix(messageStage.getCamera().combined);
+        UIUtil.drawRectangle(shaper, 1, 1, messageSize.pixelWidth() - 2, messageSize.pixelHeight() - 2,
+                ShapeRenderer.ShapeType.Line, CW_LIGHT_APRICOT);
 //        messageSLayers.drawBorder(batch);
 
         if (mode.equals(GameMode.CRAWL)) {
