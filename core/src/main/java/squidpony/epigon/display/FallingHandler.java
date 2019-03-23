@@ -282,7 +282,7 @@ public class FallingHandler {
             move(Direction.DOWN);
         }
 
-        player.stats.get(Stat.HUNGER).tick();
+        player.stats.get(Stat.NUTRITION).tick();
 
 //        pressedUp = false;
         update(scrollOffsetY + 1);

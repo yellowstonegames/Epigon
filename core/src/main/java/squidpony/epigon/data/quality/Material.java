@@ -10,5 +10,6 @@ public interface Material extends ConstantKey {
     Color getMaterialColor();
     int getValue();
     int getHardness();
+    int getFlammability();
     char getGlyph();
 }

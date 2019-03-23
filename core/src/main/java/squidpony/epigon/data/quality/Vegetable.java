@@ -31,7 +31,7 @@ public enum Vegetable implements ConstantKey {
                             : "@Name chew$ the bitter yarrow and make$ a face.")),
     MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁",
             new Interactable("eat", true, false, (actor, target, level) -> {
-                actor.stats.get(Stat.HUNGER).addActual(10);
+                actor.stats.get(Stat.NUTRITION).addActual(10);
                 return "@Name eat$ the mossmelon with gusto.";})),
     SAINT_JOHNʼS_WORT('ˬ', SColor.AURORA_ASPARAGUS, "a squat, round-leafed plant"),
     ANGELCRESS('∝', SColor.AURORA_SAGE_GREEN, "a water plant with lobes that suggest angel wings", "~≁",
@@ -63,8 +63,8 @@ public enum Vegetable implements ConstantKey {
     ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts",
             new Interactable("eat", true, false, (actor, target, level) ->
             {
-                actor.stats.get(Stat.HUNGER).addActual(1);
-                actor.stats.get(Stat.THIRST).addActual(9);
+                actor.stats.get(Stat.NUTRITION).addActual(1);
+                actor.stats.get(Stat.HYDRATION).addActual(9);
                 return "@Name slurp$ the clear, pure gel from the aloe vera.";}),
             new Interactable("apply to skin", true, false, (actor, target, level) ->
                 actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Ignite"))
@@ -102,7 +102,7 @@ public enum Vegetable implements ConstantKey {
     BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey", new Interactable(
             "chew", true, false, (actor, target, level) -> {
         actor.stats.get(Stat.SLEEP).addActual(8);
-        actor.stats.get(Stat.HUNGER).addActual(2);
+        actor.stats.get(Stat.NUTRITION).addActual(2);
         return "@Name chew$ on the tasty, tasty blue sweetleaf and feel$ more awake!";
     })),
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
@@ -111,7 +111,7 @@ public enum Vegetable implements ConstantKey {
                     "@Name put$ the sopping-wet lord's lily on @my head@s! @Name@m the lord@s of the nitwits!")),
     GHOST_ACORN('˳', SColor.AURORA_CELADON, "an acorn that seems almost weightless", "¸",
             new Interactable("eat", true, false, (actor, target, level) -> {
-                actor.stats.get(Stat.HUNGER).addActual(-1);
+                actor.stats.get(Stat.NUTRITION).addActual(-1);
                 return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
     FROST_WALNUT('˳', SColor.AURORA_AQUAMARINE, "a ripe but very hard walnut that feels icy-cold to the touch", "",
             new Interactable("open", true, false, (actor, target, level) -> {
@@ -125,7 +125,7 @@ public enum Vegetable implements ConstantKey {
                 return "@Name catch$$ on fire after cracking open the roaster's pecan!";})),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
             new Interactable("eat", true, false, (actor, target, level) -> {
-                actor.stats.get(Stat.HUNGER).addActual(10);
+                actor.stats.get(Stat.NUTRITION).addActual(10);
                 return "@Name eat$ the lobster apple, ignoring the bits of rind in @my teeth.";}));
     
     private final Color color;

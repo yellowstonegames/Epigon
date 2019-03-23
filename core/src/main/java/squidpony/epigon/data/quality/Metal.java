@@ -77,6 +77,12 @@ public enum Metal implements Material {
     public int getHardness() {
         return hardness;
     }
+
+    @Override
+    public int getFlammability() {
+        return -1;
+    }
+
     @Override
     public char getGlyph()
     {

@@ -202,6 +202,8 @@ public class RecipeMixer {
         blueprint.symbol = material.getGlyph();
         blueprint.mainMaterial = material;
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness() * 0.01));
+        if(material.getFlammability() >= 0) 
+            blueprint.stats.put(Stat.HYDRATION, new LiveValue(material.getFlammability()));
 
         Modification materialMod = new Modification();
         materialMod.baseValueMultiplier = material.getValue() * 0.01;
@@ -239,6 +241,8 @@ public class RecipeMixer {
         blueprint.attached = true;
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(100));
         blueprint.stats.put(Stat.TOUGHNESS, new LiveValue(20 + (material.lumber() == null ? 100 : material.lumber().hardness)));
+        if(material.lumber() != null && material.lumber().flammability >= 0)
+            blueprint.stats.put(Stat.HYDRATION, new LiveValue(material.lumber().flammability * (1.5 + blueprint.nextDouble())));
         if(material.fruit() != null) {
             for (int i = blueprint.next(3); i < 4; i++) {
                 blueprint.inventory.add(buildVegetable(material.fruit()));

@@ -152,7 +152,7 @@ public class HandBuilt {
         rawMeat = Physical.makeBasic("meat", 'ₘ', SColor.DB_FAWN);
         steak = Physical.makeBasic("steak", 'ᴤ', SColor.DB_MUD);
         eat = new Interactable("eat", true, false, (actor, target, level) -> {
-            actor.stats.get(Stat.HUNGER).addActual(target.stats.getOrDefault(Stat.VIGOR, LiveValue.ONE).actual());
+            actor.stats.get(Stat.NUTRITION).addActual(target.stats.getOrDefault(Stat.VIGOR, LiveValue.ONE).actual());
             return "@Name eat$ the " + target.name + ", and feel$ less hungry.";
         });
         
@@ -496,7 +496,7 @@ public class HandBuilt {
         
 //        Modification hungerUp = new Modification();
 //        LiveValueModification lvm = LiveValueModification.add(20);
-//        hungerUp.statChanges.put(Stat.HUNGER, lvm);
+//        hungerUp.statChanges.put(Stat.NUTRITION, lvm);
         
 //        RecipeBlueprint rb = new RecipeBlueprint();
 //        rb.requiredConsumed.put(rawMeat, 1);

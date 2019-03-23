@@ -179,6 +179,11 @@ public enum Stone implements Material {
     }
 
     @Override
+    public int getFlammability() {
+        return -1;
+    }
+
+    @Override
     public String toString() {
         return name().toLowerCase().replace('_', ' ');
     }

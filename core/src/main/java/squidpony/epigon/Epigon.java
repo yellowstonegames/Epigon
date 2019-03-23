@@ -530,8 +530,8 @@ public class Epigon extends Game {
     private void initPlayer() {
         player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(42.0);
-        player.stats.get(Stat.HUNGER).delta(-0.1);
-        player.stats.get(Stat.HUNGER).min(0);
+        player.stats.get(Stat.NUTRITION).delta(-0.1);
+        player.stats.get(Stat.NUTRITION).min(0);
         //player.stats.get(Stat.DEVOTION).actual(player.stats.get(Stat.DEVOTION).base() * 1.7);
         player.stats.values().forEach(lv -> lv.max(Double.max(lv.max(), lv.actual())));
         

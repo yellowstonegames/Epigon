@@ -2,9 +2,9 @@ package squidpony.epigon.data;
 
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
+import squidpony.squidmath.OrderedMap;
 
 import static squidpony.epigon.data.CalcStat.*;
-import squidpony.squidmath.OrderedMap;
 
 /**
  * Represents all of the possible base stats.
@@ -50,8 +50,8 @@ public enum Stat implements ConstantKey {
     SANITY("SA", "How sane one is; used to resist fear and horror."),
     
     // Needs
-    HUNGER("HU", "How full of nutrition."),
-    THIRST("TH", "How full of liquids."),
+    NUTRITION("NU", "How full of nutrition."), // objects with this are perishable; low nutrition spoils quickly
+    HYDRATION("HY", "How full of liquids."), // objects with this are flammable; low hydration catches fire easily 
     REST("RE", "How well rested, needed for mental and social healing."),
     SLEEP("SL", "How much sleep, needed for physical and magic healing."),
 
@@ -80,13 +80,13 @@ public enum Stat implements ConstantKey {
 
     public static final Stat[] healths = {VIGOR, ENDURANCE, SPIRIT, SANITY};
 
-    public static final Stat[] needs = {HUNGER, THIRST, REST, SLEEP};
+    public static final Stat[] needs = {NUTRITION, HYDRATION, REST, SLEEP};
 
     public static final Stat[] senses = {SIGHT, HEARING};
 
     public static final Stat[] utilities = {MOBILITY, VOLUME, MASS, OPACITY, STRUCTURE};
 
-    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, THIRST, HUNGER, SANITY, /*CHARM, INTELLECT,*/ SPIRIT, ENDURANCE};
+    public static final Stat[] rolloverProcessOrder = {REST, SLEEP, HYDRATION, NUTRITION, SANITY, /*CHARM, INTELLECT,*/ SPIRIT, ENDURANCE};
 
     public static final ConstantKey[] combatStats = {PRECISION, DAMAGE, INFLUENCE, CRIT, EVASION, DEFENSE,
         LUCK, STEALTH, QUICKNESS, RANGE, AREA};
@@ -148,9 +148,9 @@ public enum Stat implements ConstantKey {
                 return SPIRIT;
             case CHARM:
                 return SPIRIT;
-            case HUNGER:
+            case NUTRITION:
                 return ENDURANCE;
-            case THIRST:
+            case HYDRATION:
                 return ENDURANCE;
             case REST:
                 return SANITY;
@@ -172,9 +172,9 @@ public enum Stat implements ConstantKey {
 //                return SPIRIT;
 //            case CHARM:
 //                return INTELLECT;
-//            case HUNGER:
+//            case NUTRITION:
 //                return ENDURANCE;
-//            case THIRST:
+//            case HYDRATION:
 //                return ENDURANCE;
 //            case REST:
 //                return INTELLECT;
