@@ -1,15 +1,14 @@
 package squidpony.epigon.mapping;
 
 import squidpony.epigon.GauntRNG;
-import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;
+import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.NumberTools;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static squidpony.squidgrid.gui.gdx.SColor.*;
 
@@ -24,7 +23,7 @@ import static squidpony.squidgrid.gui.gdx.SColor.*;
 public class EpiTile {
 
     public Physical floor;
-    public List<Physical> contents = new ArrayList<>();
+    public ArrayList<Physical> contents = new ArrayList<>();
     public Physical blockage;
 
     private final float tintColor;

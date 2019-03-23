@@ -13,15 +13,16 @@ import squidpony.squidgrid.gui.gdx.SColor;
 /**
  * Created by Tommy Ettinger on 12/28/2018.
  */
-//¸ grass
-//˛ root
-//˳ fruit
-//ˬ leaf
-//˒ thorn
-//˷ vine
-//∗ flower
-//˔ fungus
-//∝ cress
+//¸  default grass
+//ᵧ  special grass
+//˛ᵩ root
+//˳˚ fruit
+//ˬ  leaf
+//˒  thorn
+//˷  vine
+//∗  flower
+//˔  fungus
+//∝  pond plants
 public enum Vegetable implements ConstantKey {
     BITTER_YARROW('∗', SColor.COSMIC_LATTE, "a small flower on a long stem",
             new Interactable("chew", true, false, (actor, target, level) -> 
@@ -39,9 +40,13 @@ public enum Vegetable implements ConstantKey {
                             ? "Saying a prayer to the angelcress lifts @name_s curse."
                             : "@Name look$ crazy, talking to a plant.")),
     SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture."),
-    GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves"),
+    GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves",
+            new Interactable("grasp", true, false, (actor, target, level) -> {
+                actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Bleed"), actor));
+                actor.stats.get(CalcStat.STEALTH).addActual(1.0);
+                return "@Name begin$ to bleed profusely, but the blood disappears before it touches the ground!";})),
     RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁"),
-    RASPUTINʼS_SORROW('˛', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death",
+    RASPUTINʼS_SORROW('ᵩ', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 if(actor.stats.get(Stat.VIGOR).actual() * 10.0 < actor.stats.get(Stat.VIGOR).max())
                 {
@@ -54,7 +59,7 @@ public enum Vegetable implements ConstantKey {
                     return "@Name eat$ the Rasputin's sorrow, only to feel agonizing pain!";
                 }
             })),
-    DESERT_SAGE('¸', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass"),
+    DESERT_SAGE('ᵧ', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass"),
     ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts",
             new Interactable("eat", true, false, (actor, target, level) ->
             {
@@ -66,7 +71,7 @@ public enum Vegetable implements ConstantKey {
                         ? "@Name rub$ aloe vera sap on @my skin, soothing @my burns." 
                         : "@Name decide$ a nice aloe vera spa treatment is the appropriate course of action."
             )),
-    FRAGRANT_CLOVEˉHAZEL('˛', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent", new Interactable(
+    FRAGRANT_CLOVEˉHAZEL('ᵩ', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent", new Interactable(
             "eat", true, false, (actor, target, level) -> {
                 if(actor.nextBoolean())
                 {
@@ -103,21 +108,21 @@ public enum Vegetable implements ConstantKey {
     BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
     LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~",
             new Interactable("wear", false, false, (actor, target, level) ->
-                    "@Name put$ the sopping-wet lordʼs lily on @my head@s! @Name@m the lord@s of the nitwits!")),
+                    "@Name put$ the sopping-wet lord's lily on @my head@s! @Name@m the lord@s of the nitwits!")),
     GHOST_ACORN('˳', SColor.AURORA_CELADON, "an acorn that seems almost weightless", "¸",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(-1);
                 return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
-    FROST_WALNUT('˳', SColor.AURORA_AQUAMARINE, "an ripe but very hard walnut that feels icy-cold to the touch", "",
+    FROST_WALNUT('˳', SColor.AURORA_AQUAMARINE, "a ripe but very hard walnut that feels icy-cold to the touch", "",
             new Interactable("open", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Chill"), actor));
                 actor.stats.get(CalcStat.DEFENSE).addActual(1.0);
                 return "@Name shiver$ with wintry cold after cracking open the frost walnut!";})),
-    ROASTERʼS_PECAN('˳', SColor.CW_RICH_ORANGE, "an ripe pecan in a hard shell that seems hot to the touch", "",
+    ROASTERʼS_PECAN('˳', SColor.CW_RICH_ORANGE, "a ripe pecan in a hard shell that seems hot to the touch", "",
             new Interactable("open", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Ignite"), actor));
                 actor.stats.get(CalcStat.DAMAGE).addActual(1.0);
-                return "@Name catch$$ on fire after cracking open the roasterʼs pecan!";})),
+                return "@Name catch$$ on fire after cracking open the roaster's pecan!";})),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.HUNGER).addActual(10);
