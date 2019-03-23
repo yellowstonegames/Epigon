@@ -57,7 +57,7 @@ public class Prefs {
         return Gdx.app.getPreferences(prefKey).getInteger("screenYLocation", 0);
     }
 
-    public static void setScreenYLoaction(int y) {
+    public static void setScreenYLocation(int y) {
         Gdx.app.getPreferences(prefKey).putInteger("screenYLocation", y).flush();
     }
 

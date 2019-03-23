@@ -6,6 +6,7 @@ import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;
 import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidmath.NumberTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +32,15 @@ public class EpiTile {
     
     public EpiTile()
     {
-        tintColor = dbColors[System.identityHashCode(this) & 31];
-        tintAmount = GauntRNG.nextFloat(System.identityHashCode(this)) * 0.3f;
+        tintColor = DAWNBRINGER_AURORA[System.identityHashCode(this) & 255].toEditedFloat(0f, -0.4f, -0.1f, 1f);
+        tintAmount = GauntRNG.nextFloat(System.identityHashCode(this)) * GauntRNG.nextFloat(NumberTools.doubleToLongBits(tintColor)) * 0.6f;
     }
     
     public EpiTile(Physical floor)
     {
         this.floor = floor;
-        tintColor = dbColors[floor.next(5)];
-        tintAmount = floor.nextFloat(0.3f);
+        tintColor = DAWNBRINGER_AURORA[floor.next(8)].toEditedFloat(0f, -0.4f, -0.1f, 1f);
+        tintAmount = floor.nextFloat() * GauntRNG.nextFloat(NumberTools.doubleToLongBits(tintColor)) * 0.6f;
     }
     
     /**
@@ -102,10 +103,10 @@ public class EpiTile {
      * @return
      */
     public float getBackgroundColor(int x, int y, long time) {
-        return //0x1.fffffep-126f; // fully transparent, but not equal to 0 (0 is used to leave the current background)
-                floor != null && floor.terrainData != null
+        return floor != null && floor.terrainData != null
                         ? floor.terrainData.noise == null ? floor.terrainData.background : SColor.toEditedFloat(floor.terrainData.background, 0f, 0f, floor.terrainData.noise.getConfiguredNoise(x * 5f, y * 5f, time * 0x1p-7f) * 0.8f, 0f)
-                        : 0x1.fffffep-126f ;
+                        : 0x1.fffffep-126f  // fully transparent, but not equal to 0 (0 is used to leave the current background)
+                ;
     }
 
     public static final float[] dbColors = {
@@ -147,7 +148,7 @@ public class EpiTile {
         //check in order of preference
         if (blockage != null) {
             if (blockage.creatureData != null) {
-                return SColor.lerpFloatColorsBlended(getCreature().color, tintColor, tintAmount);
+                return getCreature().color;
             } else {
                 return SColor.lerpFloatColorsBlended(blockage.color, tintColor, tintAmount);
             }
