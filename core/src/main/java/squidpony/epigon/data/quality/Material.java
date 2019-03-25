@@ -7,7 +7,7 @@ import squidpony.epigon.ConstantKey;
  * Created by Tommy Ettinger on 11/26/2017.
  */
 public interface Material extends ConstantKey {
-    Color getMaterialColor();
+    Color getColor();
     int getValue();
     int getHardness();
     int getFlammability();

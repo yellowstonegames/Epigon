@@ -164,7 +164,7 @@ public enum Stone implements Material {
 
 
     @Override
-    public Color getMaterialColor() {
+    public Color getColor() {
         return front;
     }
 

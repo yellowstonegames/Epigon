@@ -61,7 +61,7 @@ public enum Hide implements Material {
     }
 
     @Override
-    public Color getMaterialColor() {
+    public Color getColor() {
         return front;
     }
 

@@ -23,30 +23,33 @@ import squidpony.squidgrid.gui.gdx.SColor;
 //∗  flower
 //˔  fungus
 //∝  pond plants
-public enum Vegetable implements ConstantKey {
-    BITTER_YARROW('∗', SColor.COSMIC_LATTE, "a small flower on a long stem",
+public enum Vegetable implements Material {
+    BITTER_YARROW('∗', SColor.COSMIC_LATTE, "a small flower on a long stem", 1, 1, 15,
             new Interactable("chew", true, false, (actor, target, level) -> 
                     actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Afflict"))
                             ? "Chewing the bitter yarrow cures @my poison affliction."
                             : "@Name chew$ the bitter yarrow and make$ a face.")),
-    MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁",
+    MOSSMELON('˳', SColor.AURORA_FERN_GREEN, "a strange round melon with a mossy rind", "¸≁", 2, 2, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.NUTRITION).addActual(10);
                 return "@Name eat$ the mossmelon with gusto.";})),
-    SAINT_JOHNʼS_WORT('ˬ', SColor.AURORA_ASPARAGUS, "a squat, round-leafed plant"),
+    SAINT_JOHNʼS_WORT('ˬ', SColor.AURORA_ASPARAGUS, "a squat, round-leafed plant", 1, 1, -1),
     ANGELCRESS('∝', SColor.AURORA_SAGE_GREEN, "a water plant with lobes that suggest angel wings", "~≁",
+            5, 1, -1,
             new Interactable("worship", true, false, (actor, target, level) ->
                     actor.removeCondition(ConditionBlueprint.CONDITIONS.get("Curse"))
                             ? "Saying a prayer to the angelcress lifts @name_s curse."
                             : "@Name look$ crazy, talking to a plant.")),
-    SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture."),
+    SNAKEBERRY('˳', SColor.AURORA_EGGPLANT, "a shrub with deep-purple berries that have a scaly texture.", 2, 3, -1),
     GRAY_DOVETHORN('˒', SColor.LAVENDER_GRAY, "a vine that intermingles thorns with gray feathery leaves",
+            1, 4, 3,
             new Interactable("grasp", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Bleed"), actor));
                 actor.stats.get(CalcStat.STEALTH).addActual(1.0);
                 return "@Name begin$ to bleed profusely, but the blood disappears before it touches the ground!";})),
-    RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁"),
+    RED_RATBANE('˷', SColor.RED_BEAN, "an ugly red vine known to deter rodents", "≁", 4, 2, 4),
     RASPUTINʼS_SORROW('ᵩ', SColor.AURORA_ZUCCHINI, "a dark vine purported to help men cheat death",
+            10, 2, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 if(actor.stats.get(Stat.VIGOR).actual() * 10.0 < actor.stats.get(Stat.VIGOR).max())
                 {
@@ -59,8 +62,9 @@ public enum Vegetable implements ConstantKey {
                     return "@Name eat$ the Rasputin's sorrow, only to feel agonizing pain!";
                 }
             })),
-    DESERT_SAGE('ᵧ', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass"),
+    DESERT_SAGE('ᵧ', SColor.AURORA_SAGE_GREEN, "a pleasant-smelling dry grass", 2, 1, 1),
     ALOE_VERA('˒', SColor.AURORA_SILVER_GREEN, "a thorny succulent that hoards moisture in dry deserts",
+            1, 1, -1,
             new Interactable("eat", true, false, (actor, target, level) ->
             {
                 actor.stats.get(Stat.NUTRITION).addActual(1);
@@ -71,8 +75,9 @@ public enum Vegetable implements ConstantKey {
                         ? "@Name rub$ aloe vera sap on @my skin, soothing @my burns." 
                         : "@Name decide$ a nice aloe vera spa treatment is the appropriate course of action."
             )),
-    FRAGRANT_CLOVEˉHAZEL('ᵩ', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent", new Interactable(
-            "eat", true, false, (actor, target, level) -> {
+    FRAGRANT_CLOVEˉHAZEL('ᵩ', SColor.CLOVE_BROWN, "a rich-brown root with an enticing scent", 
+            0, 1, 7,
+            new Interactable("eat", true, false, (actor, target, level) -> {
                 if(actor.nextBoolean())
                 {
                     actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Afflict"), actor));
@@ -85,63 +90,77 @@ public enum Vegetable implements ConstantKey {
                 }
     })),
     FLYˉAGARIC_MUSHROOM('˔', SColor.RED_PIGMENT, "a toadstool that is said to bring men to Heaven and Hell",
+            8, 1, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Afflict"), actor));
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Intoxicate"), actor));
                 return "@Name begin$ to... uggh... woah... AsCeNd InTo A hIgHeR pLaNe Of ExIsTeNcE!";
             })),
     SKULLMALLOW('∝', SColor.CW_ALMOST_WHITE, "a reed that oozes a sticky white sap in the pattern of a skull", "¸≁",
+            1, 1, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Wither"), actor));
                 return "@Name turn$ deathly pale after eating the skullmallow, as one might expect.";})),
-    NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~", new Interactable("contemplate",
-            false, false, (actor, target, level) -> {
+    NOBLE_LOTUS('∗', SColor.HELIOTROPE, "a beautiful purple flower on a lily pad", "~",
+            15, 1, -1, 
+            new Interactable("contemplate", false, false, (actor, target, level) -> {
         actor.stats.get(Stat.SANITY).addActual(5);
         return "@Name pause$ to marvel at the perfection of the noble lotus, and calm$ down.";
     })),
-    BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey", new Interactable(
-            "chew", true, false, (actor, target, level) -> {
+    BLUE_SWEETLEAF('ˬ', SColor.AURORA_SHARP_AZURE, "a low-lying, bright-blue-leafed shrub that smells like honey",
+            3, 1, 11,
+            new Interactable("chew", true, false, (actor, target, level) -> {
         actor.stats.get(Stat.SLEEP).addActual(8);
         actor.stats.get(Stat.NUTRITION).addActual(2);
         return "@Name chew$ on the tasty, tasty blue sweetleaf and feel$ more awake!";
     })),
-    BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent"),
+    BLOODˉOFˉTHIEVES('˒', SColor.AURORA_FRESH_BLOOD, "a thorny thicket said to prick only those with ill intent",
+            1, 7, 6),
     LORDʼS_LILY('∗', SColor.WHITE, "a pure-white flower shaped something like a crown", "~",
+            5, 1, -1,
             new Interactable("wear", false, false, (actor, target, level) ->
                     "@Name put$ the sopping-wet lord's lily on @my head@s! @Name@m the lord@s of the nitwits!")),
     GHOST_ACORN('˳', SColor.AURORA_CELADON, "an acorn that seems almost weightless", "¸",
+            1, 10, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.NUTRITION).addActual(-1);
                 return "@Name eat$ the ghost acorn, but feel$ even hungrier...";})),
     FROST_WALNUT('˳', SColor.AURORA_AQUAMARINE, "a ripe but very hard walnut that feels icy-cold to the touch", "",
+            5, 90, -1,
             new Interactable("open", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Chill"), actor));
                 actor.stats.get(CalcStat.DEFENSE).addActual(1.0);
                 return "@Name shiver$ with wintry cold after cracking open the frost walnut!";})),
     ROASTERʼS_PECAN('˳', SColor.CW_RICH_ORANGE, "a ripe pecan in a hard shell that seems hot to the touch", "",
+            5, 90, 1,
             new Interactable("open", true, false, (actor, target, level) -> {
                 actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Ignite"), actor));
                 actor.stats.get(CalcStat.DAMAGE).addActual(1.0);
                 return "@Name catch$$ on fire after cracking open the roaster's pecan!";})),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
+            2, 20, -1, 
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.NUTRITION).addActual(10);
                 return "@Name eat$ the lobster apple, ignoring the bits of rind in @my teeth.";}));
     
     private final Color color;
     private final char symbol;
+    private final int value, hardness, flammability;
     private final String description;
     private final String prettyName;
     private final String terrains;
     private final Interactable[] interactables;
     
-    Vegetable(char symbol, Color color, String description, Interactable... interactables) {
-        this(symbol, color, description, "¸", interactables);
+    Vegetable(char symbol, Color color, String description, int value, int hardness, int flammability, Interactable... interactables) {
+        this(symbol, color, description, "¸", value, hardness, flammability, interactables);
     }
-    Vegetable(char symbol, Color color, String description, String terrains, Interactable... interactables) {
+    Vegetable(char symbol, Color color, String description, String terrains, int value, int hardness, int flammability, Interactable... interactables) {
         this.symbol = symbol;
         this.color = color;
         this.description = description;
+        this.value = value;
+        this.hardness = hardness;
+        this.flammability = flammability;
         prettyName = Utilities.lower(name(), "_").replace('ˉ', '-').replace('ʼ', '\'');
         this.terrains = terrains;
         this.interactables = interactables == null ? new Interactable[0] : interactables;
@@ -165,10 +184,10 @@ public enum Vegetable implements ConstantKey {
         return prettyName;
     }
 
-    public Color color() {
+    public Color getColor() {
         return color;
     }
-    public char symbol() {
+    public char getGlyph() {
         return symbol;
     }
     public String terrains()
@@ -182,4 +201,18 @@ public enum Vegetable implements ConstantKey {
 
     public static final Vegetable[] ALL = values();
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
+
+    @Override
+    public int getHardness() {
+        return 0;
+    }
+
+    @Override
+    public int getFlammability() {
+        return 0;
+    }
 }

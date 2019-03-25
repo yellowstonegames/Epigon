@@ -62,7 +62,7 @@ public enum Wood implements Material {
     }
 
     @Override
-    public Color getMaterialColor() {
+    public Color getColor() {
         return front;
     }
 

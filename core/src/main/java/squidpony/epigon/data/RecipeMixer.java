@@ -101,7 +101,7 @@ public class RecipeMixer {
 
             Modification materialMod = new Modification();
             materialMod.baseValueMultiplier = material.getValue() * 0.01;
-            materialMod.color = material.getMaterialColor();
+            materialMod.color = material.getColor();
             materialMod.possiblePrefix = Maker.makeList(material.toString());
             LiveValueModification lvm = new LiveValueModification();
             lvm.baseOverwrite = material.getHardness() * 0.01;
@@ -196,23 +196,32 @@ public class RecipeMixer {
 
     public static Physical buildMaterial(Material material) {
         Physical blueprint = new Physical();
-        blueprint.color = material.getMaterialColor().toFloatBits();
+        blueprint.color = material.getColor().toFloatBits();
         blueprint.name = "Bit of " + material.toString();
         blueprint.baseValue = material.getValue();
         blueprint.symbol = material.getGlyph();
         blueprint.mainMaterial = material;
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness() * 0.01));
-        if(material.getFlammability() >= 0) 
-            blueprint.stats.put(Stat.HYDRATION, new LiveValue(material.getFlammability()));
 
         Modification materialMod = new Modification();
         materialMod.baseValueMultiplier = material.getValue() * 0.01;
-        materialMod.color = material.getMaterialColor();
+        materialMod.color = material.getColor();
+        materialMod.baseValue = (double)material.getValue();
         materialMod.possiblePrefix = Maker.makeList(material.toString());
         LiveValueModification lvm = new LiveValueModification();
         lvm.baseOverwrite = material.getHardness() * 0.01;
         lvm.actualOverwrite = material.getHardness() * 0.01;
         materialMod.statChanges.put(Stat.STRUCTURE, lvm);
+
+        if(material.getFlammability() >= 0)
+        {
+            blueprint.stats.put(Stat.HYDRATION, new LiveValue(material.getFlammability()));
+            LiveValueModification fm = new LiveValueModification();
+            fm.baseOverwrite = (double) material.getFlammability();
+            fm.actualOverwrite = (double) material.getFlammability();
+            materialMod.statChanges.put(Stat.HYDRATION, fm);
+        }
+
         blueprint.whenUsedAsMaterial.add(materialMod);
 
         return blueprint;
@@ -220,12 +229,15 @@ public class RecipeMixer {
 
     public static Physical buildVegetable(Vegetable material) {
         Physical blueprint = new Physical();
-        blueprint.color = material.color().toFloatBits();
+        blueprint.color = material.getColor().toFloatBits();
         blueprint.name = material.prettyName();
-        blueprint.baseValue = 5;
         blueprint.rarity = Rating.SLIGHT;
-        blueprint.symbol = material.symbol();
-        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(2));
+        blueprint.symbol = material.getGlyph();
+        blueprint.baseValue = material.getValue();
+        blueprint.stats.put(Stat.STRUCTURE, new LiveValue(material.getHardness()));
+        if(material.getFlammability() >= 0) {
+            blueprint.stats.put(Stat.HYDRATION, new LiveValue(material.getFlammability()));
+        }
         if(material.interactables().length > 0)
             blueprint.interactableData = Maker.makeList(material.interactables());
         return blueprint;
@@ -235,7 +247,7 @@ public class RecipeMixer {
         Physical blueprint = new Physical();
         blueprint.color = material.color().toFloatBits();
         blueprint.name = material.prettyName();
-        blueprint.baseValue = material.lumber() == null ? 50 : material.lumber().value;
+        blueprint.baseValue = material.lumber() == null ? 50 : material.lumber().value * 10;
         blueprint.rarity = Rating.SLIGHT;
         blueprint.symbol = material.symbol();
         blueprint.attached = true;

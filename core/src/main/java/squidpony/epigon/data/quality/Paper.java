@@ -59,7 +59,7 @@ public enum Paper implements Material {
     }
 
     @Override
-    public Color getMaterialColor() {
+    public Color getColor() {
         return front;
     }
 
