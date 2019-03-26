@@ -23,7 +23,8 @@ public enum Tree implements ConstantKey {
     PECAN('¥', SColor.TAN, "A tall tree with some little brown nuts in it", Wood.PECAN, Vegetable.ROASTERʼS_PECAN),
     MAPLE('¥', SColor.CLOVE_BROWN, "A tree with some beautiful leaves and thick branches", Wood.MAPLE, null),
     WALNUT('¥', SColor.WALNUT, "A large tree with dark wood and some small white nuts high up on it", Wood.WALNUT, Vegetable.FROST_WALNUT),
-    APPLE('¥', SColor.BRUSHWOOD_DYED, "A small tree bearing bright-red apples", Wood.OAK, Vegetable.LOBSTER_APPLE);
+    APPLE('¥', SColor.BRUSHWOOD_DYED, "A small tree bearing bright-red apples", Wood.OAK, Vegetable.LOBSTER_APPLE),
+    CHERRY('¥', SColor.RED_BEAN, "A small tree bearing scintillating red cherries", Wood.CHERRY, Vegetable.THUNDER_CHERRY);
     private final Color color;
     private final char symbol;
     private final String description;

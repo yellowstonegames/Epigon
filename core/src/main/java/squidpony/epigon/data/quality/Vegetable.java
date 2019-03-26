@@ -138,10 +138,16 @@ public enum Vegetable implements Material {
                 actor.stats.get(CalcStat.DAMAGE).addActual(1.0);
                 return "@Name catch$$ on fire after cracking open the roaster's pecan!";})),
     LOBSTER_APPLE('˳', SColor.DB_LOBSTER, "an apple with a thick, shell-like rind", "",
-            2, 20, -1, 
+            2, 20, -1,
             new Interactable("eat", true, false, (actor, target, level) -> {
                 actor.stats.get(Stat.NUTRITION).addActual(10);
-                return "@Name eat$ the lobster apple, ignoring the bits of rind in @my teeth.";}));
+                return "@Name eat$ the lobster apple, ignoring the bits of rind in @my teeth.";})),
+    THUNDER_CHERRY('˳', SColor.CRIMSON, "a cluster of bright-red cherries with sparks arcing across their skins", "",
+            2, 1, -1, new Interactable("eat", true, false, (actor, target, level) -> {
+        actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Electrify"), actor));
+        actor.stats.get(CalcStat.EVASION).addActual(1.0);
+        return "@Name @am shocked by the unexpectedly-electric cherries!";
+    }));
     
     private final Color color;
     private final char symbol;
@@ -151,10 +157,12 @@ public enum Vegetable implements Material {
     private final String terrains;
     private final Interactable[] interactables;
     
-    Vegetable(char symbol, Color color, String description, int value, int hardness, int flammability, Interactable... interactables) {
+    Vegetable(char symbol, Color color, String description,
+              int value, int hardness, int flammability, Interactable... interactables) {
         this(symbol, color, description, "¸", value, hardness, flammability, interactables);
     }
-    Vegetable(char symbol, Color color, String description, String terrains, int value, int hardness, int flammability, Interactable... interactables) {
+    Vegetable(char symbol, Color color, String description, String terrains,
+              int value, int hardness, int flammability, Interactable... interactables) {
         this.symbol = symbol;
         this.color = color;
         this.description = description;
@@ -203,16 +211,16 @@ public enum Vegetable implements Material {
 
     @Override
     public int getValue() {
-        return 0;
+        return value;
     }
 
     @Override
     public int getHardness() {
-        return 0;
+        return hardness;
     }
 
     @Override
     public int getFlammability() {
-        return 0;
+        return flammability;
     }
 }

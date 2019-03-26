@@ -3,6 +3,7 @@ package squidpony.epigon.data;
 import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.data.quality.Element;
+import squidpony.squidmath.DiverRNG;
 import squidpony.squidmath.NumberTools;
 import squidpony.squidmath.OrderedMap;
 import squidpony.squidmath.UnorderedSet;
@@ -118,7 +119,24 @@ public class ConditionBlueprint extends EpiData {
                     null)
             , "Electrify", new ConditionBlueprint("electrify", "electrif$$$", 3, 1, Element.LIGHTNING, '⚡',
                     ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.STEALTH, (int)'-', 2.0, CalcStat.EVASION, (int)'-', 2.0),
-                    null)
+                    new VisualCondition(){
+                        @Override
+                        public void update() {
+                            long time = DiverRNG.determine(TimeUtils.timeSinceMillis(Epigon.startMillis));
+                            if((time & 15L) == 0)
+                            {
+                                mildAdd = -0.625f;
+                                warmMul = 0.625f;
+                                lumaAdd = time * 0x1.9p-61f;
+                            }
+                            else 
+                            {
+                                mildAdd = 0f;
+                                warmMul = 1f;
+                                lumaAdd = time * 0x1.3p-68f;
+                            }
+                        }
+                    })
             , "Sunder", new ConditionBlueprint("sunder", "sunder$", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
                     null)
