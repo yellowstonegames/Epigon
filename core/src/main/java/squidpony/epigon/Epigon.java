@@ -1873,7 +1873,7 @@ public class Epigon extends Game {
                     toCursor.clear();
                     mapInput.setMouse(equipmentMouse);
                     break;
-                case DRAW:
+                case WIELD:
                     equipItem();
                     break;
                 case DROP:
@@ -2079,8 +2079,11 @@ public class Epigon extends Game {
                 case MOVE_RIGHT:
                     mapOverlayHandler.move(Direction.RIGHT);
                     break;
-                case DRAW:
+                case WIELD:
                     equipItem(mapOverlayHandler.getSelected());
+                    break;
+                case DROP:
+                    map.contents[player.location.x][player.location.y].contents.add(player.removeFromInventory(mapOverlayHandler.getSelected()));
                     break;
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();

@@ -1,6 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.data.quality.Element;
@@ -412,18 +413,23 @@ public class Physical extends EpiData {
         }
     }
 
-    public void removeFromInventory(Physical removing) {
-        removeFromInventory(removing, 1);
+    public Physical removeFromInventory(Physical removing) {
+        return removeFromInventory(removing, 1);
     }
 
-    public void removeFromInventory(Physical removing, int quantity) {
+    public Physical removeFromInventory(Physical removing, int quantity) {
         // TODO - handle negatives
         // TODO - message that requested quantity not found
         // NOTE - during object creation the quantity may not exist as equipping it might be the first interaction with the item
         if (removing.groupingData == null || removing.groupingData.quantity <= quantity) {
             inventory.remove(removing);
+            return removing;
         } else {
+            quantity = MathUtils.clamp(quantity, 0, removing.groupingData.quantity);
             removing.groupingData.quantity -= quantity;
+            Physical dropped = RecipeMixer.buildPhysical(removing);
+            dropped.groupingData.quantity = quantity;
+            return dropped;
         }
     }
 

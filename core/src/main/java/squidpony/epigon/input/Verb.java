@@ -12,8 +12,8 @@ public enum Verb {
         + " powders, gels, and oils where CONSUME applies them to your skin. Use this command if you want to eat the body butter like it's actual butter"),
     CONTEXT_PRIOR("Cycles the context area (lower right box on the Main View) one display state prior."),
     CONTEXT_NEXT("Cycles the context area (lower right box on the Main View) to the next display state."),
-    DRAW("In map view, randomly wields a weapon from the inventory. In inventory view, manually picks an object to equip."),
-    DROP("Drops the items you currently hold in random adjacent squares."),
+    WIELD("In map view, randomly wields a weapon from the inventory. In inventory view, manually picks an object to equip."),
+    DROP("In map view, drops the items you currently hold in random adjacent squares. In inventory view, drops the selected item in your square."),
     EXAMINE("All five senses used to pay particular attention to an area; may trigger traps if you don't find them, which will not happen from just \"View\""), // If VIEW is changed this last bit needs to be changed as well
     FIRE("Using an equipped weapon with ammo."),
     GATHER("Get from all near tiles."),
