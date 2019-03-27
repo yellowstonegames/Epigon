@@ -1,10 +1,12 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import squidpony.StringKit;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
-import squidpony.epigon.data.slot.*;
+import squidpony.epigon.data.slot.ClothingSlot;
+import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Creature;
 import squidpony.squidgrid.gui.gdx.PanelEffect;
 import squidpony.squidgrid.gui.gdx.SColor;
@@ -12,6 +14,7 @@ import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.SquidColorCenter;
 import squidpony.squidmath.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -296,9 +299,31 @@ public class InfoHandler {
 
             if (physical.creatureData.weaponChoices != null && physical.creatureData.weaponChoices.items() != null && !physical.creatureData.weaponChoices.items().isEmpty()) {
                 Weapon currentWeapon = physical.creatureData.weaponChoices.items().first();
-                put(3, yOffset, "BARE " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
+                put(3, yOffset++, "BARE " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
             } else if (!offenseFound) {
-                put(3, yOffset, "Offenseless");
+                put(3, yOffset++, "Offenseless");
+            }
+            yOffset++;
+            if(physical.conditions.isEmpty())
+            {
+                put(3, yOffset, "Condition: healthy ([/]for now[/])");
+            }
+            else if(physical.conditions.size() == 1)
+            {
+                put(3, yOffset, "Condition: " + physical.conditions.getAt(0).parent.adjective);
+            }
+            else 
+            {
+                StringBuilder sb = new StringBuilder("Conditions: ").append(physical.conditions.getAt(0).parent.adjective);
+                for (int i = 1; i < physical.conditions.size(); i++) {
+                    sb.append(", ").append(physical.conditions.getAt(i).parent.adjective);
+                }
+                ArrayList<String> wrapped = new ArrayList<>();
+                StringKit.wrap(wrapped, sb, width - 6);
+                for (int i = 0; i < wrapped.size(); i++) {
+                    put(3, yOffset++, wrapped.get(i));
+                }
+                
             }
         }
     }

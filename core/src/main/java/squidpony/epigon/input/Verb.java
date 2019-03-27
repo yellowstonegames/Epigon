@@ -9,7 +9,7 @@ public enum Verb {
     ATTEMPT("Fiddle with an item or environment feature to try to figure out its function; luck-based, may backfire. \"What does this lever do?\""),
     CONSUME("Eat, drink, snort. Also includes rubbing oils, powders, and gels on yourself."),
     CONSUME_WEIRDLY("For items that may have different effects on different parts of the body. This is an option for"
-        + " powders, gels, and oils where CONSUME applies them to your skin. Use this command if you want to eat the body butter like it's actual butter"),
+        + " powders, gels, and oils where CONSUME applies them to your skin. Use this command if you want to eat the body butter like it's actual butter."),
     CONTEXT_PRIOR("Cycles the context area (lower right box on the Main View) one display state prior."),
     CONTEXT_NEXT("Cycles the context area (lower right box on the Main View) to the next display state."),
     WIELD("In map view, randomly wields a weapon from the inventory. In inventory view, manually picks an object to equip."),
@@ -21,7 +21,7 @@ public enum Verb {
     HELP("Opens up the manual, key binding reference, and 'hints and tips.'"),
     INFO_PRIOR("Cycles the info area (upper right box on the Main View) one display state prior."),
     INFO_NEXT("Cycles the info area (upper right box on the Main View) to the next display state."),
-    INTERACT("Generic interaction with world environment. Catch-all for anything not covered by specific verb."),
+    INTERACT("Generic interaction with world environment and items; may have a context menu to select a specific action."),
     EQUIPMENT("Open a screen to see your items and equip or use them."),
     MESSAGE_PRIOR("Cycles the message area (lower left box on the Main View) to show one earlier message, if any."),
     MESSAGE_NEXT("Cycles the message area (lower left box on the Main View) to show one later message, if any."),
