@@ -8,10 +8,7 @@ import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Creature;
-import squidpony.squidgrid.gui.gdx.PanelEffect;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SparseLayers;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidmath.*;
 
 import java.util.ArrayList;
@@ -140,7 +137,7 @@ public class InfoHandler {
     }
 
     private void put(int x, int y, String s) {
-        layers.put(x, y, s, layers.defaultPackedForeground, 0f);
+        layers.put(x, y, GDXMarkup.instance.colorString(s));
     }
 
     private void put(int x, int y, String s, Color color) {
@@ -306,7 +303,7 @@ public class InfoHandler {
             yOffset++;
             if(physical.conditions.isEmpty())
             {
-                put(3, yOffset, "Condition: healthy ([/]for now[/])");
+                put(3, yOffset, "Condition: healthy ([/]for now...[/])");
             }
             else if(physical.conditions.size() == 1)
             {
