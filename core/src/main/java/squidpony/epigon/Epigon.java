@@ -320,20 +320,32 @@ public class Epigon extends Game {
                 float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo,
                         conditionY = 1f, conditionCw = 1f, conditionCm = 1f,
                         conditionYAdd = 0f, conditionCwAdd = 0f, conditionCmAdd = 0f;
-                final int clen = player.conditions.size();
-                for (int i = clen - 1; i >= 0; i--) {
-                    VisualCondition vis = player.conditions.getAt(i).parent.visual;
-                    if(vis != null)
-                    {
-                        vis.update();
-                        conditionY *= vis.lumaMul;
-                        conditionCw *= vis.warmMul;
-                        conditionCm *= vis.mildMul;
-                        conditionYAdd += vis.lumaAdd;
-                        conditionCwAdd += vis.warmAdd;
-                        conditionCmAdd += vis.mildAdd;
-                        break;
+                if(player.visualCondition == null) {
+                    final int clen = player.conditions.size();
+                    for (int i = clen - 1; i >= 0; i--) {
+                        VisualCondition vis = player.conditions.getAt(i).parent.visual;
+                        if (vis != null) {
+                            vis.update();
+                            conditionY *= vis.lumaMul;
+                            conditionCw *= vis.warmMul;
+                            conditionCm *= vis.mildMul;
+                            conditionYAdd += vis.lumaAdd;
+                            conditionCwAdd += vis.warmAdd;
+                            conditionCmAdd += vis.mildAdd;
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    VisualCondition vis = player.visualCondition;
+                    vis.update();
+                    conditionY *= vis.lumaMul;
+                    conditionCw *= vis.warmMul;
+                    conditionCm *= vis.mildMul;
+                    conditionYAdd += vis.lumaAdd;
+                    conditionCwAdd += vis.warmAdd;
+                    conditionCmAdd += vis.mildAdd;
                 }
                 filter.yMul  = 0.7f  * conditionY;
                 filter.cwMul = 0.65f * conditionCw;

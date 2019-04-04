@@ -68,6 +68,7 @@ public class Physical extends EpiData {
     public OrderedMap<Element, LiveValue> elementalDamageMultiplier = new OrderedMap<>(); // The change to incoming damage
 
     public OrderedSet<Condition> conditions = new OrderedSet<>();
+    public VisualCondition visualCondition = null;
     private ArrayList<Condition> conditionsToRemove = new ArrayList<>();
 
     // initial stats on instantiation come from required modification

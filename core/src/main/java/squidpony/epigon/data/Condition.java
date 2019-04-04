@@ -84,12 +84,12 @@ public class Condition extends EpiData {
     }
     public boolean update()
     {
-//        if(parent.period != 0 && currentTick % parent.period == 0) {
+        if(parent.period != 0 && parent.changes != null && currentTick % parent.period == 0) {
 //            for (Modification m : parent.tickEffects)
 //            {
 //                RecipeMixer.applyModification(attachedTo, m);
-//            }
-//        }
+                ChangeTable.strikePhysical(attachedTo, parent.changes);
+        }
         if(++currentTick >= parent.duration)
         {
             return wearOff();

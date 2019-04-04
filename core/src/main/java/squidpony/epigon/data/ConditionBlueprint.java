@@ -110,7 +110,7 @@ public class ConditionBlueprint extends EpiData {
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 4.0, CalcStat.INFLUENCE, (int)'-', 4.0, CalcStat.CRIT, (int)'-', 2.0), 
                     null)
             , "Corrode", new ConditionBlueprint("corrode", "corrode$", "corroding", 4, 1, Element.ACID, '\uffff',
-                    ChangeTable.makeCT(null, ~'s', 4.0, Stat.VIGOR, (int)'<', 2.0),
+                    ChangeTable.makeCT(null, ~'s', 4.0, Stat.VIGOR, ~'-', 2.0),
                     null)
             , "Disarm", new ConditionBlueprint("disarm", "disarm$", "disarmed", 1, 0, Element.BLUNT, '\uffff',
                     ChangeTable.makeCT(null, ~'d', 2.0, CalcStat.EVASION, (int)'-', 4.0, CalcStat.DEFENSE, (int)'-', 4.0),
@@ -119,7 +119,7 @@ public class ConditionBlueprint extends EpiData {
                     ChangeTable.makeCT(CalcStat.PRECISION, (int)'-', 13.0),
                     null)
             , "Electrify", new ConditionBlueprint("electrify", "electrif$$$", "electrified", 3, 1, Element.LIGHTNING, '⚡',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.STEALTH, (int)'-', 2.0, CalcStat.EVASION, (int)'-', 2.0),
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 3.0, CalcStat.STEALTH, (int)'-', 2.0, CalcStat.EVASION, (int)'-', 2.0),
                     new VisualCondition(){
                         @Override
                         public void update() {
@@ -142,19 +142,19 @@ public class ConditionBlueprint extends EpiData {
                     ChangeTable.makeCT(null, ~'S', 8.0, Stat.VIGOR, ~'-', 2.0),
                     null)
             , "Afflict", new ConditionBlueprint("afflict", "afflict$", "afflicted", 6, 1, Element.POISON, '\uffff',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.5, CalcStat.PRECISION, (int)'-', 3.0),
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 1.5, CalcStat.PRECISION, (int)'-', 3.0),
                     null)
             , "Bleed", new ConditionBlueprint("bleed", "cut$", "bleeding", 3, 1, Element.SLASHING, '\uffff',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 3.0, CalcStat.DAMAGE, (int)'-', 1.0),
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 3.0, CalcStat.DAMAGE, (int)'-', 1.0),
                     null)
             , "Chill", new ConditionBlueprint("chill", "chill$", "chilled",  3, 1, Element.ICE, '▯',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0),
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 1.0, CalcStat.QUICKNESS, (int)'-', 3.0, CalcStat.PRECISION, (int)'-', 3.0),
                     new VisualCondition(1.3f, 0.9f, 0.9f, 0.2f, -0.1f, 0f))
             , "Curse", new ConditionBlueprint("curse", "curse$", "cursed", 3, 0, Element.FATEFUL, '\uffff',
                     ChangeTable.makeCT(CalcStat.LUCK, (int)'-', 8.0, CalcStat.INFLUENCE, (int)'-', 2.0),
                     null)
             , "Ignite", new ConditionBlueprint("ignite", "ignite$", "burning", 2, 1, Element.FIRE, 'ˇ',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 6.5),
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 6.5),
                     new VisualCondition(1.1f, 1f, 1f, 0f, 0.25f, 0f){
                         @Override
                         public void update() {
@@ -168,8 +168,8 @@ public class ConditionBlueprint extends EpiData {
             , "Blind", new ConditionBlueprint("blind", "blind$", "blind", 3, 0, Element.SHADOW, '\uffff',
                     ChangeTable.makeCT(Stat.SIGHT, (int)'-', 7.0, CalcStat.PRECISION, (int)'-', 3.0),
                     new VisualCondition(0.5f, 0.4f, 0.4f))
-            , "Wither", new ConditionBlueprint("wither", "wither$", "withering", 15, 2, Element.DEATH, '\uffff',
-                    ChangeTable.makeCT(Stat.VIGOR, (int)'<', 1.0),
+            , "Wither", new ConditionBlueprint("wither", "wither$", "withering", 20, 2, Element.DEATH, '\uffff',
+                    ChangeTable.makeCT(Stat.VIGOR, ~'-', 1.0),
                     null)
             , "Intoxicate", new ConditionBlueprint("intoxicate", "intoxicate$", "intoxicated", 6, 0, Element.POISON, '\uffff',
                     ChangeTable.makeCT(CalcStat.INFLUENCE, (int)'+', 4.0, CalcStat.PRECISION, (int)'-', 8.0, CalcStat.STEALTH, (int)'-', 7.0),

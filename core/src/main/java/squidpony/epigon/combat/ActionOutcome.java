@@ -172,8 +172,9 @@ public class ActionOutcome {
             }
             if (ao.targetConditioned) {
                 Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.randomValue(actor)), target, ao.element);
-                ChangeTable.strikePhysical(target, c.parent.changes);
-                //target.conditions.add(c);
+                if(c.parent.period == 0) 
+                    ChangeTable.strikePhysical(target, c.parent.changes);
+                target.conditions.add(c);
             }
         }
         return ao;
