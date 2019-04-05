@@ -180,6 +180,12 @@ public class ConditionBlueprint extends EpiData {
                             mildMul = NumberTools.swayRandomized(987654321, TimeUtils.timeSinceMillis(Epigon.startMillis) * 0.004f) * 2f;
                         }
                     })
+            , "Redeye", new ConditionBlueprint("redeye", "see$ red", "seeing red", 4, 0, Element.POISON, '\uffff',
+                    null, new VisualCondition(1f, 0.5f, 0.5f, 0f, 0.5f, -0.5f))
+            , "Greeneye", new ConditionBlueprint("greeneye", "see$ green", "seeing green", 4, 0, Element.POISON, '\uffff',
+                    null, new VisualCondition(1f, 0.5f, 0.5f, 0f, -0.5f, 0.5f))
+            , "Blueeye", new ConditionBlueprint("blueeye", "see$ blue", "seeing blue", 4, 0, Element.POISON, '\uffff',
+                    null, new VisualCondition(1f, 0.5f, 0.5f, 0f, -0.5f, -0.5f))
 
     );
 }

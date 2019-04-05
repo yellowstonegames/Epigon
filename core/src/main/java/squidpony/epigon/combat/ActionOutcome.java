@@ -171,7 +171,7 @@ public class ActionOutcome {
                 target.statEffects.removeLast();
             }
             if (ao.targetConditioned) {
-                Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.randomValue(actor)), target, ao.element);
+                Condition c = new Condition(ConditionBlueprint.CONDITIONS.getOrDefault(ao.targetCondition, ConditionBlueprint.CONDITIONS.getAt(0)), target, ao.element); //CONDITIONS.randomValue(actor)
                 if(c.parent.period == 0) 
                     ChangeTable.strikePhysical(target, c.parent.changes);
                 target.conditions.add(c);

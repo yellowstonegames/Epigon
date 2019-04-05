@@ -2099,6 +2099,8 @@ public class Epigon extends Game {
                     break;
                 case INTERACT:
                     Physical selected = mapOverlayHandler.getSelected();
+                    if(selected == null)
+                        break;
                     if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
                         buildInteractOptions(selected);
                         menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);

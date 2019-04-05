@@ -391,6 +391,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical strikePhysical(Physical physical, ChangeTable ct)
     {
+        if(ct == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
@@ -463,6 +464,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical holdPhysical(Physical physical, ChangeTable ct)
     {
+        if(ct == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
@@ -519,6 +521,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical releasePhysical(Physical physical, ChangeTable ct)
     {
+        if(ct == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
@@ -577,6 +580,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical strikePhysical(Physical physical, Iterable<ChangeTable> tables)
     {
+        if(tables == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
@@ -654,6 +658,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical holdPhysical(Physical physical, Iterable<ChangeTable> tables)
     {
+        if(tables == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
@@ -713,6 +718,7 @@ public class ChangeTable extends AbstractCollection<ConstantKey> {
      */
     public static Physical releasePhysical(Physical physical, Iterable<ChangeTable> tables)
     {
+        if(tables == null) return physical;
         OrderedMap<ConstantKey, LiveValue> changing = physical.stats;
         int originalSize = changing.size();
         ConstantKey k;
