@@ -8,13 +8,11 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -32,7 +30,6 @@ import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
-import squidpony.squidgrid.gui.gdx.TextPanel;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
@@ -108,8 +105,8 @@ public class Epigon extends Game {
     private SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
     private SparseLayers contextSLayers;
-    private TextPanel<Color> messageSLayers;
-    private ShapeRenderer shaper;
+    private SparseLayers messageSLayers;
+//    private ShapeRenderer shaper;
     private SubcellLayers fallingSLayers;
 
     private InputSpecialMultiplexer multiplexer;
@@ -131,7 +128,8 @@ public class Epigon extends Game {
     private OrderedMap<String, Interactable> interactionOptions = new OrderedMap<>(8);
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
-    
+    private int messageIndex;
+
     // World
     private WorldGenerator worldGenerator;
     private EpiMap[] world;
@@ -262,22 +260,21 @@ public class Epigon extends Game {
         font = DefaultResources.getCrispLeanFamily();
         TextCellFactory smallFont = font.copy();
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
+        messageIndex = messageCount;
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
         }
 
-        TextCellFactory messageFont = DefaultResources.getCrispPrintFamily().initBySize();
-        messageSLayers = new TextPanel<>(GDXMarkup.instance, messageFont);
-//        messageFont.bmpFont.getData().setLineHeight(30); // unfortunate, but helps make lines a reasonable size
-        messageSLayers.initShared(messageSize.pixelWidth(), messageSize.pixelHeight(), messages);
-        messageSLayers.backgroundColor = unseenColor;
-//        messageSLayers.borderColor = CW_LIGHT_APRICOT;
-//        messageSLayers.borderSize = 2f;
-//        messageSLayers.borderStyle = UIUtil.CornerStyle.ROUNDED;
-        messageSLayers.getScrollPane().setHeight(messageSize.pixelHeight());
-        messageSLayers.getScrollPane().setStyle(new ScrollPane.ScrollPaneStyle());
+        messageSLayers = new SparseLayers(
+                messageSize.gridWidth,
+                messageSize.gridHeight,
+                messageSize.cellWidth,
+                messageSize.cellHeight,
+                font);
+
+        messageSLayers.setDefaultBackground(unseenColor);
         
-        shaper = new ShapeRenderer();
+//        shaper = new ShapeRenderer();
 /*
                 messageSize.gridWidth,
                 messageSize.gridHeight,
@@ -451,7 +448,7 @@ public class Epigon extends Game {
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
 
-        messageSLayers.getScrollPane().setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        messageSLayers.setBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
         infoSLayers.setBounds(0, 0, infoSize.pixelWidth(), infoSize.pixelHeight());
         contextSLayers.setBounds(0, 0, contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlaySLayers.setBounds(0, 0, mapSize.pixelWidth(), mapSize.pixelWidth());
@@ -484,8 +481,7 @@ public class Epigon extends Game {
         mapStage.addActor(mapHoverSLayers);
         mapOverlayStage.addActor(mapOverlaySLayers);
         fallingStage.addActor(fallingSLayers);
-        messageStage.addActor(messageSLayers.getScrollPane());
-        //messageSLayers.getScrollPane().layout();
+        messageStage.addActor(messageSLayers);
         infoStage.addActor(infoSLayers);
         contextStage.addActor(contextHandler.group);
 
@@ -523,7 +519,10 @@ public class Epigon extends Game {
         mapSLayers.addLayer();//next adds at level 3, used for effects
 //        mapSLayers.addLayer();//level 3, backgrounds for hovering menus
 //        mapSLayers.addLayer();//level 4, text for hovering menus
-        
+        IColoredString<Color> emptyICS = IColoredString.Impl.create();
+        for (int i = 0; i <= messageCount; i++) {
+            messages.add(emptyICS);
+        }        
         worldGenerator = new WorldGenerator();
         contextHandler.message("Have fun!",
                 style("Bump into statues ([*][/]s[,]) and stuff."),
@@ -929,17 +928,12 @@ public class Epigon extends Game {
         infoHandler.updateDisplay(target, changes);
     }
 
-    private void clearContents(SquidLayers layers, Color background) {
-        int w = layers.getGridWidth();
-        int h = layers.getGridHeight();
-        for (int x = 1; x < w - 1; x++) {
-            for (int y = 1; y < h - 1; y++) {
-                layers.put(x, y, ' ', SColor.TRANSPARENT, background);
-            }
-        }
+    private void clearContents(SparseLayers layers, Color background) {
+        layers.clear();
+        layers.fillBackground(background);
     }
 
-    private void clearAndBorder(SquidLayers layers, Color borderColor, Color background) {
+    private void clearAndBorder(SparseLayers layers, Color borderColor, Color background) {
         clearContents(layers, background);
 
         int w = layers.getGridWidth();
@@ -959,40 +953,42 @@ public class Epigon extends Game {
     }
 
     public void updateMessages() {
-//        clearContents(messageSLayers, unseenColor);
-//
-//        int w = messageSLayers.getGridWidth();
-//        int h = messageSLayers.getGridHeight();
-//        for (int x = 0; x < w; x++) {
-//            messageSLayers.put(x, 0, ((x & 7) == 4) ? '↑' : '─', APRICOT, unseenColor);
-//            messageSLayers.put(x, h - 1, ((x & 7) == 4) ? '↓' : '─', APRICOT, unseenColor);
-//        }
-//        String text = "Click to Scroll ";
-//        messageSLayers.putString(w - 7 - text.length(), 0, text + "Up──", APRICOT, unseenColor);
-//        messageSLayers.putString(w - 7 - text.length(), h - 1, text + "Down", APRICOT, unseenColor);
-//        for (int y = 0; y < h; y++) {
-//            messageSLayers.put(0, y, '│', APRICOT, unseenColor);
-//            messageSLayers.put(w - 1, y, '│', APRICOT, unseenColor);
-//        }
-//        messageSLayers.put(0, 0, '┌', APRICOT, unseenColor);
-//        messageSLayers.put(w - 1, 0, '┐', APRICOT, unseenColor);
-//        messageSLayers.put(0, h - 1, '└', APRICOT, unseenColor);
-//        messageSLayers.put(w - 1, h - 1, '┘', APRICOT, unseenColor);
-//        for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
-//            messageSLayers.getForegroundLayer().put(1, messageCount - c, messages.get(i));
-//        }
+        clearContents(messageSLayers, unseenColor);
+
+        int w = messageSLayers.getGridWidth();
+        int h = messageSLayers.getGridHeight();
+        for (int x = 0; x < w; x++) {
+            messageSLayers.put(x, 0, '─', APRICOT, unseenColor);
+            messageSLayers.put(x, h - 1, '─', APRICOT, unseenColor);
+        }
+        String text = "Click to Scroll ";
+        messageSLayers.put(w - 7 - text.length(), 0, text + "↑ ──", APRICOT, unseenColor);
+        messageSLayers.put(w - 7 - text.length(), h - 1, text + "↓ ──", APRICOT, unseenColor);
+        for (int y = 0; y < h; y++) {
+            messageSLayers.put(0, y, '│', APRICOT, unseenColor);
+            messageSLayers.put(w - 1, y, '│', APRICOT, unseenColor);
+        }
+        messageSLayers.put(0, 0, '┌', APRICOT, unseenColor);
+        messageSLayers.put(w - 1, 0, '┐', APRICOT, unseenColor);
+        messageSLayers.put(0, h - 1, '└', APRICOT, unseenColor);
+        messageSLayers.put(w - 1, h - 1, '┘', APRICOT, unseenColor);
+        for (int i = messageIndex, c = 0; i >= 0 && c < messageCount; i--, c++) {
+            messageSLayers.put(1, messageCount - c, messages.get(i));
+        }
     }
 
     /**
      * @param amount negative to scroll to previous messages, positive for later messages
      */
     private void scrollMessages(int amount) {
-        messageSLayers.scroll(amount);
+        messageIndex = MathUtils.clamp(messageIndex + amount, messageCount, messages.size() - 1);
+        updateMessages();
     }
 
     private void message(String text) {
-        messages.add(GDXMarkup.instance.colorString("[White]" + text));
-        messageSLayers.scrollToEdge(false);
+        messageIndex = Math.max(messages.size(), messageCount);
+        messages.add(GDXMarkup.instance.colorString("[]" + text));
+        updateMessages();
     }
     
     private void calcFOV(int checkX, int checkY) {
@@ -1606,9 +1602,9 @@ public class Epigon extends Game {
         messageViewport.apply(false);
         messageStage.act();
         messageStage.draw();
-        shaper.setProjectionMatrix(messageStage.getCamera().combined);
-        UIUtil.drawRectangle(shaper, 1, 1, messageSize.pixelWidth() - 2, messageSize.pixelHeight() - 2,
-                ShapeRenderer.ShapeType.Line, CW_LIGHT_APRICOT);
+//        shaper.setProjectionMatrix(messageStage.getCamera().combined);
+//        UIUtil.drawRectangle(shaper, 1, 1, messageSize.pixelWidth() - 2, messageSize.pixelHeight() - 2,
+//                ShapeRenderer.ShapeType.Line, CW_LIGHT_APRICOT);
 //        messageSLayers.drawBorder(batch);
 
         if (mode.equals(GameMode.CRAWL)) {
@@ -1669,7 +1665,7 @@ public class Epigon extends Game {
         float currentZoomX = (float) width / totalPixelWidth();
         float currentZoomY = (float) height / totalPixelHeight();
 
-        messageSLayers.getScrollPane().setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
+        messageSLayers.setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
