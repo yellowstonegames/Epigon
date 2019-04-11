@@ -883,31 +883,6 @@ public class Epigon extends Game {
         }
     }
 
-    private void applyStatChange(Physical target, Map<ConstantKey, Double> amounts) {
-        OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
-        for (Entry<ConstantKey, LiveValue> entry : target.stats.entrySet()) {
-            Double amount = amounts.get(entry.getKey());
-            if (amount != null) {
-                changes.put(entry.getKey(), amount);
-                entry.getValue().addActual(amount);
-            }
-        }
-        for (Stat s : Stat.rolloverProcessOrder) {
-            LiveValue lv = target.stats.get(s);
-            if (lv == null) {
-                continue; // doesn't have this stat so skip it
-            }
-            double val = lv.actual();
-            if (val < 0) {
-                target.stats.get(s).actual(0);
-                target.stats.get(s.getRollover()).addActual(val);
-                changes.merge(s.getRollover(), val, Double::sum);
-            }
-        }
-
-        infoHandler.updateDisplay(target, changes);
-    }
-
     private void applyStatChange(Physical target, Stat stat, double amount) {
         OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
         changes.put(stat, amount);
@@ -926,6 +901,12 @@ public class Epigon extends Game {
         }
 
         infoHandler.updateDisplay(target, changes);
+
+        for (Entry<ConstantKey, Double> entry : changes.entrySet()) {
+            double val = entry.getValue();
+            SColor color = val >= 0 ? SColor.CW_RICH_JADE : SColor.CW_RED;
+            fxHandler.floatText(target.location, String.format("%.1f %s", val, Utilities.capitalizeFirst(entry.getKey().toString())), color);
+        }
     }
 
     private void clearContents(SparseLayers layers, Color background) {

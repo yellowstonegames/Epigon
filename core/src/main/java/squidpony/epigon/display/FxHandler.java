@@ -40,6 +40,16 @@ public class FxHandler {
         seen = visible;
     }
 
+    public void floatText(Coord origin, String text) {
+        floatText(origin, text, SColor.ALICE_BLUE);
+    }
+
+    public void floatText(Coord origin, String text, SColor color) {
+        for (int i = 0; i < text.length(); i++) {
+            fx.summon(0.008f * i, origin.x + i, origin.y, origin.x + 2 + i, origin.y - 1, text.charAt(i), color.toFloatBits(), SColor.FRESH_ONION.toFloatBits(), 0.6f, null);
+        }
+    }
+
     public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(0.85f, viable.refill(seen, 0.001, 999.0),
             origin, size * 3,
