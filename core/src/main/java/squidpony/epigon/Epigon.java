@@ -97,8 +97,8 @@ public class Epigon extends Game {
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
     public static final FloatFilters.YCwCmFilter filter = new FloatFilters.YCwCmFilter(0.9f, 1.3f, 1.3f);
-    public static FloatFilter
-            identityFilter = new FloatFilters.IdentityFilter(),
+    public static final FloatFilter
+            //identityFilter = new FloatFilters.IdentityFilter(),
             grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
     private SparseLayers mapSLayers;
     private SparseLayers mapHoverSLayers;
