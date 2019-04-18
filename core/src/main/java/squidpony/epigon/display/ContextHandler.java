@@ -237,7 +237,9 @@ public class ContextHandler {
         int x = width / 2 - title.length() / 2;
         put(x, 0, title);
 
+        put(arrowLeft.x + 2, arrowLeft.y, '[');
         put(arrowLeft.x, arrowLeft.y, '◀');
+        put(arrowRight.x - 2, arrowRight.y, ']');
         put(arrowRight.x, arrowRight.y, '▶');
     }
 

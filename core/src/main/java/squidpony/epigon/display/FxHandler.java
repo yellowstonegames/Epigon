@@ -40,9 +40,19 @@ public class FxHandler {
         seen = visible;
     }
 
+    public void floatText(Coord origin, String text) {
+        floatText(origin, text, SColor.ALICE_BLUE);
+    }
+
+    public void floatText(Coord origin, String text, SColor color) {
+        for (int i = 0; i < text.length(); i++) {
+            fx.summon(0.008f * i, origin.x + i, origin.y, origin.x + 2 + i, origin.y - 1, text.charAt(i), color.toFloatBits(), SColor.FRESH_ONION.toFloatBits(), 0.6f, null);
+        }
+    }
+
     public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
         fx.addAction(new ConeEffect(0.85f, viable.refill(seen, 0.001, 999.0),
-            origin.multiply(3), size * 3,
+            origin, size * 3,
             rng.nextDouble(360.0),
             radius,
             colorCenter.saturate(element.color, 0.3),
@@ -287,6 +297,7 @@ public class FxHandler {
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
+            System.out.println("cone @ " + center);
             FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius, angle, 75.0);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();

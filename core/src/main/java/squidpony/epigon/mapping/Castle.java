@@ -13,7 +13,7 @@ public class Castle {
     /* Castle notes from real castles
     Average thickness of stone wall: 2m but can be up to 15m
 
-    Standard motte and baily area: 0.12 square km
+    Standard motte and bailey area: 0.12 square km
 
     Approximate largest stone keeps: 31m x 31m
 

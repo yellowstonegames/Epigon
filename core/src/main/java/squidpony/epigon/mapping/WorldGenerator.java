@@ -76,9 +76,10 @@ public class WorldGenerator {
             aboveground[i] = new EpiMap(width, height);
         }
 
+        Physical walkway = RecipeMixer.buildPhysical(Physical.makeBasic("stone walkway", '.', SColor.LINEN));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                aboveground[sky].contents[x][y] = new EpiTile(RecipeMixer.buildPhysical(Physical.makeBasic("stone walkway", '.', SColor.LINEN)));
+                aboveground[sky].contents[x][y] = new EpiTile(walkway);
             }
         }
 
