@@ -25,9 +25,12 @@ public class QuickHull {
      */
     public List<Coord> executeQuickHull(Coord[] inputPoints) {
         List<Coord> convexHull = new ArrayList<>();
-        if (inputPoints.length < 1) {
+        if (inputPoints == null || inputPoints.length < 1) {
             throw new IllegalArgumentException("Cannot compute convex hull of zero points.");
         }
+
+//        System.out.println("Starting quickhull for " + inputPoints.length + " points.");
+//        long millis = System.currentTimeMillis();
 
         // search extreme values
         Coord rightmostPoint = inputPoints[0];
@@ -40,7 +43,7 @@ public class QuickHull {
             }
         }
 
-        // divide the set into two halfes
+        // divide the set into two halves
         List<Coord> leftOfLine = new LinkedList<>();
         List<Coord> rightOfLine = new LinkedList<>();
         for (Coord point : inputPoints) {
@@ -62,6 +65,9 @@ public class QuickHull {
 
         hull = divide(rightOfLine, rightmostPoint, leftmostPoint);
         convexHull.addAll(hull);
+
+//        millis = System.currentTimeMillis() - millis;
+//        System.out.println("Quickhull took " + millis + " milliseconds.");
 
         return convexHull;
     }

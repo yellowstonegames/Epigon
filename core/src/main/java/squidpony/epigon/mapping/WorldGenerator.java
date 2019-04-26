@@ -69,6 +69,9 @@ public class WorldGenerator {
     }
 
     public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
+//        System.out.println("Building castle.");
+//        long millis = System.currentTimeMillis();
+
         EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
         EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
 
@@ -87,6 +90,8 @@ public class WorldGenerator {
 
         world = Stream.of(aboveground, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
 
+//        millis = System.currentTimeMillis() - millis;
+//        System.out.println("Castle building took " + millis + " milliseconds.");
         return world;
     }
 
@@ -191,6 +196,9 @@ public class WorldGenerator {
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
+//        System.out.printf("Building world %sx%s and %s deep\n", width, height, depth);
+//        long millis = System.currentTimeMillis();
+
         init(width, height, depth, handBuilt);
         placeMinerals();
         faultMap();
@@ -304,6 +312,9 @@ public class WorldGenerator {
             floorWorld[e].andNot(tmp);
             floorWorld[e - 1].andNot(tmp);
         }
+
+//        millis = System.currentTimeMillis() - millis;
+//        System.out.println("Building world took " + millis + " milliseconds.");
 
         return world;
     }
@@ -509,7 +520,7 @@ public class WorldGenerator {
         do {
             x2 = x - rng.nextInt(width);
             y2 = y - rng.nextInt(height);
-        } while ((x2 == 0) && (y2 == 0));
+        } while ((x2 == 0) || (y2 == 0));
         m = (y2) / (x2);//y - y1/x - x1
 //        } while (((int) m == 0) || ((int) m == 1) || ((int) m == -1));
 

@@ -63,84 +63,10 @@ public class EpiMap {
     }
 
     public double[][] opacities() {
-//        double o;
-//        int xx, yy;
         double[][] resistances = lighting.resistances;
         for (int x = 0; x < width; x++) {
-//            xx = x * 3;
             for (int y = 0; y < height; y++) {
-//                yy = y * 3; o =
                 resistances[x][y] = contents[x][y].opacity();
-//                switch (line[x][y]) {
-//                    case '\1':
-//                    case '#':
-//                    case '+':
-//                        triResistances[xx][yy] = triResistances[xx + 1][yy] = triResistances[xx + 2][yy]
-//                            = triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = triResistances[xx][yy + 2] = triResistances[xx + 1][yy + 2] = triResistances[xx + 2][yy + 2] = o;
-//                        break;
-//                    case '├':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┤':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
-//                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┴':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┬':
-//                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-//                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┌':
-//                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-// /*triResistances[xx][yy+1] =*/
-//                        triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┐':
-//                        /*triResistances[xx][yy] = triResistances[xx+1][yy] = triResistances[xx+2][yy] =*/
-//                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
-//                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '└':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '┘':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1]
-//                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] = triResistances[xx+1][yy+2] = triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '│':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ /*triResistances[xx][yy+1] =*/ triResistances[xx + 1][yy + 1]
-//                            = /*triResistances[xx+2][yy+1] =*/ /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                    case '─':
-//                        triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1] = o;
-//                        break;
-//                    case '┼':
-//                        /*triResistances[xx][yy] =*/
-//                        triResistances[xx + 1][yy]
-//                            = /*triResistances[xx+2][yy] =*/ triResistances[xx][yy + 1] = triResistances[xx + 1][yy + 1] = triResistances[xx + 2][yy + 1]
-//                            = /*triResistances[xx][yy+2] =*/ triResistances[xx + 1][yy + 2] = /*triResistances[xx+2][yy+2] =*/ o;
-//                        break;
-//                }
             }
         }
         return resistances;

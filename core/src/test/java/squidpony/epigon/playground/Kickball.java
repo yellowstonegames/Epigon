@@ -6,9 +6,11 @@ import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
+import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedSet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,11 +25,75 @@ public class Kickball {
     }
 
     private void go() {
-        testImmutableKeys();
-        testJSON();
+//        testImmutableKeys();
+//        testJSON();
 //        testFormulas();
 //        testJSON();
 //        printStones();
+        testWorldBuild();
+    }
+
+    private class TimeTracker implements Comparable<TimeTracker> {
+
+        long time;
+        int width, height, depth;
+
+        public TimeTracker(long time, int width, int height, int depth) {
+            this.time = time;
+            this.width = width;
+            this.height = height;
+            this.depth = depth;
+        }
+
+        @Override
+        public int compareTo(TimeTracker o) {
+            return Long.compare(time, o.time);
+        }
+
+        @Override
+        public String toString() {
+            return "" + time + "," + width + "," + height + "," + depth;
+        }
+    }
+
+    private void testWorldBuild() {
+        System.out.println("Testing world building.");
+
+        HandBuilt hand = new HandBuilt();
+        WorldGenerator gen = new WorldGenerator();
+
+        int hStep = 7;
+        int zStep = 3;
+        int width = 11;
+        int height = 11;
+        long milli;
+
+        List<TimeTracker> list = new ArrayList<>(100 * 500 / zStep);
+        for (int i = 0; i < 40; i++) {
+            for (int z = 1; z < 500; z += zStep) {
+                milli = System.currentTimeMillis();
+                gen.buildWorld(width, height, z, hand);
+                milli = System.currentTimeMillis() - milli;
+                list.add(new TimeTracker(milli, width, height, z));
+            }
+            System.out.println("Iteration " + i);
+            if (i % 2 == 0) {
+                width += hStep;
+            } else {
+                height += hStep;
+            }
+        }
+
+        list.sort(null);
+        TimeTracker last = list.get(list.size() - 1);
+        System.out.println("");
+        System.out.println("Worst cases, at time " + last.time);
+        list.stream()
+            .filter(t -> t.compareTo(last) == 0)
+            .forEach(t -> System.out.println("" + t.width + " x " + t.height + " x " + t.depth));
+        System.out.println("");
+        String csv = list.stream().map(TimeTracker::toString).collect(Collectors.joining("\n"));
+        System.out.println(csv);
     }
 
     private void testImmutableKeys() {
