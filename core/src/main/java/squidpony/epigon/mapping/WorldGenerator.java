@@ -764,9 +764,21 @@ public class WorldGenerator {
     }
 
     private void buildGroundLevelCastle(Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
+        buildMoat(castle);
 
-        //choose area for moat
+        List<Coord> corners = findInternalPolygonCorners(castle.insideMoat, 4, 4);
+        Coord courtyardCentroid = findCentroid(corners);
+
+        buildOuterWall(courtyardCentroid, castle);
+        layBricks(courtyardCentroid, castle);
+        tearDownWalls(castle);
+        buildKeep(courtyardCentroid, castle);
+        buildGardens(castle);
+        addPlants(castle);
+    }
+
+    private void buildMoat(Castle castle) {
+        EpiMap map = castle.buildZone[castle.ground];
         int distance = 8; // space between points
         castle.moat.surface8way(8);
         List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
@@ -776,7 +788,7 @@ public class WorldGenerator {
         castle.moat.expand8way();
         castle.moatBank = castle.moat.copy();
         GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
-        for (Coord c : nonMoat) {             
+        for (Coord c : nonMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
         }
 
@@ -797,12 +809,11 @@ public class WorldGenerator {
         for (Coord c : castle.insideMoat) {
             map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
         }
+    }
 
-        corners = findInternalPolygonCorners(castle.insideMoat, distance / 2, 4);
-        Coord courtyardCentroid = findCentroid(corners);
-        castle.outerWall = new GreasedRegion(courtyardCentroid, castle.insideMoat.width, castle.insideMoat.height);
-        while (!castle.outerWall.intersects(castle.moat))
-        {
+    private void buildOuterWall(Coord centroid, Castle castle) {
+        castle.outerWall = new GreasedRegion(centroid, castle.insideMoat.width, castle.insideMoat.height);
+        while (!castle.outerWall.intersects(castle.moat)) {
             castle.outerWall.expand8way();
         }
         castle.outerWall.surface8way(3);
@@ -811,18 +822,32 @@ public class WorldGenerator {
         castle.outerWall.expand();
 
         for (Coord c : castle.outerWall) {
-            map.contents[c.x][c.y].add(getWall(Stone.GNEISS));
-            map.contents[c.x][c.y].floor = getFloor(Stone.GNEISS);
-        }
+            for (int z = castle.ground; z > Integer.max(castle.ground - 3, castle.ground - castle.height); z--) {
+                EpiTile tile = castle.tileAt(c, z);
+                if (tile == null) {
+                    tile = new EpiTile();
+                    castle.setTileAt(c, castle.ground - z, tile);
+                }
 
-        castle.courtyard = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
+                tile.add(getWall(Stone.GNEISS));
+                tile.floor = getFloor(Stone.GNEISS);
+            }
+        }
+    }
+
+    private void layBricks(Coord centroid, Castle castle) {
+        EpiMap map = castle.buildZone[castle.ground];
+        castle.courtyard = new GreasedRegion(centroid, castle.region.width, castle.region.height)
             .flood8way(castle.insideMoat.copy().andNot(castle.outerWall), castle.region.width * castle.region.height);
 
         Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '≡', SColor.PERSIAN_RED));
         for (Coord c : castle.courtyard) {
             map.contents[c.x][c.y].floor = brick;
         }
+    }
 
+    private void tearDownWalls(Castle castle) {
+        EpiMap map = castle.buildZone[castle.ground];
         castle.holes.expand(2);
         castle.holes.fray(0.2);
         castle.holes.fray(0.2);
@@ -832,9 +857,10 @@ public class WorldGenerator {
             map.contents[c.x][c.y].add(rubble);
             placeMud(map.contents[c.x][c.y]);
         }
+    }
 
-        buildKeep(castle, courtyardCentroid);
-
+    private void buildGardens(Castle castle) {
+        EpiMap map = castle.buildZone[castle.ground];
         castle.garden = castle.courtyard.copy().andNot(castle.keepWall).andNot(castle.insideKeep);
         Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
 
@@ -850,31 +876,31 @@ public class WorldGenerator {
         for (Coord c : castle.pondBank) {
             placeMud(map.contents[c.x][c.y]);
         }
+    }
+
+    private void addPlants(Castle castle) {
+        EpiMap map = castle.buildZone[castle.ground];
         GreasedRegion outside = castle.region.copy().not().flood(castle.insideMoat.copy().not(), castle.width * castle.height);
-        for(GreasedRegion area : new GreasedRegion[]{
-                castle.garden, castle.pond, castle.pondBank, outside
-        })
-        {
+        for (GreasedRegion area : new GreasedRegion[]{castle.garden, castle.pond, castle.pondBank, outside}) {
             Direction[] dirs = new Direction[8];
             EpiTile tile;
-            for(Coord c : area) {
+            for (Coord c : area) {
                 float noise = FastNoise.instance.getSimplex(c.x * 1.6f, c.y * 1.6f);
                 if (noise > -0.1f && noise < 0.35f) {
                     tile = map.contents[c.x][c.y];
-                    if(tile.floor.symbol == '.') 
+                    if (tile.floor.symbol == '.') {
                         tile.floor = RecipeMixer.buildPhysical(handBuilt.grass);
+                    }
                     if (tile.floor.next(3) == 0 && vegetablesByTerrain.containsKey(tile.floor.symbol)) {
                         // 1 in 8 chance
                         tile.contents.add(RecipeMixer.buildVegetable(
-                                vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-                    }
-                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 9) {    // 9 in 256 chance
+                            vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
+                    } else if (treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 9) {    // 9 in 256 chance
                         Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
                         tree.shuffle(Direction.OUTWARDS, dirs);
                         for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
-                            if(map.inBounds(c.x + dirs[i].deltaX, c.y + dirs[i].deltaY)
-                                    && (map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '.' || map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '¸'))
-                            {
+                            if (map.inBounds(c.x + dirs[i].deltaX, c.y + dirs[i].deltaY)
+                                && (map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '.' || map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '¸')) {
                                 map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
                                 map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].contents.add(tree.inventory.remove(0));
                             }
@@ -888,7 +914,7 @@ public class WorldGenerator {
         }
     }
 
-    private void buildKeep(Castle castle, Coord courtyardCentroid) {
+    private void buildKeep(Coord courtyardCentroid, Castle castle) {
         // sketch out a keep's borders
         
 //        int top = courtyardCentroid.y;
@@ -940,6 +966,7 @@ public class WorldGenerator {
 //                bottom--;
 //                break;
 //        }
+
         castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.courtyard.width, castle.courtyard.height);
         while (!castle.insideKeep.intersects(castle.outerWall))
         {

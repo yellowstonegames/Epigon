@@ -174,7 +174,7 @@ public class Epigon extends Game {
     public float startingY, finishY, timeToFall;
 
     private static final boolean DEBUG = false;
-    private boolean odinView = false;
+    private boolean odinView = true;
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
@@ -182,9 +182,9 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 400;
-        worldHeight = 200;
-        worldDepth = 20;
+        worldWidth = 40;
+        worldHeight = 20;
+        worldDepth = 10;
         totalDepth = worldDepth + World.DIVE_HEADER.length;
         int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
         int bigH = 26;
@@ -644,9 +644,8 @@ public class Epigon extends Game {
     private void prepCrawl() {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
-        int underground = 8;
         int aboveground = 7;
-        world = worldGenerator.buildCastle(worldWidth, worldHeight, underground, aboveground, handBuilt);
+        world = worldGenerator.buildCastle(worldWidth, worldHeight, worldDepth, aboveground, handBuilt);
         depth = aboveground; // should be the very surface
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.lighting.fovResult);
