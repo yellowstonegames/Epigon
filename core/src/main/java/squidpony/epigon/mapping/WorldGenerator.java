@@ -200,15 +200,17 @@ public class WorldGenerator {
         long millis = System.currentTimeMillis();
 
         init(width, height, depth, handBuilt);
-        placeMinerals();
-        faultMap();
-        bubbleMap(false);
-        extrudeMap();
-        faultMap();
-        bubbleMap(false);
-        intrudeMap();
-        metamorphoseMap();
-
+//        placeMinerals();
+//        faultMap();
+//        bubbleMap(false);
+//        extrudeMap();
+//        faultMap();
+//        bubbleMap(false);
+//        intrudeMap();
+//        metamorphoseMap();
+        
+        noiseMap();
+        
         makeSolid();
 
         System.out.println("Building world INIT took " + (System.currentTimeMillis() - millis) + " milliseconds.");
@@ -646,20 +648,20 @@ public class WorldGenerator {
 
     private void metamorphoseMap() {
         Physical[][][] near = new Physical[3][3][3];
-        Stone changer;
+        Physical changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = rng.getRandomElement(Arrays
+        changer = getFloor(rng.getRandomElement(Arrays
             .stream(Stone.values())
             .filter(s -> s.metamorphic)
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList())));
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer = rng.getRandomElement(Arrays
+                changer = getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())));
             }
             for (int i = 1; i < width - 1; i++) {
                 for (int k = 1; k < height - 1; k++) {
@@ -698,7 +700,7 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 45) {
-                                world[j].contents[i][k].floor = getFloor(changer); // TODO - cache
+                                world[j].contents[i][k].floor = changer;
                             }
                         }
                     }
@@ -709,10 +711,10 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = rng.getRandomElement(Arrays
+                changer = getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())));
             }
             for (int i = width - 1; i > 1; i--) {
                 for (int k = height - 1; k > 1; k--) {
@@ -751,10 +753,32 @@ public class WorldGenerator {
                     if (changing) {
                         if (pointInBounds(i, k, j)) {
                             if (rng.nextInt(100) < 25) {
-                                world[j].contents[i][k].floor = getFloor(changer);
+                                world[j].contents[i][k].floor = changer;
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+    
+    private void noiseMap()
+    {
+        FastNoise noise = new FastNoise(rng.nextInt(), 0.025f, FastNoise.SIMPLEX_FRACTAL, 2),
+                ridge = new FastNoise(rng.nextInt(), 0.035f, FastNoise.SIMPLEX_FRACTAL, 3);
+        ridge.setFractalType(FastNoise.RIDGED_MULTI);
+        EpiMap map;
+        Stone[] stones = rng.shuffleInPlace(Stone.values());
+        Physical[] floors = new Physical[stones.length];
+        for (int i = 0; i < stones.length; i++) {
+            floors[i] = getFloor(stones[i]);
+        }
+        float diversity = stones.length * 0.04f + rng.nextFloat(stones.length * 0.16f), halfway = stones.length * 0.5f;
+        for (int z = 0; z < depth; z++) {
+            map = world[z];
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    map.contents[x][y] = new EpiTile(floors[Math.round(halfway + (diversity * noise.getConfiguredNoise(x, y, z + ridge.getConfiguredNoise(x, y, z) * 0.5f)))]);
                 }
             }
         }
