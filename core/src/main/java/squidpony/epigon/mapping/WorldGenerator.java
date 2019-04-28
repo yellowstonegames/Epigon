@@ -69,8 +69,8 @@ public class WorldGenerator {
     }
 
     public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
-//        System.out.println("Building castle.");
-//        long millis = System.currentTimeMillis();
+        System.out.println("Building castle.");
+        long millis = System.currentTimeMillis();
 
         EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
         EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
@@ -90,8 +90,8 @@ public class WorldGenerator {
 
         world = Stream.of(aboveground, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
 
-//        millis = System.currentTimeMillis() - millis;
-//        System.out.println("Castle building took " + millis + " milliseconds.");
+        millis = System.currentTimeMillis() - millis;
+        System.out.println("Castle building took " + millis + " milliseconds.");
         return world;
     }
 
@@ -196,8 +196,8 @@ public class WorldGenerator {
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
-//        System.out.printf("Building world %sx%s and %s deep\n", width, height, depth);
-//        long millis = System.currentTimeMillis();
+        System.out.printf("Building world %sx%s and %s deep\n", width, height, depth);
+        long millis = System.currentTimeMillis();
 
         init(width, height, depth, handBuilt);
         placeMinerals();
@@ -211,6 +211,8 @@ public class WorldGenerator {
 
         makeSolid();
 
+        System.out.println("Building world INIT took " + (System.currentTimeMillis() - millis) + " milliseconds.");
+        
         EpiTile tile;
         GreasedRegion[] floorWorld = new GreasedRegion[depth];
         GreasedRegion tmp = new GreasedRegion(width, height);
@@ -288,6 +290,7 @@ public class WorldGenerator {
                 }
             }
         }
+        long lateMillis = System.currentTimeMillis();
         for (int e = 0; e < depth - 1; e++) {
             EpiMap eMap = world[e];
             EpiMap nextMap = world[e + 1];
@@ -312,9 +315,10 @@ public class WorldGenerator {
             floorWorld[e].andNot(tmp);
             floorWorld[e - 1].andNot(tmp);
         }
+        System.out.println("Building world LATE took " + (System.currentTimeMillis() - lateMillis) + " milliseconds.");
 
-//        millis = System.currentTimeMillis() - millis;
-//        System.out.println("Building world took " + millis + " milliseconds.");
+        millis = System.currentTimeMillis() - millis;
+        System.out.println("Building world took " + millis + " milliseconds.");
 
         return world;
     }
@@ -425,10 +429,8 @@ public class WorldGenerator {
         while (z < depth) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    EpiTile tile = world[z].contents[x][y];
-                    if (tile == null) {
-                        tile = new EpiTile(floor);
-                        world[z].contents[x][y] = tile;
+                    if (world[z].contents[x][y] == null) {
+                        world[z].contents[x][y] = new EpiTile(floor);
                     }
                 }
             }
@@ -521,7 +523,7 @@ public class WorldGenerator {
             x2 = x - rng.nextInt(width);
             y2 = y - rng.nextInt(height);
         } while ((x2 == 0) || (y2 == 0));
-        m = (y2) / (x2);//y - y1/x - x1
+        m = (y2) / (double)(x2);//y - y1/x - x1
 //        } while (((int) m == 0) || ((int) m == 1) || ((int) m == -1));
 
         int b = (int) (y - m * x);//y-mx

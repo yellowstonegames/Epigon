@@ -62,15 +62,15 @@ public class Kickball {
         HandBuilt hand = new HandBuilt();
         WorldGenerator gen = new WorldGenerator();
 
-        int hStep = 7;
+        int hStep = 4;
         int zStep = 3;
-        int width = 11;
-        int height = 11;
+        int width = 21;
+        int height = 21;
         long milli;
 
-        List<TimeTracker> list = new ArrayList<>(100 * 500 / zStep);
-        for (int i = 0; i < 40; i++) {
-            for (int z = 1; z < 500; z += zStep) {
+        ArrayList<TimeTracker> list = new ArrayList<>(100 * 500 / zStep);
+        for (int i = 0; i < 9; i++) {
+            for (int z = 1; z < 100; z += zStep) {
                 milli = System.currentTimeMillis();
                 gen.buildWorld(width, height, z, hand);
                 milli = System.currentTimeMillis() - milli;
