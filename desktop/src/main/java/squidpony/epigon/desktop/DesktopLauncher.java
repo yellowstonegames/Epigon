@@ -30,7 +30,8 @@ public class DesktopLauncher {
         //hand control over to the display
         
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowedMode(Prefs.getScreenWidth(), Prefs.getScreenHeight());
+        config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+//        config.setWindowedMode(Prefs.getScreenWidth(), Prefs.getScreenHeight());
         config.setTitle(Prefs.getGameTitle());
         //uncomment if testing FPS
         config.useVsync(false);
