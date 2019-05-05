@@ -85,7 +85,7 @@ public class Epigon extends Game {
     public static final long seed = 0xBEEFEEDADBA77L;
     public final StatefulRNG rng = new StatefulRNG(seed);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final DiverRNG rootChaos = new DiverRNG(seed + 1L);
+    public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
     private DataStarter handBuilt;
     private MapDecorator mapDecorator;
@@ -693,6 +693,8 @@ public class Epigon extends Game {
         setupLevel();
         
         if (location == null) { // set up a valid random start location
+            //// when validating that map setup is deterministic, the following print should always be the same:
+            //System.out.println(rng.getState() + ", floors hash " + floors.hash64());
             GreasedRegion floors2 = floors.copy();
             floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
             do {

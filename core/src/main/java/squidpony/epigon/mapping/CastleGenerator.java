@@ -1,13 +1,12 @@
 package squidpony.epigon.mapping;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.control.DataPool;
+import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Stone;
-import squidpony.epigon.data.control.DataStarter;
+import squidpony.epigon.data.quality.Tree;
+import squidpony.epigon.data.quality.Vegetable;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonGenerator;
@@ -16,21 +15,27 @@ import squidpony.squidgrid.mapping.styled.TilesetType;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.FastNoise;
 import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.StatefulRNG;
 
-import static squidpony.epigon.util.Utilities.*;
-import squidpony.epigon.data.control.DataPool;
-import squidpony.epigon.data.quality.Tree;
-import squidpony.epigon.data.quality.Vegetable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static squidpony.epigon.util.Utilities.connectPoints;
+import static squidpony.epigon.util.Utilities.findCentroid;
+import static squidpony.epigon.util.Utilities.findInternalPolygonCorners;
 
 public class CastleGenerator {
 
     private int width, height, depth, sky;
     private final DataStarter handBuilt;
     private final MapDecorator decorator;
+    private StatefulRNG rng;
 
     public CastleGenerator(MapDecorator decorator) {
         this.decorator = decorator;
         this.handBuilt = decorator.handBuilt;
+        rng = new StatefulRNG(2000L);
     }
 
     /**

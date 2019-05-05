@@ -4,21 +4,15 @@ import com.badlogic.gdx.graphics.Color;
 import regexodus.Matcher;
 import regexodus.Pattern;
 import squidpony.StringKit;
+import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.Weapon;
 import squidpony.epigon.mapping.QuickHull;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidmath.Coord;
-import squidpony.squidmath.DDALine;
-import squidpony.squidmath.DiverRNG;
-import squidpony.squidmath.Elias;
-import squidpony.squidmath.GreasedRegion;
-import squidpony.squidmath.RNG;
-import squidpony.squidmath.StatefulRNG;
+import squidpony.squidmath.*;
 
 import java.util.Collection;
 import java.util.List;
-import squidpony.epigon.GauntRNG;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.
@@ -265,6 +259,7 @@ public class Utilities {
     }
 
     public static List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
+        rng.setState(region.hash64());
         GreasedRegion points = region.copy();
         do {
             points.remake(region).randomScatter(rng, distance, 12);

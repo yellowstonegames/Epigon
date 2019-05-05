@@ -1,16 +1,17 @@
 package squidpony.epigon.mapping;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import squidpony.Maker;
 import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.control.DataStarter;
+import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.StatefulRNG;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Adds fun frilly things to maps.
@@ -18,16 +19,17 @@ import squidpony.squidmath.Coord;
 public class MapDecorator {
 
     public DataStarter handBuilt;
-
+    public StatefulRNG srng;
     public MapDecorator(DataStarter handBuilt) {
         this.handBuilt = handBuilt;
+        srng = new StatefulRNG(4000L);
     }
 
     public void placeDoor(EpiTile tile) {
         Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
         List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
         Physical door = adds.get(0);
-        handBuilt.setDoorOpen(door, handBuilt.rng.nextBoolean());
+        handBuilt.setDoorOpen(door, srng.nextBoolean());
         tile.add(door);
     }
 
@@ -37,8 +39,8 @@ public class MapDecorator {
 
     public void placeLava(EpiTile tile) {
         tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
-        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(), tile.floor.nextFloat() * (tile.floor.nextFloat(0.75F) + 0.25F));
-        tile.floor.radiance.delay = tile.floor.nextFloat();
+        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(), srng.nextFloat() * (srng.nextFloat(0.75F) + 0.25F));
+        tile.floor.radiance.delay = srng.nextFloat();
     }
 
     public void placeMud(EpiTile tile) {

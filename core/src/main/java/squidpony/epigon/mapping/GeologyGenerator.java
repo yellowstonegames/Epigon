@@ -1,13 +1,13 @@
 package squidpony.epigon.mapping;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.util.Bounds;
+import squidpony.squidmath.StatefulRNG;
 
-import static squidpony.epigon.util.Utilities.rng;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Applies geological changes.
@@ -19,13 +19,16 @@ public class GeologyGenerator {
     private Bounds bounds;
     private EpiMap[] world;
     private int width, height, depth;
-
+    private StatefulRNG rng;
+    
     public GeologyGenerator(EpiMap[] world) {
         this.world = world;
         width = world[0].width;
         height = world[0].height;
         depth = world.length;
         bounds = new Bounds(width, height, depth);
+        rng = new StatefulRNG(3000L);
+
     }
 
     /**
