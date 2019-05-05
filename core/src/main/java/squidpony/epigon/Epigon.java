@@ -84,7 +84,7 @@ public class Epigon extends Game {
     public static final long seed = 0xBEEFEEDADBA77L;
     public final StatefulRNG rng = new StatefulRNG(seed);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
-    public static final DiverRNG rootChaos = new DiverRNG();
+    public static final DiverRNG rootChaos = new DiverRNG(seed + 1L);
     public final RecipeMixer mixer;
     private DataStarter handBuilt;
     private MapDecorator mapDecorator;
