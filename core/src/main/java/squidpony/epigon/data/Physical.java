@@ -1,5 +1,6 @@
 package squidpony.epigon.data;
 
+import squidpony.epigon.data.control.RecipeMixer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.Maker;

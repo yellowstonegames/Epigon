@@ -29,7 +29,7 @@ import static squidpony.epigon.data.Physical.basePhysical;
 /**
  * Contains objects to use to test out connections.
  */
-public class HandBuilt {
+public class DataStarter {
 
     public StatefulRNG rng;
     public long chaos;
@@ -131,11 +131,11 @@ public class HandBuilt {
     public Physical grass;
     public Physical shadedGrass;
 
-    public HandBuilt() {
+    public DataStarter() {
         this(new RecipeMixer());
     }
 
-    public HandBuilt(RecipeMixer mixer) {
+    public DataStarter(RecipeMixer mixer) {
         chaos = rootChaos.nextLong();
         rng = new StatefulRNG(new DiverRNG(chaos));
         this.mixer = mixer;
@@ -563,38 +563,6 @@ public class HandBuilt {
         return mod;
     }
 
-    public void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
-        placeStairs(top.contents[c.x][c.y], false);
-        placeStairs(bottom.contents[c.x][c.y], true);
-    }
-
-    public void placeStairs(EpiTile tile, boolean up) {
-        Physical adding;
-        if (tile.floor != null) {
-            if (tile.floor.terrainData != null && tile.floor.terrainData.stone != null) {
-                adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-            } else {
-                adding = tile.floor;
-            }
-        } else {
-            adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
-        }
-
-        if (up) {
-            tile.contents.addAll(RecipeMixer.mix(upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
-        } else {
-            tile.contents.addAll(RecipeMixer.mix(downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
-        }
-    }
-
-    public void placeDoor(EpiTile tile) {
-        Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-        List<Physical> adds = RecipeMixer.mix(doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
-        Physical door = adds.get(0);
-        setDoorOpen(door, rng.nextBoolean());
-        tile.add(door);
-    }
-
     /**
      * Sets the door to the open state, true means open and false means closed.
      *
@@ -604,23 +572,4 @@ public class HandBuilt {
         RecipeMixer.applyModification(door, open ? openDoor : closeDoor);
     }
 
-    public void placeWall(EpiTile tile) {
-        Physical adding = DataPool.instance().getWall(tile.floor.terrainData.stone);
-        tile.add(adding);
-    }
-
-    public void placeWater(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(water);
-    }
-
-    public void placeLava(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(lava);
-        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
-            tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
-        tile.floor.radiance.delay = tile.floor.nextFloat();
-    }
-
-    public void placeMud(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(mud);
-    }
 }

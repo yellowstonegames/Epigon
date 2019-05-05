@@ -5,7 +5,6 @@ import java.util.Map;
 import squidpony.epigon.Epigon;
 
 import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
@@ -21,7 +20,7 @@ public class DataPool {
 
     private static DataPool instance;
 
-    private HandBuilt handBuilt;
+    private DataStarter handBuilt;
 
     private final Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private final Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
@@ -34,7 +33,7 @@ public class DataPool {
         }
 
         instance = new DataPool();
-        instance.handBuilt = new HandBuilt();
+        instance.handBuilt = new DataStarter();
         instance.initPlants();
 
         return instance;

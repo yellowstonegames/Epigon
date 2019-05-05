@@ -1,12 +1,14 @@
 package squidpony.epigon.playground;
 
-import squidpony.epigon.data.control.HandBuilt;
+import squidpony.epigon.data.control.RecipeMixer;
+import squidpony.epigon.data.control.DataStarter;
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
+import squidpony.epigon.mapping.MapDecorator;
 import squidpony.epigon.mapping.WorldGenerator;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedSet;
@@ -60,8 +62,9 @@ public class Kickball {
     private void testWorldBuild() {
         System.out.println("Testing world building.");
 
-        HandBuilt hand = new HandBuilt();
-        WorldGenerator gen = new WorldGenerator(new HandBuilt());
+        DataStarter hand = new DataStarter();
+        MapDecorator mapDecorator = new MapDecorator(hand);
+        WorldGenerator gen = new WorldGenerator(mapDecorator);
 
         int hStep = 4;
         int zStep = 3;
@@ -112,7 +115,7 @@ public class Kickball {
         }
     }
     private void testFormulas() {
-        HandBuilt handBuilt = new HandBuilt();
+        DataStarter handBuilt = new DataStarter();
         Physical source = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
         Physical target = RecipeMixer.buildPhysical(Inclusion.ANDALUSITE);
         source.stats.put(Stat.AIM, new LiveValue(52.5));
@@ -170,7 +173,7 @@ public class Kickball {
         convert.setIgnoreUnknownFields(true);
         convert.setUsePrototypes(false);
 
-        HandBuilt starter = new HandBuilt();
+        DataStarter starter = new DataStarter();
 
         // Create an actual player
         //Physical player = starter.player;

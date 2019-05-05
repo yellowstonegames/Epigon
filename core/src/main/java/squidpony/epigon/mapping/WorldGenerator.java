@@ -1,14 +1,14 @@
 package squidpony.epigon.mapping;
 
 import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
+import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.WeightedTableWrapper;
 import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
 import squidpony.epigon.data.trait.Grouping;
-import squidpony.epigon.data.control.HandBuilt;
+import squidpony.epigon.data.control.DataStarter;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
@@ -32,11 +32,13 @@ public class WorldGenerator {
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
-    private HandBuilt handBuilt;
+    private DataStarter handBuilt;
+    private MapDecorator decorator;
     private StatefulRNG rng;
 
-    public WorldGenerator(HandBuilt handBuilt) {
-        this.handBuilt = handBuilt;
+    public WorldGenerator(MapDecorator decorator) {
+        this.decorator = decorator;
+        handBuilt = decorator.handBuilt;
     }
 
     public EpiMap buildDive(int width, int depth) {
@@ -193,15 +195,15 @@ public class WorldGenerator {
                         case '.':
                             break;
                         case '#':
-                            handBuilt.placeWall(tile);
+                            decorator.placeWall(tile);
                             break;
                         case '+':
                         case '/':
-                            handBuilt.placeDoor(tile);
+                            decorator.placeDoor(tile);
                             break;
                         case '~': // TODO - distinguish deep water
                         case ',':
-                            handBuilt.placeWater(tile);
+                            decorator.placeWater(tile);
                             break;
                         case '&': // should never occur naturally
                             break;
@@ -239,7 +241,7 @@ public class WorldGenerator {
             eMap.downStairPositions.or(tmp);
             nextMap.upStairPositions.or(tmp);
             for (Coord c : tmp) {
-                handBuilt.placeStairs(eMap, nextMap, c);
+                decorator.placeStairs(eMap, nextMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e + 1].andNot(tmp);
@@ -251,7 +253,7 @@ public class WorldGenerator {
             eMap.upStairPositions.or(tmp);
             prevMap.downStairPositions.or(tmp);
             for (Coord c : tmp) {
-                handBuilt.placeStairs(prevMap, eMap, c);
+                decorator.placeStairs(prevMap, eMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e - 1].andNot(tmp);
@@ -260,7 +262,7 @@ public class WorldGenerator {
         return world;
     }
 
-    private void init(int width, int height, int depth, HandBuilt handBuilt) {
+    private void init(int width, int height, int depth, DataStarter handBuilt) {
         this.width = width;
         this.height = height;
         this.depth = depth;

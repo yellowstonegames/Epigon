@@ -1,5 +1,6 @@
 package squidpony.epigon;
 
+import squidpony.epigon.data.control.RecipeMixer;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -24,7 +25,7 @@ import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
-import squidpony.epigon.data.control.HandBuilt;
+import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -85,7 +86,8 @@ public class Epigon extends Game {
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
-    public HandBuilt handBuilt;
+    private DataStarter handBuilt;
+    private MapDecorator mapDecorator;
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     private GameMode mode = GameMode.CRAWL;
@@ -203,7 +205,7 @@ public class Epigon extends Game {
 
     public Epigon() {
         mixer = new RecipeMixer();
-        //handBuilt = new HandBuilt(mixer);
+        //handBuilt = new DataStarter(mixer);
         Weapon.init();
     }
 
@@ -513,7 +515,8 @@ public class Epigon extends Game {
         mapHoverSLayers.clear();
         mapHoverSLayers.glyphs.clear();
         mapHoverSLayers.clearActions(); //  not sure if needed
-        handBuilt = new HandBuilt(mixer);
+        handBuilt = new DataStarter(mixer);
+        mapDecorator = new MapDecorator(handBuilt);
 
         mapSLayers.addLayer();//first added layer adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
@@ -524,13 +527,13 @@ public class Epigon extends Game {
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
         }
-        worldGenerator = new WorldGenerator(handBuilt);
-        castleGenerator = new CastleGenerator(handBuilt);
+        worldGenerator = new WorldGenerator(mapDecorator);
+        castleGenerator = new CastleGenerator(mapDecorator);
         contextHandler.message("Have fun!",
-                style("Bump into statues ([*][/]s[,]) and stuff."),
-                style("Now [/]90% fancier[/]!"),
-                "Use ? for help, or q to quit.",
-                "Use numpad or arrow keys to move.");
+            style("Bump into statues ([*][/]s[,]) and stuff."),
+            style("Now [/]90% fancier[/]!"),
+            "Use ? for help, or q to quit.",
+            "Use numpad or arrow keys to move.");
 
         initPlayer();
 

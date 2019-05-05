@@ -1,4 +1,4 @@
-package squidpony.epigon.data;
+package squidpony.epigon.data.control;
 
 import com.badlogic.gdx.graphics.Colors;
 import squidpony.Maker;
@@ -16,6 +16,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import squidpony.epigon.data.CalcStat;
+import squidpony.epigon.data.Condition;
+import squidpony.epigon.data.ConditionBlueprint;
+import squidpony.epigon.data.Culture;
+import squidpony.epigon.data.LiveValue;
+import squidpony.epigon.data.LiveValueModification;
+import squidpony.epigon.data.Modification;
+import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.Rating;
+import squidpony.epigon.data.Recipe;
+import squidpony.epigon.data.RecipeBlueprint;
+import squidpony.epigon.data.Skill;
+import squidpony.epigon.data.Stat;
+import squidpony.epigon.data.Weapon;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in

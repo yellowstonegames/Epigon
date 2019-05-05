@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import squidpony.ArrayTools;
 import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
+import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.data.quality.Element;

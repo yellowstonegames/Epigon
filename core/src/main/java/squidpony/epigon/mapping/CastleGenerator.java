@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.RecipeMixer;
+import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Stone;
-import squidpony.epigon.data.control.HandBuilt;
+import squidpony.epigon.data.control.DataStarter;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonGenerator;
@@ -25,10 +25,12 @@ import squidpony.epigon.data.quality.Vegetable;
 public class CastleGenerator {
 
     private int width, height, depth, sky;
-    private final HandBuilt handBuilt;
+    private final DataStarter handBuilt;
+    private final MapDecorator decorator;
 
-    public CastleGenerator(HandBuilt handbuilt) {
-        this.handBuilt = handbuilt;
+    public CastleGenerator(MapDecorator decorator) {
+        this.decorator = decorator;
+        this.handBuilt = decorator.handBuilt;
     }
 
     /**
@@ -134,12 +136,12 @@ public class CastleGenerator {
 
         castle.moat.fray(0.3).fray(0.2);
         for (Coord c : castle.moat) {
-            handBuilt.placeWater(map.contents[c.x][c.y]);
+            decorator.placeWater(map.contents[c.x][c.y]);
         }
 
         castle.moatBank.andNot(castle.moat);
         for (Coord c : castle.moatBank) {
-            handBuilt.placeMud(map.contents[c.x][c.y]);
+            decorator.placeMud(map.contents[c.x][c.y]);
         }
 
         castle.insideMoat = new GreasedRegion(findCentroid(corners), castle.region.width, castle.region.height)
@@ -195,7 +197,7 @@ public class CastleGenerator {
         for (Coord c : castle.holes) {
             map.contents[c.x][c.y].blockage = null;
             map.contents[c.x][c.y].add(rubble);
-            handBuilt.placeMud(map.contents[c.x][c.y]);
+            decorator.placeMud(map.contents[c.x][c.y]);
         }
     }
 
@@ -214,7 +216,7 @@ public class CastleGenerator {
         }
         castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
         for (Coord c : castle.pondBank) {
-            handBuilt.placeMud(map.contents[c.x][c.y]);
+            decorator.placeMud(map.contents[c.x][c.y]);
         }
     }
 
@@ -360,7 +362,7 @@ public class CastleGenerator {
             }
             if (interior[c.x][c.y] == '+' || interior[c.x][c.y] == '/') {
                 tile.blockage = null;
-                handBuilt.placeDoor(tile);
+                decorator.placeDoor(tile);
             } else if (interior[c.x][c.y] != '.') {
                 tile.add(insideWall);
             }
