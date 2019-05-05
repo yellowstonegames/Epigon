@@ -1,7 +1,7 @@
 package squidpony.epigon.data.slot;
 
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 import squidpony.squidmath.Coord;
 
 public enum OverArmorSlot implements BodySlot {

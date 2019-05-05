@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.StringKit;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.quality.Element;

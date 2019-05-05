@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.Hashers;
 import squidpony.squidmath.OrderedMap;

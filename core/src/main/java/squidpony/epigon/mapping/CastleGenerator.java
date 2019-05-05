@@ -17,7 +17,7 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.FastNoise;
 import squidpony.squidmath.GreasedRegion;
 
-import static squidpony.epigon.Utilities.*;
+import static squidpony.epigon.util.Utilities.*;
 import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;

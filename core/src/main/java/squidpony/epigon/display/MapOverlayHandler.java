@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Rating;
 import squidpony.squidgrid.Direction;
