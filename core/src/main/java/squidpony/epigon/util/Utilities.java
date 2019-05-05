@@ -1,4 +1,4 @@
-package squidpony.epigon;
+package squidpony.epigon.util;
 
 import com.badlogic.gdx.graphics.Color;
 import regexodus.Matcher;
@@ -18,6 +18,7 @@ import squidpony.squidmath.StatefulRNG;
 
 import java.util.Collection;
 import java.util.List;
+import squidpony.epigon.GauntRNG;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.

@@ -5,11 +5,11 @@ import squidpony.epigon.data.control.DataStarter;
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.mapping.MapDecorator;
-import squidpony.epigon.mapping.WorldGenerator;
+import squidpony.epigon.mapping.LocalAreaGenerator;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.OrderedSet;
 
@@ -64,7 +64,7 @@ public class Kickball {
 
         DataStarter hand = new DataStarter();
         MapDecorator mapDecorator = new MapDecorator(hand);
-        WorldGenerator gen = new WorldGenerator(mapDecorator);
+        LocalAreaGenerator gen = new LocalAreaGenerator(mapDecorator);
 
         int hStep = 4;
         int zStep = 3;

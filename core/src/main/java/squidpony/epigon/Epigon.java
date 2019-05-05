@@ -1,5 +1,6 @@
 package squidpony.epigon;
 
+import squidpony.epigon.util.Utilities;
 import squidpony.epigon.data.control.RecipeMixer;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -133,7 +134,7 @@ public class Epigon extends Game {
     private int messageIndex;
 
     // World
-    private WorldGenerator worldGenerator;
+    private LocalAreaGenerator worldGenerator;
     private CastleGenerator castleGenerator;
     private EpiMap[] world;
     private EpiMap map;
@@ -527,7 +528,7 @@ public class Epigon extends Game {
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
         }
-        worldGenerator = new WorldGenerator(mapDecorator);
+        worldGenerator = new LocalAreaGenerator(mapDecorator);
         castleGenerator = new CastleGenerator(mapDecorator);
         contextHandler.message("Have fun!",
             style("Bump into statues ([*][/]s[,]) and stuff."),

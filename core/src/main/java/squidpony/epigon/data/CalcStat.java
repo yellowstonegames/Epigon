@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import squidpony.epigon.ConstantKey;
-import squidpony.epigon.Utilities;
+import squidpony.epigon.util.Utilities;
 
 /**
  * Created by Tommy Ettinger on 12/10/2017.
