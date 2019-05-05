@@ -28,15 +28,20 @@ public class Config {
             return instance;
         }
 
-        try {
-            FileHandle file = Gdx.files.local(configFilename);
-            if (file == null) {
-                instance = new Config();
+        // TEMP - shorcut here until splash screen loading is figured out
+        if (Gdx.files == null) {
+            instance = new Config();
+        } else {
+            try {
+                FileHandle file = Gdx.files.local(configFilename);
+                if (file == null) {
+                    instance = new Config();
+                }
+                instance = mapper.readValue(file.readString(), Config.class);
+            } catch (IOException e) {
+                System.out.println("Config file did not load");
+                instance = new Config(); // use default if file fails to load
             }
-            instance = mapper.readValue(file.readString(), Config.class);
-        } catch (IOException e) {
-            System.out.println("Config file did not load");
-            instance = new Config(); // use default if file fails to load
         }
 
         return instance;

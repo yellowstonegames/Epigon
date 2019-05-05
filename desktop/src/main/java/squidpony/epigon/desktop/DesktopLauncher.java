@@ -1,16 +1,10 @@
 package squidpony.epigon.desktop;
 
 import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Graphics.Monitor;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import squidpony.epigon.Epigon;
 import squidpony.epigon.files.Config;
@@ -73,52 +67,4 @@ public class DesktopLauncher {
         new Lwjgl3Application(new Epigon(), appConfig);
     }
 
-
-
-    /**
-     * Shows a splash screen while assets are loading.
-     *
-     * Found at http://www.pixnbgames.com/blog/libgdx/how-to-make-a-splash-screen-in-libgdx/
-     */
-    private static final Screen splash = new Screen() {
-
-        private final SpriteBatch batch = new SpriteBatch();
-        private final Texture ttrSplash = new Texture("splash-screen.png");
-
-        @Override
-        public void render(float delta) {
-            Gdx.gl.glClearColor(0, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-            batch.begin();
-            batch.draw(ttrSplash, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            batch.end();
-        }
-
-        @Override
-        public void hide() {
-        }
-
-        @Override
-        public void pause() {
-        }
-
-        @Override
-        public void resume() {
-        }
-
-        @Override
-        public void show() {
-        }
-
-        @Override
-        public void resize(int width, int height) {
-        }
-
-        @Override
-        public void dispose() {
-            ttrSplash.dispose();
-            batch.dispose();
-        }
-    };
 }
