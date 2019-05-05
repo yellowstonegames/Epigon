@@ -2,7 +2,6 @@ package squidpony.epigon.data.control;
 
 import java.util.EnumMap;
 import java.util.Map;
-import squidpony.epigon.Epigon;
 
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.quality.Stone;
@@ -20,7 +19,7 @@ public class DataPool {
 
     private static DataPool instance;
 
-    private DataStarter handBuilt;
+    private DataStarter dataStarter;
 
     private final Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
     private final Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
@@ -33,7 +32,7 @@ public class DataPool {
         }
 
         instance = new DataPool();
-        instance.handBuilt = new DataStarter();
+        instance.dataStarter = new DataStarter();
         instance.initPlants();
 
         return instance;
@@ -69,7 +68,7 @@ public class DataPool {
         }
 
         wall = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
-        RecipeMixer.applyModification(wall, handBuilt.makeWall);
+        RecipeMixer.applyModification(wall, dataStarter.makeWall);
         walls.put(stone, wall);
         return wall;
     }

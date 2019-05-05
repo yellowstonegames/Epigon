@@ -28,13 +28,13 @@ import squidpony.epigon.data.control.DataPool;
 public class LocalAreaGenerator {
     private EpiMap[] world;
     private int width, height, depth;
-    private DataStarter handBuilt;
+    private DataStarter dataStarter;
     private MapDecorator decorator;
     private StatefulRNG rng;
 
     public LocalAreaGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        handBuilt = decorator.handBuilt;
+        dataStarter = decorator.handBuilt;
     }
 
     public EpiMap buildDive(int width, int depth) {
@@ -57,11 +57,11 @@ public class LocalAreaGenerator {
                 char c = World.DIVE_HEADER[y].charAt(x);
                 switch (c) {
                     case ' ':
-                        map.contents[x][y] = new EpiTile(handBuilt.emptySpace);
+                        map.contents[x][y] = new EpiTile(dataStarter.emptySpace);
                         break;
                     case '$':
-                        map.contents[x][y] = new EpiTile(handBuilt.emptySpace);
-                        map.contents[x][y].add(handBuilt.money);
+                        map.contents[x][y] = new EpiTile(dataStarter.emptySpace);
+                        map.contents[x][y].add(dataStarter.money);
                         break;
                     default:
                         Physical p = new Physical();
@@ -76,14 +76,14 @@ public class LocalAreaGenerator {
 
         int centerGap = width / 2;
         int gapSize = (int) (width * 0.4);
-        long seed1 = handBuilt.rng.nextLong() + System.nanoTime(),
-            seed2 = handBuilt.rng.nextLong() + seed1,
-            seed3 = handBuilt.rng.nextLong() + seed2 ^ seed1;
+        long seed1 = dataStarter.rng.nextLong() + System.nanoTime(),
+            seed2 = dataStarter.rng.nextLong() + seed1,
+            seed3 = dataStarter.rng.nextLong() + seed2 ^ seed1;
         final double portionGapSize = 0.08 * width, offGapSize = 0.12 * width,
             halfWidth = 0.5 * width, centerOff = 0.135 * width, extraWiggle = 0.02 * width;
         for (int level = World.DIVE_HEADER.length; level < height; level++) {
             for (int x = centerGap - gapSize; x < centerGap + gapSize; x++) {
-                map.contents[x][level].floor = handBuilt.emptySpace;
+                map.contents[x][level].floor = dataStarter.emptySpace;
                 map.contents[x][level].blockage = null;
                 safeSpots.insert(x, level);
             }
@@ -95,7 +95,7 @@ public class LocalAreaGenerator {
             centerGap = Math.max(centerGap, gapSize / 2 + 1); // make sure it's not off the left side
             centerGap = Math.min(centerGap, width - gapSize / 2 - 1); // make sure it's not off the right side
         }
-        rng = new StatefulRNG(new DiverRNG(handBuilt.rng.nextLong() ^ seed3));
+        rng = new StatefulRNG(new DiverRNG(dataStarter.rng.nextLong() ^ seed3));
         safeSpots.retract(2).randomScatter(rng, 8);
 
         Inclusion[] inclusions = Inclusion.values();
@@ -108,7 +108,7 @@ public class LocalAreaGenerator {
             contents[i] = gem;
             weights[i] = rng.between(1.0, 3.0);
         }
-        contents[inclusions.length] = handBuilt.money;
+        contents[inclusions.length] = dataStarter.money;
         weights[inclusions.length] = inclusions.length * 3.25;
         WeightedTableWrapper<Physical> table = new WeightedTableWrapper<>(rng.nextLong(), contents, weights);
 
@@ -137,7 +137,7 @@ public class LocalAreaGenerator {
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth) {
-        init(width, height, depth, handBuilt);
+        init(width, height, depth);
 
         noiseMap();
 
@@ -212,7 +212,7 @@ public class LocalAreaGenerator {
                             if (eMap.inBounds(x + dirs[i].deltaX, y + dirs[i].deltaY)
                                 && (dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] == '.' || dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] == '"')) {
                                 dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] = '&';
-                                eMap.contents[x + dirs[i].deltaX][y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
+                                eMap.contents[x + dirs[i].deltaX][y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(dataStarter.shadedGrass);
                                 eMap.contents[x + dirs[i].deltaX][y + dirs[i].deltaY].contents.add(tree.inventory.remove(0));
                             }
                         }
@@ -250,12 +250,11 @@ public class LocalAreaGenerator {
         return world;
     }
 
-    private void init(int width, int height, int depth, DataStarter handBuilt) {
+    private void init(int width, int height, int depth) {
         this.width = width;
         this.height = height;
         this.depth = depth;
-        this.handBuilt = handBuilt;
-        rng = handBuilt.rng.copy();
+        rng = dataStarter.rng.copy();
         rng.setState(1000L);
         world = new EpiMap[depth];
 
