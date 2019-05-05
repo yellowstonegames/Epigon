@@ -1,6 +1,7 @@
-package squidpony.epigon.playground;
+package squidpony.epigon.data.control;
 
 import com.badlogic.gdx.graphics.Color;
+
 import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
@@ -8,6 +9,7 @@ import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
 import squidpony.epigon.data.quality.Element;
+import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.*;
 import squidpony.squidgrid.gui.gdx.Radiance;
@@ -16,20 +18,32 @@ import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
 import static squidpony.epigon.data.Physical.basePhysical;
+import squidpony.epigon.data.quality.Inclusion;
+import squidpony.epigon.data.quality.Tree;
+import squidpony.epigon.data.quality.Vegetable;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
 
 /**
  * Contains objects to use to test out connections.
- * TODO: Too much of this is currently critical to the game, and should not be in the playground package. 
  */
 public class HandBuilt {
+
     public StatefulRNG rng;
     public long chaos;
     public RecipeMixer mixer;
+
+    private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
+    private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
+    public static final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
+    public static final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
 
     public Physical doorBlueprint;
     public Physical baseOpenDoor;
@@ -45,7 +59,6 @@ public class HandBuilt {
 
     public Recipe upStairRecipe;
     public Recipe downStairRecipe;
-
 
     public Physical playerBlueprint;
 //    public Radiance playerRadiance;
@@ -70,7 +83,6 @@ public class HandBuilt {
 //    public Recipe steakRecipe;
 
 //    public Physical carrotOfTruth; // when eaten the player can see through walls for a while
-    
     public Physical torch;
 
     public Physical lava;
@@ -120,11 +132,9 @@ public class HandBuilt {
 //    public Skill whip = new Skill("whip", flexible);
 //    public Skill hammer = new Skill("hammer", armedCombat);
 //    public Skill smallClub = new Skill("club (small)", hammer);
-
 //    public Ability unarmedStrike;
 //    public Ability armedStrike;
 //    public Ability cookSteak;
-
     public Profession chef;
     public Physical water;
     public Physical mud;
@@ -147,7 +157,7 @@ public class HandBuilt {
 
         money = Physical.makeBasic("gold coin", '$', SColor.CW_GOLD);
         money.groupingData = new Grouping(1);
-        
+
         baseFood = Physical.makeBasic("fūd", '℉', SColor.AMBER_DYE);
         rawMeat = Physical.makeBasic("meat", 'ₘ', SColor.DB_FAWN);
         steak = Physical.makeBasic("steak", 'ᴤ', SColor.DB_MUD);
@@ -155,7 +165,7 @@ public class HandBuilt {
             actor.stats.get(Stat.NUTRITION).addActual(target.stats.getOrDefault(Stat.VIGOR, LiveValue.ONE).actual());
             return "@Name eat$ the " + target.name + ", and feel$ less hungry.";
         });
-        
+
         cookSteak = new Interactable("cook steak", true, false, (actor, target, level) -> {
             actor.inventory.add(RecipeMixer.buildPhysical(steak));
             return "@Name cook$ the " + target.name + " into a steak.";
@@ -184,7 +194,7 @@ public class HandBuilt {
         lava.description = "molten stone";
         lava.radiance = new Radiance(1.8f, lava.color, 0.42f, 0f);
         lava.attached = true; // pick up the FLESH-SEARING MOLTEN CORE OF THE PLANET? n/n
-        
+
         water = Physical.makeBasic("water", '~', SColor.AZUL);
         water.description = "shallow water";
         water.attached = true;
@@ -193,7 +203,7 @@ public class HandBuilt {
         water.terrainData.background = SColor.translucentColor(SColor.LAPIS_LAZULI, 0.9f);
         water.terrainData.noise = new FastNoise(1234567, 0.03f, FastNoise.SIMPLEX_FRACTAL, 2);
         water.stats.put(Stat.OPACITY, LiveValue.ZERO);
-        
+
         mud = Physical.makeBasic("mud", '≁', SColor.DISTANT_RIVER_BROWN);
         mud.description = "dirty slick mud fit for some wrestling";
         mud.attached = true;
@@ -238,15 +248,13 @@ public class HandBuilt {
 //        cookSteak.validTargets.add(rawMeat);
     }
 
-    private static RatingValueModification rvmSkill(Rating rating)
-    {
+    private static RatingValueModification rvmSkill(Rating rating) {
         RatingValueModification rvm = new RatingValueModification();
         rvm.overwriteIncrease = rating;
         return rvm;
     }
 
-    private static RatingValueModification rvmSkill(Integer deltaLevel, Rating deltaMax)
-    {
+    private static RatingValueModification rvmSkill(Integer deltaLevel, Rating deltaMax) {
         RatingValueModification rvm = new RatingValueModification();
         rvm.deltaLevel = deltaLevel;
         rvm.deltaMax = deltaMax;
@@ -328,7 +336,7 @@ public class HandBuilt {
             playerBlueprint.stats.put(s, new LiveValue(100));
             playerBlueprint.statProgression.put(s, rating);
         }
-        
+
         Creature cb = new Creature();
         playerBlueprint.creatureData = cb;
 
@@ -351,7 +359,7 @@ public class HandBuilt {
         cb.skills = new OrderedMap<>();
         int[] ordering = rng.randomOrdering(Skill.combatSkills.size());
         for (int i = 0; i < 5; i++) {
-            cb.skills.put(Skill.combatSkills.keyAt(ordering[i]), Rating.allRatings[i+1]);
+            cb.skills.put(Skill.combatSkills.keyAt(ordering[i]), Rating.allRatings[i + 1]);
         }
 
         // make sure the player has prereqs for chef
@@ -371,7 +379,7 @@ public class HandBuilt {
 //        Weapon unarmed = Weapon.getWeapons().get("sinister magic");
         Weapon unarmed = Weapon.randomUnarmedWeapon(playerBlueprint).copy();
         playerBlueprint.inventory.add(torch);
-                 
+
         //playerBlueprint.creatureData.lastUsedItem = torch;
         //Weapon unarmed = Weapon.getUnarmedWeapons().get("fire magic").copy();
         playerBlueprint.creatureData.weaponChoices = new ProbabilityTable<>(++chaos);
@@ -380,8 +388,8 @@ public class HandBuilt {
         System.out.println("Player's culture is " + culture);
         List<Weapon> possibleItems = rng.shuffle(Weapon.cultures.get(culture));
         playerBlueprint.inventory.add(RecipeMixer.applyModification(
-                RecipeMixer.buildWeapon(possibleItems.get(0).copy(), playerBlueprint), 
-                beamWeaponModification()));
+            RecipeMixer.buildWeapon(possibleItems.get(0).copy(), playerBlueprint),
+            beamWeaponModification()));
         for (int i = 1; i < 3 && i < possibleItems.size(); i++) {
             playerBlueprint.inventory.add(RecipeMixer.buildWeapon(possibleItems.get(i).copy(), playerBlueprint));
         }
@@ -443,7 +451,7 @@ public class HandBuilt {
         downStairBlueprint.generic = true;
         downStairBlueprint.attached = true;
         downStairBlueprint.blocking = false;
-        
+
         RecipeBlueprint downStairRecipeBlueprint;
         downStairRecipeBlueprint = new RecipeBlueprint();
         downStairRecipeBlueprint.requiredCatalyst.put(basePhysical, 1);
@@ -493,11 +501,10 @@ public class HandBuilt {
             ClothingSlot.RIGHT_HAND
         ));
         glovesRecipe = createBasicConsumptionRecipe(basePhysical, glovesBlueprint);
-        
+
 //        Modification hungerUp = new Modification();
 //        LiveValueModification lvm = LiveValueModification.add(20);
 //        hungerUp.statChanges.put(Stat.NUTRITION, lvm);
-        
 //        RecipeBlueprint rb = new RecipeBlueprint();
 //        rb.requiredConsumed.put(rawMeat, 1);
 //        rb.result.put(steak, 1);
@@ -566,4 +573,88 @@ public class HandBuilt {
         return mod;
     }
 
+    public Physical getWall(Stone stone) {
+        Physical wall = walls.get(stone);
+        if (wall != null) {
+            return wall;
+        }
+
+        wall = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
+        RecipeMixer.applyModification(wall, makeWall);
+        walls.put(stone, wall);
+        return wall;
+    }
+
+    public Physical getFloor(Stone stone) {
+        Physical floor = floors.get(stone);
+        if (floor != null) {
+            return floor;
+        }
+
+        floor = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
+        floor.name = stone.toString() + " floor";
+        floors.put(stone, floor);
+        return floor;
+    }
+
+    public void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
+        placeStairs(top.contents[c.x][c.y], false);
+        placeStairs(bottom.contents[c.x][c.y], true);
+    }
+
+    public void placeStairs(EpiTile tile, boolean up) {
+        Physical adding;
+        if (tile.floor != null) {
+            if (tile.floor.terrainData != null && tile.floor.terrainData.stone != null) {
+                adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
+            } else {
+                adding = tile.floor;
+            }
+        } else {
+            adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
+        }
+
+        if (up) {
+            tile.contents.addAll(RecipeMixer.mix(upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
+        } else {
+            tile.contents.addAll(RecipeMixer.mix(downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
+        }
+    }
+
+    public void placeDoor(EpiTile tile) {
+        Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
+        List<Physical> adds = RecipeMixer.mix(doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
+        Physical door = adds.get(0);
+        setDoorOpen(door, rng.nextBoolean());
+        tile.add(door);
+    }
+
+    /**
+     * Sets the door to the open state, true means open and false means closed.
+     *
+     * @param open
+     */
+    public void setDoorOpen(Physical door, boolean open) {
+        RecipeMixer.applyModification(door, open ? openDoor : closeDoor);
+    }
+
+    public void placeWall(EpiTile tile) {
+        Physical adding = getWall(tile.floor.terrainData.stone);
+        tile.add(adding);
+    }
+
+    public void placeWater(EpiTile tile) {
+        tile.floor = RecipeMixer.buildPhysical(water);
+    }
+
+    public void placeLava(EpiTile tile) {
+        tile.floor = RecipeMixer.buildPhysical(lava);
+        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
+            tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
+        tile.floor.radiance.delay = tile.floor.nextFloat();
+    }
+
+    public void placeMud(EpiTile tile) {
+        tile.floor = RecipeMixer.buildPhysical(mud);
+    }
 }

@@ -24,6 +24,7 @@ import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
+import squidpony.epigon.data.control.HandBuilt;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -34,7 +35,6 @@ import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.*;
-import squidpony.epigon.playground.HandBuilt;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -132,6 +132,7 @@ public class Epigon extends Game {
 
     // World
     private WorldGenerator worldGenerator;
+    private CastleGenerator castleGenerator;
     private EpiMap[] world;
     private EpiMap map;
     private char[][] simple;
@@ -524,6 +525,7 @@ public class Epigon extends Game {
             messages.add(emptyICS);
         }        
         worldGenerator = new WorldGenerator();
+        castleGenerator = new CastleGenerator(handBuilt);
         contextHandler.message("Have fun!",
                 style("Bump into statues ([*][/]s[,]) and stuff."),
                 style("Now [/]90% fancier[/]!"),
@@ -645,7 +647,9 @@ public class Epigon extends Game {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int aboveground = 7;
-        world = worldGenerator.buildCastle(worldWidth, worldHeight, worldDepth, aboveground, handBuilt);
+        EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth, handBuilt);
+        EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveground);
+        world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
         depth = aboveground; // should be the very surface
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.lighting.fovResult);

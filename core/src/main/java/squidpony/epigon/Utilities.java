@@ -5,18 +5,27 @@ import regexodus.Matcher;
 import regexodus.Pattern;
 import squidpony.StringKit;
 import squidpony.epigon.data.Weapon;
+import squidpony.epigon.mapping.QuickHull;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
+import squidpony.squidmath.DDALine;
 import squidpony.squidmath.DiverRNG;
+import squidpony.squidmath.Elias;
+import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.RNG;
+import squidpony.squidmath.StatefulRNG;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Tommy Ettinger on 9/28/2017.
  */
 public class Utilities {
+
+    public static final long seed = 0xBEEFEEDADBA77L;
+    public static final StatefulRNG rng = new StatefulRNG(seed);
 
     public static char randomBraille(long state) {
         return (char) GauntRNG.between(state, 0x2801, 0x2900);
@@ -98,8 +107,7 @@ public class Utilities {
         return ret;
     }
 
-    public static String capitalizeFirst(final CharSequence original)
-    {
+    public static String capitalizeFirst(final CharSequence original) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -111,8 +119,8 @@ public class Utilities {
 
     private static final Matcher capitalizeMatcher = Pattern.compile("(?<!\\pL)(\\pL)(\\pL*)(\\PL*)").matcher();
     private static final StringBuilder sb = new StringBuilder(64);
-    public static String caps(final CharSequence original)
-    {
+
+    public static String caps(final CharSequence original) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -125,8 +133,9 @@ public class Utilities {
         }
         return sb.toString();
     }
+
     public static String caps(final CharSequence original,
-                              final CharSequence oldDelimiter) {
+        final CharSequence oldDelimiter) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -139,8 +148,9 @@ public class Utilities {
         }
         return sb.toString();
     }
+
     public static String caps(final CharSequence original,
-                                    final CharSequence oldDelimiter, final CharSequence newDelimiter) {
+        final CharSequence oldDelimiter, final CharSequence newDelimiter) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -153,8 +163,9 @@ public class Utilities {
         }
         return sb.toString();
     }
+
     public static String lower(final CharSequence original,
-                              final CharSequence oldDelimiter) {
+        final CharSequence oldDelimiter) {
         if (original == null || original.length() <= 0) {
             return "";
         }
@@ -229,16 +240,79 @@ public class Utilities {
         }
         return cs;
     }
-    
-    public static float progressiveLighten(float color)
-    {
+
+    public static float progressiveLighten(float color) {
         return SColor.toEditedFloat(color, 0f, 0f, (1.0f - SColor.lumaOfFloat(color)) * 0.4f, 1f);
     }
-    
+
     // I don't think range is ever a non-integer currently...
     public static String getRangeText(Weapon weapon) {
         int intRange = (int) Math.round(weapon.rawWeapon.range) + 1;
-        return  " " + Weapon.shapes.keyAt(weapon.shape) + " " + intRange;
+        return " " + Weapon.shapes.keyAt(weapon.shape) + " " + intRange;
+    }
+
+    public static Coord findCentroid(List<Coord> coords) {
+        int centroidX = 0;
+        int centroidY = 0;
+        for (Coord c : coords) {
+            centroidX += c.x;
+            centroidY += c.y;
+        }
+        centroidX /= coords.size();
+        centroidY /= coords.size();
+        return Coord.get(centroidX, centroidY);
+    }
+
+    public static List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
+        GreasedRegion points = region.copy();
+        do {
+            points.remake(region).randomScatter(rng, distance, 12);
+            if (points.isEmpty()) {
+                System.out.println("No points found for area");
+            }
+        } while (pointsInLine(points)); // need to make sure at least a triangle is possible
+
+        QuickHull hull = new QuickHull();
+        Coord[] coords = points.asCoords();
+        return hull.executeQuickHull(coords);// TODO - rework hull to use greased region
+    }
+
+    public static GreasedRegion connectPoints(GreasedRegion region, Coord... points) {
+        Elias elias = new Elias();
+        GreasedRegion lines = region.copy();
+        for (int i = 0; i < points.length; i++) {
+            lines.addAll(elias.line(points[i], points[(i + 1) % points.length]));
+        }
+        return lines;
+    }
+
+    public static GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {
+        for (int i = 0; i < points.size(); i++) {
+            region.addAll(DDALine.line(points.get(i), points.get((i + 1) % points.size())));
+        }
+//        GreasedRegion lines = region.copy();
+//        region.or(lines.neighborDown());
+//        lines.remake(region);
+//        region.or(lines.neighborLeft());
+        return region;
+    }
+
+    public static boolean pointsInLine(GreasedRegion points) {
+        int sz = points.size();
+        if (sz < 3) {
+            return true; // 2 or less points are considered to always be in a line
+        }
+
+        double angle = Coord.degrees(points.nth(0), points.nth(1));
+        for (int i = 1; i < sz; i++) {
+            double test = Coord.degrees(points.nth(i), points.nth((i + 1) % sz));
+            if (angle != test && (angle + 180) % 360 != test) {
+                return false;
+            }
+        }
+
+        System.out.println("Points in a line: " + StringKit.join(", ", points));
+        return true;
     }
 
     /*
@@ -321,5 +395,5 @@ public class Utilities {
     ἠἡἢἣἤἥἦἧἨἩἪἫἬἭἮἯἰἱἲἳἴἵἶἷἸἹἺἻἼἽἾἿὀὁὂὃὄὅὈὉὊὋὌὍὐὑὒὓὔὕὖὗὙὛὝὟὠὡὢὣὤὥὦὧὨὩὪὫὬὭὮὯὰάὲέὴήὶίὸόὺύὼώᾀᾁᾂᾃᾄᾅᾆᾇᾈᾉᾊᾋᾌᾍᾎᾏ
     ᾐᾑᾒᾓᾔᾕᾖᾗᾘᾙᾚᾛᾜᾝᾞᾟᾠᾡᾢᾣᾤᾥᾦᾧᾨᾩᾪᾫᾬᾭᾮᾯᾰᾱᾲᾳᾴᾶᾷᾸᾹᾺΆᾼ᾽ιῂῃῄῆῇῈΈῊΉῌ῍῎῏ῐῑῒΐῖῗῘῙῚΊ῝῞῟ῠῡῢΰῤῥῦῧῨῩῪΎῬ῭΅`ῲῳῴῶῷῸΌῺΏῼ
   
-  */
+     */
 }

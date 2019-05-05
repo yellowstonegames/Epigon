@@ -1,7 +1,5 @@
 package squidpony.epigon.mapping;
 
-import squidpony.Maker;
-import squidpony.StringKit;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.RecipeMixer;
 import squidpony.epigon.data.WeightedTableWrapper;
@@ -10,24 +8,18 @@ import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
 import squidpony.epigon.data.trait.Grouping;
-import squidpony.epigon.playground.HandBuilt;
+import squidpony.epigon.data.control.HandBuilt;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
 import squidpony.squidgrid.mapping.DungeonGenerator;
 import squidpony.squidgrid.mapping.FlowingCaveGenerator;
 import squidpony.squidgrid.mapping.SerpentMapGenerator;
-import squidpony.squidgrid.mapping.styled.DungeonBoneGen;
 import squidpony.squidgrid.mapping.styled.TilesetType;
 import squidpony.squidmath.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Creates a world.
@@ -36,63 +28,33 @@ import java.util.stream.Stream;
  */
 public class WorldGenerator {
 
-    public static final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
-    public static final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
     private static final int maxRecurse = 10;
     private EpiMap[] world;
     private int width, height, depth;
     private HandBuilt handBuilt;
     private StatefulRNG rng;
-    private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
-    private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
-    
-    public WorldGenerator()
-    {
+
+    public WorldGenerator() {
         Vegetable[] vegetables = Vegetable.ALL;
         for (int v = 0; v < vegetables.length; v++) {
             String terrains = vegetables[v].terrains();
             for (int i = 0; i < terrains.length(); i++) {
-                if (!vegetablesByTerrain.containsKey(terrains.charAt(i)))
-                    vegetablesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(vegetables[v]));
-                vegetablesByTerrain.get(terrains.charAt(i)).add(vegetables[v]);
+                if (!handBuilt.vegetablesByTerrain.containsKey(terrains.charAt(i))) {
+                    handBuilt.vegetablesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(vegetables[v]));
+                }
+                handBuilt.vegetablesByTerrain.get(terrains.charAt(i)).add(vegetables[v]);
             }
         }
         Tree[] trees = Tree.ALL;
         for (int t = 0; t < trees.length; t++) {
             String terrains = trees[t].terrains();
             for (int i = 0; i < terrains.length(); i++) {
-                if (!treesByTerrain.containsKey(terrains.charAt(i)))
-                    treesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(trees[t]));
-                treesByTerrain.get(terrains.charAt(i)).add(trees[t]);
+                if (!handBuilt.treesByTerrain.containsKey(terrains.charAt(i))) {
+                    handBuilt.treesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(trees[t]));
+                }
+                handBuilt.treesByTerrain.get(terrains.charAt(i)).add(trees[t]);
             }
         }
-    }
-
-    public EpiMap[] buildCastle(int width, int height, int depth, int sky, HandBuilt handBuilt) {
-        System.out.println("Building castle.");
-        long millis = System.currentTimeMillis();
-
-        EpiMap[] underground = buildWorld(width, height, depth, handBuilt);
-        EpiMap[] aboveground = new EpiMap[sky + 1]; // first layer above ground is floor zero
-
-        for (int i = 0; i <= sky; i++) {
-            aboveground[i] = new EpiMap(width, height);
-        }
-
-        Physical walkway = RecipeMixer.buildPhysical(Physical.makeBasic("stone walkway", '.', SColor.LINEN));
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                aboveground[sky].contents[x][y] = new EpiTile(walkway);
-            }
-        }
-
-        generateCastle(aboveground);
-
-        world = Stream.of(aboveground, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
-
-        millis = System.currentTimeMillis() - millis;
-        System.out.println("Castle building took " + millis + " milliseconds.");
-        return world;
     }
 
     public EpiMap buildDive(int width, int depth, HandBuilt handBuilt) {
@@ -196,9 +158,6 @@ public class WorldGenerator {
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
-        System.out.printf("Building world %sx%s and %s deep\n", width, height, depth);
-        long millis = System.currentTimeMillis();
-
         init(width, height, depth, handBuilt);
 //        placeMinerals();
 //        faultMap();
@@ -208,13 +167,11 @@ public class WorldGenerator {
 //        bubbleMap(false);
 //        intrudeMap();
 //        metamorphoseMap();
-        
+
         noiseMap();
-        
+
         makeSolid();
 
-        System.out.println("Building world INIT took " + (System.currentTimeMillis() - millis) + " milliseconds.");
-        
         EpiTile tile;
         GreasedRegion[] floorWorld = new GreasedRegion[depth];
         GreasedRegion tmp = new GreasedRegion(width, height);
@@ -253,15 +210,15 @@ public class WorldGenerator {
                         case '.':
                             break;
                         case '#':
-                            placeWall(tile);
+                            handBuilt.placeWall(tile);
                             break;
                         case '+':
                         case '/':
-                            placeDoor(tile);
+                            handBuilt.placeDoor(tile);
                             break;
                         case '~': // TODO - distinguish deep water
                         case ',':
-                            placeWater(tile);
+                            handBuilt.placeWater(tile);
                             break;
                         case '&': // should never occur naturally
                             break;
@@ -272,19 +229,17 @@ public class WorldGenerator {
                             tile.floor.name = "modified " + c;
                             break;
                     }
-                    if(vegetablesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(5) == 0)
-                        // 1 in 32 chance
-                        tile.contents.add(RecipeMixer.buildVegetable(vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-                    else if(treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
-                        Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
+                    if (handBuilt.vegetablesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(5) == 0) {// 1 in 32 chance
+                        tile.contents.add(RecipeMixer.buildVegetable(handBuilt.vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
+                    } else if (handBuilt.treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
+                        Physical tree = RecipeMixer.buildTree(handBuilt.treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
                         tree.shuffle(Direction.OUTWARDS, dirs);
                         for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
-                            if(eMap.inBounds(x + dirs[i].deltaX, y + dirs[i].deltaY)
-                                    && (dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] == '.' || dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] == '"'))
-                            {
-                                dungeonChars[x + dirs[i].deltaX][y+ dirs[i].deltaY] = '&';
-                                eMap.contents[x + dirs[i].deltaX][y+ dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
-                                eMap.contents[x + dirs[i].deltaX][y+ dirs[i].deltaY].contents.add(tree.inventory.remove(0));
+                            if (eMap.inBounds(x + dirs[i].deltaX, y + dirs[i].deltaY)
+                                && (dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] == '.' || dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] == '"')) {
+                                dungeonChars[x + dirs[i].deltaX][y + dirs[i].deltaY] = '&';
+                                eMap.contents[x + dirs[i].deltaX][y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
+                                eMap.contents[x + dirs[i].deltaX][y + dirs[i].deltaY].contents.add(tree.inventory.remove(0));
                             }
                         }
                         tile.contents.add(tree);
@@ -292,7 +247,7 @@ public class WorldGenerator {
                 }
             }
         }
-        long lateMillis = System.currentTimeMillis();
+
         for (int e = 0; e < depth - 1; e++) {
             EpiMap eMap = world[e];
             EpiMap nextMap = world[e + 1];
@@ -300,7 +255,7 @@ public class WorldGenerator {
             eMap.downStairPositions.or(tmp);
             nextMap.upStairPositions.or(tmp);
             for (Coord c : tmp) {
-                placeStairs(eMap, nextMap, c);
+                handBuilt.placeStairs(eMap, nextMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e + 1].andNot(tmp);
@@ -312,15 +267,11 @@ public class WorldGenerator {
             eMap.upStairPositions.or(tmp);
             prevMap.downStairPositions.or(tmp);
             for (Coord c : tmp) {
-                placeStairs(prevMap, eMap, c);
+                handBuilt.placeStairs(prevMap, eMap, c);
             }
             floorWorld[e].andNot(tmp);
             floorWorld[e - 1].andNot(tmp);
         }
-        System.out.println("Building world LATE took " + (System.currentTimeMillis() - lateMillis) + " milliseconds.");
-
-        millis = System.currentTimeMillis() - millis;
-        System.out.println("Building world took " + millis + " milliseconds.");
 
         return world;
     }
@@ -339,95 +290,13 @@ public class WorldGenerator {
         }
     }
 
-    private void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
-        placeStairs(top.contents[c.x][c.y], false);
-        placeStairs(bottom.contents[c.x][c.y], true);
-    }
-
-    private void placeStairs(EpiTile tile, boolean up) {
-        Physical adding;
-        if (tile.floor != null) {
-            if (tile.floor.terrainData != null && tile.floor.terrainData.stone != null) {
-                adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-            } else {
-                adding = tile.floor;
-            }
-        } else {
-            adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
-        }
-
-        if (up) {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
-        } else {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
-        }
-    }
-
-    private void placeDoor(EpiTile tile) {
-        Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-        List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
-        Physical door = adds.get(0);
-        setDoorOpen(door, rng.nextBoolean());
-        tile.add(door);
-    }
-
-    /**
-     * Sets the door to the open state, true means open and false means closed.
-     *
-     * @param open
-     */
-    private void setDoorOpen(Physical door, boolean open) {
-        RecipeMixer.applyModification(door, open ? handBuilt.openDoor : handBuilt.closeDoor);
-    }
-
-    private void placeWall(EpiTile tile) {
-        Physical adding = getWall(tile.floor.terrainData.stone);
-        tile.add(adding);
-    }
-
-    private void placeWater(EpiTile tile) {
-//        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
-//        tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(),
-//                tile.floor.nextFloat() * (tile.floor.nextFloat(0.75f) + 0.25f));
-//        tile.floor.radiance.delay = tile.floor.nextFloat();
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.water);
-    }
-
-    private void placeMud(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.mud);
-    }
-
-    private Physical getWall(Stone stone) {
-        Physical wall = walls.get(stone);
-        if (wall != null) {
-            return wall;
-        }
-
-        wall = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
-        RecipeMixer.applyModification(wall, handBuilt.makeWall);
-        walls.put(stone, wall);
-        return wall;
-    }
-
-    private Physical getFloor(Stone stone) {
-        Physical floor = floors.get(stone);
-        if (floor != null) {
-            return floor;
-        }
-
-        floor = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
-        floor.name = stone.toString() + " floor";
-        floors.put(stone, floor);
-        return floor;
-    }
-
     /**
      * Randomly places minerals in the provided map.
      */
     private void placeMinerals() {
         int z = 0;
         int thickness = rng.between(12, 18);
-        Physical floor = getFloor(rng.getRandomElement(Stone.values()));
+        Physical floor = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
         while (z < depth) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -440,7 +309,7 @@ public class WorldGenerator {
             thickness--;
             if (thickness <= 0) {
                 thickness = rng.between(2, 10);
-                floor = getFloor(rng.getRandomElement(Stone.values()));
+                floor = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
             }
         }
     }
@@ -454,7 +323,7 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    tile.add(getWall(tile.floor.terrainData.stone));
+                    tile.add(handBuilt.getWall(tile.floor.terrainData.stone));
                 }
             }
         }
@@ -480,7 +349,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = getFloor(rng.getRandomElement(Stone.values()));
+                    blueprint = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
                 }
             }
 
@@ -525,7 +394,7 @@ public class WorldGenerator {
             x2 = x - rng.nextInt(width);
             y2 = y - rng.nextInt(height);
         } while ((x2 == 0) || (y2 == 0));
-        m = (y2) / (double)(x2);//y - y1/x - x1
+        m = (y2) / (double) (x2);//y - y1/x - x1
 //        } while (((int) m == 0) || ((int) m == 1) || ((int) m == -1));
 
         int b = (int) (y - m * x);//y-mx
@@ -589,7 +458,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = getFloor(intruder);
+                        world[z].contents[x][y].floor = handBuilt.getFloor(intruder);
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -637,7 +506,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = getFloor(extruder);
+                                world[z].contents[x][y].floor = handBuilt.getFloor(extruder);
                             }
                         }
                     }
@@ -651,14 +520,14 @@ public class WorldGenerator {
         Physical changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = getFloor(rng.getRandomElement(Arrays
+        changer = handBuilt.getFloor(rng.getRandomElement(Arrays
             .stream(Stone.values())
             .filter(s -> s.metamorphic)
             .collect(Collectors.toList())));
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer = getFloor(rng.getRandomElement(Arrays
+                changer = handBuilt.getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
                     .collect(Collectors.toList())));
@@ -711,7 +580,7 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = getFloor(rng.getRandomElement(Arrays
+                changer = handBuilt.getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
                     .collect(Collectors.toList())));
@@ -761,17 +630,16 @@ public class WorldGenerator {
             }
         }
     }
-    
-    private void noiseMap()
-    {
+
+    private void noiseMap() {
         FastNoise noise = new FastNoise(rng.nextInt(), 0.025f, FastNoise.SIMPLEX_FRACTAL, 2),
-                ridge = new FastNoise(rng.nextInt(), 0.035f, FastNoise.SIMPLEX_FRACTAL, 3);
+            ridge = new FastNoise(rng.nextInt(), 0.035f, FastNoise.SIMPLEX_FRACTAL, 3);
         ridge.setFractalType(FastNoise.RIDGED_MULTI);
         EpiMap map;
         Stone[] stones = rng.shuffleInPlace(Stone.values());
         Physical[] floors = new Physical[stones.length];
         for (int i = 0; i < stones.length; i++) {
-            floors[i] = getFloor(stones[i]);
+            floors[i] = handBuilt.getFloor(stones[i]);
         }
         float diversity = stones.length * 0.04f + rng.nextFloat(stones.length * 0.16f), halfway = stones.length * 0.5f;
         for (int z = 0; z < depth; z++) {
@@ -782,360 +650,6 @@ public class WorldGenerator {
                 }
             }
         }
-    }
-
-    private void generateCastle(EpiMap[] buildZone) {
-        Castle castle = new Castle(buildZone);
-        buildGroundLevelCastle(castle);
-    }
-
-    private void buildGroundLevelCastle(Castle castle) {
-        buildMoat(castle);
-
-        List<Coord> corners = findInternalPolygonCorners(castle.insideMoat, 4, 4);
-        Coord courtyardCentroid = findCentroid(corners);
-
-        buildOuterWall(courtyardCentroid, castle);
-        layBricks(courtyardCentroid, castle);
-        tearDownWalls(castle);
-        buildKeep(courtyardCentroid, castle);
-        buildGardens(castle);
-        addPlants(castle);
-    }
-
-    private void buildMoat(Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
-        int distance = 8; // space between points
-        castle.moat.surface8way(8);
-        List<Coord> corners = findInternalPolygonCorners(castle.moat, distance, 7);
-        castle.moat.clear();
-        connectPoints(castle.moat, corners);
-
-        castle.moat.expand8way();
-        castle.moatBank = castle.moat.copy();
-        GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
-        for (Coord c : nonMoat) {
-            map.contents[c.x][c.y].floor = getFloor(Stone.ARGILLITE);
-        }
-
-        castle.moat.fray(0.3).fray(0.2);
-        for (Coord c : castle.moat) {
-            placeWater(map.contents[c.x][c.y]);
-        }
-
-        castle.moatBank.andNot(castle.moat);
-        for (Coord c : castle.moatBank) {
-            placeMud(map.contents[c.x][c.y]);
-        }
-
-        castle.insideMoat = new GreasedRegion(findCentroid(corners), castle.region.width, castle.region.height)
-            .flood8way(nonMoat, castle.region.width * castle.region.height);
-
-        castle.insideMoat.andNot(castle.moat).andNot(castle.moatBank);
-        for (Coord c : castle.insideMoat) {
-            map.contents[c.x][c.y].floor = getFloor(Stone.OBSIDIAN);
-        }
-    }
-
-    private void buildOuterWall(Coord centroid, Castle castle) {
-        castle.outerWall = new GreasedRegion(centroid, castle.insideMoat.width, castle.insideMoat.height);
-        while (!castle.outerWall.intersects(castle.moat)) {
-            castle.outerWall.expand8way();
-        }
-        castle.outerWall.surface8way(3);
-//        castle.outerWall = connectPoints(castle.outerWall, corners);
-        castle.holes = castle.outerWall.copy().randomScatter(rng, 8).expand(); // find the holes before the expansion so that they're in the middle of the wall
-        castle.outerWall.expand();
-
-        for (Coord c : castle.outerWall) {
-            for (int z = castle.ground; z > Integer.max(castle.ground - 3, castle.ground - castle.height); z--) {
-                EpiTile tile = castle.tileAt(c, z);
-                if (tile == null) {
-                    tile = new EpiTile();
-                    castle.setTileAt(c, castle.ground - z, tile);
-                }
-
-                tile.add(getWall(Stone.GNEISS));
-                tile.floor = getFloor(Stone.GNEISS);
-            }
-        }
-    }
-
-    private void layBricks(Coord centroid, Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
-        castle.courtyard = new GreasedRegion(centroid, castle.region.width, castle.region.height)
-            .flood8way(castle.insideMoat.copy().andNot(castle.outerWall), castle.region.width * castle.region.height);
-
-        Physical brick = RecipeMixer.buildPhysical(Physical.makeBasic("brick", '≡', SColor.PERSIAN_RED));
-        for (Coord c : castle.courtyard) {
-            map.contents[c.x][c.y].floor = brick;
-        }
-    }
-
-    private void tearDownWalls(Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
-        castle.holes.expand(2);
-        castle.holes.fray(0.2);
-        castle.holes.fray(0.2);
-        Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
-        for (Coord c : castle.holes) {
-            map.contents[c.x][c.y].blockage = null;
-            map.contents[c.x][c.y].add(rubble);
-            placeMud(map.contents[c.x][c.y]);
-        }
-    }
-
-    private void buildGardens(Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
-        castle.garden = castle.courtyard.copy().andNot(castle.keepWall).andNot(castle.insideKeep);
-        Physical pondWater = RecipeMixer.buildPhysical(Physical.makeBasic("pond water", '~', SColor.SEA_GREEN));
-
-        castle.pond = castle.garden.copy();
-        Coord pondCenter = castle.pond.singleRandom(rng);
-        castle.pond.and(castle.pond.copy().fill(false).insertCircle(pondCenter, 2));
-        castle.pond.fray(0.4);
-        for (Coord c : castle.pond) {
-            map.contents[c.x][c.y].blockage = null;
-            map.contents[c.x][c.y].floor = pondWater;
-        }
-        castle.pondBank = castle.pond.copy().fringe().andNot(castle.keepWall).andNot(castle.insideKeep).andNot(castle.outerWall);
-        for (Coord c : castle.pondBank) {
-            placeMud(map.contents[c.x][c.y]);
-        }
-    }
-
-    private void addPlants(Castle castle) {
-        EpiMap map = castle.buildZone[castle.ground];
-        GreasedRegion outside = castle.region.copy().not().flood(castle.insideMoat.copy().not(), castle.width * castle.height);
-        for (GreasedRegion area : new GreasedRegion[]{castle.garden, castle.pond, castle.pondBank, outside}) {
-            Direction[] dirs = new Direction[8];
-            EpiTile tile;
-            for (Coord c : area) {
-                float noise = FastNoise.instance.getSimplex(c.x * 1.6f, c.y * 1.6f);
-                if (noise > -0.1f && noise < 0.35f) {
-                    tile = map.contents[c.x][c.y];
-                    if (tile.floor.symbol == '.') {
-                        tile.floor = RecipeMixer.buildPhysical(handBuilt.grass);
-                    }
-                    if (tile.floor.next(3) == 0 && vegetablesByTerrain.containsKey(tile.floor.symbol)) {
-                        // 1 in 8 chance
-                        tile.contents.add(RecipeMixer.buildVegetable(
-                            vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-                    } else if (treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 9) {    // 9 in 256 chance
-                        Physical tree = RecipeMixer.buildTree(treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
-                        tree.shuffle(Direction.OUTWARDS, dirs);
-                        for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
-                            if (map.inBounds(c.x + dirs[i].deltaX, c.y + dirs[i].deltaY)
-                                && (map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '.' || map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor.symbol == '¸')) {
-                                map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].floor = RecipeMixer.buildPhysical(handBuilt.shadedGrass);
-                                map.contents[c.x + dirs[i].deltaX][c.y + dirs[i].deltaY].contents.add(tree.inventory.remove(0));
-                            }
-                        }
-                        tile.contents.add(tree);
-                    }
-
-                }
-            }
-
-        }
-    }
-
-    private void buildKeep(Coord courtyardCentroid, Castle castle) {
-        // sketch out a keep's borders
-        
-//        int top = courtyardCentroid.y;
-//        int bottom = courtyardCentroid.y;
-//        int left = courtyardCentroid.x;
-//        int right = courtyardCentroid.x;
-//        int lastChoice = 0;
-//        expandKeep:
-//        while (true) {
-//            lastChoice = rng.nextInt(4);
-//            switch (lastChoice) {
-//                case 0:
-//                    top--;
-//                    break;
-//                case 1:
-//                    right++;
-//                    break;
-//                case 2:
-//                    left--;
-//                    break;
-//                case 3:
-//                default:
-//                    bottom++;
-//                    break;
-//            }
-//            for (int x = left; x <= right; x++) {
-//                if (!castle.courtyard.contains(x, top) || !castle.courtyard.contains(x, bottom)) {
-//                    break expandKeep;
-//                }
-//            }
-//            for (int y = top; y <= bottom; y++) {
-//                if (!castle.courtyard.contains(left, y) || !castle.courtyard.contains(right, y)) {
-//                    break expandKeep;
-//                }
-//            }
-//        }
-//        switch (lastChoice) {
-//            case 0:
-//                top++;
-//                break;
-//            case 1:
-//                right--;
-//                break;
-//            case 2:
-//                left++;
-//                break;
-//            case 3:
-//            default:
-//                bottom--;
-//                break;
-//        }
-
-        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.courtyard.width, castle.courtyard.height);
-        while (!castle.insideKeep.intersects(castle.outerWall))
-        {
-            castle.insideKeep.expand8way();
-        }
-        castle.insideKeep.retract(6);
-        
-        castle.keepWall = connectPoints(new GreasedRegion(castle.courtyard.width, castle.courtyard.height),
-                castle.insideKeep.copy().andNot(castle.insideKeep.copy().removeCorners()).asCoords());
-        for (Coord c : castle.keepWall) {
-            for (int z = 0; z <= 4; z++) {
-                EpiTile tile = castle.tileAt(c, castle.ground - z);
-                if (tile == null) {
-                    tile = new EpiTile();
-                    castle.setTileAt(c, castle.ground - z, tile);
-                }
-                tile.floor = getFloor(Stone.MARBLE);
-                //tile.add(getWall(Stone.MARBLE));
-            }
-
-            if ((c.x + c.y & 1) == 0) {
-                EpiTile tile = castle.tileAt(c, castle.ground - 5);
-                if (tile == null) {
-                    tile = new EpiTile();
-                    castle.setTileAt(c, castle.ground - 5, tile);
-                }
-                tile.floor = getFloor(Stone.MARBLE);
-                tile.add(getWall(Stone.MARBLE));
-            }
-        }
-
-//        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
-//            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
-
-        Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
-        Physical insideFloor = getFloor(Stone.GRANITE), insideWall = getWall(Stone.GRANITE);
-        DungeonBoneGen dbg = new DungeonBoneGen(rng);
-        DungeonGenerator dungeonGenerator = new DungeonGenerator(width, height, rng);
-        dungeonGenerator.addDoors(30, true);
-        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width, height);
-        GreasedRegion gr = dbg.region.copy();
-        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width + 5, height + 5);
-        gr.insert(-5, -5, dbg.region);
-        dbg.generate(TilesetType.LIMITED_CONNECTIVITY, width + 3, height + 3);
-        gr.not().insert(-2, -2, dbg.region);
-        char[][] interior = dungeonGenerator.generate(gr.toChars());
-        for (Coord c : castle.insideKeep) {
-            EpiTile tile = castle.tileAt(c, castle.ground);
-            if(tile == null) {
-                castle.setTileAt(c, castle.ground, tile = new EpiTile(insideFloor));
-            }
-            else {
-                tile.floor = insideFloor;
-            }
-            if(interior[c.x][c.y] == '+' || interior[c.x][c.y] == '/')
-            {
-                tile.blockage = null;
-                placeDoor(tile);
-            }
-            else if(interior[c.x][c.y] != '.')
-                tile.add(insideWall);
-        }
-//        for (Coord c : castle.insideKeep) {
-//            for (int z = 0; z <= 4; z++) {
-//                EpiTile tile = castle.tileAt(c, castle.ground - z);
-//                if (tile == null) {
-//                    castle.setTileAt(c, castle.ground - z, new EpiTile(carpet));
-//                } else {
-//                    tile.floor = carpet;
-//                }
-//            }
-//        }
-//        GreasedRegion doors = castle.keepWall.copy().randomScatter(rng, 8, 5);
-//        for (Coord c : doors) {
-//            EpiTile tile = castle.tileAt(c, castle.ground);
-//            tile.floor = getFloor(Stone.MARBLE);
-//            tile.blockage = null;
-//            placeDoor(tile);
-//        }
-    }
-
-    private Coord findCentroid(List<Coord> coords) {
-        int centroidX = 0;
-        int centroidY = 0;
-        for (Coord c : coords) {
-            centroidX += c.x;
-            centroidY += c.y;
-        }
-        centroidX /= coords.size();
-        centroidY /= coords.size();
-        return Coord.get(centroidX, centroidY);
-    }
-
-    private List<Coord> findInternalPolygonCorners(GreasedRegion region, int distance, int pointLimit) {
-        GreasedRegion points = region.copy();
-        do {
-            points.remake(region).randomScatter(rng, distance, 12);
-            if (points.isEmpty()) {
-                System.out.println("No points found for area");
-            }
-        } while (pointsInLine(points)); // need to make sure at least a triangle is possible
-
-        QuickHull hull = new QuickHull();
-        Coord[] coords = points.asCoords();
-        return hull.executeQuickHull(coords);// TODO - rework hull to use greased region
-    }
-
-    private GreasedRegion connectPoints(GreasedRegion region, Coord... points) {
-        Elias elias = new Elias();
-        GreasedRegion lines = region.copy();
-        for (int i = 0; i < points.length; i++) {
-            lines.addAll(elias.line(points[i], points[(i + 1) % points.length]));
-        }
-        return lines;
-    }
-
-    private GreasedRegion connectPoints(GreasedRegion region, List<Coord> points) {
-        for (int i = 0; i < points.size(); i++) {
-            region.addAll(DDALine.line(points.get(i), points.get((i + 1) % points.size())));
-        }
-//        GreasedRegion lines = region.copy();
-//        region.or(lines.neighborDown());
-//        lines.remake(region);
-//        region.or(lines.neighborLeft());
-        return region;
-    }
-
-    private boolean pointsInLine(GreasedRegion points) {
-        int sz = points.size();
-        if (sz < 3) {
-            return true; // 2 or less points are considered to always be in a line
-        }
-
-        double angle = Coord.degrees(points.nth(0), points.nth(1));
-        for (int i = 1; i < sz; i++) {
-            double test = Coord.degrees(points.nth(i), points.nth((i + 1) % sz));
-            if (angle != test && (angle + 180) % 360 != test) {
-                return false;
-            }
-        }
-
-        System.out.println("Points in a line: " + StringKit.join(", ", points));
-        return true;
     }
 
     private boolean pointInBounds(int x, int y, int z) {
