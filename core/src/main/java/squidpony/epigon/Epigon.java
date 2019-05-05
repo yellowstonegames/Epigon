@@ -523,8 +523,8 @@ public class Epigon extends Game {
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         for (int i = 0; i <= messageCount; i++) {
             messages.add(emptyICS);
-        }        
-        worldGenerator = new WorldGenerator();
+        }
+        worldGenerator = new WorldGenerator(handBuilt);
         castleGenerator = new CastleGenerator(handBuilt);
         contextHandler.message("Have fun!",
                 style("Bump into statues ([*][/]s[,]) and stuff."),
@@ -558,7 +558,7 @@ public class Epigon extends Game {
     private void prepFall() {
         message("Falling..... Press SPACE to continue");
         int w = World.DIVE_HEADER[0].length();
-        map = worldGenerator.buildDive(w, worldDepth, handBuilt);
+        map = worldGenerator.buildDive(w, worldDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
@@ -647,7 +647,7 @@ public class Epigon extends Game {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int aboveground = 7;
-        EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth, handBuilt);
+        EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth);
         EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveground);
         world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
         depth = aboveground; // should be the very surface

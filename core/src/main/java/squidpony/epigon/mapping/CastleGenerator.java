@@ -18,11 +18,14 @@ import squidpony.squidmath.FastNoise;
 import squidpony.squidmath.GreasedRegion;
 
 import static squidpony.epigon.Utilities.*;
+import squidpony.epigon.data.control.DataPool;
+import squidpony.epigon.data.quality.Tree;
+import squidpony.epigon.data.quality.Vegetable;
 
 public class CastleGenerator {
 
     private int width, height, depth, sky;
-    private HandBuilt handBuilt;
+    private final HandBuilt handBuilt;
 
     public CastleGenerator(HandBuilt handbuilt) {
         this.handBuilt = handbuilt;
@@ -63,7 +66,7 @@ public class CastleGenerator {
      * @param sky z level above ground, including the first castle level.
      * @return
      */
-    public EpiMap[] buildCastle(int width, int height, int depth, int sky) {
+    private EpiMap[] buildCastle(int width, int height, int depth, int sky) { // NOTE - made private until depth actually builds a basement to prevent using this overload
         System.out.println("Building castle.");
         this.width = width;
         this.height = height;
@@ -126,7 +129,7 @@ public class CastleGenerator {
         castle.moatBank = castle.moat.copy();
         GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
         for (Coord c : nonMoat) {
-            map.contents[c.x][c.y].floor = handBuilt.getFloor(Stone.ARGILLITE);
+            map.contents[c.x][c.y].floor = DataPool.instance().getFloor(Stone.ARGILLITE);
         }
 
         castle.moat.fray(0.3).fray(0.2);
@@ -144,7 +147,7 @@ public class CastleGenerator {
 
         castle.insideMoat.andNot(castle.moat).andNot(castle.moatBank);
         for (Coord c : castle.insideMoat) {
-            map.contents[c.x][c.y].floor = handBuilt.getFloor(Stone.OBSIDIAN);
+            map.contents[c.x][c.y].floor = DataPool.instance().getFloor(Stone.OBSIDIAN);
         }
     }
 
@@ -166,8 +169,8 @@ public class CastleGenerator {
                     castle.setTileAt(c, castle.ground - z, tile);
                 }
 
-                tile.add(handBuilt.getWall(Stone.GNEISS));
-                tile.floor = handBuilt.getFloor(Stone.GNEISS);
+                tile.add(DataPool.instance().getWall(Stone.GNEISS));
+                tile.floor = DataPool.instance().getFloor(Stone.GNEISS);
             }
         }
     }
@@ -221,6 +224,8 @@ public class CastleGenerator {
         for (GreasedRegion area : new GreasedRegion[]{castle.garden, castle.pond, castle.pondBank, outside}) {
             Direction[] dirs = new Direction[8];
             EpiTile tile;
+            Vegetable veggie;
+            Tree treeBase;
             for (Coord c : area) {
                 float noise = FastNoise.instance.getSimplex(c.x * 1.6f, c.y * 1.6f);
                 if (noise > -0.1f && noise < 0.35f) {
@@ -228,12 +233,11 @@ public class CastleGenerator {
                     if (tile.floor.symbol == '.') {
                         tile.floor = RecipeMixer.buildPhysical(handBuilt.grass);
                     }
-                    if (tile.floor.next(3) == 0 && handBuilt.vegetablesByTerrain.containsKey(tile.floor.symbol)) {
-                        // 1 in 8 chance
-                        tile.contents.add(RecipeMixer.buildVegetable(
-                            handBuilt.vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-                    } else if (handBuilt.treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 9) {    // 9 in 256 chance
-                        Physical tree = RecipeMixer.buildTree(handBuilt.treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
+
+                    if (tile.floor.next(3) == 0 && (veggie = DataPool.instance().getVegetable(tile.floor.symbol, tile.floor)) != null) {
+                        tile.contents.add(RecipeMixer.buildVegetable(veggie));
+                    } else if (tile.floor.next(8) < 9 && (treeBase = DataPool.instance().getTree(tile.floor.symbol, tile.floor)) != null) {    // 9 in 256 chance
+                        Physical tree = RecipeMixer.buildTree(treeBase);
                         tree.shuffle(Direction.OUTWARDS, dirs);
                         for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
                             if (map.inBounds(c.x + dirs[i].deltaX, c.y + dirs[i].deltaY)
@@ -318,7 +322,7 @@ public class CastleGenerator {
                     tile = new EpiTile();
                     castle.setTileAt(c, castle.ground - z, tile);
                 }
-                tile.floor = handBuilt.getFloor(Stone.MARBLE);
+                tile.floor = DataPool.instance().getFloor(Stone.MARBLE);
                 //tile.add(getWall(Stone.MARBLE));
             }
 
@@ -328,15 +332,15 @@ public class CastleGenerator {
                     tile = new EpiTile();
                     castle.setTileAt(c, castle.ground - 5, tile);
                 }
-                tile.floor = handBuilt.getFloor(Stone.MARBLE);
-                tile.add(handBuilt.getWall(Stone.MARBLE));
+                tile.floor = DataPool.instance().getFloor(Stone.MARBLE);
+                tile.add(DataPool.instance().getWall(Stone.MARBLE));
             }
         }
 
 //        castle.insideKeep = new GreasedRegion(courtyardCentroid, castle.region.width, castle.region.height)
 //            .flood8way(castle.courtyard.copy().andNot(castle.keepWall), castle.region.width * castle.region.height);
         Physical carpet = RecipeMixer.buildPhysical(Physical.makeBasic("plush carpet", 'ˬ', SColor.ROYAL_PURPLE));
-        Physical insideFloor = handBuilt.getFloor(Stone.GRANITE), insideWall = handBuilt.getWall(Stone.GRANITE);
+        Physical insideFloor = DataPool.instance().getFloor(Stone.GRANITE), insideWall = DataPool.instance().getWall(Stone.GRANITE);
         DungeonBoneGen dbg = new DungeonBoneGen(rng);
         DungeonGenerator dungeonGenerator = new DungeonGenerator(width, height, rng);
         dungeonGenerator.addDoors(30, true);

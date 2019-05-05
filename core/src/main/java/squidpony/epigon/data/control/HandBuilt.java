@@ -9,27 +9,22 @@ import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
 import squidpony.epigon.data.quality.Element;
-import squidpony.epigon.data.quality.Stone;
+import squidpony.epigon.data.quality.Inclusion;
 import squidpony.epigon.data.slot.ClothingSlot;
 import squidpony.epigon.data.trait.*;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
 import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import static squidpony.epigon.Epigon.rootChaos;
 import static squidpony.epigon.data.Physical.basePhysical;
-import squidpony.epigon.data.quality.Inclusion;
-import squidpony.epigon.data.quality.Tree;
-import squidpony.epigon.data.quality.Vegetable;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
 
 /**
  * Contains objects to use to test out connections.
@@ -39,11 +34,6 @@ public class HandBuilt {
     public StatefulRNG rng;
     public long chaos;
     public RecipeMixer mixer;
-
-    private Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
-    private Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
-    public static final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
-    public static final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
 
     public Physical doorBlueprint;
     public Physical baseOpenDoor;
@@ -573,30 +563,6 @@ public class HandBuilt {
         return mod;
     }
 
-    public Physical getWall(Stone stone) {
-        Physical wall = walls.get(stone);
-        if (wall != null) {
-            return wall;
-        }
-
-        wall = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
-        RecipeMixer.applyModification(wall, makeWall);
-        walls.put(stone, wall);
-        return wall;
-    }
-
-    public Physical getFloor(Stone stone) {
-        Physical floor = floors.get(stone);
-        if (floor != null) {
-            return floor;
-        }
-
-        floor = RecipeMixer.buildPhysical(RecipeMixer.buildPhysical(stone));
-        floor.name = stone.toString() + " floor";
-        floors.put(stone, floor);
-        return floor;
-    }
-
     public void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
         placeStairs(top.contents[c.x][c.y], false);
         placeStairs(bottom.contents[c.x][c.y], true);
@@ -639,7 +605,7 @@ public class HandBuilt {
     }
 
     public void placeWall(EpiTile tile) {
-        Physical adding = getWall(tile.floor.terrainData.stone);
+        Physical adding = DataPool.instance().getWall(tile.floor.terrainData.stone);
         tile.add(adding);
     }
 

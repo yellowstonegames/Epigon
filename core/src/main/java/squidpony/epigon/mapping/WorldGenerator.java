@@ -20,6 +20,7 @@ import squidpony.squidmath.*;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import squidpony.epigon.data.control.DataPool;
 
 /**
  * Creates a world.
@@ -34,32 +35,12 @@ public class WorldGenerator {
     private HandBuilt handBuilt;
     private StatefulRNG rng;
 
-    public WorldGenerator() {
-        Vegetable[] vegetables = Vegetable.ALL;
-        for (int v = 0; v < vegetables.length; v++) {
-            String terrains = vegetables[v].terrains();
-            for (int i = 0; i < terrains.length(); i++) {
-                if (!handBuilt.vegetablesByTerrain.containsKey(terrains.charAt(i))) {
-                    handBuilt.vegetablesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(vegetables[v]));
-                }
-                handBuilt.vegetablesByTerrain.get(terrains.charAt(i)).add(vegetables[v]);
-            }
-        }
-        Tree[] trees = Tree.ALL;
-        for (int t = 0; t < trees.length; t++) {
-            String terrains = trees[t].terrains();
-            for (int i = 0; i < terrains.length(); i++) {
-                if (!handBuilt.treesByTerrain.containsKey(terrains.charAt(i))) {
-                    handBuilt.treesByTerrain.put(terrains.charAt(i), new EnumOrderedSet<>(trees[t]));
-                }
-                handBuilt.treesByTerrain.get(terrains.charAt(i)).add(trees[t]);
-            }
-        }
+    public WorldGenerator(HandBuilt handBuilt) {
+        this.handBuilt = handBuilt;
     }
 
-    public EpiMap buildDive(int width, int depth, HandBuilt handBuilt) {
-
-        world = buildWorld(width, 6, depth, handBuilt);
+    public EpiMap buildDive(int width, int depth) {
+        world = buildWorld(width, 6, depth);
 
         this.width = width;
         this.height = depth + World.DIVE_HEADER.length;
@@ -157,7 +138,7 @@ public class WorldGenerator {
         return map;
     }
 
-    public EpiMap[] buildWorld(int width, int height, int depth, HandBuilt handBuilt) {
+    public EpiMap[] buildWorld(int width, int height, int depth) {
         init(width, height, depth, handBuilt);
 //        placeMinerals();
 //        faultMap();
@@ -201,6 +182,8 @@ public class WorldGenerator {
             char[][] dungeonChars = gen.getDungeon();
             floorWorld[e] = new GreasedRegion(gen.getBareDungeon(), '.');
             Direction[] dirs = new Direction[8];
+            Vegetable veggie;
+            Tree treeBase;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     char c = dungeonChars[x][y];
@@ -229,10 +212,11 @@ public class WorldGenerator {
                             tile.floor.name = "modified " + c;
                             break;
                     }
-                    if (handBuilt.vegetablesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(5) == 0) {// 1 in 32 chance
-                        tile.contents.add(RecipeMixer.buildVegetable(handBuilt.vegetablesByTerrain.get(tile.floor.symbol).randomItem(tile.floor)));
-                    } else if (handBuilt.treesByTerrain.containsKey(tile.floor.symbol) && tile.floor.next(8) < 3) {    // 3 in 256 chance
-                        Physical tree = RecipeMixer.buildTree(handBuilt.treesByTerrain.get(tile.floor.symbol).randomItem(tile.floor));
+
+                    if (tile.floor.next(5) == 0 && (veggie = DataPool.instance().getVegetable(tile.floor.symbol, tile.floor)) != null) {// 1 in 32 chance
+                        tile.contents.add(RecipeMixer.buildVegetable(veggie));
+                    } else if (tile.floor.next(8) < 3 && (treeBase = DataPool.instance().getTree(tile.floor.symbol, tile.floor)) != null) {    // 3 in 256 chance
+                        Physical tree = RecipeMixer.buildTree(treeBase);
                         tree.shuffle(Direction.OUTWARDS, dirs);
                         for (int i = 0; i < dirs.length && !tree.inventory.isEmpty(); i++) {
                             if (eMap.inBounds(x + dirs[i].deltaX, y + dirs[i].deltaY)
@@ -296,7 +280,7 @@ public class WorldGenerator {
     private void placeMinerals() {
         int z = 0;
         int thickness = rng.between(12, 18);
-        Physical floor = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
+        Physical floor = DataPool.instance().getFloor(rng.getRandomElement(Stone.values()));
         while (z < depth) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -309,7 +293,7 @@ public class WorldGenerator {
             thickness--;
             if (thickness <= 0) {
                 thickness = rng.between(2, 10);
-                floor = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
+                floor = DataPool.instance().getFloor(rng.getRandomElement(Stone.values()));
             }
         }
     }
@@ -323,7 +307,7 @@ public class WorldGenerator {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     EpiTile tile = world[z].contents[x][y];
-                    tile.add(handBuilt.getWall(tile.floor.terrainData.stone));
+                    tile.add(DataPool.instance().getWall(tile.floor.terrainData.stone));
                 }
             }
         }
@@ -349,7 +333,7 @@ public class WorldGenerator {
                 if (useExistingFloor) {
                     blueprint = world[centerZ].contents[centerX][centerY].floor;
                 } else {
-                    blueprint = handBuilt.getFloor(rng.getRandomElement(Stone.values()));
+                    blueprint = DataPool.instance().getFloor(rng.getRandomElement(Stone.values()));
                 }
             }
 
@@ -458,7 +442,7 @@ public class WorldGenerator {
             for (int x = currentX - forceX; x < currentX + forceX; x++) {
                 for (int y = currentY - forceY; y < currentY + forceY; y++) {
                     if (pointInBounds(x, y, z)) {
-                        world[z].contents[x][y].floor = handBuilt.getFloor(intruder);
+                        world[z].contents[x][y].floor = DataPool.instance().getFloor(intruder);
                     }
                     forceY += rng.nextInt(3) - 1;
                     forceX += rng.nextInt(3) - 1;
@@ -506,7 +490,7 @@ public class WorldGenerator {
                         n = (Math.pow((double) (extrudeX - x) / sizeX, 1) + Math.pow((double) (extrudeY - y) / sizeX, 1));
                         if (n < 1) {//code for oval shape
                             if (pointInBounds(x, y, z)) {
-                                world[z].contents[x][y].floor = handBuilt.getFloor(extruder);
+                                world[z].contents[x][y].floor = DataPool.instance().getFloor(extruder);
                             }
                         }
                     }
@@ -520,14 +504,14 @@ public class WorldGenerator {
         Physical changer;
         int changetrack = 0;
         boolean changing, igneous, sedimentary;
-        changer = handBuilt.getFloor(rng.getRandomElement(Arrays
+        changer = DataPool.instance().getFloor(rng.getRandomElement(Arrays
             .stream(Stone.values())
             .filter(s -> s.metamorphic)
             .collect(Collectors.toList())));
         for (int j = 0; j < depth; j++) {
             changetrack++;
             if (changetrack > 4) {
-                changer = handBuilt.getFloor(rng.getRandomElement(Arrays
+                changer = DataPool.instance().getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
                     .collect(Collectors.toList())));
@@ -580,7 +564,7 @@ public class WorldGenerator {
         for (int j = depth; j > 0; j--) {
             changetrack++;
             if (changetrack > 4) {
-                changer = handBuilt.getFloor(rng.getRandomElement(Arrays
+                changer = DataPool.instance().getFloor(rng.getRandomElement(Arrays
                     .stream(Stone.values())
                     .filter(s -> s.metamorphic)
                     .collect(Collectors.toList())));
@@ -639,7 +623,7 @@ public class WorldGenerator {
         Stone[] stones = rng.shuffleInPlace(Stone.values());
         Physical[] floors = new Physical[stones.length];
         for (int i = 0; i < stones.length; i++) {
-            floors[i] = handBuilt.getFloor(stones[i]);
+            floors[i] = DataPool.instance().getFloor(stones[i]);
         }
         float diversity = stones.length * 0.04f + rng.nextFloat(stones.length * 0.16f), halfway = stones.length * 0.5f;
         for (int z = 0; z < depth; z++) {

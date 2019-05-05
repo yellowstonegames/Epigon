@@ -61,7 +61,7 @@ public class Kickball {
         System.out.println("Testing world building.");
 
         HandBuilt hand = new HandBuilt();
-        WorldGenerator gen = new WorldGenerator();
+        WorldGenerator gen = new WorldGenerator(new HandBuilt());
 
         int hStep = 4;
         int zStep = 3;
@@ -73,7 +73,7 @@ public class Kickball {
         for (int i = 0; i < 9; i++) {
             for (int z = 1; z < 100; z += zStep) {
                 milli = System.currentTimeMillis();
-                gen.buildWorld(width, height, z, hand);
+                gen.buildWorld(width, height, z);
                 milli = System.currentTimeMillis() - milli;
                 list.add(new TimeTracker(milli, width, height, z));
             }
