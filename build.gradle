@@ -34,7 +34,6 @@ project(":desktop") {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
     }
 }
 
@@ -44,9 +43,6 @@ project(":core") {
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
-        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        ///// implicitly included by dep on squidlib; don't need to explicitly require
-        //compile "com.github.tommyettinger:regexodus:$regexodusVersion"
-        //compile "com.github.SquidPony.SquidLib:squidlib-util:$squidlibVersion"
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
     }
 }

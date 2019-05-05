@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.ArrayTools;
 import squidpony.epigon.Epigon;
-import squidpony.epigon.Prefs;
 import squidpony.epigon.Utilities;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Rating;
@@ -18,6 +17,7 @@ import squidpony.squidmath.OrderedMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import squidpony.epigon.files.Config;
 
 /**
  * Controls what happens on the full map overlay panel.
@@ -322,7 +322,7 @@ public class MapOverlayHandler {
 
         put(1, y, "Game Overview", headingColor);
         y++;
-        put(1, y, Prefs.getGameTitle() + " is a roguelike. Probably gonna die and such.");
+        put(1, y, Config.instance().gameTitle + " is a roguelike. Probably gonna die and such.");
         y += 2;
 
         put(1, y, "Ratings & Rarities, worst to best", headingColor);

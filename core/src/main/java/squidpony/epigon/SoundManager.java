@@ -9,6 +9,7 @@ import squidpony.squidmath.OrderedSet;
 
 import java.util.Map;
 import java.util.TreeMap;
+import squidpony.epigon.files.Config;
 
 /**
  * Singleton class which controls sound output.
@@ -28,12 +29,12 @@ public class SoundManager {
     private final OrderedSet<String> readableFileTypes = Maker.makeOS("wav", "mp3", "ogg");
 
     public SoundManager() {
-        if (Prefs.isSoundfxOn()) {
+        if (Config.instance().audioConfig.soundfxOn) {
             System.out.println("Loading Sound FX");
             loadSoundFXResources();
         }
 
-        if (Prefs.isMusicOn()) {
+        if (Config.instance().audioConfig.musicOn) {
             System.out.println("Loading Music");
             loadMusicResources();
         }
@@ -73,7 +74,7 @@ public class SoundManager {
      * @param key
      */
     public void playSoundFX(String key) {
-        if (!Prefs.isSoundfxOn()) {
+        if (!Config.instance().audioConfig.soundfxOn) {
             return;//don't do anything if the sound effects are off
         }
 
@@ -86,7 +87,7 @@ public class SoundManager {
             return;
         }
 
-        temp.play(Prefs.getSoundfxVolume());
+        temp.play(Config.instance().audioConfig.soundfxVolume);
     }
 
     private void loadMusicResources() {
@@ -126,7 +127,7 @@ public class SoundManager {
      * @param key
      */
     public void playMusic(String key) {
-        if (!Prefs.isMusicOn()) {
+        if (!Config.instance().audioConfig.musicOn) {
             stopMusic();
             return;//don't do anything if the music is off
         }
@@ -147,7 +148,7 @@ public class SoundManager {
             nowPlaying = temp;
         }
 
-        nowPlaying.setVolume(Prefs.getMusicVolume());
+        nowPlaying.setVolume(Config.instance().audioConfig.musicVolume);
         nowPlaying.setLooping(true);
         if (!nowPlaying.isPlaying()) {
             nowPlaying.play();
@@ -175,13 +176,14 @@ public class SoundManager {
         if (musicLoaded) {
             if (volume < 0.001) {
                 unloadMusicResources();//unload if volume set to effectively zero
-                Prefs.setMusicOn(false);
+                Config.instance().audioConfig.musicOn = false;
             } else if (nowPlaying != null) {
                 nowPlaying.setVolume(volume);
             }
         }
 
-        Prefs.setMusicVolume(volume);
+        Config.instance().audioConfig.musicVolume = volume;
+        Config.instance().save();
     }
 
     public void dispose() {
