@@ -1,7 +1,5 @@
 package squidpony.epigon;
 
-import squidpony.epigon.util.Utilities;
-import squidpony.epigon.data.control.RecipeMixer;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -20,6 +18,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.Messaging;
@@ -27,6 +26,7 @@ import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.control.DataStarter;
+import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -37,6 +37,7 @@ import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.*;
+import squidpony.epigon.util.Utilities;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.Direction;
@@ -562,7 +563,8 @@ public class Epigon extends Game {
     private void prepFall() {
         message("Falling..... Press SPACE to continue");
         int w = World.DIVE_HEADER[0].length();
-        map = worldGenerator.buildDive(w, worldDepth);
+        WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
+        map = wcg.buildDive(worldGenerator.buildWorld(w, 1, worldDepth), w, worldDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
