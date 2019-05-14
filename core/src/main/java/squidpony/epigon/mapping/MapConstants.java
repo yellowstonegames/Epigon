@@ -5,15 +5,13 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidPanel;
 
 /**
- * Contains links to everything in the current game world.
+ * Contains starter elements of hard coded maps.
  *
  * @author Eben
  */
-public class World {
-
-    //
-    public EpiMap overworld;
+public class MapConstants {
     private EpiMap currentMap;
+    
     private static final String[] MINI_DEFAULT_MAP = new String[]{//in order to be in line with GUI coordinate pairs, this appears to be sideways in this style constructor.
         "#################################################################",
         "#,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#..m.mmmmmmmmmmmmmm..m...#",
@@ -124,19 +122,6 @@ public class World {
         " ╲$$$$$$$  ╲$$     ╲$      ╲$$$$$$$                                              │                  ",
         "                                                                                 ↡                  "
     };
-
-    public void outputMap(SquidPanel pane) {
-        int width = currentMap.width;
-        int height = currentMap.height;
-        pane = new SquidPanel(width, height);
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                EpiTile tile = currentMap.contents[x][y];
-                pane.put(x, y, tile.getSymbol(), tile.getForegroundColor());
-            }
-        }
-    }
 
     static public EpiMap getDefaultMap() {
         int width = DEFAULT_MAP[0].length();

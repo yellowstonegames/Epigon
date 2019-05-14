@@ -27,26 +27,26 @@ public class WobblyCanyonGenerator {
 
     public WobblyCanyonGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        dataStarter = decorator.handBuilt;
+        dataStarter = decorator.dataSTarter;
         rng = dataStarter.rng.copy();
     }
 
     public EpiMap buildDive(EpiMap[] world, int width, int depth) {
         this.width = width;
-        this.height = depth + World.DIVE_HEADER.length;
+        this.height = depth + MapConstants.DIVE_HEADER.length;
         this.depth = 1;
         EpiMap map = new EpiMap(width, height);
         GreasedRegion safeSpots = new GreasedRegion(width, height);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < depth; y++) {
-                map.contents[x][y + World.DIVE_HEADER.length] = world[y].contents[x][0];
+                map.contents[x][y + MapConstants.DIVE_HEADER.length] = world[y].contents[x][0];
             }
         }
 
         // Add in dive header
-        for (int x = 0; x < World.DIVE_HEADER[0].length(); x++) {
-            for (int y = 0; y < World.DIVE_HEADER.length; y++) {
-                char c = World.DIVE_HEADER[y].charAt(x);
+        for (int x = 0; x < MapConstants.DIVE_HEADER[0].length(); x++) {
+            for (int y = 0; y < MapConstants.DIVE_HEADER.length; y++) {
+                char c = MapConstants.DIVE_HEADER[y].charAt(x);
                 switch (c) {
                     case ' ':
                         map.contents[x][y] = new EpiTile(dataStarter.emptySpace);
@@ -73,7 +73,7 @@ public class WobblyCanyonGenerator {
                 seed3 = dataStarter.rng.nextLong() + seed2 ^ seed1;
         final double portionGapSize = 0.08 * width, offGapSize = 0.12 * width,
                 halfWidth = 0.5 * width, centerOff = 0.135 * width, extraWiggle = 0.02 * width;
-        for (int level = World.DIVE_HEADER.length; level < height; level++) {
+        for (int level = MapConstants.DIVE_HEADER.length; level < height; level++) {
             for (int x = centerGap - gapSize; x < centerGap + gapSize; x++) {
                 map.contents[x][level].floor = dataStarter.emptySpace;
                 map.contents[x][level].blockage = null;

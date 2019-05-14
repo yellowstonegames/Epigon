@@ -34,7 +34,7 @@ public class CastleGenerator {
 
     public CastleGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        this.handBuilt = decorator.handBuilt;
+        this.handBuilt = decorator.dataSTarter;
         rng = new StatefulRNG(2000L);
     }
 
