@@ -5,21 +5,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.utils.ObjectSet;
 
 import com.badlogic.gdx.math.Vector2;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 18, height = 10;
+    private static final int width = 100, height = 100;
 
     private static final int cellWidth = 1, cellHeight = 1;
     // the initial bug was reported on ObjectMap
 //    private ObjectMap<GridPoint2, Integer> theMap;
-    private ObjectSet<Object> theMap;
+    private OldMap<Object, Object> theMap;
 
     @Override
     public void create() {
-        theMap = new ObjectSet<>();
+        theMap = new OldMap<>();
         generate();
     }
 
@@ -62,7 +61,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                unSzudzik(pair, z);
 //                theMap.put(0xC13FA9A902A6328FL * x ^ 0x91E10DA5C79E7B1DL * y, null); // uses 23312576 bytes of heap
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
-                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
+                theMap.put(new Vector2(x - width * 0.5f, y - height * 0.5f), null); // crashes out of heap with 720 Vector2
 //                theMap.add(new GridPoint2(x, y));
             }
         }
