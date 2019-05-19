@@ -18,33 +18,33 @@ import java.util.List;
  */
 public class MapDecorator {
 
-    public DataStarter handBuilt;
+    public DataStarter dataSTarter;
     public StatefulRNG srng;
     public MapDecorator(DataStarter handBuilt) {
-        this.handBuilt = handBuilt;
+        this.dataSTarter = handBuilt;
         srng = new StatefulRNG(4000L);
     }
 
     public void placeDoor(EpiTile tile) {
         Physical adding = RecipeMixer.buildPhysical(tile.floor.terrainData.stone);
-        List<Physical> adds = RecipeMixer.mix(handBuilt.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
+        List<Physical> adds = RecipeMixer.mix(dataSTarter.doorRecipe, Maker.makeList(adding), new ArrayList<>(0));
         Physical door = adds.get(0);
-        handBuilt.setDoorOpen(door, srng.nextBoolean());
+        dataSTarter.setDoorOpen(door, srng.nextBoolean());
         tile.add(door);
     }
 
     public void placeWater(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.water);
+        tile.floor = RecipeMixer.buildPhysical(dataSTarter.water);
     }
 
     public void placeLava(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.lava);
+        tile.floor = RecipeMixer.buildPhysical(dataSTarter.lava);
         tile.floor.radiance.color = SColor.lerpFloatColors(SColor.CW_ORANGE.toFloatBits(), SColor.CW_YELLOW.toFloatBits(), srng.nextFloat() * (srng.nextFloat(0.75F) + 0.25F));
         tile.floor.radiance.delay = srng.nextFloat();
     }
 
     public void placeMud(EpiTile tile) {
-        tile.floor = RecipeMixer.buildPhysical(handBuilt.mud);
+        tile.floor = RecipeMixer.buildPhysical(dataSTarter.mud);
     }
 
     public void placeStairs(EpiMap top, EpiMap bottom, Coord c) {
@@ -64,9 +64,9 @@ public class MapDecorator {
             adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
         }
         if (up) {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
+            tile.contents.addAll(RecipeMixer.mix(dataSTarter.upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
         } else {
-            tile.contents.addAll(RecipeMixer.mix(handBuilt.downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
+            tile.contents.addAll(RecipeMixer.mix(dataSTarter.downStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));
         }
     }
 

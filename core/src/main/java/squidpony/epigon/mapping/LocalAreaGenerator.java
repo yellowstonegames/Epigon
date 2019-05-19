@@ -29,7 +29,7 @@ public class LocalAreaGenerator {
 
     public LocalAreaGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        dataStarter = decorator.handBuilt;
+        dataStarter = decorator.dataSTarter;
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth) {
