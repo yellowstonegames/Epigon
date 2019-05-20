@@ -7,18 +7,38 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 100, height = 100;
+    private static final int width = 500, height = 500;
 
     private static final int cellWidth = 1, cellHeight = 1;
     // the initial bug was reported on ObjectMap
 //    private ObjectMap<GridPoint2, Integer> theMap;
-    private OldMap<Object, Object> theMap;
+
+    //200x200
+    //Initial allocated space for Set: 2049
+    //2383177240ns taken, about 10 to the 9.377156342594699 power.
+    //Post-assign allocated space for Set: 131073
+    //1000x1000
+    //Initial allocated space for Set: 2049
+    //43338435400ns taken, about 10 to the 10.636873228409462 power.
+    //Post-assign allocated space for Set: 2097153
+    private UnorderedSet<Object> theMap;
+    //200x200
+    //Initial allocated space for Set: 2048
+    //33255870ns taken, about 10 to the 7.521868313807727 power.
+    //Post-assign allocated space for Set: 131072
+    //1000x1000
+    //Initial allocated space for Set: 2048
+    //791335494ns taken, about 10 to the 8.898360645700507 power.
+    //Post-assign allocated space for Set: 2097152
+//    private DoubleHashing<Object> theMap;
 
     @Override
     public void create() {
-        theMap = new OldMap<>();
+        theMap = new UnorderedSet<>(1024, 0.5f);
+//        theMap = new DoubleHashing<>(2048);
         generate();
     }
 
@@ -46,7 +66,8 @@ public class MapMemoryTest extends ApplicationAdapter {
     public void generate()
     {
 //        long[] pair = new long[2];
-        System.out.println("Initial heap memory used: " + Gdx.app.getJavaHeap());
+        System.out.println("Initial allocated space for Set: " + theMap.capacity());
+        final long startTime = TimeUtils.nanoTime();
         for (int x = -width; x < width; x++) {
             for (int y = -height; y < height; y++) {
 //                long z = (x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL);
@@ -61,7 +82,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                unSzudzik(pair, z);
 //                theMap.put(0xC13FA9A902A6328FL * x ^ 0x91E10DA5C79E7B1DL * y, null); // uses 23312576 bytes of heap
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
-                theMap.put(new Vector2(x - width * 0.5f, y - height * 0.5f), null); // crashes out of heap with 720 Vector2
+                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
 //                theMap.add(new GridPoint2(x, y));
             }
         }
@@ -75,7 +96,9 @@ public class MapMemoryTest extends ApplicationAdapter {
                 //// like the golden ratio but with better properties for 2D spaces. These don't need to be prime.
                 
                 //final int gpHash = 53 * 53 + x + 53 * y; // equivalent to current hashCode()
-        System.out.println("Post-assign memory used: " + Gdx.app.getJavaHeap());
+        long taken = TimeUtils.timeSinceNanos(startTime);
+        System.out.println(taken + "ns taken, about 10 to the " + Math.log10(taken) + " power.");
+        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
     }
 
     @Override
