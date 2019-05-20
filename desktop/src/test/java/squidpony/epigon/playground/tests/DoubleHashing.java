@@ -61,26 +61,16 @@ public class DoubleHashing<T> {
 		mask = msb - 1;
 	}
 	
-	/**
-	 * Code extracted from Java HashMap. 
-	 * This function ensures that hashCodes that differ only by 
-	 * constant multiples at each bit position have a bounded 
-	 * number of collisions (approximately 8 at default load factor).
-	 * @param h input number
-	 * @return the hash value
-	 */
-	private static int hash(int h){
-		h ^= (h >>> 20) ^ (h >>> 12);
-		return h ^ ( h >>> 7) ^ (h >>> 4);
-	}
-
 	/*
-	 * hashCode(): implemented by converting the internal address of 
-	 * the object into an integer
+ 	 * Code extracted from Java HashMap.
+	 * This function ensures that hashCodes that differ only by
+	 * constant multiples at each bit position have a bounded
+	 * number of collisions (approximately 8 at default load factor).
 	 * Key is stored at table[hash( x.hashCode() ) & ( table.length − 1 ) ]
 	 */
-	private int h(T x) {
-		return hash(x.hashCode()) & mask;
+	private int h(int x) {
+		x ^= (x >>> 20) ^ (x >>> 12);
+		return (x ^ (x >>> 7) ^ (x >>> 4)) & mask;
 	}
 	
 	/**
@@ -88,8 +78,8 @@ public class DoubleHashing<T> {
 	 * @param x the input
 	 * @return the hashDigit
 	 */
-	private int h2(T x) {
-		return 10 + x.hashCode() % 9;
+	private int h2(final int x) {
+		return ~(x & 0x1E);
 	}
 	
 	/**
@@ -99,14 +89,14 @@ public class DoubleHashing<T> {
 	 * @return index of x
 	 */
 	private int find(T x) {
-		
+		final int xh = x.hashCode();
 		int index = 0;
 		int k = 0;
 		
 		while (true) {
 			
 			// update index as per Double Hashing algorithm
-			index = (h(x) + k * h2(x)) & mask;
+			index = (h(xh) + k * h2(xh)) & mask;
 			
 			// When the index is freshly available or there is already x at that index
 			if (table[index] == null || x.equals(table[index].element)) 
@@ -132,7 +122,7 @@ public class DoubleHashing<T> {
 			
 			// updating index for next index in probe sequence 
 			k++;
-			index = (h(x) + k * h2(x)) & mask;
+			index = (h(xh) + k * h2(xh)) & mask;
 			
 			// When we found freshly available index
 			if (table[index] == null) 

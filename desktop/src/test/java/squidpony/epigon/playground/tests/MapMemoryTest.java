@@ -10,12 +10,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 500, height = 500;
+    private static final int width = 100, height = 100;
 
     private static final int cellWidth = 1, cellHeight = 1;
     // the initial bug was reported on ObjectMap
 //    private ObjectMap<GridPoint2, Integer> theMap;
 
+    // Linear probing UnorderedSet, from SquidLib
     //200x200
     //Initial allocated space for Set: 2049
     //2383177240ns taken, about 10 to the 9.377156342594699 power.
@@ -24,7 +25,8 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: 2049
     //43338435400ns taken, about 10 to the 10.636873228409462 power.
     //Post-assign allocated space for Set: 2097153
-    private UnorderedSet<Object> theMap;
+//    private UnorderedSet<Object> theMap;
+    // DoubleHashing mostly as-is, some adjustments to use a mask
     //200x200
     //Initial allocated space for Set: 2048
     //33255870ns taken, about 10 to the 7.521868313807727 power.
@@ -33,12 +35,42 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: 2048
     //791335494ns taken, about 10 to the 8.898360645700507 power.
     //Post-assign allocated space for Set: 2097152
+    // DoubleHashing with no modulus used
+    //200x200
+    //Initial allocated space for Set: 2048
+    //21927116ns taken, about 10 to the 7.340981514137573 power.
+    //Post-assign allocated space for Set: 131072 
+    //1000x1000
+    //Initial allocated space for Set: 2048
+    //719916826ns taken, about 10 to the 8.857282324075996 power.
+    //Post-assign allocated space for Set: 2097152
 //    private DoubleHashing<Object> theMap;
+    // RobinHood WITHOUT better hash mixing:
+    //200x200
+    //Initial allocated space for Set: 2048
+    //9836116046ns taken, about 10 to the 9.992823643881254 power.
+    //Post-assign allocated space for Set: 131072
+    //1000x1000
+    //Initial allocated space for Set: 2048
+    //133757218480ns taken, about 10 to the 11.126317228909627 power.
+    //Post-assign allocated space for Set: 2097152
+    
+    // RobinHood WITH better hash mixing:
+    //200x200
+    //Initial allocated space for Set: 2048
+    //34606440ns taken, about 10 to the 7.539156925272842 power.
+    //Post-assign allocated space for Set: 131072
+    //1000x1000
+    //Initial allocated space for Set: 2048
+    //953714426ns taken, about 10 to the 8.97941835187509 power.
+    //Post-assign allocated space for Set: 2097152
+    private RobinHood<Object> theMap;
 
     @Override
     public void create() {
-        theMap = new UnorderedSet<>(1024, 0.5f);
+//        theMap = new UnorderedSet<>(1024, 0.5f);
 //        theMap = new DoubleHashing<>(2048);
+        theMap = new RobinHood<>(2048);
         generate();
     }
 
