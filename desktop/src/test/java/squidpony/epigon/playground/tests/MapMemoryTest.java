@@ -5,11 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
-
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
-
-import java.util.HashSet;
+import squidpony.Mnemonic;
 
 public class MapMemoryTest extends ApplicationAdapter {
     private static final int width = 500, height = 500;
@@ -27,8 +24,11 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: Not supported
     //913632622ns taken, about 10 to the 8.960771598018294 power.
     //Post-assign allocated space for Set: Not supported
-    
-    private HashSet<Object> theMap;
+    //1000x1000 Strings
+    //Initial allocated space for Set: Not supported
+    //893019736ns taken, about 10 to the 8.950861057030966 power.
+    //Post-assign allocated space for Set: Not supported
+//    private HashSet<Object> theMap;
     // Linear probing UnorderedSet, from SquidLib
     //200x200
     //Initial allocated space for Set: 2049
@@ -37,6 +37,10 @@ public class MapMemoryTest extends ApplicationAdapter {
     //1000x1000
     //Initial allocated space for Set: 2049
     //43338435400ns taken, about 10 to the 10.636873228409462 power.
+    //Post-assign allocated space for Set: 2097153
+    //1000x1000 Strings
+    //Initial allocated space for Set: 2049
+    //868829554ns taken, about 10 to the 8.938934585404091 power.
     //Post-assign allocated space for Set: 2097153
 //    private UnorderedSet<Object> theMap;
     // DoubleHashing mostly as-is, some adjustments to use a mask
@@ -56,6 +60,10 @@ public class MapMemoryTest extends ApplicationAdapter {
     //1000x1000
     //Initial allocated space for Set: 2048
     //719916826ns taken, about 10 to the 8.857282324075996 power.
+    //Post-assign allocated space for Set: 2097152
+    //1000x1000 Strings
+    //Initial allocated space for Set: 2048
+    //895451080ns taken, about 10 to the 8.952041864594444 power.
     //Post-assign allocated space for Set: 2097152
 //    private DoubleHashing<Object> theMap;
     // RobinHood WITHOUT better hash mixing:
@@ -77,14 +85,18 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: 2048
     //953714426ns taken, about 10 to the 8.97941835187509 power.
     //Post-assign allocated space for Set: 2097152
-    //private RobinHood<Object> theMap;
+    //1000x1000 Strings
+    //Initial allocated space for Set: 2048
+    //990291616ns taken, about 10 to the 8.995763102244613 power.
+    //Post-assign allocated space for Set: 2097152
+    private RobinHood<Object> theMap;
 
     @Override
     public void create() {
 //        theMap = new UnorderedSet<>(1024, 0.5f);
 //        theMap = new DoubleHashing<>(2048);
-//        theMap = new RobinHood<>(2048);
-        theMap = new HashSet<>(2048, 0.5f);
+        theMap = new RobinHood<>(2048);
+//        theMap = new HashSet<>(2048, 0.5f);
         generate();
     }
 
@@ -112,9 +124,10 @@ public class MapMemoryTest extends ApplicationAdapter {
     public void generate()
     {
 //        long[] pair = new long[2];
-        System.out.println("Initial allocated space for Set: Not supported");
-//        System.out.println("Initial allocated space for Set: " + theMap.capacity());
+//        System.out.println("Initial allocated space for Set: Not supported");
+        System.out.println("Initial allocated space for Set: " + theMap.capacity());
         final long startTime = TimeUtils.nanoTime();
+        Mnemonic m = new Mnemonic(123456789L);
         for (int x = -width; x < width; x++) {
             for (int y = -height; y < height; y++) {
 //                long z = (x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL);
@@ -129,8 +142,9 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                unSzudzik(pair, z);
 //                theMap.put(0xC13FA9A902A6328FL * x ^ 0x91E10DA5C79E7B1DL * y, null); // uses 23312576 bytes of heap
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
-                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
+//                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
 //                theMap.add(new GridPoint2(x, y));
+                theMap.add(m.toMnemonic(szudzik(x, y)));
             }
         }
 //                final GridPoint2 gp = new GridPoint2(x, y);
@@ -145,8 +159,8 @@ public class MapMemoryTest extends ApplicationAdapter {
                 //final int gpHash = 53 * 53 + x + 53 * y; // equivalent to current hashCode()
         long taken = TimeUtils.timeSinceNanos(startTime);
         System.out.println(taken + "ns taken, about 10 to the " + Math.log10(taken) + " power.");
-//        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
-        System.out.println("Post-assign allocated space for Set: Not supported");
+        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
+//        System.out.println("Post-assign allocated space for Set: Not supported");
     }
 
     @Override
