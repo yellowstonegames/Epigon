@@ -9,13 +9,26 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 
+import java.util.HashSet;
+
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 100, height = 100;
+    private static final int width = 500, height = 500;
 
     private static final int cellWidth = 1, cellHeight = 1;
     // the initial bug was reported on ObjectMap
 //    private ObjectMap<GridPoint2, Integer> theMap;
 
+    // HashSet from the JDK
+    //200x200
+    //Initial allocated space for Set: Not supported
+    //21198700ns taken, about 10 to the 7.326309228846793 power.
+    //Post-assign allocated space for Set: Not supported    
+    //1000x1000
+    //Initial allocated space for Set: Not supported
+    //913632622ns taken, about 10 to the 8.960771598018294 power.
+    //Post-assign allocated space for Set: Not supported
+    
+    private HashSet<Object> theMap;
     // Linear probing UnorderedSet, from SquidLib
     //200x200
     //Initial allocated space for Set: 2049
@@ -64,13 +77,14 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: 2048
     //953714426ns taken, about 10 to the 8.97941835187509 power.
     //Post-assign allocated space for Set: 2097152
-    private RobinHood<Object> theMap;
+    //private RobinHood<Object> theMap;
 
     @Override
     public void create() {
 //        theMap = new UnorderedSet<>(1024, 0.5f);
 //        theMap = new DoubleHashing<>(2048);
-        theMap = new RobinHood<>(2048);
+//        theMap = new RobinHood<>(2048);
+        theMap = new HashSet<>(2048, 0.5f);
         generate();
     }
 
@@ -98,7 +112,8 @@ public class MapMemoryTest extends ApplicationAdapter {
     public void generate()
     {
 //        long[] pair = new long[2];
-        System.out.println("Initial allocated space for Set: " + theMap.capacity());
+        System.out.println("Initial allocated space for Set: Not supported");
+//        System.out.println("Initial allocated space for Set: " + theMap.capacity());
         final long startTime = TimeUtils.nanoTime();
         for (int x = -width; x < width; x++) {
             for (int y = -height; y < height; y++) {
@@ -130,7 +145,8 @@ public class MapMemoryTest extends ApplicationAdapter {
                 //final int gpHash = 53 * 53 + x + 53 * y; // equivalent to current hashCode()
         long taken = TimeUtils.timeSinceNanos(startTime);
         System.out.println(taken + "ns taken, about 10 to the " + Math.log10(taken) + " power.");
-        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
+//        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
+        System.out.println("Post-assign allocated space for Set: Not supported");
     }
 
     @Override
