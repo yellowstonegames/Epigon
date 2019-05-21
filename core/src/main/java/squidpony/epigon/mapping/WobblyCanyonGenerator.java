@@ -27,7 +27,7 @@ public class WobblyCanyonGenerator {
 
     public WobblyCanyonGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        dataStarter = decorator.dataSTarter;
+        dataStarter = decorator.dataStarter;
         rng = dataStarter.rng.copy();
     }
 

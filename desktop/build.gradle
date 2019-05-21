@@ -21,6 +21,9 @@ task run(dependsOn: classes, type: JavaExec) {
     standardInput = System.in
     workingDir = project.assetsDir
     setIgnoreExitValue(true)
+    //squidpony.squidgrid.FOV::shadowCast
+//    jvmArgs += '-XX:+UnlockDiagnosticVMOptions'
+//    jvmArgs += '-XX:+PrintInlining'
 }
 
 task debug(dependsOn: classes, type: JavaExec) {

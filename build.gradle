@@ -13,15 +13,16 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Epigon"
-        squidlibVersion = '11b22fa2a6'
+        squidlibVersion = '20966402e3' // 'b589294499' // 11b22fa2a6
         gdxVersion = '1.9.8'
         roboVMVersion = '1.12.0'
         aiVersion = '1.8.1'
         regexodusVersion = '0.1.10'
+        jacksonVersion = '2.0.1'
     }
 
     repositories {
-        mavenLocal()
+        //mavenLocal()
         mavenCentral()
         maven { url "https://jitpack.io" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -40,9 +41,9 @@ project(":desktop") {
 project(":core") {
     apply plugin: "java"
     dependencies {
-        compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+        compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     }
 }

@@ -29,7 +29,7 @@ public class LocalAreaGenerator {
 
     public LocalAreaGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        dataStarter = decorator.dataSTarter;
+        dataStarter = decorator.dataStarter;
     }
 
     public EpiMap[] buildWorld(int width, int height, int depth) {
@@ -87,7 +87,8 @@ public class LocalAreaGenerator {
                             break;
                         case '~': // TODO - distinguish deep water
                         case ',':
-                            decorator.placeWater(tile);
+                            decorator.placeLava(tile);
+//                            decorator.placeWater(tile);
                             break;
                         case '&': // should never occur naturally
                             break;

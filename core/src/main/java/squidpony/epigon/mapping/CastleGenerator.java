@@ -34,7 +34,7 @@ public class CastleGenerator {
 
     public CastleGenerator(MapDecorator decorator) {
         this.decorator = decorator;
-        this.handBuilt = decorator.dataSTarter;
+        this.handBuilt = decorator.dataStarter;
         rng = new StatefulRNG(2000L);
     }
 
@@ -141,7 +141,8 @@ public class CastleGenerator {
 
         castle.moat.fray(0.3).fray(0.2);
         for (Coord c : castle.moat) {
-            decorator.placeWater(map.contents[c.x][c.y]);
+            decorator.placeLava(map.contents[c.x][c.y]);
+//            decorator.placeWater(map.contents[c.x][c.y]);
         }
 
         castle.moatBank.andNot(castle.moat);
