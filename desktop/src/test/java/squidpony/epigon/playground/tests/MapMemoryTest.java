@@ -5,11 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.TimeUtils;
 import squidpony.Mnemonic;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 500, height = 500;
+    private static final int width =2500, height = 1500;
 
     private static final int cellWidth = 1, cellHeight = 1;
     // the initial bug was reported on ObjectMap
@@ -89,14 +90,16 @@ public class MapMemoryTest extends ApplicationAdapter {
     //Initial allocated space for Set: 2048
     //990291616ns taken, about 10 to the 8.995763102244613 power.
     //Post-assign allocated space for Set: 2097152
-    private RobinHood<Object> theMap;
-
+    //private RobinHood<Object> theMap;
+    
+    private ObjectSet<Object> theMap;
     @Override
     public void create() {
 //        theMap = new UnorderedSet<>(1024, 0.5f);
 //        theMap = new DoubleHashing<>(2048);
-        theMap = new RobinHood<>(2048);
+//        theMap = new RobinHood<>(2048);
 //        theMap = new HashSet<>(2048, 0.5f);
+        theMap = new ObjectSet<>(2048, 0.5f);
         generate();
     }
 
@@ -124,12 +127,15 @@ public class MapMemoryTest extends ApplicationAdapter {
     public void generate()
     {
 //        long[] pair = new long[2];
-//        System.out.println("Initial allocated space for Set: Not supported");
-        System.out.println("Initial allocated space for Set: " + theMap.capacity());
+        System.out.println("Initial allocated space for Set: Not supported");
+//        System.out.println("Initial allocated space for Set: " + theMap.capacity());
         final long startTime = TimeUtils.nanoTime();
         Mnemonic m = new Mnemonic(123456789L);
+//        GridPoint2 gp = new GridPoint2(0, 0);
         for (int x = -width; x < width; x++) {
             for (int y = -height; y < height; y++) {
+//                for (int z = -height; z < height; z++) {
+
 //                long z = (x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL);
 //                z =        ((z & 0x00000000ffff0000L) << 16) | ((z >>> 16) & 0x00000000ffff0000L) | (z & 0xffff00000000ffffL);
 //                z =        ((z & 0x0000ff000000ff00L) << 8 ) | ((z >>> 8 ) & 0x0000ff000000ff00L) | (z & 0xff0000ffff0000ffL);
@@ -142,11 +148,21 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                unSzudzik(pair, z);
 //                theMap.put(0xC13FA9A902A6328FL * x ^ 0x91E10DA5C79E7B1DL * y, null); // uses 23312576 bytes of heap
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
-//                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
-//                theMap.add(new GridPoint2(x, y));
-                theMap.add(m.toMnemonic(szudzik(x, y)));
+                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
+//                    gp.set(x, y);
+//                    theMap.add(gp.hashCode());
+//                    long r, s;
+//                    r = (x ^ 0xa0761d65L) * (y ^ 0x8ebc6af1L);
+//                    s = 0xa0761d65L * (z ^ 0x589965cdL);
+//                    r -= r >> 32;
+//                    s -= s >> 32;
+//                    r = ((r ^ s) + 0xeb44accbL) * 0xeb44acc8L;
+//                    theMap.add((int)(r - (r >> 32)));
+
+//                theMap.add(m.toMnemonic(szudzik(x, y)));
+                }
             }
-        }
+//        }
 //                final GridPoint2 gp = new GridPoint2(x, y);
 //                final int gpHash = gp.hashCode(); // uses the updated GridPoint2 hashCode(), not the current GDX code
 //                theMap.put(gp, gpHash | 0xFF000000); //value doesn't matter; this was supposed to test ObjectMap
@@ -159,8 +175,8 @@ public class MapMemoryTest extends ApplicationAdapter {
                 //final int gpHash = 53 * 53 + x + 53 * y; // equivalent to current hashCode()
         long taken = TimeUtils.timeSinceNanos(startTime);
         System.out.println(taken + "ns taken, about 10 to the " + Math.log10(taken) + " power.");
-        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
-//        System.out.println("Post-assign allocated space for Set: Not supported");
+//        System.out.println("Post-assign allocated space for Set: " + theMap.capacity());
+        System.out.println("Post-assign allocated space for Set: Not supported");
     }
 
     @Override
@@ -180,7 +196,7 @@ public class MapMemoryTest extends ApplicationAdapter {
     public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("LibGDX Test: ObjectMap<GridPoint2, Integer> memory usage");
-        config.setWindowedMode(width * cellWidth, height * cellHeight);
+        config.setWindowedMode(500, 100);
         config.setIdleFPS(1);
         new Lwjgl3Application(new MapMemoryTest(), config);
     }

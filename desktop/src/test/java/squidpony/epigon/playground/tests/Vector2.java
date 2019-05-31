@@ -416,8 +416,12 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 
 	@Override
 	public int hashCode () {
-		final int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
-		return 0xC13F * (xx ^ xx >>> 16) + 0x91E1 * (yy ^ yy >>> 16);
+//		final int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
+		//return 0xC13F * (xx ^ xx >>> 16) + 0x91E1 * (yy ^ yy >>> 16);
+		final long r = (NumberUtils.floatToIntBits(x) ^ 0xa0761d65L) * (NumberUtils.floatToIntBits(y) ^ 0x8ebc6af1L);
+		//r = ((r - (r >> 32)) + 0xeb44accbL) * 0xeb44acc8L;
+		return ((int)(r - (r >> 32)));
+
 	}
 //		final int result = 0xC13F * NumberUtils.floatToIntBits(x) + 0x91E1 * NumberUtils.floatToIntBits(y);
 	// ^ xx + yy >>> 24;
