@@ -139,7 +139,7 @@ public class InfoHandler {
     }
 
     private void put(int x, int y, String s) {
-        layers.put(x, y, GDXMarkup.instance.colorString(s));
+        layers.put(x, y, GDXMarkup.instance.colorStringOnly(s));
     }
 
     private void put(int x, int y, String s, Color color) {

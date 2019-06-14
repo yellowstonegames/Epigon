@@ -90,7 +90,8 @@ public class Epigon extends Game {
     public final RecipeMixer mixer;
     private DataStarter handBuilt;
     private MapDecorator mapDecorator;
-    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
+    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
+//    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     private GameMode mode = GameMode.CRAWL;
 
@@ -191,17 +192,17 @@ public class Epigon extends Game {
         worldHeight = 80;
         worldDepth = 10;
         totalDepth = worldDepth + MapConstants.DIVE_HEADER.length;
-        int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
+        int bigW = 152;//World.DIVE_HEADER[0].length() + 2;
         int bigH = 26;
         int smallW = 50;
         int smallH = 22;
-        int cellW = 14;
-        int cellH = 28;
+        int cellW = 8;
+        int cellH = 12;
         int bottomH = 8;
-        mapSize = new PanelSize(51, bigH, 28, 28);
+        mapSize = new PanelSize(51, bigH, 24, 24);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 7 / 4, 7, 16);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 4, 7, 16);
+        infoSize = new PanelSize(smallW, smallH * 7 / 4, 8, 12);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 4, 8, 12);
         messageCount = bottomH - 2;
     }
 
@@ -262,8 +263,11 @@ public class Epigon extends Game {
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
 
-        font = DefaultResources.getCrispLeanFamily();
-        TextCellFactory smallFont = font.copy();
+        font = new TextCellFactory().font("7-12-serif.fnt");
+        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
+        //smallFont.bmpFont.getData().scale(2);
+//        font = DefaultResources.getCrispLeanFamily();
+//        TextCellFactory smallFont = font.copy();
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         messageIndex = messageCount;
         for (int i = 0; i <= messageCount; i++) {
@@ -506,7 +510,8 @@ public class Epigon extends Game {
     }
 
     public static String style(CharSequence text) {
-        return GDXMarkup.instance.styleString(text).toString();
+//        return text.toString();
+        return GDXMarkup.instance.colorStringOnly(text).present();
     }
 
     private void startGame() {
@@ -979,7 +984,7 @@ public class Epigon extends Game {
 
     private void message(String text) {
         messageIndex = Math.max(messages.size(), messageCount);
-        messages.add(GDXMarkup.instance.colorString("[]" + text));
+        messages.add(GDXMarkup.instance.colorStringOnly("[]" + text));
         updateMessages();
     }
     

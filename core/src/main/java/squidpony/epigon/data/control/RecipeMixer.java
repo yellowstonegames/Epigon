@@ -3,10 +3,10 @@ package squidpony.epigon.data.control;
 import com.badlogic.gdx.graphics.Colors;
 import squidpony.Maker;
 import squidpony.Messaging;
+import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.trait.*;
-import squidpony.squidgrid.gui.gdx.GDXMarkup;
 import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
@@ -16,20 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import squidpony.epigon.data.CalcStat;
-import squidpony.epigon.data.Condition;
-import squidpony.epigon.data.ConditionBlueprint;
-import squidpony.epigon.data.Culture;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.LiveValueModification;
-import squidpony.epigon.data.Modification;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.Rating;
-import squidpony.epigon.data.Recipe;
-import squidpony.epigon.data.RecipeBlueprint;
-import squidpony.epigon.data.Skill;
-import squidpony.epigon.data.Stat;
-import squidpony.epigon.data.Weapon;
 
 /**
  * This class does all the recipe mixing. It has methods for creating objects based on recipes in
@@ -453,16 +439,17 @@ public class RecipeMixer {
         blueprint.color = Colors.get(raw.color).toFloatBits();
         blueprint.name = raw.name;
         blueprint.blocking = true;
-        switch (raw.symbol.length())
-        {
-            case 2: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0),
-                    raw.symbol.charAt(1) == '*', raw.symbol.charAt(1) == '/');
-            break;
-            case 3: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0), true, true);
-            break;
-            default: blueprint.symbol = raw.symbol.charAt(0);             
-            break;
-        }
+//        switch (raw.symbol.length())
+//        {
+//            case 2: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0),
+//                    raw.symbol.charAt(1) == '*', raw.symbol.charAt(1) == '/');
+//            break;
+//            case 3: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0), true, true);
+//            break;
+//            default: blueprint.symbol = raw.symbol.charAt(0);             
+//            break;
+//        }
+        blueprint.symbol = raw.symbol.charAt(0);
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(raw.vigor * 5.0));
         blueprint.stats.put(Stat.VIGOR, new LiveValue(raw.vigor));
         blueprint.stats.put(Stat.ENDURANCE, new LiveValue(raw.endurance));
