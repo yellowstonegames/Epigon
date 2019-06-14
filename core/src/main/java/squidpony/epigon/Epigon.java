@@ -188,21 +188,21 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 80;
-        worldHeight = 80;
+        worldWidth = 120;
+        worldHeight = 90;
         worldDepth = 10;
         totalDepth = worldDepth + MapConstants.DIVE_HEADER.length;
         int bigW = 152;//World.DIVE_HEADER[0].length() + 2;
-        int bigH = 26;
+        int bigH = 52;
         int smallW = 50;
-        int smallH = 22;
+        int smallH = 36;
         int cellW = 8;
         int cellH = 12;
         int bottomH = 8;
-        mapSize = new PanelSize(51, bigH, 24, 24);
+        mapSize = new PanelSize(102, bigH, 12, 12);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 7 / 4, 8, 12);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 4, 8, 12);
+        infoSize = new PanelSize(smallW, smallH, 8, 12);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH), 8, 12);
         messageCount = bottomH - 2;
     }
 
@@ -265,6 +265,8 @@ public class Epigon extends Game {
 
         font = new TextCellFactory().font("7-12-serif.fnt");
         TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
+        font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
+        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         //smallFont.bmpFont.getData().scale(2);
 //        font = DefaultResources.getCrispLeanFamily();
 //        TextCellFactory smallFont = font.copy();
@@ -359,7 +361,8 @@ public class Epigon extends Game {
                 filter.yAdd  = 0.7f  * conditionYAdd;
                 filter.cwAdd = 0.65f * conditionCwAdd;
                 filter.cmAdd = 0.65f * conditionCmAdd;
-                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
+                font.draw(batch, backgrounds, xo, yo);
+//                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
                 int len = layers.size();
                 Frustum frustum = null;
                 Stage stage = getStage();
@@ -386,7 +389,8 @@ public class Epigon extends Game {
                 filter.cwAdd = 0.95f * conditionCwAdd;
                 filter.cmAdd = 0.95f * conditionCmAdd;
 
-                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
+                font.draw(batch, walls, xo, yo, 3, 3);
+//                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
 
                 font.configureShader(batch);
                 if(frustum == null) {
