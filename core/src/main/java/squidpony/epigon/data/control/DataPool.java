@@ -1,16 +1,14 @@
 package squidpony.epigon.data.control;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
-
 import squidpony.squidmath.EnumOrderedSet;
 import squidpony.squidmath.IRNG;
 import squidpony.squidmath.OrderedMap;
+
+import java.util.EnumMap;
 
 /**
  * Holds the needed references to objects in common use.
@@ -21,8 +19,8 @@ public class DataPool {
 
     private DataStarter dataStarter;
 
-    private final Map<Stone, Physical> walls = new EnumMap<>(Stone.class);
-    private final Map<Stone, Physical> floors = new EnumMap<>(Stone.class);
+    private final EnumMap<Stone, Physical> walls = new EnumMap<>(Stone.class);
+    private final EnumMap<Stone, Physical> floors = new EnumMap<>(Stone.class);
     private final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
     private final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
 
@@ -86,14 +84,14 @@ public class DataPool {
     }
 
     public Vegetable getVegetable(Character c, IRNG rng) {
-        EnumOrderedSet<Vegetable> vegies = vegetablesByTerrain.get(c);
-        if (vegies == null || vegies.isEmpty()) {
+        EnumOrderedSet<Vegetable> veggies = vegetablesByTerrain.get(c);
+        if (veggies == null || veggies.isEmpty()) {
             return null;
         }
-        return vegies.randomItem(rng);
+        return veggies.randomItem(rng);
     }
 
-    public Tree getTree(char c, IRNG rng) {
+    public Tree getTree(Character c, IRNG rng) {
         EnumOrderedSet<Tree> trees = treesByTerrain.get(c);
         if (trees == null || trees.isEmpty()) {
             return null;

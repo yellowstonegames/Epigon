@@ -18,7 +18,6 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.Messaging;
@@ -262,7 +261,6 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
-
         font = new TextCellFactory().font("7-12-serif.fnt");
         TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
         font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);

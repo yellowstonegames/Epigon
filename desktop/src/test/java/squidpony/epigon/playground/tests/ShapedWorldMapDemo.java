@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import squidpony.StringKit;
+import squidpony.squidgrid.gui.gdx.FilterBatch;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidMouse;
@@ -340,7 +340,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
 //    private static final int width = 512, height = 512;
 //    private static final int width = 128, height = 128;
 
-    private SpriteBatch batch;
+    private FilterBatch batch;
     //    private SquidPanel display;//, overlay;
     private static final int cellWidth = 1, cellHeight = 1;
     private SquidInput input;
@@ -661,7 +661,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
+        batch = new FilterBatch();
 //        display = new SquidPanel(width, height, cellWidth, cellHeight);
         //display.getTextCellFactory().font().getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         view = new StretchViewport(width*cellWidth, height*cellHeight);
