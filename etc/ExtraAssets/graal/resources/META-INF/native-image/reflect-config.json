@@ -1,0 +1,77 @@
+[
+  {
+    "name":"com.badlogic.gdx.graphics.Color",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.graphics.g2d.GlyphLayout",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.graphics.g2d.GlyphLayout$GlyphRun",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.InputEvent",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.actions.DelayAction",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.actions.MoveToAction",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.actions.ParallelAction",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.actions.RunnableAction",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.scenes.scene2d.actions.SequenceAction",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.badlogic.gdx.utils.Array",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"java.io.File",
+    "methods":[
+      {"name":"canExecute","parameterTypes":[] },
+      {"name":"setExecutable","parameterTypes":["boolean","boolean"] }
+    ]
+  },
+  {
+    "name":"java.lang.ClassLoader",
+    "methods":[{"name":"findLibrary","parameterTypes":["java.lang.String"] }]
+  },
+  {
+    "name":"java.nio.Buffer",
+    "fields":[{"name":"address"}]
+  },
+  {
+    "name":"org.lwjgl.MemoryUtilSun$AccessorUnsafe",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.lwjgl.input.Keyboard",
+    "allPublicFields":true
+  },
+  {
+    "name":"org.lwjgl.opengl.Display",
+    "methods":[{"name":"getImplementation","parameterTypes":[] }]
+  },
+  {
+    "name":"org.lwjgl.opengl.GlobalLock",
+    "fields":[{"name":"lock"}]
+  },
+  {
+    "name":"sun.misc.Unsafe",
+    "allDeclaredFields":true
+  }
+]

@@ -39,10 +39,7 @@ import squidpony.epigon.mapping.*;
 import squidpony.epigon.util.Utilities;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
-import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.FOV;
-import squidpony.squidgrid.LOS;
-import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.*;
 import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.mapping.LineKit;
@@ -241,7 +238,6 @@ public class Epigon extends Game {
         batch = new FilterBatch(filter);
         // uncomment the line below to see the game with no filters
         //batch = new FilterBatch();
-
         if(DEBUG) {
             glp = new GLProfiler(Gdx.graphics);
             glp.enable();
@@ -671,8 +667,8 @@ public class Epigon extends Game {
         simple = new char[map.width][map.height];
 
         RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
-        toPlayerDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG);
-        monsterDijkstra = new DijkstraMap(simple, DijkstraMap.Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
+        toPlayerDijkstra = new DijkstraMap(simple, Measurement.EUCLIDEAN, dijkstraRNG);
+        monsterDijkstra = new DijkstraMap(simple, Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
         los = new LOS(LOS.BRESENHAM);
         blockage = new GreasedRegion(map.width, map.height);
         player.location = Coord.get(0, 0);

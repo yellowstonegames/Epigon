@@ -1,0 +1,38 @@
+[
+  {
+    "name":"java.lang.String",
+    "methods":[
+      {"name":"<init>","parameterTypes":["byte[]"] },
+      {"name":"getBytes","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.lwjgl.BufferUtils",
+    "methods":[{"name":"createByteBuffer","parameterTypes":["int"] }]
+  },
+  {
+    "name":"org.lwjgl.opengl.DisplayMode",
+    "fields":[
+      {"name":"height"},
+      {"name":"width"}
+    ],
+    "methods":[{"name":"<init>","parameterTypes":["int","int","int","int"] }]
+  },
+  {
+    "name":"org.lwjgl.opengl.PixelFormat",
+    "fields":[
+      {"name":"accum_alpha"},
+      {"name":"accum_bpp"},
+      {"name":"alpha"},
+      {"name":"colorSamples"},
+      {"name":"depth"},
+      {"name":"floating_point"},
+      {"name":"floating_point_packed"},
+      {"name":"num_aux_buffers"},
+      {"name":"sRGB"},
+      {"name":"samples"},
+      {"name":"stencil"},
+      {"name":"stereo"}
+    ]
+  }
+]

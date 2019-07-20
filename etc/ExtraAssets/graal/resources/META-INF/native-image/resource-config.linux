@@ -1,0 +1,31 @@
+{
+  "resources":[
+    {"pattern":"7-12-serif.fnt"},
+    {"pattern":"7-12-serif.png"},
+    {"pattern":"sound fx/footstep00.ogg"},
+    {"pattern":"sound fx/footstep01.ogg"},
+    {"pattern":"sound fx/footstep02.ogg"},
+    {"pattern":"sound fx/footstep03.ogg"},
+    {"pattern":"sound fx/footstep04.ogg"},
+    {"pattern":"sound fx/footstep05.ogg"},
+    {"pattern":"sound fx/footstep06.ogg"},
+    {"pattern":"sound fx/footstep07.ogg"},
+    {"pattern":"sound fx/footstep08.ogg"},
+    {"pattern":"sound fx/footstep09.ogg"},
+    {"pattern":"images/icons/libgdx128.png"}, 
+    {"pattern":"images/icons/libgdx16.png"}, 
+    {"pattern":"images/icons/libgdx32.png"}, 
+    {"pattern":"images/icons/libgdx64.png"}, 
+    {"pattern":"java/lang/invoke/MethodHandleImpl$BindCaller$T.class"},
+    {"pattern":"libgdx64.so"},
+    {"pattern":"libglfw.so"},
+    {"pattern":"libglfw.so.sha1"},
+    {"pattern":"liblwjgl.so"},
+    {"pattern":"liblwjgl.so.sha1"},
+    {"pattern":"liblwjgl_opengl.so"},
+    {"pattern":"liblwjgl_opengl.so.sha1"},
+    {"pattern":"libopenal.so"},
+    {"pattern":"libopenal.so.sha1"},
+    {"pattern":"org/lwjgl/system/APIUtil.class"}
+  ]
+}
