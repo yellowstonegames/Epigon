@@ -31,17 +31,41 @@ import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.display.*;
+import squidpony.epigon.display.ContextHandler;
+import squidpony.epigon.display.FallingHandler;
+import squidpony.epigon.display.FxHandler;
+import squidpony.epigon.display.InfoHandler;
+import squidpony.epigon.display.MapOverlayHandler;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
+import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
-import squidpony.epigon.mapping.*;
+import squidpony.epigon.mapping.CastleGenerator;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.LocalAreaGenerator;
+import squidpony.epigon.mapping.MapConstants;
+import squidpony.epigon.mapping.MapDecorator;
+import squidpony.epigon.mapping.RememberedTile;
+import squidpony.epigon.mapping.WobblyCanyonGenerator;
 import squidpony.epigon.util.Utilities;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.*;
-import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.FilterBatch;
+import squidpony.squidgrid.gui.gdx.FloatFilter;
+import squidpony.squidgrid.gui.gdx.FloatFilters;
+import squidpony.squidgrid.gui.gdx.GDXMarkup;
+import squidpony.squidgrid.gui.gdx.MapUtility;
+import squidpony.squidgrid.gui.gdx.Radiance;
+import squidpony.squidgrid.gui.gdx.SColor;
+import squidpony.squidgrid.gui.gdx.SparseLayers;
+import squidpony.squidgrid.gui.gdx.SquidColorCenter;
+import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.gui.gdx.SquidMouse;
+import squidpony.squidgrid.gui.gdx.SubcellLayers;
+import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidgrid.mapping.LineKit;
 import squidpony.squidmath.*;
 
@@ -175,8 +199,8 @@ public class Epigon extends Game {
     public static final int worldWidth, worldHeight, worldDepth, totalDepth;
     public float startingY, finishY, timeToFall;
 
-    private static final boolean DEBUG = false;
-    private boolean odinView = true;
+    private static final boolean DEBUG = true;
+    private boolean odinView = false;
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
@@ -258,9 +282,10 @@ public class Epigon extends Game {
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
         font = new TextCellFactory().font("7-12-serif.fnt");
-        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
         font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
-        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
+        TextCellFactory smallFont = font;
+//        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
+//        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         //smallFont.bmpFont.getData().scale(2);
 //        font = DefaultResources.getCrispLeanFamily();
 //        TextCellFactory smallFont = font.copy();
@@ -1584,19 +1609,29 @@ public class Epigon extends Game {
         } else {
             multiplexer.process();
         }
-
         // the order here matters. We apply multiple viewports at different times to clip different areas.
         contextViewport.apply(false);
         contextStage.act();
-        contextStage.draw();
+
+        batch.begin();
+
+        batch.setProjectionMatrix(contextViewport.getCamera().combined);
+        contextStage.getRoot().draw(batch, 1);
 
         infoViewport.apply(false);
         infoStage.act();
-        infoStage.draw();
+//        infoStage.draw();
+        batch.setProjectionMatrix(infoViewport.getCamera().combined);
+        infoStage.getRoot().draw(batch, 1);
 
         messageViewport.apply(false);
         messageStage.act();
-        messageStage.draw();
+//        messageStage.draw();
+        batch.setProjectionMatrix(messageViewport.getCamera().combined);
+        messageStage.getRoot().draw(batch, 1);
+
+//        batch.end();
+
 //        shaper.setProjectionMatrix(messageStage.getCamera().combined);
 //        UIUtil.drawRectangle(shaper, 1, 1, messageSize.pixelWidth() - 2, messageSize.pixelHeight() - 2,
 //                ShapeRenderer.ShapeType.Line, CW_LIGHT_APRICOT);
@@ -1609,7 +1644,7 @@ public class Epigon extends Game {
             //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
             batch.setProjectionMatrix(mapStage.getCamera().combined);
             //then we start a batch and manually draw the stage without having it handle its batch...
-            batch.begin();
+//            batch.begin();
             mapSLayers.font.configureShader(batch);
             if (mapOverlaySLayers.isVisible()) {
                 mapOverlayStage.act();
@@ -1624,8 +1659,14 @@ public class Epigon extends Game {
                 if (DEBUG) {
                     int drawCalls = glp.getDrawCalls();
                     int textureBindings = glp.getTextureBindings();
+                    int calls = glp.getCalls();
+                    int switches = glp.getShaderSwitches();
                     tempSB.setLength(0);
-                    tempSB.append(Gdx.graphics.getFramesPerSecond()).append(" FPS, Draw Calls: ").append(drawCalls).append(", Texture Binds: ").append(textureBindings);
+                    tempSB.append(Gdx.graphics.getFramesPerSecond())
+                            .append(" FPS, Draw Calls: ").append(drawCalls)
+                            .append(", Calls: ").append(calls)
+                            .append(", Texture Binds: ").append(textureBindings)
+                            .append(", Shader Switches: ").append(switches);
                     screenPosition.set(16, 8);
                     mapViewport.unproject(screenPosition);
                     font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
@@ -1640,7 +1681,7 @@ public class Epigon extends Game {
             //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
             batch.setProjectionMatrix(fallingStage.getCamera().combined);
             //then we start a batch and manually draw the stage without having it handle its batch...
-            batch.begin();
+//            batch.begin();
             fallingSLayers.font.configureShader(batch);
             fallingStage.getRoot().draw(batch, 1f);
             //so we can draw the actors independently of the stage while still in the same batch
