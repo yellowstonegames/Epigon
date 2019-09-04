@@ -1,0 +1,19 @@
+{
+    "platform": "windows64",
+    "jdk": "get a 64-bit Windows zip from https://adoptopenjdk.net/archive.html , ideally OpenJDK 8",
+    "executable": "Epigon",
+    "classpath": [
+        "Epigon-1.0.jar"
+    ],
+    "mainclass": "squidpony.epigon.desktop.DesktopLauncher",
+    "vmargs": [
+    	"Xmx1G"
+    ],
+    "resources": [
+    ],
+    "removelibs": [
+        "Epigon-1.0.jar"
+    ],
+    "minimizejre": "metal.json",
+    "output": "Epigon-1.0"
+}

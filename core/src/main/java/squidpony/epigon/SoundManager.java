@@ -5,11 +5,11 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import squidpony.Maker;
+import squidpony.epigon.files.Config;
 import squidpony.squidmath.OrderedSet;
 
 import java.util.Map;
 import java.util.TreeMap;
-import squidpony.epigon.files.Config;
 
 /**
  * Singleton class which controls sound output.
@@ -183,7 +183,7 @@ public class SoundManager {
         }
 
         Config.instance().audioConfig.musicVolume = volume;
-        Config.instance().save();
+//        Config.instance().save();
     }
 
     public void dispose() {

@@ -45,6 +45,6 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
         compile "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
-        compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+//        compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     }
 }
