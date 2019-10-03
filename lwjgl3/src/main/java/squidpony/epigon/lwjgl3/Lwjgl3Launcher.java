@@ -1,4 +1,4 @@
-package squidpony.epigon.desktop;
+package squidpony.epigon.lwjgl3;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Graphics.DisplayMode;
@@ -9,7 +9,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.files.Config;
 
-public class DesktopLauncher {
+public class Lwjgl3Launcher {
 
     public static void main(String... args) {
         // load splashscreen

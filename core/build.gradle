@@ -1,8 +1,9 @@
-sourceCompatibility = 8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
 
-sourceSets {
-    main {
-        java.srcDirs = [ 'src/main/java' ]
-    }
+dependencies {
+	api "com.badlogicgames.gdx:gdx:$gdxVersion"
+	api "com.github.SquidPony.SquidLib:squidlib:$squidlibVersion"
+	api "com.github.SquidPony.SquidLib:squidlib-extra:$squidlibVersion"
+
 }

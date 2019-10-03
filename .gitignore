@@ -1,32 +1,40 @@
+## Gradle
+.gradle
+gradle-app.setting
+build/
+
+## Java:
 *.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.war
 *.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-**/.nb-gradle/
-**/NetBeans Project/build
-**/NetBeans Project/nbproject
-**/.nb-gradle
-**/*.nb-gradle-properties
-
-## Android Studio and Intellij and Android in general
+## Android:
 android/libs/armeabi/
 android/libs/armeabi-v7a/
 android/libs/x86/
 android/gen/
+local.properties
+com_crashlytics_export_strings.xml
+
+## GWT:
+war/
+html/war/gwt_bree/
+html/gwt-unitCache/
+.apt_generated/
+html/war/WEB-INF/deploy/
+html/war/WEB-INF/classes/
+.gwt/
+gwt-unitCache/
+www-test/
+.gwt-tmp/
+
+## IntelliJ, Android Studio:
 .idea/
 *.ipr
 *.iws
 *.iml
 out/
-com_crashlytics_export_strings.xml
 
 ## Eclipse
 .classpath
@@ -38,7 +46,6 @@ tmp/
 *.bak
 *.swp
 *~.nib
-local.properties
 .settings/
 .loadpath
 .externalToolBuilders/
@@ -46,25 +53,12 @@ local.properties
 
 ## NetBeans
 **/nbproject/private/
-**/build/
-**/nbbuild/
-**/dist/
-**/nbdist/
+build/
+nbbuild/
+dist/
+nbdist/
 nbactions.xml
 nb-configuration.xml
-.nb-gradle
-
-## Gradle
-
-**/.gradle
-**/gradle-app.setting
-**/build/
 
 ## OS Specific
 .DS_Store
-
-*.*#
-
-**/target/
-**/dependency-reduced-pom.xml
-**/gradle-wrapper.jar
