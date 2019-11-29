@@ -7,6 +7,7 @@ import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;
 import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.trait.*;
+import squidpony.squidgrid.gui.gdx.GDXMarkup;
 import squidpony.squidgrid.gui.gdx.Radiance;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.*;
@@ -439,17 +440,17 @@ public class RecipeMixer {
         blueprint.color = Colors.get(raw.color).toFloatBits();
         blueprint.name = raw.name;
         blueprint.blocking = true;
-//        switch (raw.symbol.length())
-//        {
-//            case 2: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0),
-//                    raw.symbol.charAt(1) == '*', raw.symbol.charAt(1) == '/');
-//            break;
-//            case 3: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0), true, true);
-//            break;
-//            default: blueprint.symbol = raw.symbol.charAt(0);             
-//            break;
-//        }
-        blueprint.symbol = raw.symbol.charAt(0);
+        switch (raw.symbol.length())
+        {
+            case 2: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0),
+                    raw.symbol.charAt(1) == '*', raw.symbol.charAt(1) == '/');
+            break;
+            case 3: blueprint.symbol = GDXMarkup.instance.styleChar(raw.symbol.charAt(0), true, true);
+            break;
+            default: blueprint.symbol = raw.symbol.charAt(0);             
+            break;
+        }
+//        blueprint.symbol = raw.symbol.charAt(0);
         blueprint.stats.put(Stat.STRUCTURE, new LiveValue(raw.vigor * 5.0));
         blueprint.stats.put(Stat.VIGOR, new LiveValue(raw.vigor));
         blueprint.stats.put(Stat.ENDURANCE, new LiveValue(raw.endurance));

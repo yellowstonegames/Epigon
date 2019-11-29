@@ -52,20 +52,8 @@ import squidpony.epigon.util.Utilities;
 import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.*;
-import squidpony.squidgrid.gui.gdx.FilterBatch;
-import squidpony.squidgrid.gui.gdx.FloatFilter;
-import squidpony.squidgrid.gui.gdx.FloatFilters;
-import squidpony.squidgrid.gui.gdx.GDXMarkup;
-import squidpony.squidgrid.gui.gdx.MapUtility;
-import squidpony.squidgrid.gui.gdx.Radiance;
-import squidpony.squidgrid.gui.gdx.SColor;
-import squidpony.squidgrid.gui.gdx.SparseLayers;
-import squidpony.squidgrid.gui.gdx.SquidColorCenter;
-import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.*;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidgrid.gui.gdx.SquidMouse;
-import squidpony.squidgrid.gui.gdx.SubcellLayers;
-import squidpony.squidgrid.gui.gdx.TextCellFactory;
 import squidpony.squidgrid.mapping.LineKit;
 import squidpony.squidmath.*;
 
@@ -110,8 +98,8 @@ public class Epigon extends Game {
     public final RecipeMixer mixer;
     private DataStarter handBuilt;
     private MapDecorator mapDecorator;
-    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
-//    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
+//    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
+    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     private GameMode mode = GameMode.CRAWL;
 
@@ -208,21 +196,21 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 120;
-        worldHeight = 90;
+        worldWidth = 80;
+        worldHeight = 80;
         worldDepth = 10;
         totalDepth = worldDepth + MapConstants.DIVE_HEADER.length;
-        int bigW = 152;//World.DIVE_HEADER[0].length() + 2;
-        int bigH = 52;
+        int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
+        int bigH = 26;
         int smallW = 50;
-        int smallH = 36;
-        int cellW = 8;
-        int cellH = 12;
+        int smallH = 22;
+        int cellW = 14;
+        int cellH = 28;
         int bottomH = 8;
-        mapSize = new PanelSize(102, bigH, 12, 12);
+        mapSize = new PanelSize(51, bigH, 28, 28);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH, 8, 12);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH), 8, 12);
+        infoSize = new PanelSize(smallW, smallH * 7 / 5, 9, 20);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 5, 9, 20);
         messageCount = bottomH - 2;
     }
 
@@ -281,9 +269,11 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
-        font = new TextCellFactory().font("7-12-serif.fnt");
+//        font = new TextCellFactory().font("7-12-serif.fnt");
+        font = DefaultResources.getCrispLeanFamily();
         font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
-        TextCellFactory smallFont = font;
+        TextCellFactory smallFont = font.copy();
+        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
 //        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
 //        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         //smallFont.bmpFont.getData().scale(2);
@@ -534,7 +524,7 @@ public class Epigon extends Game {
 
     public static String style(CharSequence text) {
 //        return text.toString();
-        return GDXMarkup.instance.colorStringOnly(text).present();
+        return GDXMarkup.instance.styleString(text).toString();
     }
 
     private void startGame() {
@@ -1007,7 +997,7 @@ public class Epigon extends Game {
 
     private void message(String text) {
         messageIndex = Math.max(messages.size(), messageCount);
-        messages.add(GDXMarkup.instance.colorStringOnly("[]" + text));
+        messages.add(GDXMarkup.instance.colorString("[]" + text));
         updateMessages();
     }
     
