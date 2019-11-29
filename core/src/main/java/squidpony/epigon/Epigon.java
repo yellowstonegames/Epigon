@@ -370,8 +370,8 @@ public class Epigon extends Game {
                 filter.yAdd  = 0.7f  * conditionYAdd;
                 filter.cwAdd = 0.65f * conditionCwAdd;
                 filter.cmAdd = 0.65f * conditionCmAdd;
-                font.draw(batch, backgrounds, xo, yo);
-//                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
+//                font.draw(batch, backgrounds, xo, yo);
+                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
                 int len = layers.size();
                 Frustum frustum = null;
                 Stage stage = getStage();
@@ -398,7 +398,7 @@ public class Epigon extends Game {
                 filter.cwAdd = 0.95f * conditionCwAdd;
                 filter.cmAdd = 0.95f * conditionCmAdd;
 
-                font.draw(batch, walls, xo, yo, 3, 3);
+                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
 //                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
 
                 font.configureShader(batch);
@@ -1614,6 +1614,22 @@ public class Epigon extends Game {
         batch.setProjectionMatrix(infoViewport.getCamera().combined);
         infoStage.getRoot().draw(batch, 1);
 
+        if (DEBUG) {
+            int drawCalls = glp.getDrawCalls();
+            int textureBindings = glp.getTextureBindings();
+            int calls = glp.getCalls();
+            int switches = glp.getShaderSwitches();
+            tempSB.setLength(0);
+            tempSB.append(Gdx.graphics.getFramesPerSecond())
+                    .append(" FPS, Draw Calls: ").append(drawCalls)
+                    .append(", Calls: ").append(calls)
+                    .append(", Texture Binds: ").append(textureBindings)
+                    .append(", Shader Switches: ").append(switches);
+            screenPosition.set(16, 8);
+            mapViewport.unproject(screenPosition);
+            messageSLayers.put(1, 1, tempSB.toString(), WHITE);
+//            font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
+        }
         messageViewport.apply(false);
         messageStage.act();
 //        messageStage.draw();
@@ -1646,21 +1662,6 @@ public class Epigon extends Game {
             }
             else {
                 mapSLayers.draw(batch, 1f);
-                if (DEBUG) {
-                    int drawCalls = glp.getDrawCalls();
-                    int textureBindings = glp.getTextureBindings();
-                    int calls = glp.getCalls();
-                    int switches = glp.getShaderSwitches();
-                    tempSB.setLength(0);
-                    tempSB.append(Gdx.graphics.getFramesPerSecond())
-                            .append(" FPS, Draw Calls: ").append(drawCalls)
-                            .append(", Calls: ").append(calls)
-                            .append(", Texture Binds: ").append(textureBindings)
-                            .append(", Shader Switches: ").append(switches);
-                    screenPosition.set(16, 8);
-                    mapViewport.unproject(screenPosition);
-                    font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
-                }
             }
             mapHoverSLayers.draw(batch, 1f);
             batch.end();
