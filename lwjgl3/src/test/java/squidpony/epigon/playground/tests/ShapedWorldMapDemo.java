@@ -148,10 +148,10 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
 
 
         protected void regenerate(int startX, int startY, int usedWidth, int usedHeight,
-                                  double waterMod, double coolMod, int stateA, int stateB)
+                                  double waterMod, double heatMod, int stateA, int stateB)
         {
             boolean fresh = false;
-            if(cacheA != stateA || cacheB != stateB || waterMod != landModifier || coolMod != coolingModifier)
+            if(cacheA != stateA || cacheB != stateB || waterMod != landModifier || heatMod != heatModifier)
             {
                 minHeight = Double.POSITIVE_INFINITY;
                 maxHeight = Double.NEGATIVE_INFINITY;
@@ -174,7 +174,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
             int t;
 
             landModifier = (waterMod <= 0) ? rng.nextDouble(0.29) + 0.91 : waterMod;
-            coolingModifier = (coolMod <= 0) ? rng.nextDouble(0.45) * (rng.nextDouble()-0.5) + 1.1 : coolMod;
+            heatModifier = (heatMod <= 0) ? rng.nextDouble(0.45) * (rng.nextDouble()-0.5) + 1.1 : heatMod;
 
             double p,
                     ps, pc,
@@ -282,7 +282,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
                 minHeat1 = ps;
                 maxHeat1 = pc;
             }
-            heatDiff = coolingModifier / (maxHeat1 - minHeat1);
+            heatDiff = heatModifier / (maxHeat1 - minHeat1);
             qs = Double.POSITIVE_INFINITY;
             qc = Double.NEGATIVE_INFINITY;
             ps = Double.POSITIVE_INFINITY;
@@ -801,7 +801,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
         long startTime = System.nanoTime();
         world.setCenterLongitude((startTime & 0xFFFFFFFFFFFFL) * 0x1p-32);
         //world.setCenterLongitude(++counter * 0.02);
-        world.generate(world.landModifier, world.coolingModifier, seed);
+        world.generate(world.landModifier, world.heatModifier, seed);
         dbm.makeBiomes(world);
         //political = fpm.generate(seed + 1000L, world, dbm, null, 50, 1.0);
 //        System.out.println(StringKit.hex(CrossHash.hash64(world.heightCodeData)) + " " + StringKit.hex(CrossHash.hash64(dbm.biomeCodeData)));

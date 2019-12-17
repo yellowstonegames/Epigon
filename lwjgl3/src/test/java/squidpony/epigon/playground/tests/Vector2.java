@@ -416,10 +416,19 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 
 	@Override
 	public int hashCode () {
-//		final int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
+		int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
+		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
+		xx ^= xx >> 16 ^ xx >>> 21;
+		yy ^= yy >> 16 ^ yy >>> 21;
+		////Rosenberg-Strong Pairing Function
+		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells; the shell is max(x,y).
+		return xx + (xx >= yy ? xx * xx + xx - yy : yy * yy);
+
 		//return 0xC13F * (xx ^ xx >>> 16) + 0x91E1 * (yy ^ yy >>> 16);
-		final long r = (NumberUtils.floatToIntBits(x) ^ 0xa0761d65L) * (NumberUtils.floatToIntBits(y) ^ 0x8ebc6af1L);
-		return ((int)(r - (r >> 32)));
+		
+//		final long r = (NumberUtils.floatToIntBits(x) ^ 0xa0761d65L) * (NumberUtils.floatToIntBits(y) ^ 0x8ebc6af1L);
+//		return ((int)(r - (r >> 32)));
+		
 		//r = ((r - (r >> 32)) + 0xEB44ACCBL) * 0xE7037ED1L;
 //		return ((int)(r - (r >> 32)));
 
