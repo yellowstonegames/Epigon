@@ -416,14 +416,29 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 
 	@Override
 	public int hashCode () {
-		int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
-		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
-		xx ^= xx >> 16 ^ xx >>> 21;
-		yy ^= yy >> 16 ^ yy >>> 21;
-		////Rosenberg-Strong Pairing Function
-		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells; the shell is max(x,y).
-		return xx + (xx >= yy ? xx * xx + xx - yy : yy * yy);
+		
+		////Two different XLCG random number generator steps, added, keeping only the upper 32 bits.
+		////This may be a little finicky regarding input, but it doesn't give anomalous results on GWT.
+		////Both this and the Rosenberg-Strong pairing function below can handle 25 million Vector2 in an ObjectMap.
+		return (int)(((NumberUtils.floatToIntBits(x) ^ 0xC13FA9A902A6328DL) * 0xD1B54A32D192ED0BL
+				+ (NumberUtils.floatToIntBits(y) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L) >>> 32);
+//		int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
+////		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
+//		xx ^= xx >> 16 ^ xx >>> 21;
+//		yy ^= yy >> 16 ^ yy >>> 21;
+////		////Rosenberg-Strong Pairing Function
+////		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells; the shell is max(x,y).
+//		xx += (xx > yy ? xx * xx + xx - yy : yy * yy);
+//		////Gray Code, makes any sequential values for xx vary by exactly one bit
+//		////only used here to scramble visual patterns slightly and to end with a bitwise operation for GWT reasons.
+//		////There probably are many Vector2 values where this hashCode() will be different on GWT; the above XLCG way
+//		////shouldn't have the same issues, though it will be slower on GWT.
+//		return xx ^ xx >>> 1;
 
+		////Cantor Pairing Function; not quite as fast?
+//		return yy + ((xx+yy) * (xx+yy+1) >> 1);
+
+//		return 0xC13F * xx ^ 0x91E1 * yy;
 		//return 0xC13F * (xx ^ xx >>> 16) + 0x91E1 * (yy ^ yy >>> 16);
 		
 //		final long r = (NumberUtils.floatToIntBits(x) ^ 0xa0761d65L) * (NumberUtils.floatToIntBits(y) ^ 0x8ebc6af1L);

@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 3000, height = 3000;
+    private static final int width = 5000, height = 5000;
     // the initial bug was reported on ObjectMap
 //    private com.badlogic.gdx.utils.ObjectMap<GridPoint2, Integer> theMap;
     private ObjectMap<Vector2, Integer> theMap;
+//    private com.badlogic.gdx.utils.ObjectMap<Vector2, Integer> theMap;
+//    private com.badlogic.gdx.utils.ObjectMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private HashMap<com.badlogic.gdx.math.GridPoint2, Integer> theMap;
 
     // HashSet from the JDK
@@ -99,6 +101,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //        theMap = new HashSet<>(2048, 0.5f);
 //        theMap = new ObjectSet<>(2048, 0.5f);
 //        theMap = new HashMap<>(1000000, 0.5f);
+//        theMap = new ObjectMap<>(1000000, 0.5f);
         theMap = new ObjectMap<>(1000000, 0.5f);
         generate();
     }
@@ -149,8 +152,11 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                unSzudzik(pair, z);
 //                theMap.put(0xC13FA9A902A6328FL * x ^ 0x91E10DA5C79E7B1DL * y, null); // uses 23312576 bytes of heap
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
-//                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f)); // crashes out of heap with 720 Vector2
-                theMap.put(new Vector2(x - 1500, y - 1500), x); // crashes out of heap with 720 Vector2
+//                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f));
+//                theMap.put(new Vector2((x * 0xC13FA9A9 >> 8), (y * 0x91E10DA5 >> 8)), x); // sub-random point sequence
+                theMap.put(new Vector2(x - 2500, y - 2500), x);
+//                theMap.put(new com.badlogic.gdx.math.Vector2(x - 25, y - 25), x);  // crashes out of heap with 50x50 Vector2
+
 //                theMap.put(new GridPoint2(x - 1500, y - 1500), x); // crashes out of heap with 720 Vector2
 //                    gp.set(x, y);
 //                    theMap.add(gp.hashCode());
