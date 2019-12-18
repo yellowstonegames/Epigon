@@ -102,7 +102,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //        theMap = new ObjectSet<>(2048, 0.5f);
 //        theMap = new HashMap<>(1000000, 0.5f);
 //        theMap = new ObjectMap<>(1000000, 0.5f);
-        theMap = new ObjectMap<>(1000000, 0.5f);
+        theMap = new ObjectMap<>(1000000, 1f - 0.015625f);
         generate();
     }
 

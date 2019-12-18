@@ -419,6 +419,10 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 		
 		////Two different XLCG random number generator steps, added, keeping only the upper 32 bits.
 		////This may be a little finicky regarding input, but it doesn't give anomalous results on GWT.
+		////Magic numbers used are all within a few bits of (2 to the 64) divided by a harmonious number or its square.
+		////See http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/ for an intro.
+		////The only requirement for an XLCG is that the XOR constant, modulo 8, equals 5, and the multiplier constant,
+		////modulo 8, equals 3; this is easy with hex because the XOR constant ends in D or 5, the other in B or 3.
 		////Both this and the Rosenberg-Strong pairing function below can handle 25 million Vector2 in an ObjectMap.
 		return (int)(((NumberUtils.floatToIntBits(x) ^ 0xC13FA9A902A6328DL) * 0xD1B54A32D192ED0BL
 				+ (NumberUtils.floatToIntBits(y) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L) >>> 32);
