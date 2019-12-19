@@ -424,8 +424,11 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 		////The only requirement for an XLCG is that the XOR constant, modulo 8, equals 5, and the multiplier constant,
 		////modulo 8, equals 3; this is easy with hex because the XOR constant ends in D or 5, the other in B or 3.
 		////Both this and the Rosenberg-Strong pairing function below can handle 25 million Vector2 in an ObjectMap.
-		return (int)(((NumberUtils.floatToIntBits(x) ^ 0xC13FA9A902A6328DL) * 0xD1B54A32D192ED0BL
-				+ (NumberUtils.floatToIntBits(y) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L) >>> 32);
+//		return (int)(((NumberUtils.floatToIntBits(x) ^ 0xC13FA9A902A6328DL) * 0xD1B54A32D192ED0BL
+//				+ (NumberUtils.floatToIntBits(y) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L) >>> 32);
+		return (int)(((NumberUtils.floatToIntBits(x) * 0xC13FA9A902A6328FL)
+				+ (NumberUtils.floatToIntBits(y) * 0x91E10DA5C79E7B1DL)) >>> 32);
+
 //		int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
 ////		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
 //		xx ^= xx >> 16 ^ xx >>> 21;

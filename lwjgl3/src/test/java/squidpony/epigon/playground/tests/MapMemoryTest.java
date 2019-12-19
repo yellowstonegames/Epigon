@@ -10,15 +10,15 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.HashMap;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 100, height = 100;
+    private static final int width = 1000, height = 1000;
     // the initial bug was reported on ObjectMap
 //    private com.badlogic.gdx.utils.ObjectMap<GridPoint2, Integer> theMap;
 //    private ObjectMap<Vector2, Integer> theMap;
 //    private ObjectMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private com.badlogic.gdx.utils.ObjectMap<Vector2, Integer> theMap;
 //    private OrderedMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
-//    private HashMap<Vector2, Integer> theMap;
-    private HashMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
+    private HashMap<Vector2, Integer> theMap;
+//    private HashMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private com.badlogic.gdx.utils.ObjectMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private HashMap<com.badlogic.gdx.math.GridPoint2, Integer> theMap;
 
@@ -170,8 +170,10 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f));
 //                theMap.put(new Vector2((x * 0xC13FA9A9 >> 8), (y * 0x91E10DA5 >> 8)), x); // sub-random point sequence
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x - 2500, y - 2500), x);
-                theMap.put(new com.badlogic.gdx.math.Vector2(x, y), x);  // when using old hashCode with HashMap: 7,481,873 ns
-                //theMap.put(new Vector2(x, y), x);  // when using new hashCode with HashMap: 4,799,871 ns
+//                theMap.put(new com.badlogic.gdx.math.Vector2(x, y), x);  // when using old hashCode with HashMap: 7,481,873 ns
+                theMap.put(new Vector2(x, y), x);  // when using new hashCode with HashMap: 4,799,871 ns
+//                909940988ns for 1M with original hashCode
+//                182242216ns for 1M with R2 hashCode, roughly 5x faster due to HashMap not having to handle collisions
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x - 25, y - 25), x);  // crashes out of heap with 50x50 Vector2
 
 //                theMap.put(new GridPoint2(x - 1500, y - 1500), x); // crashes out of heap with 720 Vector2
