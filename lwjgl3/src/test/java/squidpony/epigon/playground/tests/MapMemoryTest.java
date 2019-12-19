@@ -7,12 +7,18 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.TimeUtils;
 
+import java.util.HashMap;
+
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 5000, height = 5000;
+    private static final int width = 100, height = 100;
     // the initial bug was reported on ObjectMap
 //    private com.badlogic.gdx.utils.ObjectMap<GridPoint2, Integer> theMap;
-    private ObjectMap<Vector2, Integer> theMap;
+//    private ObjectMap<Vector2, Integer> theMap;
+//    private ObjectMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private com.badlogic.gdx.utils.ObjectMap<Vector2, Integer> theMap;
+//    private OrderedMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
+//    private HashMap<Vector2, Integer> theMap;
+    private HashMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private com.badlogic.gdx.utils.ObjectMap<com.badlogic.gdx.math.Vector2, Integer> theMap;
 //    private HashMap<com.badlogic.gdx.math.GridPoint2, Integer> theMap;
 
@@ -102,7 +108,12 @@ public class MapMemoryTest extends ApplicationAdapter {
 //        theMap = new ObjectSet<>(2048, 0.5f);
 //        theMap = new HashMap<>(1000000, 0.5f);
 //        theMap = new ObjectMap<>(1000000, 0.5f);
-        theMap = new ObjectMap<>(1000000, 1f - 0.015625f);
+//        theMap = new OrderedMap<>(width * height, 0.5f);
+//        theMap = new OrderedMap<>(width * height, 0.5f);
+        theMap = new HashMap<>(width * height, 0.5f);
+//        theMap = new com.badlogic.gdx.utils.ObjectMap<>(width * height, 0.5f);
+//        theMap = new com.badlogic.gdx.utils.ObjectMap<>(1000000, 0.5f);
+//        theMap = new ObjectMap<>(1000000, 1f - 0.015625f);
         generate();
     }
 
@@ -130,12 +141,16 @@ public class MapMemoryTest extends ApplicationAdapter {
     public void generate()
     {
 //        long[] pair = new long[2];
-//        System.out.println("Initial allocated space for Set: Not supported");
-        System.out.println("Initial allocated space for Set: " + theMap.capacity);
+        System.out.println("Initial allocated space for Set: Not supported");
+//        System.out.println("Initial allocated space for Set: " + theMap.capacity);
         final long startTime = TimeUtils.nanoTime();
 //        Mnemonic m = new Mnemonic(123456789L);
         Vector2 gp = new Vector2(0, 0);
 //        GridPoint2 gp = new GridPoint2(0, 0);
+//        RandomXS128 random = new RandomXS128(1);
+//        for (int i = 0; i < 10000000; i++) {
+//            theMap.put(new com.badlogic.gdx.math.Vector2(random.nextFloat() - 0.5f, random.nextFloat() - 0.5f), i);
+//        }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
 //                for (int z = -height; z < height; z++) {
@@ -146,7 +161,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                z =        ((z & 0x00f000f000f000f0L) << 4 ) | ((z >>> 4 ) & 0x00f000f000f000f0L) | (z & 0xf00ff00ff00ff00fL);
 //                z =        ((z & 0x0c0c0c0c0c0c0c0cL) << 2 ) | ((z >>> 2 ) & 0x0c0c0c0c0c0c0c0cL) | (z & 0xc3c3c3c3c3c3c3c3L);
 //                z =        ((z & 0x2222222222222222L) << 1 ) | ((z >>> 1 ) & 0x2222222222222222L) | (z & 0x9999999999999999L);
-//                theMap.put(z, null);                                                 // uses 23312536 bytes of heap
+//                theMap.put(z, null);                                                   // uses 23312536 bytes of heap
 //                long z = szudzik(x, y);
 //                theMap.put(z, null);                                                   // uses 18331216 bytes of heap?
 //                unSzudzik(pair, z);
@@ -154,7 +169,9 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                theMap.put((x & 0xFFFFFFFFL) << 32 | (y & 0xFFFFFFFFL), null);       // uses 28555456 bytes of heap
 //                theMap.add(new Vector2(x - width * 0.5f, y - height * 0.5f));
 //                theMap.put(new Vector2((x * 0xC13FA9A9 >> 8), (y * 0x91E10DA5 >> 8)), x); // sub-random point sequence
-                theMap.put(new Vector2(x - 2500, y - 2500), x);
+//                theMap.put(new com.badlogic.gdx.math.Vector2(x - 2500, y - 2500), x);
+                theMap.put(new com.badlogic.gdx.math.Vector2(x, y), x);  // when using old hashCode with HashMap: 7,481,873 ns
+                //theMap.put(new Vector2(x, y), x);  // when using new hashCode with HashMap: 4,799,871 ns
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x - 25, y - 25), x);  // crashes out of heap with 50x50 Vector2
 
 //                theMap.put(new GridPoint2(x - 1500, y - 1500), x); // crashes out of heap with 720 Vector2
@@ -184,8 +201,8 @@ public class MapMemoryTest extends ApplicationAdapter {
                 //final int gpHash = 53 * 53 + x + 53 * y; // equivalent to current hashCode()
         long taken = TimeUtils.timeSinceNanos(startTime);
         System.out.println(taken + "ns taken, about 10 to the " + Math.log10(taken) + " power.");
-        System.out.println("Post-assign allocated space for Set: " + theMap.capacity);
-//        System.out.println("Post-assign allocated space for Set: Not supported");
+//        System.out.println("Post-assign allocated space for Set: " + theMap.capacity);
+        System.out.println("Post-assign allocated space for Set: Not supported");
     }
 
     @Override

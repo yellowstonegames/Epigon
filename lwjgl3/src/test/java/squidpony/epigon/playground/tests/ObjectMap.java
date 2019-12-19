@@ -31,9 +31,9 @@ import java.util.NoSuchElementException;
  * next higher POT size.
  * @author Nathan Sweet */
 public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
-	private static final int PRIME1 = 0xbe1f14b1;
-	private static final int PRIME2 = 0xb4b82e39;
-	private static final int PRIME3 = 0xced1c241;
+	private static final int PRIME1 = 0x17C231;//0xbe1f14b1;
+	private static final int PRIME2 = 0x174DF9;//0xb4b82e39;
+	private static final int PRIME3 = 0x19E151;//0xced1c241;
 
 	public int size;
 
@@ -177,7 +177,8 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 		if (key1 == null) {
 			keyTable[index1] = key;
 			valueTable[index1] = value;
-			if (size++ >= threshold) resize(capacity << 1);
+			if (size++ >= threshold)
+				resize(capacity << 1);
 			return;
 		}
 
@@ -186,7 +187,8 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 		if (key2 == null) {
 			keyTable[index2] = key;
 			valueTable[index2] = value;
-			if (size++ >= threshold) resize(capacity << 1);
+			if (size++ >= threshold)
+				resize(capacity << 1);
 			return;
 		}
 
@@ -195,7 +197,8 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 		if (key3 == null) {
 			keyTable[index3] = key;
 			valueTable[index3] = value;
-			if (size++ >= threshold) resize(capacity << 1);
+			if (size++ >= threshold) 
+				resize(capacity << 1);
 			return;
 		}
 
@@ -518,17 +521,34 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 
 	private int hash1 (int h) {
 //		return (h << 21 | h >>> 11) * PRIME1 ^ h;
-		h *= 0x9E375;
+//		h *= 0x9E375;
+//		return h ^ h >>> 16;
+		h *= PRIME1;
 		return h ^ h >>> 16;
+
+//		final int s = (h * PRIME1 ^ 0xC1C64E6D);
+//		h = (s ^ s >>> 17) * ((h * 0xACEDB + 0x9E3779BB) >>> 12 | 1);
+//		h = (h ^ h >>> 16) * 0xAC451;
+//		return (h ^ h >>> 15);
 	}
 
 	private int hash2 (int h) {
 		h *= PRIME2;
 		return (h ^ h >>> hashShift) & mask;
+//		final int s = (h * PRIME2 ^ 0xC1C64E6D);
+//		h = (s ^ s >>> 17) * ((h * 0xE629D + 0x9E3779BB) >>> 12 | 1);
+//		h = (h ^ h >>> 16) * 0xAC451;
+//		h ^= h >>> 15;
+//		return (h ^ h >>> hashShift) & mask;
 	}
 	private int hash3 (int h) {
 		h *= PRIME3;
-		return (h ^ h >>> hashShift) & mask;
+		return (h ^ h >>> (hashShift + 1 | 1)) & mask;
+//		final int s = (h * PRIME3 ^ 0xC1C64E6D);
+//		h = (s ^ s >>> 17) * ((h * 0xB1A45 + 0x9E3779BB) >>> 12 | 1);
+//		h = (h ^ h >>> 16) * 0xAC451;
+//		h ^= h >>> 15;
+//		return (h ^ h >>> hashShift) & mask;
 	}
 
 //	private int hash2 (final int n) {
