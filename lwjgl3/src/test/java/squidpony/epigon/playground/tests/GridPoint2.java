@@ -184,12 +184,19 @@ public class GridPoint2 implements Serializable {
 
 	@Override
 	public int hashCode () {
+		//5670185991ns taken, about 10 to the 9.753597304667192 power.
+//		return (int)((x * 0xC13FA9A902A6328FL + y * 0x91E10DA5C79E7B1DL) >>> 32);
+		//4828246273ns taken, about 10 to the 9.6837894139268 power.
+		final long xx = (x << 1 ^ x >> 31) + 0x80000000L;
+		final long yy = (y << 1 ^ y >> 31) + 0x80000000L;
+		return (int) (xx + (xx > yy ? xx * xx + xx - yy : yy * yy));
+
 		//// handy way of making all but the largest x or y into a positive number, with negative originals odd.
-		final int xx = x << 1 ^ x >> 31;
-		final int yy = y << 1 ^ y >> 31;
-		////Rosenberg-Strong Pairing Function
-		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells (the shell is max(x,y)).
-		return xx + (xx >= yy ? xx * xx + xx - yy : yy * yy);
+//		final int xx = x << 1 ^ x >> 31;
+//		final int yy = y << 1 ^ y >> 31;
+//		////Rosenberg-Strong Pairing Function
+//		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells (the shell is max(x,y)).
+//		return xx + (xx >= yy ? xx * xx + xx - yy : yy * yy);
 		////Cantor Pairing Function
 		////also assigns numbers to (x,y) pairs, but shells are triangular stripes instead of right angles.
 		//return yy + ((xx + yy) * (xx + yy + 1) >> 1);

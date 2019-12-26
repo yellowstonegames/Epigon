@@ -102,7 +102,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 		K[] keyTable = this.keyTable;
 
 		// Check for existing keys.
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index1 = hashCode & mask;
 		K key1 = keyTable[index1];
 		if (key.equals(key1)) {
@@ -171,7 +171,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	/** Skips checks for existing keys. */
 	private void putResize (K key, V value) {
 		// Check for empty buckets.
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index1 = hashCode & mask;
 		K key1 = keyTable[index1];
 		if (key1 == null) {
@@ -210,11 +210,11 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 		V[] valueTable = this.valueTable;
 		int mask = this.mask;
 
-		if(index1 == index2 && index1 == index3)
-			System.out.println("FULL INDEX COLLISION WHEN INSERTING " + insertKey);
-
-		if(index1 == index2 || index1 == index3 || index2 == index3)
-			System.out.println("PARTIAL INDEX COLLISION WHEN INSERTING " + insertKey);
+//		if(index1 == index2 && index1 == index3)
+//			System.out.println("FULL INDEX COLLISION WHEN INSERTING " + insertKey);
+//
+//		if(index1 == index2 || index1 == index3 || index2 == index3)
+//			System.out.println("PARTIAL INDEX COLLISION WHEN INSERTING " + insertKey);
 
 		// Push keys until an empty bucket is found.
 		K evictedKey;
@@ -244,7 +244,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 			}
 
 			// If the evicted key hashes to an empty bucket, put it there and stop.
-			int hashCode = hash1(evictedKey.hashCode());
+			int hashCode = (evictedKey.hashCode());
 			index1 = hashCode & mask;
 			key1 = keyTable[index1];
 			if (key1 == null) {
@@ -284,9 +284,9 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	private void putStash (K key, V value) {
 		if (stashSize == stashCapacity) {
 			// Too many pushes occurred and the stash is full, increase the table size.
-			resize(capacity << 1);
-			System.out.println("Too many pushes occurred and the stash is full; size is now " + size + ", capacity is now " + capacity +
-					", hashShift is now " + hashShift + ", stashSize is now " + stashSize + ", stashCapacity is now " + stashCapacity);
+			resize(capacity, stashCapacity << 1);
+//			System.out.println("Too many pushes occurred and the stash is full; size is now " + size + ", capacity is now " + capacity +
+//					", hashShift is now " + hashShift + ", stashSize is now " + stashSize + ", stashCapacity is now " + stashCapacity);
 			put_internal(key, value);
 			return;
 		}
@@ -300,7 +300,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 
 	/** Returns the value for the specified key, or null if the key is not in the map. */
 	public V get (K key) {
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index = hashCode & mask;
 		if (!key.equals(keyTable[index])) {
 			index = hash2(hashCode);
@@ -314,7 +314,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 
 	/** Returns the value for the specified key, or the default value if the key is not in the map. */
 	public V get (K key, V defaultValue) {
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index = hashCode & mask;
 		if (!key.equals(keyTable[index])) {
 			index = hash2(hashCode);
@@ -334,7 +334,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	}
 
 	public V remove (K key) {
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index = hashCode & mask;
 		if (key.equals(keyTable[index])) {
 			keyTable[index] = null;
@@ -446,7 +446,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	}
 
 	public boolean containsKey (K key) {
-		int hashCode = hash1(key.hashCode());
+		int hashCode = (key.hashCode());
 		int index = hashCode & mask;
 		if (!key.equals(keyTable[index])) {
 			index = hash2(hashCode);
@@ -493,20 +493,22 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	}
 
 	private void resize (int newSize) {
+		resize(newSize, Math.max(3, (int)Math.ceil(Math.log(newSize)) * 2));
+	}
+	private void resize (int newSize, int newStashCapacity) {
 		int oldEndIndex = capacity + stashSize;
-
+		stashCapacity = newStashCapacity;
 		capacity = newSize;
 		threshold = (int)(newSize * loadFactor);
 		mask = newSize - 1;
 		hashShift = 31 - Integer.numberOfTrailingZeros(newSize);
-		stashCapacity = Math.max(3, (int)Math.ceil(Math.log(newSize)) * 2);
 		pushIterations = Math.max(Math.min(newSize, 8), (int)Math.sqrt(newSize) / 8);
 
 		K[] oldKeyTable = keyTable;
 		V[] oldValueTable = valueTable;
 
-		keyTable = (K[])new Object[newSize + stashCapacity];
-		valueTable = (V[])new Object[newSize + stashCapacity];
+		keyTable = (K[])new Object[newSize + newStashCapacity];
+		valueTable = (V[])new Object[newSize + newStashCapacity];
 
 		int oldSize = size;
 		size = 0;
@@ -523,6 +525,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 //		return (h << 21 | h >>> 11) * PRIME1 ^ h;
 //		h *= 0x9E375;
 //		return h ^ h >>> 16;
+		h ^= 0xC1C64E6D;
 		h *= PRIME1;
 		return h ^ h >>> 16;
 
@@ -533,6 +536,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	}
 
 	private int hash2 (int h) {
+		h ^= 0x9E3779B9;
 		h *= PRIME2;
 		return (h ^ h >>> hashShift) & mask;
 //		final int s = (h * PRIME2 ^ 0xC1C64E6D);
@@ -542,6 +546,7 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 //		return (h ^ h >>> hashShift) & mask;
 	}
 	private int hash3 (int h) {
+		h ^= 0xBBE05633;
 		h *= PRIME3;
 		return (h ^ h >>> (hashShift + 1 | 1)) & mask;
 //		final int s = (h * PRIME3 ^ 0xC1C64E6D);

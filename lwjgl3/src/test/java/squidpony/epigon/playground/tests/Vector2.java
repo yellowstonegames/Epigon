@@ -426,15 +426,23 @@ public class Vector2 implements Serializable, Vector<Vector2> {
 		////Both this and the Rosenberg-Strong pairing function below can handle 25 million Vector2 in an ObjectMap.
 //		return (int)(((NumberUtils.floatToIntBits(x) ^ 0xC13FA9A902A6328DL) * 0xD1B54A32D192ED0BL
 //				+ (NumberUtils.floatToIntBits(y) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L) >>> 32);
-		return (int)(((NumberUtils.floatToIntBits(x) * 0xC13FA9A902A6328FL)
-				+ (NumberUtils.floatToIntBits(y) * 0x91E10DA5C79E7B1DL)) >>> 32);
+		////works almost as well as commented code above with XLCG, slightly faster
+		return (int)((NumberUtils.floatToIntBits(x) * 0xC13FA9A902A6328FL
+				+ NumberUtils.floatToIntBits(y) * 0x91E10DA5C79E7B1DL) >>> 32);
+//		final long h = 
+//				((NumberUtils.floatToIntBits(x) * 0xC13FA9A902A6328FL)
+//				+ (NumberUtils.floatToIntBits(y) * 0x91E10DA5C79E7B1DL));
+//		return (int)(h >>> 32);
+//		final int h = NumberUtils.floatToIntBits(x * 0.7548776662466927f + 0.5698402909980532f) + NumberUtils.floatToIntBits(y * 0.5698402909980532f + 0.7548776662466927f);
+//		return h ^ h >>> 16 ^ h >>> 21;
 
 //		int xx = NumberUtils.floatToIntBits(x), yy = NumberUtils.floatToIntBits(y);
-////		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
+//		////There was lots of fiddling with this; it seems very strong now. Yes, one of those is a signed shift.
 //		xx ^= xx >> 16 ^ xx >>> 21;
 //		yy ^= yy >> 16 ^ yy >>> 21;
-////		////Rosenberg-Strong Pairing Function
-////		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells; the shell is max(x,y).
+//		////Rosenberg-Strong Pairing Function
+//		////assigns numbers to (x,y) pairs, assigning bigger numbers to bigger shells; the shell is max(x,y).
+////		return xx + (xx > yy ? xx * xx + xx - yy : yy * yy);
 //		xx += (xx > yy ? xx * xx + xx - yy : yy * yy);
 //		////Gray Code, makes any sequential values for xx vary by exactly one bit
 //		////only used here to scramble visual patterns slightly and to end with a bitwise operation for GWT reasons.
