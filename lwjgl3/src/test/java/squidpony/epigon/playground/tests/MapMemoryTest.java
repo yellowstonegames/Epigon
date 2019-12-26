@@ -7,19 +7,30 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.TimeUtils;
 
-import com.badlogic.gdx.math.GridPoint2;
+import java.util.HashMap;
+
+//import com.badlogic.gdx.math.GridPoint2;
 
 //import com.badlogic.gdx.utils.ObjectMap;
 
 public class MapMemoryTest extends ApplicationAdapter {
-    private static final int width = 42, height = 160;
+    private static final int width = 600, height = 600;
     // the initial bug was reported on ObjectMap
-    //24311861ns taken, about 10 to the 7.385818204055041 power. (default libGDX hashCode())
-    // 3295466ns taken, about 10 to the 6.517916835293881 power. (custom hashCode(), long Rosenberg-Strong-based)
-    private ObjectMap<GridPoint2, Integer> theMap;
+    // 44x160:
+    //17318774ns taken, about 10 to the 7.2385171449630645 power. (default libGDX hashCode())
+    // 2673270ns taken, about 10 to the 6.427042824670609 power.  (custom hashCode(), long Rosenberg-Strong-based)
+    // 600x600:
+    //61281360ns taken, about 10 to the 7.787328394906881 power.
+//    private ObjectMap<GridPoint2, Integer> theMap;
+    // 600x600:
+    //158299104788ns taken, about 10 to the 11.199478458850157 power. (Boom's horrible always-0 hashCode())
+//    private ObjectMap<Boom, Integer> theMap;
     // 2413330ns taken, about 10 to the 6.382616711622814 power. (default libGDX hashCode())
     // 1974040ns taken, about 10 to the 6.29535594853791 power.  (custom hashCode(), long Rosenberg-Strong-based)
 //    private HashMap<GridPoint2, Integer> theMap;
+    // 600x600:
+    //4661515873501ns taken, about 10 to the 12.668527167428932 power. (Boom's horrible always-0 hashCode())
+    private HashMap<Boom, Integer> theMap;
 //    private com.badlogic.gdx.utils.ObjectMap<GridPoint2, Integer> theMap; //5806446897ns taken, about 10 to the 9.763910458542151 power.
 //    private UnorderedMap<GridPoint2, Integer> theMap; //5368669452ns taken, about 10 to the 9.729866665354251 power.
 //    private com.badlogic.gdx.utils.ObjectMap<com.badlogic.gdx.math.GridPoint2, Integer> theMap; //CRASH, out of memory
@@ -121,8 +132,8 @@ public class MapMemoryTest extends ApplicationAdapter {
 //        theMap = new ObjectMap<>(1000000, 0.5f);
 //        theMap = new OrderedMap<>(width * height, 0.5f);
 //        theMap = new OrderedMap<>(width * height, 0.5f);
-//        theMap = new HashMap<>(width * height, 0.5f);
-        theMap = new ObjectMap<>(width * height, 0.5f);
+        theMap = new HashMap<>(width * height, 0.5f);
+//        theMap = new ObjectMap<>(width * height, 0.5f);
 //        theMap = new com.badlogic.gdx.utils.ObjectMap<>(width * height, 0.5f);
 //        theMap = new com.badlogic.gdx.utils.ObjectMap<>(1000000, 0.5f);
 //        theMap = new ObjectMap<>(1000000, 1f - 0.015625f);
@@ -182,7 +193,7 @@ public class MapMemoryTest extends ApplicationAdapter {
 //                theMap.put(new Vector2((x * 0xC13FA9A9 >> 8), (y * 0x91E10DA5 >> 8)), x); // sub-random point sequence
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x - 2500, y - 2500), x);
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x, y), x);  // when using old hashCode with HashMap: 7,481,873 ns
-                theMap.put(new GridPoint2(x, y), x);  // when using new hashCode with HashMap: 4,799,871 ns
+                theMap.put(new Boom(x, y), x);  // when using new hashCode with HashMap: 4,799,871 ns
 //                909940988ns for 1M with original hashCode
 //                182242216ns for 1M with R2 hashCode, roughly 5x faster due to HashMap not having to handle collisions
 //                theMap.put(new com.badlogic.gdx.math.Vector2(x - 25, y - 25), x);  // crashes out of heap with 50x50 Vector2

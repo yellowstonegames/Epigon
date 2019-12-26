@@ -284,7 +284,11 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	private void putStash (K key, V value) {
 		if (stashSize == stashCapacity) {
 			// Too many pushes occurred and the stash is full, increase the table size.
-			resize(capacity, stashCapacity << 1);
+			// this uses the least significant bit of stash capacity (whether it is even or odd) to determine if
+			// this should increase capacity and stashCapacity, or just stashCapacity. It should increase capacity
+			// on every other occasion when stashCapacity has been exhausted.
+			resize(capacity << (stashCapacity & 1), (stashCapacity << 1) ^ (1 - (stashCapacity & 1)));
+
 //			System.out.println("Too many pushes occurred and the stash is full; size is now " + size + ", capacity is now " + capacity +
 //					", hashShift is now " + hashShift + ", stashSize is now " + stashSize + ", stashCapacity is now " + stashCapacity);
 			put_internal(key, value);
