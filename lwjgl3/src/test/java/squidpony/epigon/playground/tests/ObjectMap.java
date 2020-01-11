@@ -526,38 +526,17 @@ public class ObjectMap<K, V> implements Iterable<ObjectMap.Entry<K, V>> {
 	}
 
 	private int hash1 (int h) {
-//		return (h << 21 | h >>> 11) * PRIME1 ^ h;
-//		h *= 0x9E375;
-//		return h ^ h >>> 16;
-		h ^= 0xC1C64E6D;
-		h *= PRIME1;
+		h = ( h ^ 0xC1C64E6D) * 0x17C231;
 		return h ^ h >>> 16;
-
-//		final int s = (h * PRIME1 ^ 0xC1C64E6D);
-//		h = (s ^ s >>> 17) * ((h * 0xACEDB + 0x9E3779BB) >>> 12 | 1);
-//		h = (h ^ h >>> 16) * 0xAC451;
-//		return (h ^ h >>> 15);
 	}
 
 	private int hash2 (int h) {
-		h ^= 0x9E3779B9;
-		h *= PRIME2;
+		h = (h ^ 0x9E3779B9) * 0x174DF9;
 		return (h ^ h >>> hashShift) & mask;
-//		final int s = (h * PRIME2 ^ 0xC1C64E6D);
-//		h = (s ^ s >>> 17) * ((h * 0xE629D + 0x9E3779BB) >>> 12 | 1);
-//		h = (h ^ h >>> 16) * 0xAC451;
-//		h ^= h >>> 15;
-//		return (h ^ h >>> hashShift) & mask;
 	}
 	private int hash3 (int h) {
-		h ^= 0xBBE05633;
-		h *= PRIME3;
+		h = (h ^ 0xBBE05633) * 0x19E151;
 		return (h ^ h >>> (hashShift + 1 | 1)) & mask;
-//		final int s = (h * PRIME3 ^ 0xC1C64E6D);
-//		h = (s ^ s >>> 17) * ((h * 0xB1A45 + 0x9E3779BB) >>> 12 | 1);
-//		h = (h ^ h >>> 16) * 0xAC451;
-//		h ^= h >>> 15;
-//		return (h ^ h >>> hashShift) & mask;
 	}
 
 //	private int hash2 (final int n) {
