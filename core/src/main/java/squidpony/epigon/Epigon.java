@@ -204,13 +204,13 @@ public class Epigon extends Game {
         int bigH = 26;
         int smallW = 50;
         int smallH = 22;
-        int cellW = 14;
-        int cellH = 28;
+        int cellW = 10;
+        int cellH = 20;
         int bottomH = 8;
-        mapSize = new PanelSize(51, bigH, 28, 28);
+        mapSize = new PanelSize(bigW / 2, bigH, cellH, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 7 / 5, 9, 20);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 5, 9, 20);
+        infoSize = new PanelSize(smallW, smallH * 7 / 5, 8, 16);
+        contextSize = new PanelSize(smallW, bottomH * 7 / 5, 8, 16);
         messageCount = bottomH - 2;
     }
 
@@ -274,6 +274,8 @@ public class Epigon extends Game {
         font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         TextCellFactory smallFont = font.copy();
         smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
+        font.setSmoothingMultiplier(1.5f);
+        smallFont.setSmoothingMultiplier(1.5f);
 //        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
 //        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         //smallFont.bmpFont.getData().scale(2);
