@@ -178,12 +178,9 @@ public class Epigon extends Game {
     private Instant nextInput = Instant.now();
     private long fallDuration = 0L, currentFallDuration = 0L;
 
-    // WIP stuff, needs large sample map
     private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage, fallingStage;
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport, mapOverlayViewport, fallingViewport;
-
-//    private float[] lightLevels;
-
+    
     public static final int worldWidth, worldHeight, worldDepth, totalDepth;
     public float startingY, finishY, timeToFall;
 
@@ -204,13 +201,14 @@ public class Epigon extends Game {
         int bigH = 26;
         int smallW = 50;
         int smallH = 22;
-        int cellW = 10;
-        int cellH = 20;
+        int cellW = 14;
+        int cellH = 28;
         int bottomH = 8;
         mapSize = new PanelSize(bigW / 2, bigH, cellH, cellH);
         messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 7 / 5, 8, 16);
-        contextSize = new PanelSize(smallW, bottomH * 7 / 5, 8, 16);
+        infoSize = new PanelSize(smallW, smallH * 7 / 5, 9, 20);
+        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 5, 9, 20);
+//        contextSize = new PanelSize(smallW, bottomH * 7 / 5, 8, 16);
         messageCount = bottomH - 2;
     }
 
@@ -1626,7 +1624,9 @@ public class Epigon extends Game {
                     .append(" FPS, Draw Calls: ").append(drawCalls)
                     .append(", Calls: ").append(calls)
                     .append(", Texture Binds: ").append(textureBindings)
-                    .append(", Shader Switches: ").append(switches);
+                    .append(", Shader Switches: ").append(switches)
+                    .append(", Lights: ").append(map.lighting.lights.size())
+            ;
             screenPosition.set(16, 8);
             mapViewport.unproject(screenPosition);
             messageSLayers.put(1, 1, tempSB.toString(), WHITE);

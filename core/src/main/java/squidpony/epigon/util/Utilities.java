@@ -301,7 +301,7 @@ public class Utilities {
         double angle = Coord.degrees(points.nth(0), points.nth(1));
         for (int i = 1; i < sz; i++) {
             double test = Coord.degrees(points.nth(i), points.nth((i + 1) % sz));
-            if (angle != test && (angle + 180) % 360 != test) {
+            if (Math.abs((angle % 180) - (test % 180)) > 0.001) {
                 return false;
             }
         }
