@@ -90,7 +90,7 @@ public class WobblyCanyonGenerator {
         rng = new StatefulRNG(new DiverRNG(dataStarter.rng.nextLong() ^ seed3));
         safeSpots.retract(2).randomScatter(rng, 8);
 
-        Inclusion[] inclusions = Inclusion.values();
+        Inclusion[] inclusions = Inclusion.ALL;
         Physical[] contents = new Physical[inclusions.length + 1];
         double[] weights = new double[inclusions.length + 1];
         for (int i = 0; i < inclusions.length; i++) {

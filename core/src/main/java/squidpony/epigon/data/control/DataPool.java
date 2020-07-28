@@ -4,11 +4,10 @@ import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
+import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.EnumOrderedSet;
 import squidpony.squidmath.IRNG;
 import squidpony.squidmath.OrderedMap;
-
-import java.util.EnumMap;
 
 /**
  * Holds the needed references to objects in common use.
@@ -19,8 +18,8 @@ public class DataPool {
 
     private DataStarter dataStarter;
 
-    private final EnumMap<Stone, Physical> walls = new EnumMap<>(Stone.class);
-    private final EnumMap<Stone, Physical> floors = new EnumMap<>(Stone.class);
+    private final EnumOrderedMap<Stone, Physical> walls = new EnumOrderedMap<>(Stone.class);
+    private final EnumOrderedMap<Stone, Physical> floors = new EnumOrderedMap<>(Stone.class);
     private final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
     private final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
 

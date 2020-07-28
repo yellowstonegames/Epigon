@@ -138,7 +138,7 @@ public class GeologyGenerator {
 
     private void intrudeMap() {
         Stone intruder = rng.getRandomElement(Arrays
-            .stream(Stone.values())
+            .stream(Stone.ALL)
             .filter(s -> s.intrusive)
             .collect(Collectors.toList()));
         int startX = rng.nextInt(width - 2) + 1;

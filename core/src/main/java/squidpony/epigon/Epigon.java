@@ -670,18 +670,18 @@ public class Epigon extends Game {
     private void prepCrawl() {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
-        int aboveground = 7;
+        int aboveGround = 7;
         EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth);
-        EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveground);
+        EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveGround);
         world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
-        depth = aboveground; // should be the very surface
+        depth = aboveGround+1; // higher is deeper; aboveGround is surface-level
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.lighting.fovResult);
         floors = new GreasedRegion(map.width, map.height);
 
         simple = new char[map.width][map.height];
 
-        RNG dijkstraRNG = new RNG();// random seed, player won't make deterministic choices
+        StatefulRNG dijkstraRNG = new StatefulRNG();// random seed, player won't make deterministic choices
         toPlayerDijkstra = new DijkstraMap(simple, Measurement.EUCLIDEAN, dijkstraRNG);
         monsterDijkstra = new DijkstraMap(simple, Measurement.EUCLIDEAN, dijkstraRNG); // shared RNG
         los = new LOS(LOS.BRESENHAM);
@@ -759,12 +759,14 @@ public class Epigon extends Game {
                 if(weapon == null) {
                     if (creature.weaponData != null)
                     {
+                        ((StatefulRNG)monsterDijkstra.rng).setState(creature.location.hashCode() ^ (long)player.location.hashCode() << 32);
 //                        message(creature.name + " has sight " + creature.stats.get(Stat.SIGHT).actual());
 //                        monsterDijkstra.findTechniquePath(path, (int) creature.stats.get(Stat.SIGHT).actual(), creature.weaponData.technique, simple, los, creaturePositions, null, c, ps);
                         monsterDijkstra.findAttackPath(path, 1,  creature.weaponData.technique.aoe.getMinRange(), creature.weaponData.technique.aoe.getMaxRange(), los, creaturePositions, null, c, pa);
                     }
                 }
-                else
+                else {
+                    ((StatefulRNG) monsterDijkstra.rng).setState(creature.location.hashCode() ^ (long) player.location.hashCode() << 32);
                     monsterDijkstra.findAttackPath(path, 1, weapon.technique.aoe.getMinRange(), weapon.technique.aoe.getMaxRange(), los, creaturePositions, null, c, pa);
 //                if(!path.isEmpty())
 //                {
@@ -773,6 +775,7 @@ public class Epigon extends Game {
 //                            + " has a path! " + path.toString(), Color.WHITE));
 //                    updateMessages();
 //                }
+                }
                 if(weapon == null && path.isEmpty()) // && monsterDijkstra.targetMap[c.x][c.y] == null
                 {
                     Coord next = c.translateCapped(creature.between(-1, 2), creature.between(-1, 2), map.width, map.height);
@@ -2517,6 +2520,7 @@ public class Epigon extends Game {
                     if (thing == null) {
                         if (toCursor.isEmpty()) {
                             cursor = Coord.get(screenX, screenY);
+                            ((StatefulRNG)toPlayerDijkstra.rng).setState(player.location.hashCode() ^ (long)cursor.hashCode() << 32);
                             toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
                             if (!toCursor.isEmpty()) {
                                 toCursor.remove(0); // Remove cell you're in from list
@@ -2592,6 +2596,7 @@ public class Epigon extends Game {
 
             cursor = Coord.get(screenX, screenY);
             toCursor.clear();
+            ((StatefulRNG)toPlayerDijkstra.rng).setState(player.location.hashCode() ^ (long)cursor.hashCode() << 32);
             toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
             if (!toCursor.isEmpty()) {
                 toCursor.remove(0);
