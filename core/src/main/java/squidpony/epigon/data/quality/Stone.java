@@ -192,5 +192,7 @@ public enum Stone implements Material {
     {
         return '#';
     }
+    
+    public static final Stone[] ALL = values();
 
 }

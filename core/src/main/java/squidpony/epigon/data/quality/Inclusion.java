@@ -171,5 +171,6 @@ public enum Inclusion implements Material {
     {
         return '⬡';
     }
+    public static final Inclusion[] ALL = values();
 
 }

@@ -268,7 +268,7 @@ public final class GauntRNG {
      * changed to specified degrees using a random number generator. Takes a state that will be used to generate random
      * values, where the state must be called with {@code state += 3}, as well as floats representing the amounts of
      * change that can be applied to hue, saturation, value, and opacity. Returns a float that can be used as a packed
-     * or encoded color with methods like {@link com.badlogic.gdx.graphics.g2d.Batch#setColor(float)}, or in various
+     * or encoded color with methods like {@link com.badlogic.gdx.graphics.g2d.Batch#setPackedColor(float)}, or in various
      * SquidLib classes like SparseLayers or SquidLayers. The float is likely to be different than the result of
      * {@link Color#toFloatBits()} unless hue, saturation, value, and opacity are all 0. This won't modify the given
      * Color, nor will it allocate any objects.
@@ -345,7 +345,7 @@ public final class GauntRNG {
      * changed to specified degrees using a random number generator. Takes a state that will be used to generate random
      * values, where the state must be called with {@code state += 4}, as well as floats representing the amounts of
      * change that can be applied to hue, saturation, value, and opacity. Returns a float that can be used as a packed
-     * or encoded color with methods like {@link com.badlogic.gdx.graphics.g2d.Batch#setColor(float)}, or in various
+     * or encoded color with methods like {@link com.badlogic.gdx.graphics.g2d.Batch#setPackedColor(float)}, or in various
      * SquidLib classes like SparseLayers or SquidLayers. The float is likely to be different than the result of
      * {@link Color#toFloatBits()} unless hue, saturation, value, and opacity are all 0. This won't modify the given
      * Color, nor will it allocate any objects.

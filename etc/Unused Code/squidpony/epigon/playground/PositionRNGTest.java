@@ -1,7 +1,6 @@
 package squidpony.epigon.playground;
 
 import squidpony.StringKit;
-import squidpony.epigon.PositionRNG;
 
 /**
  * Created by Tommy Ettinger on 3/26/2018.

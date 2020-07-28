@@ -5,7 +5,7 @@ package squidpony.epigon.util;
  */
 public class Bounds {
 
-    int width, height, depth;
+    public final int width, height, depth;
 
     public Bounds(int width, int height, int depth) {
         this.width = width;

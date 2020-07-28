@@ -5,7 +5,7 @@ import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
-import squidpony.epigon.data.quality.Inclusion;
+import squidpony.epigon.data.quality.Wood;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.StatefulRNG;
@@ -61,7 +61,7 @@ public class MapDecorator {
                 adding = tile.floor;
             }
         } else {
-            adding = RecipeMixer.buildPhysical(Inclusion.DIAMOND); // TODO - replace with base of whatever is appropriate
+            adding = RecipeMixer.buildMaterial(Wood.OAK); // TODO - replace with base of whatever is appropriate
         }
         if (up) {
             tile.contents.addAll(RecipeMixer.mix(dataStarter.upStairRecipe, Maker.makeList(adding), new ArrayList<>(0)));

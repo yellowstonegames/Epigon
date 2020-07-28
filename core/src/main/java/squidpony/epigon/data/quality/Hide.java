@@ -85,5 +85,7 @@ public enum Hide implements Material {
     {
         return 'ᴥ';
     }
+    
+    public static final Hide[] ALL = values();
 
 }

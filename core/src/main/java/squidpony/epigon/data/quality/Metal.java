@@ -89,4 +89,5 @@ public enum Metal implements Material {
         return '⊕';
     }
 
+    public static final Metal[] ALL = values();
 }

@@ -36,7 +36,7 @@ public class Kickball {
         testWorldBuild();
     }
 
-    private class TimeTracker implements Comparable<TimeTracker> {
+    private static class TimeTracker implements Comparable<TimeTracker> {
 
         long time;
         int width, height, depth;

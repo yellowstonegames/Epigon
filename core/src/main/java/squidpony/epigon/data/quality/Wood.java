@@ -86,4 +86,6 @@ public enum Wood implements Material {
         return '=';
     }
 
+    public static final Wood[] ALL = values();
+
 }

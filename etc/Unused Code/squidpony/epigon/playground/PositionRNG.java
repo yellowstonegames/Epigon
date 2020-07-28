@@ -1,4 +1,4 @@
-package squidpony.epigon;
+package squidpony.epigon.playground;
 
 /**
  * Created by Tommy Ettinger on 12/25/2017.

@@ -84,4 +84,5 @@ public enum Paper implements Material {
         return '⌷';
     }
 
+    public static final Paper[] ALL = values();
 }

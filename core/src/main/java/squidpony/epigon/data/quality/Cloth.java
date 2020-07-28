@@ -84,4 +84,6 @@ public enum Cloth implements Material {
     {
         return 'ᴥ';
     }
+
+    public static final Cloth[] ALL = values();
 }
