@@ -16,22 +16,23 @@ public class DataPool {
 
     private static DataPool instance;
 
-    private DataStarter dataStarter;
+    public final DataStarter dataStarter;
 
     private final EnumOrderedMap<Stone, Physical> walls = new EnumOrderedMap<>(Stone.class);
     private final EnumOrderedMap<Stone, Physical> floors = new EnumOrderedMap<>(Stone.class);
     private final OrderedMap<Character, EnumOrderedSet<Vegetable>> vegetablesByTerrain = new OrderedMap<>(8);
     private final OrderedMap<Character, EnumOrderedSet<Tree>> treesByTerrain = new OrderedMap<>(8);
 
+    private DataPool(){
+        dataStarter = new DataStarter();
+        initPlants();
+    }
     public static DataPool instance() {
         if (instance != null) {
             return instance;
         }
 
         instance = new DataPool();
-        instance.dataStarter = new DataStarter();
-        instance.initPlants();
-
         return instance;
     }
 

@@ -66,6 +66,12 @@ public class Kickball {
         MapDecorator mapDecorator = new MapDecorator(hand);
         LocalAreaGenerator gen = new LocalAreaGenerator(mapDecorator);
 
+//// things that could be defined instead of +1 and -1 that are valid Java identifiers
+//        final float ꜛ = 1f, ꜜ = -1f;
+//        final float ⴷ = 1f, ⴸ = -1f;
+//        final float ᗑ = 1f, ᗐ = -1f;
+        
+        
         int hStep = 4;
         int zStep = 3;
         int width = 21;

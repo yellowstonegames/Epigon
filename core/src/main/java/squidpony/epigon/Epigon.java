@@ -24,6 +24,7 @@ import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
+import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Element;
@@ -96,7 +97,7 @@ public class Epigon extends Game {
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
-    private DataStarter handBuilt;
+    private DataStarter dataStarter;
     private MapDecorator mapDecorator;
 //    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
@@ -535,8 +536,8 @@ public class Epigon extends Game {
         mapHoverSLayers.clear();
         mapHoverSLayers.glyphs.clear();
         mapHoverSLayers.clearActions(); //  not sure if needed
-        handBuilt = new DataStarter(mixer);
-        mapDecorator = new MapDecorator(handBuilt);
+        dataStarter = DataPool.instance().dataStarter;
+        mapDecorator = new MapDecorator(dataStarter);
 
         mapSLayers.addLayer();//first added layer adds at level 1, used for cases when we need "extra background"
         mapSLayers.addLayer();//next adds at level 2, used for the cursor line
@@ -564,7 +565,7 @@ public class Epigon extends Game {
     }
 
     private void initPlayer() {
-        player = RecipeMixer.buildPhysical(handBuilt.playerBlueprint);
+        player = RecipeMixer.buildPhysical(dataStarter.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(42.0);
         player.stats.get(Stat.NUTRITION).delta(-0.1);
         player.stats.get(Stat.NUTRITION).min(0);
@@ -644,7 +645,7 @@ public class Epigon extends Game {
                         ]);
                 p.color = Utilities.progressiveLighten(p.color);
                 Physical pMeat = RecipeMixer.buildPhysical(p);
-                RecipeMixer.applyModification(pMeat, handBuilt.makeMeats());
+                RecipeMixer.applyModification(pMeat, dataStarter.makeMeats());
                 Physical[] held = new Physical[p.creatureData.equippedDistinct.size() + 1];
                 p.creatureData.equippedDistinct.toArray(held);
                 held[held.length - 1] = pMeat;
@@ -1847,8 +1848,8 @@ public class Epigon extends Game {
                             continue;
                         }
                         EpiTile tile = map.contents[c.x][c.y];
-                        if (tile.blockage != null && tile.blockage.countsAs(handBuilt.baseClosedDoor)){
-                                RecipeMixer.applyModification(tile.blockage, handBuilt.openDoor);
+                        if (tile.blockage != null && tile.blockage.countsAs(dataStarter.baseClosedDoor)){
+                                RecipeMixer.applyModification(tile.blockage, dataStarter.openDoor);
                                 tile.contents.add(tile.blockage);
                                 tile.blockage = null;
                         }
@@ -1868,12 +1869,12 @@ public class Epigon extends Game {
                         }
                         EpiTile tile = map.contents[c.x][c.y];
                         for (Physical p : tile.contents) {
-                            if (p.countsAs(handBuilt.baseOpenDoor)) {
+                            if (p.countsAs(dataStarter.baseOpenDoor)) {
                                 if (tile.blockage != null) {
                                     message("Can't shut the door to the " + d.toString() + " there's a " + tile.blockage.name + " in the way!");
                                     continue;
                                 }
-                                RecipeMixer.applyModification(p, handBuilt.closeDoor);
+                                RecipeMixer.applyModification(p, dataStarter.closeDoor);
                                 tile.remove(p);
                                 tile.blockage = p;
                             }
