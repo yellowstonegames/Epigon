@@ -37,10 +37,11 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     private static int uniqueIntGen = Epigon.rootChaos.nextInt();
     
     public final void setState(final int s) {
-        // 33,554,432 possible seeds should be enough for Epigon.
-        // some may be in shorter cycles, but none may have periods of less than 1048576.
-        state = (s & 0x1FFFFFF) + 1L;
-        state = (state << 29 | state >>> 35) * 0xAC564B05L;
+//        // 33,554,432 possible seeds should be enough for Epigon.
+//        // some may be in shorter cycles, but none may have periods of less than 1048576.
+//        state = (s & 0x1FFFFFF) + 1L;
+//        state = (state << 29 | state >>> 35) * 0xAC564B05L;
+        state = DiverRNG.randomize(s);
     }
     
     public EpiData() {
@@ -77,10 +78,18 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     @Override
     public final int nextInt()
     {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return (int)(x ^ x >>> 27);
+
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return (int)(z ^ z >>> 22);
-        return (int)((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
+
+//        return (int)((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
 
 //        final long a = stateA * 0x41C64E6BL;
 //        return (int)((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)));
@@ -88,12 +97,20 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     @Override
     public final int next(final int bits)
     {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return (int)((x ^ x >>> 27) >>> -bits);
+
 //        final long a = stateA * 0x41C64E6BL;
 //        return (int)((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) >>> (32 - bits);
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return (int)(z ^ z >>> 22) >>> (32 - bits);
-        return (int)((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) >>> (32 - bits);
+
+//        return (int)((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) >>> (32 - bits);
     }
 
 //    /**
@@ -132,6 +149,13 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
      */
     @Override
     public final long nextLong() {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return x ^ x >>> 27;
+
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
 //        z = (z ^ z >>> 27) * 0xAEF17502108EF2D9L;
 //        return (z ^ z >>> 25);
@@ -139,7 +163,9 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return (z ^ z >>> 22);
         // return (state = (state << 21 | state >>> 43) * 0x9E3779B9L) * 0x41C64E6DL;
-        return ((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
+        
+//        return ((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
+        
 //        final long a = stateA * 0x41C64E6BL;
 //        return (stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36));
     }
@@ -150,10 +176,18 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
      */
     @Override
     public final boolean nextBoolean() {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return x < 0;
+
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return z < 0L;
-        return ((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) < 0L;
+        
+//        return ((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) < 0L;
 
 //        final long a = stateA * 0x41C64E6BL;
 //        return ((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) < 0L;
@@ -168,10 +202,18 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
      */
     @Override
     public final double nextDouble() {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return ((x ^ x >>> 27) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return ((z ^ z >>> 22) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
-        return (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
+
+//        return (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) & 0x1FFFFFFFFFFFFFL) * 0x1p-53;
 
 //        final long a = stateA * 0x41C64E6BL;
 //        return (((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36))) 
@@ -191,10 +233,18 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
      */
     @Override
     public final float nextFloat() {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return ((x ^ x >>> 27) & 0xFFFFFFL) * 0x1p-24f;
+
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return ((z ^ z >>> 22) & 0xFFFFFFL) * 0x1p-24f;
-        return (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) & 0xFFFFFFL) * 0x1p-24f;
+
+//        return (((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L) & 0xFFFFFFL) * 0x1p-24f;
 
 //        final long a = stateA * 0x41C64E6BL;
 //        return (((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)))
@@ -205,10 +255,19 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     
     public final double nextCurvedDouble()
     {
+        long x = (state += 0x6C8E9CF570932BD5L) ^ idHash;
+        x ^= x >>> 27;
+        x *= 0x3C79AC492BA7B653L;
+        x ^= x >>> 33;
+        x *= 0x1C69B3F74AC4AE35L;
+        return NumberTools.formCurvedDouble(x ^ x >>> 27);
+
 //        final long s = (state += 0x6C8E9CF570932BD5L);
 //        final long z = (s ^ s >>> 25) * (s | 0xA529L);
 //        return NumberTools.formCurvedDouble(z ^ z >>> 22);
-        return NumberTools.formCurvedDouble((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
+
+//        return NumberTools.formCurvedDouble((state = (state << 29 | state >>> 35) * 0xAC564B05L) * 0x818102004182A025L);
+        
 //        final long a = stateA * 0x41C64E6BL;
 //        return NumberTools.formCurvedDouble((stateB = 0xC6BC279692B5CC8BL - (stateB << 35 | stateB >>> 29)) ^ (stateA = (a << 28 | a >>> 36)));
 //        long z = (chaos = chaos * 0x41C64E6DL + 1L);
@@ -217,12 +276,12 @@ public abstract class EpiData extends AbstractRNG implements Serializable, State
     }
     
     /**
-     * This can't copy itself because EpiData is abstract, so it returns a StatefulRNG using a new ThrustAltRNG as its
+     * This can't copy itself because EpiData is abstract, so it returns a StatefulRNG using a new DiverRNG as its
      * RandomnessSource, seeded with this EpiData's state. This makes it stay an IRNG, but not an EpiData.
      */
     @Override
     public StatefulRNG copy() {
-        return new StatefulRNG(new ThrustAltRNG(state));
+        return new StatefulRNG(new DiverRNG(idHash ^ state));
     }
 
     /**

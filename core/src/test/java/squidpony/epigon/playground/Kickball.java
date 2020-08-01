@@ -70,8 +70,7 @@ public class Kickball {
 //        final float ꜛ = 1f, ꜜ = -1f;
 //        final float ⴷ = 1f, ⴸ = -1f;
 //        final float ᗑ = 1f, ᗐ = -1f;
-        
-        
+
         int hStep = 4;
         int zStep = 3;
         int width = 21;
