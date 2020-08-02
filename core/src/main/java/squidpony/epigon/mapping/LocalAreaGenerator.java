@@ -2,19 +2,18 @@ package squidpony.epigon.mapping;
 
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.control.DataPool;
+import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Stone;
 import squidpony.epigon.data.quality.Tree;
 import squidpony.epigon.data.quality.Vegetable;
-import squidpony.epigon.data.control.DataStarter;
-
 import squidpony.squidgrid.Direction;
-import squidpony.squidgrid.mapping.DenseRoomMapGenerator;
-import squidpony.squidgrid.mapping.DungeonGenerator;
-import squidpony.squidgrid.mapping.FlowingCaveGenerator;
-import squidpony.squidgrid.mapping.SerpentMapGenerator;
+import squidpony.squidgrid.mapping.*;
 import squidpony.squidgrid.mapping.styled.TilesetType;
-import squidpony.squidmath.*;
+import squidpony.squidmath.Coord;
+import squidpony.squidmath.FastNoise;
+import squidpony.squidmath.GreasedRegion;
+import squidpony.squidmath.StatefulRNG;
 
 /**
  * Creates a localized area in the world.
@@ -45,24 +44,31 @@ public class LocalAreaGenerator {
 
         for (int e = 0; e < depth; e++) {
             EpiMap eMap = world[e];
-            DungeonGenerator gen = new DungeonGenerator(width, height, rng);
+            SectionDungeonGenerator gen = new SectionDungeonGenerator(width, height, rng);
             // create vertical "zones" for types of generation
             if (e < 2) {
-                DenseRoomMapGenerator dense = new DenseRoomMapGenerator(width, height, rng);
-                gen.addDoors(80, true);
-                gen.generate(dense.generate());
+//                DenseRoomMapGenerator dense = new DenseRoomMapGenerator(width, height, rng);
+                gen.addDoors(40, true);
+                gen.addGrass(-1, 5);
+                gen.addWater(-1, 7);
+                gen.generate(TilesetType.DEFAULT_DUNGEON);
             } else if (e < 4) {
                 FlowingCaveGenerator flowing = new FlowingCaveGenerator(width, height, TilesetType.DEFAULT_DUNGEON, rng);
-                gen.addBoulders(8);
-                gen.addWater(14, 4);
-                gen.addGrass(17);
-                gen.generate(flowing.generate());
+                gen.addBoulders(DungeonUtility.CAVE_FLOOR, 8);
+                gen.addWater(DungeonUtility.CAVE_FLOOR, 14, 4);
+                gen.addGrass(DungeonUtility.CAVE_FLOOR, 23);
+                gen.generate(flowing.generate(), flowing.environment);
             } else {
                 SerpentMapGenerator serpent = new SerpentMapGenerator(width, height, rng, 0.2);
                 serpent.putWalledBoxRoomCarvers(4);
                 serpent.putWalledRoundRoomCarvers(2);
                 serpent.putCaveCarvers(1);
-                gen.generate(serpent.generate());
+                gen.addLake(20);
+                gen.addWater(DungeonUtility.CAVE_FLOOR, 25, 5);
+                gen.addGrass(DungeonUtility.ROOM_FLOOR, 10);
+                gen.addGrass(DungeonUtility.CORRIDOR_FLOOR, 15);
+                gen.addDoors(10, false);
+                gen.generate(serpent.generate(), serpent.getEnvironment());
             }
 
             char[][] dungeonChars = gen.getDungeon();
