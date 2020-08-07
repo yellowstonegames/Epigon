@@ -147,13 +147,13 @@ public class Epigon extends Game {
     // World
     private LocalAreaGenerator worldGenerator;
     private CastleGenerator castleGenerator;
-    private EpiMap[] world;
-    private EpiMap map;
-    private char[][] simple;
-    private char[][] lineDungeon, prunedDungeon;
-    private float[][] wallColors, walls;
+    public EpiMap[] world;
+    public EpiMap map;
+    public char[][] simple;
+    public char[][] lineDungeon, prunedDungeon;
+    public float[][] wallColors, walls;
     
-    private int depth;
+    public int depth;
     private FxHandler fxHandler;
     private MapOverlayHandler mapOverlayHandler;
     private ContextHandler contextHandler;
@@ -699,11 +699,11 @@ public class Epigon extends Game {
         mapInput.setMouse(mapMouse);
     }
 
-    private void changeLevel(int level){
+    public void changeLevel(int level){
         changeLevel(level, null);
     }
 
-    private void changeLevel(int level, Coord location) {
+    public void changeLevel(int level, Coord location) {
         map.contents[player.location.x][player.location.y].remove(player);
 
         depth = level;
@@ -996,18 +996,18 @@ public class Epigon extends Game {
     /**
      * @param amount negative to scroll to previous messages, positive for later messages
      */
-    private void scrollMessages(int amount) {
+    public void scrollMessages(int amount) {
         messageIndex = MathUtils.clamp(messageIndex + amount, messageCount, messages.size() - 1);
         updateMessages();
     }
 
-    private void message(String text) {
+    public void message(String text) {
         messageIndex = Math.max(messages.size(), messageCount);
         messages.add(GDXMarkup.instance.colorString("[WHITE]" + text));
         updateMessages();
     }
     
-    private void calcFOV(int checkX, int checkY) {
+    public void calcFOV(int checkX, int checkY) {
         //map.lighting.viewerRange = player.stats.get(Stat.SIGHT).actual();
         // this is really important; it sets the resistances of the map's lighting
         map.opacities();
@@ -1065,35 +1065,22 @@ public class Epigon extends Game {
                     //}
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
                         if (creature.appearance == null) {
-//                            message("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
-//                            System.out.println("calcFOV: recreating appearance of " + creature + " " + ((EpiData)creature).hashCode());
                             creature.appearance = mapSLayers.glyph(creature.symbol, creature.color, x, y);
-                        } /*else if (!mapSLayers.glyphs.contains(creature.appearance)) {
-                            mapSLayers.glyphs.add(creature.appearance);
-                            if (creature.overlayAppearance != null) {
-                                mapSLayers.glyphs.add(creature.overlayAppearance);
-                            }
-                        }*/
-                        
+                        }
                         creature.appearance.setVisible(true);
                     }
                 } else if ((creature = creatures.get(Coord.get(x, y))) != null && creature.appearance != null 
                         && creature.appearance.isVisible()) {
                     creature.appearance.setVisible(false);
-                    //mapSLayers.removeGlyph(creature.appearance);
                     if (creature.overlayAppearance != null) {
-                        //mapSLayers.removeGlyph(creature.overlayAppearance);
                         creature.overlayAppearance.setVisible(false);
                     }
-//                    message("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
-//                    System.out.println("calcFOV: null-ing appearance of " + creature + " " + ((EpiData)creature).hashCode());
-                    //creature.appearance = null;
                 }
             }
         }
     }
 
-    private void calcDijkstra() {
+    public void calcDijkstra() {
         toPlayerDijkstra.clearGoals();
         toPlayerDijkstra.resetMap();
         monsterDijkstra.clearGoals();
@@ -1107,7 +1094,7 @@ public class Epigon extends Game {
     /**
      * Attempts to equip a random weapon from the player's inventory
      */
-    private void equipItem() {
+    public void equipItem() {
         if (player.inventory.isEmpty()) {
             message("Nothing equippable found.");
         } else {
@@ -1122,7 +1109,7 @@ public class Epigon extends Game {
         }
     }
 
-    private void equipItem(Physical item) {
+    public void equipItem(Physical item) {
         player.equipItem(item);
         if (item.weaponData != null && item.radiance != null) { // TODO mix light sources from player held items
 //            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
@@ -1257,11 +1244,11 @@ public class Epigon extends Game {
         }
     }
 
-    private void attack(Physical target) {
+    public void attack(Physical target) {
         attack(target, chooseValidWeapon(player, target));
     }
 
-    private void attack(Physical target, Weapon choice) {
+    public void attack(Physical target, Weapon choice) {
         int targetX = target.location.x, targetY = target.location.y;
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
         Element element = ao.element;
@@ -1361,7 +1348,7 @@ public class Epigon extends Game {
     /**
      * Move the player if he isn't bumping into a wall or trying to go off the map somehow.
      */
-    private void move(Direction dir) {
+    public void move(Direction dir) {
         player.update();
         if (player.overlayAppearance != null && player.overlaySymbol == '\uffff') {
             mapSLayers.removeGlyph(player.overlayAppearance);
@@ -1402,14 +1389,14 @@ public class Epigon extends Game {
             ){
                 cancelMove();
                 thing.location = newPos; // total hack; needed by door-opening interaction
-                message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, map),
+                message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, this),
                         player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
                 cancelMove();
                 if(thing.interactableData != null && !thing.interactableData.isEmpty() && thing.interactableData.get(0).bumpAction) {
                     thing.location = newPos; // total hack; needed by door-opening interaction
-                    message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, map),
+                    message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, this),
                             player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 }
                 else 
@@ -2105,7 +2092,7 @@ public class Epigon extends Game {
                             if (interaction.consumes) {
                                 player.removeFromInventory(selected);
                             }
-                            message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                            message(Messaging.transform(interaction.interaction.interact(player, selected, Epigon.this),
                                     player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                             showingMenu = false;
                             menuLocation = null;
@@ -2420,7 +2407,7 @@ public class Epigon extends Game {
                     if (interaction.consumes) {
                         player.removeFromInventory(selected);
                     }
-                    message(Messaging.transform(interaction.interaction.interact(player, selected, map),
+                    message(Messaging.transform(interaction.interaction.interact(player, selected, Epigon.this),
                             player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 }
                 showingMenu = false;

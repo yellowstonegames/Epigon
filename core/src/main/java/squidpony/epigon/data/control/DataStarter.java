@@ -1,7 +1,6 @@
 package squidpony.epigon.data.control;
 
 import com.badlogic.gdx.graphics.Color;
-
 import squidpony.Maker;
 import squidpony.epigon.ConstantKey;
 import squidpony.epigon.Epigon;
@@ -141,18 +140,22 @@ public class DataStarter {
 
 
         baseOpenDoor.interactableData = Maker.makeList(new Interactable("close door", false, false,
-                (actor, target, level) -> {
+                (actor, target, main) -> {
                     RecipeMixer.applyModification(target, closeDoor);
-                    level.contents[target.location.x][target.location.y].remove(target);
-                    level.contents[target.location.x][target.location.y].blockage = target;
+                    main.map.contents[target.location.x][target.location.y].remove(target);
+                    main.map.contents[target.location.x][target.location.y].blockage = target;
+                    main.calcFOV(actor.location.x, actor.location.y);
+                    main.calcDijkstra();
                     return "@Name close$ the door.";
                 }));
 
         baseClosedDoor.interactableData = Maker.makeList(new Interactable("open door", false, true,
-                (actor, target, level) -> {
+                (actor, target, main) -> {
                     RecipeMixer.applyModification(target, openDoor);
-                    level.contents[target.location.x][target.location.y].add(target);
-                    level.contents[target.location.x][target.location.y].blockage = null;
+                    main.map.contents[target.location.x][target.location.y].add(target);
+                    main.map.contents[target.location.x][target.location.y].blockage = null;
+                    main.calcFOV(actor.location.x, actor.location.y);
+                    main.calcDijkstra();
                     return "@Name open$ the door.";
                 }));
 
