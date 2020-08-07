@@ -139,6 +139,23 @@ public class DataStarter {
         baseOpenDoor = Physical.makeBasic("base open door", '/', Color.CLEAR);
         baseClosedDoor = Physical.makeBasic("base closed door", '+', Color.CLEAR);
 
+
+        baseOpenDoor.interactableData = Maker.makeList(new Interactable("close door", false, false,
+                (actor, target, level) -> {
+                    RecipeMixer.applyModification(target, closeDoor);
+                    level.contents[target.location.x][target.location.y].remove(target);
+                    level.contents[target.location.x][target.location.y].blockage = target;
+                    return "@Name close$ the door.";
+                }));
+
+        baseClosedDoor.interactableData = Maker.makeList(new Interactable("open door", false, true,
+                (actor, target, level) -> {
+                    RecipeMixer.applyModification(target, openDoor);
+                    level.contents[target.location.x][target.location.y].add(target);
+                    level.contents[target.location.x][target.location.y].blockage = null;
+                    return "@Name open$ the door.";
+                }));
+
         nan = Physical.makeBasic("nan", 'ᶯ', SColor.DB_PLATINUM);
         nan.description = "currency of power";
 
@@ -392,6 +409,7 @@ public class DataStarter {
         openDoor.countsAsGained = Maker.makeUOS(baseOpenDoor);
         openDoor.symbol = '/';
         openDoor.large = false;
+        openDoor.interactable = baseOpenDoor.interactableData;
         openDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(0.0));
 
         closeDoor = new Modification();
@@ -399,6 +417,7 @@ public class DataStarter {
         closeDoor.countsAsGained = Maker.makeUOS(baseClosedDoor);
         closeDoor.symbol = '+';
         closeDoor.large = true;
+        closeDoor.interactable = baseClosedDoor.interactableData;
         closeDoor.statChanges.put(Stat.OPACITY, new LiveValueModification(1.0));
 
         doorBlueprint = new Physical();

@@ -26,7 +26,7 @@ public enum WieldSlot implements BodySlot {
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int)(hash);
     }
 
     @Override

@@ -53,7 +53,7 @@ public enum Wood implements Material {
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int)(hash);
     }
 
     @Override

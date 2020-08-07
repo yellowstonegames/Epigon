@@ -1395,9 +1395,23 @@ public class Epigon extends Game {
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
+            } else if(!map.contents[newX][newY].contents.isEmpty()
+                    && (thing = map.contents[newX][newY].contents.get(0)).interactableData != null
+                    && !thing.interactableData.isEmpty()
+                    && thing.interactableData.get(0).bumpAction
+            ){
+                cancelMove();
+                thing.location = newPos;
+                message(thing.interactableData.get(0).interaction.interact(player, thing, map));
+                runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
                 cancelMove();
-                message("Ran into " + thing.name);
+                if(thing.interactableData != null && !thing.interactableData.isEmpty() && thing.interactableData.get(0).bumpAction) {
+                    thing.location = newPos;
+                    message(thing.interactableData.get(0).interaction.interact(player, thing, map));
+                }
+                else 
+                    message("Ran into " + thing.name);
                 runTurn();
             } else {
                 runTurn();

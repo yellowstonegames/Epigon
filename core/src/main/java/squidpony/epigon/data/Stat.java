@@ -119,7 +119,7 @@ public enum Stat implements ConstantKey {
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int)(hash);
     }
     
     public String nick(){

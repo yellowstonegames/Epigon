@@ -51,7 +51,7 @@ public enum Hide implements Material {
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int)(hash);
     }
 
 

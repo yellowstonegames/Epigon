@@ -79,7 +79,7 @@ public enum Skill implements ConstantKey {
     }
     @Override
     public int hash32() {
-        return (int)(hash & 0xFFFFFFFFL);
+        return (int)(hash);
     }
     
     @Override
