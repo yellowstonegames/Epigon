@@ -1003,7 +1003,7 @@ public class Epigon extends Game {
 
     private void message(String text) {
         messageIndex = Math.max(messages.size(), messageCount);
-        messages.add(GDXMarkup.instance.colorString("[]" + text));
+        messages.add(GDXMarkup.instance.colorString("[WHITE]" + text));
         updateMessages();
     }
     
@@ -1401,14 +1401,16 @@ public class Epigon extends Game {
                     && thing.interactableData.get(0).bumpAction
             ){
                 cancelMove();
-                thing.location = newPos;
-                message(thing.interactableData.get(0).interaction.interact(player, thing, map));
+                thing.location = newPos; // total hack; needed by door-opening interaction
+                message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, map),
+                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
                 cancelMove();
                 if(thing.interactableData != null && !thing.interactableData.isEmpty() && thing.interactableData.get(0).bumpAction) {
-                    thing.location = newPos;
-                    message(thing.interactableData.get(0).interaction.interact(player, thing, map));
+                    thing.location = newPos; // total hack; needed by door-opening interaction
+                    message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, map),
+                            player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 }
                 else 
                     message("Ran into " + thing.name);
