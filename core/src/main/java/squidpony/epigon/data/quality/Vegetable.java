@@ -147,7 +147,14 @@ public enum Vegetable implements Material {
         actor.applyCondition(new Condition(ConditionBlueprint.CONDITIONS.get("Electrify"), actor));
         actor.stats.get(CalcStat.EVASION).addActual(1.0);
         return "@Name @am shocked by the unexpectedly-electric cherries!";
-    }));
+    })),
+    SALTBLOSSOM('∗', SColor.CW_ALMOST_WHITE, "a thin, pale shrub with large cubical blossoms surrounding a white jelly",
+            1, 1, -1,
+            new Interactable("eat", true, false, (actor, target, level) ->
+            {
+                actor.stats.get(Stat.NUTRITION).addActual(5);
+                actor.stats.get(Stat.HYDRATION).addActual(-5);
+                return "@Name slurp$ gel from the blossom, but it's so salty that you feel more thirsty.";}));
     
     private final Color color;
     private final char symbol;

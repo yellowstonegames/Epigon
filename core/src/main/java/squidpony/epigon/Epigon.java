@@ -1212,7 +1212,7 @@ public class Epigon extends Game {
         mapOverlaySLayers.clear(2);
         int sz = interactable.interactableData.size(), len = 0;
         for (int i = 0; i < sz; i++) {
-            len = Math.max(interactable.interactableData.get(i).phrasing.length(), len);
+            len = Math.max(interactable.interactableData.get(i).verb.length(), len);
         }
         len += 2;
         int startY = MathUtils.clamp(target.y - (sz >> 1), 0, map.height - sz - 1),
@@ -1225,7 +1225,7 @@ public class Epigon extends Game {
         int sub = mapOverlayHandler.getSubselection() == null ? -1 : mapOverlayHandler.getSubselection().y;
         if (target.x + len + 1 < map.width) {
             for (int i = 0; i < sz; i++) {
-                String name = interactable.interactableData.get(i).phrasing;
+                String name = interactable.interactableData.get(i).verb;
                 for (int j = 0; j < len; j++) {
                     mapOverlaySLayers.put(startX + j, startY + i, '\0', i == sub ? highlight : smoke, 0f, 1);
                 }
@@ -1236,7 +1236,7 @@ public class Epigon extends Game {
         } else {
             startX = target.x - len + 2;
             for (int i = 0; i < sz; i++) {
-                String name = interactable.interactableData.get(i).phrasing;
+                String name = interactable.interactableData.get(i).verb;
                 for (int j = 0; j < len; j++) {
                     mapOverlaySLayers.put(startX + j, startY + i, '\0', i == sub ? highlight : smoke, 0f, 1);
                 }
@@ -1253,7 +1253,7 @@ public class Epigon extends Game {
         if(interactable.interactableData == null || interactable.interactableData.isEmpty())
             return;
         for (Interactable inter : interactable.interactableData) {
-            interactionOptions.put(inter.phrasing, inter);
+            interactionOptions.put(inter.verb, inter);
         }
     }
 

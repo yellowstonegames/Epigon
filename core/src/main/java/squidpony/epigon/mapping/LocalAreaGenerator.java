@@ -93,8 +93,8 @@ public class LocalAreaGenerator {
                             break;
                         case '~': // TODO - distinguish deep water
                         case ',':
-                            decorator.placeLava(tile);
-//                            decorator.placeWater(tile);
+//                            decorator.placeLava(tile);
+                            decorator.placeWater(tile);
                             break;
                         case '&': // should never occur naturally
                             break;

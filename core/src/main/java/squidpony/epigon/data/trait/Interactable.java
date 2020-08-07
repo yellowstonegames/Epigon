@@ -7,17 +7,30 @@ package squidpony.epigon.data.trait;
  * An interaction can cause permanent or temporary changes, both to itself and to surrounding things.
  */
 public class Interactable {
-    public String phrasing; // What to show the player when the interaction happens.
-    public boolean consumes; // Whether this interaction uses up its Physical target
-    public boolean bumpAction; // When true this action is what happens when a player bumps into it as default.
+    /**
+     * The word or words for this kind of interaction, like "eat" or "apply directly to the forehead".
+     */
+    public String verb;
+    /**
+     * Whether this interaction uses up its Physical target.
+     */
+    public boolean consumes;
+    /**
+     * When true this action is what happens when a player bumps into it as default.
+     */
+    public boolean bumpAction;
+    /**
+     * Should probably be a lambda! A simple default is:
+     * {@code (actor, target, level) -> "Nothing happens."}
+     */
     public Interaction interaction;
     public Interactable()
     {
-        this("interact with", true, false, ((actor, target, level) -> "Nothing happens."));
+        this("interact with", false, false, (actor, target, level) -> "Nothing happens.");
     }
-    public Interactable(String phrasing, boolean consumes, boolean bump, Interaction interaction)
+    public Interactable(String verb, boolean consumes, boolean bump, Interaction interaction)
     {
-        this.phrasing = phrasing;
+        this.verb = verb;
         this.consumes = consumes;
         bumpAction = bump;
         this.interaction = interaction;
