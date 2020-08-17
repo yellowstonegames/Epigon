@@ -33,13 +33,13 @@ public class WobblyCanyonGenerator {
 
     public EpiMap buildDive(EpiMap[] world, int width, int depth) {
         this.width = width;
-        this.height = depth + MapConstants.DIVE_HEADER.length;
+        this.height = depth;
         this.depth = 1;
         EpiMap map = new EpiMap(width, height);
         GreasedRegion safeSpots = new GreasedRegion(width, height);
         for (int x = 0; x < width; x++) {
-            for (int y = 0; y < depth; y++) {
-                map.contents[x][y + MapConstants.DIVE_HEADER.length] = world[y].contents[x][0];
+            for (int y = MapConstants.DIVE_HEADER.length, y0 = 0; y < depth; y++, y0++) {
+                map.contents[x][y] = world[y0].contents[x][0];
             }
         }
 

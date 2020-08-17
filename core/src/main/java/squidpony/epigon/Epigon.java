@@ -197,7 +197,7 @@ public class Epigon extends Game {
         worldWidth = 80;
         worldHeight = 80;
         worldDepth = 10;
-        totalDepth = worldDepth + MapConstants.DIVE_HEADER.length;
+        totalDepth = 40 + MapConstants.DIVE_HEADER.length;
         int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
         int bigH = 26;
         int smallW = 50;
@@ -236,7 +236,7 @@ public class Epigon extends Game {
         //grayscale = new FloatFilters.YCbCrFilter(0.75f, 0f, 0f); // an option to fully grayscale/darken
         System.out.println(rootChaos.getState());
 
-        Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, worldDepth + MapConstants.DIVE_HEADER.length) + 1);
+        Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, totalDepth + MapConstants.DIVE_HEADER.length) + 1);
 
         // this matches the background color outside the map to the background color of unseen areas inside the map,
         // using the same filter (reducing brightness and saturation using YCwCm) as that stage of the map draw.
@@ -583,7 +583,7 @@ public class Epigon extends Game {
         message("Falling..... Press SPACE to continue");
         int w = MapConstants.DIVE_HEADER[0].length();
         WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
-        map = wcg.buildDive(worldGenerator.buildWorld(w, 1, worldDepth), w, worldDepth);
+        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, totalDepth), w, totalDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
