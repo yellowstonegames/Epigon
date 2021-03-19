@@ -145,7 +145,9 @@ public class FxHandler {
             FastNoise.instance.setSeed(System.identityHashCode(this));
             f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) * 0.125f + percent;
             idx = (int) (f * colors.length);
-            if (idx >= colors.length - 1) {
+            if (idx < 0) {
+                color = SColor.lerpFloatColors(colors[0], NumberTools.setSelectedByte(colors[0], 3, (byte) 0), (Math.min(0.99f, -f) * colors.length) % 1f);
+            } else if (idx >= colors.length - 1) {
                 color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
             } else {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);

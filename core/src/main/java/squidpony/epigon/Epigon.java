@@ -194,8 +194,8 @@ public class Epigon extends Game {
 
     // Set up sizing all in one place
     static {
-        worldWidth = 80;
-        worldHeight = 80;
+        worldWidth = 160;
+        worldHeight = 160;
         worldDepth = 10;
         totalDepth = 40 + MapConstants.DIVE_HEADER.length;
         int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
@@ -2364,7 +2364,7 @@ public class Epigon extends Game {
                     break;
                 case 'Z':
                     message("Twinkle time");
-                    for (Coord c : rng.getRandomUniqueCells(0, 0, mapSize.gridWidth, mapSize.gridHeight, 400)) {
+                    for (Coord c : rng.getRandomUniqueCells(0, 0, worldWidth, worldHeight, 400)) {
                         fxHandler.twinkle(c, Element.LIGHT);
                     }
                     break;
