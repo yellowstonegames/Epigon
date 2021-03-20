@@ -52,7 +52,7 @@ public class FxHandler {
     }
 
     public void sectorBlast(Coord origin, Element element, int size, Radius radius) {
-        fx.addAction(new ConeEffect(0.85f, viable.refill(seen, 0.001, 999.0),
+        fx.addAction(new SectorEffect(0.85f, viable.refill(seen, 0.001, 999.0),
             origin, size * 3,
             rng.nextDouble(360.0),
             radius,
@@ -323,7 +323,7 @@ public class FxHandler {
         }
     }
 
-    public class ConeEffect extends PanelEffect {
+    public class SectorEffect extends PanelEffect {
 
         /**
          * The default explosion colors are normal for (non-chemical, non-electrical) fire and smoke, going from orange
@@ -360,19 +360,18 @@ public class FxHandler {
          */
         public Coord[] affected;
 
-        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius) {
+        public SectorEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius) {
             super(fx, duration, valid);
             resMap = ArrayTools.fill(1.0, validCells.width, validCells.height);
             validCells.writeDoublesInto(resMap, 0.0);
             lightMap = new double[validCells.width][validCells.height];
-            System.out.println("cone @ " + center);
             FOV.reuseFOV(resMap, lightMap, center.x, center.y, distance, radius, angle, 75.0);
             validCells.not().writeDoublesInto(lightMap, 0.0);
             validCells.not();
             affected = new GreasedRegion(lightMap, 0.01, 999.0).asCoords();
         }
 
-        public ConeEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, Color... coloring) {
+        public SectorEffect(float duration, GreasedRegion valid, Coord center, int distance, double angle, Radius radius, Color... coloring) {
             this(duration, valid, center, distance, angle, radius);
             if (colors.length != coloring.length) {
                 colors = new float[coloring.length];
