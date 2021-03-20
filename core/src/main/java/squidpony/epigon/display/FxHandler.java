@@ -2,6 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.StringKit;
@@ -91,6 +92,30 @@ public class FxHandler {
             )));
     }
 
+    public void rain(Coord origin, Coord end, Element element, float delay) {
+        Coord[] path = Bresenham.line2D_(origin, end);
+        List<Color> colors = colorCenter.gradient(element.color, colorCenter.lightest(element.color), 6);
+        fx.addAction(
+            Actions.sequence(
+                new DelayAction(delay),
+                new LineEffect(path.length * 0.04f, path, colors),
+                new PuddleEffect((float) rng.between(0.1, 0.3), end,
+                    Maker.makeList(
+                        colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
+                        colorCenter.desaturate(element.color, 0.3),
+                        colorCenter.saturate(element.color, 0.3),
+                        colorCenter.light(colorCenter.saturate(element.color, 0.15)),
+                        colorCenter.lightest(element.color),
+                        colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
+                        colorCenter.desaturate(element.color, 0.3),
+                        colorCenter.dim(colorCenter.desaturate(element.color, 0.45), 0.1),
+                        colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
+                    )
+                )
+            )
+        );
+    }
+
     public void line(Coord origin, Coord end, Element element) {
         Coord[] path = Bresenham.line2D_(origin, end);
         fx.addAction(new LineEffect(path.length * 0.2f, path,
@@ -156,6 +181,47 @@ public class FxHandler {
         }
     }
 
+    public class PuddleEffect extends PanelEffect {
+
+        public float[] colors;
+        public Coord c;
+
+        public PuddleEffect(float duration, Coord center, List<? extends Color> coloring) {
+            super(fx, duration);
+            c = center;
+            colors = new float[coloring.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = coloring.get(i).toFloatBits();
+            }
+        }
+
+        @Override
+        protected void end() {
+            super.end();
+            fx.clear(c.x, c.y, layer);
+        }
+
+        @Override
+        protected void update(float percent) {
+            float f, color;
+            int idx;
+            FastNoise.instance.setSeed(System.identityHashCode(this));
+            f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) * 0.125f + percent;
+            idx = (int) (f * colors.length);
+            if (idx < 0) {
+                color = SColor.lerpFloatColors(colors[0], NumberTools.setSelectedByte(colors[0], 3, (byte) 0), (Math.min(0.99f, -f) * colors.length) % 1f);
+            } else if (idx >= colors.length - 1) {
+                color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+            } else {
+                color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+            }
+            int arrayIndex = (int) (percent * (Utilities.puddles.length()));
+            arrayIndex = Math.min(arrayIndex, Utilities.puddles.length() - 1);
+            char character = Utilities.puddles.charAt(arrayIndex);
+            fx.put(c.x, c.y, character, color, 0f, layer);
+        }
+    }
+
     public class LineEffect extends PanelEffect {
 
         public float[] colors;
@@ -204,7 +270,7 @@ public class FxHandler {
             fx.put(c.x, c.y, lines.charAt(0), color, 0f, layer);
         }
     }
-
+    
     public class DustEffect extends PanelEffect {
 
         public float[] colors;
@@ -425,8 +491,7 @@ public class FxHandler {
         }
     }
     
-    public class GibberishEffect2 extends PanelEffect.GibberishEffect
-    {
+    public class GibberishEffect2 extends PanelEffect.GibberishEffect {
         /**
          * Constructs an ExplosionEffect with explicit settings for most fields but also an alternate group of Color
          * objects that it will use to color the explosion instead of using fiery/smoke colors.
@@ -482,6 +547,7 @@ public class FxHandler {
         }
 
     }
+    
     public class WheelEffect extends PanelEffect {
 
         public float color;
@@ -536,8 +602,7 @@ public class FxHandler {
     }
 
     private static final char[] SLASHING_CHARS = "/-\\|".toCharArray();
-    public void attackEffect(Physical attacker, Physical target, ActionOutcome ao, Direction dir)
-    {
+    public void attackEffect(Physical attacker, Physical target, ActionOutcome ao, Direction dir) {
         fx.clear(2);
         if(ao.element == null)
         {

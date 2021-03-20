@@ -92,7 +92,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
     public static final int messageCount;
-    public static final long seed = 0xBEEFEEDADBA77L;
+    public static final long seed = "bananas".hashCode();
     public final StatefulRNG rng = new StatefulRNG(seed);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
@@ -2357,6 +2357,21 @@ public class Epigon extends Game {
                     el = rng.getRandomElement(Element.allEnergy);
                     message("Zap boom " + el.styledName);
                     fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), el);
+                    break;
+                case 'R':
+                    message("Raining");
+                    int quantity = 50000;
+                    float totalTime = 30; // in seconds
+                    int i = 0;
+                    for (Coord end : rng.getRandomCellsIterable(worldWidth, worldHeight, quantity)) {
+                        if (map.contents[end.x][end.y].blockage != null) {
+                            continue; // skip hitting blocking areas
+                        }
+                        int length = rng.between(4, 8);
+                        Coord origin = Coord.get(end.x + length, end.y - length);
+                        fxHandler.rain(origin, end, Element.WATER, totalTime * ((float) i / quantity));
+                        i++;
+                    }
                     break;
                 case 'z':
                     message("Fritzzzz");

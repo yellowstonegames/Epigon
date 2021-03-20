@@ -28,6 +28,8 @@ public class Utilities {
 
     public static final String sparkles = "#$%&";
     public static final String twinkles = "+※+¤";
+    public static final String puddles = "¤⊛●◯◌";
+    public static final String allPuddles = "0Oo¢¤©®ÒÓÔÕÖ×ØøŌōŎŏŐőƟƠΌΏΘΟΩθοϴϽϾϿОӨӪᴼṌṎṐṒỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợὀὁὂὃὄὅὈὉὊὋὌὍ0•∘⊕⊖⊙⊛⌾○◌●◦◯⠂";
     public static final char[] eighthBlocks = new char[]{' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'};
     public static final String[] brailleByDots = {
         "⠀",
