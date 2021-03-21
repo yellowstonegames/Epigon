@@ -94,24 +94,12 @@ public class FxHandler {
 
     public void rain(Coord origin, Coord end, Element element, float delay) {
         Coord[] path = Bresenham.line2D_(origin, end);
-        List<Color> colors = colorCenter.gradient(element.color, colorCenter.lightest(element.color), 6);
+        float color = SColor.toRandomizedFloat(element.color, rng, 0.1f, 0.3f, 0.375f);
         fx.addAction(
             Actions.sequence(
                 new DelayAction(delay),
-                new LineEffect(path.length * 0.04f, path, colors),
-                new PuddleEffect((float) rng.between(0.1, 0.3), end,
-                    Maker.makeList(
-                        colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f),
-                        colorCenter.desaturate(element.color, 0.3),
-                        colorCenter.saturate(element.color, 0.3),
-                        colorCenter.light(colorCenter.saturate(element.color, 0.15)),
-                        colorCenter.lightest(element.color),
-                        colorCenter.lighter(colorCenter.desaturate(element.color, 0.15)),
-                        colorCenter.desaturate(element.color, 0.3),
-                        colorCenter.dim(colorCenter.desaturate(element.color, 0.45), 0.1),
-                        colorCenter.dim(colorCenter.desaturate(element.color, 0.6), 0.2).sub(0, 0, 0, 0.3f)
-                    )
-                )
+                new LineEffect(path.length * 0.04f, path, new float[]{color}),
+                new PuddleEffect((float) rng.between(0.1, 0.3), end, color)
             )
         );
     }
@@ -183,16 +171,19 @@ public class FxHandler {
 
     public class PuddleEffect extends PanelEffect {
 
-        public float[] colors;
+        public float color;
         public Coord c;
 
-        public PuddleEffect(float duration, Coord center, List<? extends Color> coloring) {
+        public PuddleEffect(float duration, Coord center, Color coloring) {
             super(fx, duration);
             c = center;
-            colors = new float[coloring.size()];
-            for (int i = 0; i < colors.length; i++) {
-                colors[i] = coloring.get(i).toFloatBits();
-            }
+            color = coloring.toFloatBits();
+        }
+
+        public PuddleEffect(float duration, Coord center, float coloring) {
+            super(fx, duration);
+            c = center;
+            color = coloring;
         }
 
         @Override
@@ -203,18 +194,21 @@ public class FxHandler {
 
         @Override
         protected void update(float percent) {
-            float f, color;
-            int idx;
-            FastNoise.instance.setSeed(System.identityHashCode(this));
-            f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) * 0.125f + percent;
-            idx = (int) (f * colors.length);
-            if (idx < 0) {
-                color = SColor.lerpFloatColors(colors[0], NumberTools.setSelectedByte(colors[0], 3, (byte) 0), (Math.min(0.99f, -f) * colors.length) % 1f);
-            } else if (idx >= colors.length - 1) {
-                color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
-            } else {
-                color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
-            }
+//            float f, color;
+//            int idx;
+//            f = (IntPointHash.hashAll(c.x, c.y, (int) (percent * 256)) >> 6) * 0x1p-28f + percent;
+
+
+//            FastNoise.instance.setSeed(System.identityHashCode(this));
+//            f = FastNoise.instance.getSimplex(c.x * 1.5f, c.y * 1.5f, percent * 0.015f) * 0.125f + percent;
+//            idx = (int) (f * colors.length);
+//            if (idx < 0) {
+//                color = SColor.lerpFloatColors(colors[0], NumberTools.setSelectedByte(colors[0], 3, (byte) 0), (Math.min(0.99f, -f) * colors.length) % 1f);
+//            } else if (idx >= colors.length - 1) {
+//                color = SColor.lerpFloatColors(colors[colors.length - 1], NumberTools.setSelectedByte(colors[colors.length - 1], 3, (byte) 0), (Math.min(0.99f, f) * colors.length) % 1f);
+//            } else {
+//                color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
+//            }
             int arrayIndex = (int) (percent * (Utilities.puddles.length()));
             arrayIndex = Math.min(arrayIndex, Utilities.puddles.length() - 1);
             char character = Utilities.puddles.charAt(arrayIndex);
@@ -235,6 +229,12 @@ public class FxHandler {
             for (int i = 0; i < colors.length; i++) {
                 colors[i] = coloring.get(i).toFloatBits();
             }
+        }
+
+        public LineEffect(float duration, Coord[] path, float[] coloring) {
+            super(fx, duration);
+            this.path = path;
+            colors = coloring;
         }
 
         @Override

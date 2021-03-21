@@ -2360,17 +2360,18 @@ public class Epigon extends Game {
                     break;
                 case 'R':
                     message("Raining");
-                    int quantity = 50000;
-                    float totalTime = 30; // in seconds
-                    int i = 0;
-                    for (Coord end : rng.getRandomCellsIterable(worldWidth, worldHeight, quantity)) {
+                    int quantity = 8000;
+                    float totalTime = 5; // in seconds
+                    // chooses an element for the rain by the player's current position
+                    Element drops = GauntRNG.getRandomElement(player.location.hashCode(), Element.allEnergy);
+                    for (int i = 0; i < quantity; i++) {
+                        Coord end = rng.nextCoord(worldWidth, worldHeight);
                         if (map.contents[end.x][end.y].blockage != null) {
                             continue; // skip hitting blocking areas
                         }
                         int length = rng.between(4, 8);
                         Coord origin = Coord.get(end.x + length, end.y - length);
-                        fxHandler.rain(origin, end, Element.WATER, totalTime * ((float) i / quantity));
-                        i++;
+                        fxHandler.rain(origin, end, drops, totalTime * ((float) i / quantity));
                     }
                     break;
                 case 'z':
