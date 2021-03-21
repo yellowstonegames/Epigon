@@ -1,6 +1,8 @@
 package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
 import squidpony.ArrayTools;
@@ -93,12 +95,11 @@ public class FxHandler {
     }
 
     public void rain(Coord origin, Coord end, Element element, float delay) {
-        Coord[] path = Bresenham.line2D_(origin, end);
         float color = SColor.toRandomizedFloat(element.color, rng, 0.1f, 0.3f, 0.375f);
         fx.addAction(
             Actions.sequence(
                 new DelayAction(delay),
-                new LineEffect(path.length * 0.04f, path, new float[]{color}),
+                new SimpleLineEffect(Vector2.dst(origin.x, origin.y, end.x, end.y) * 0.04f, origin, end, color),
                 new PuddleEffect((float) rng.between(0.1, 0.3), end, color)
             )
         );
@@ -270,7 +271,45 @@ public class FxHandler {
             fx.put(c.x, c.y, lines.charAt(0), color, 0f, layer);
         }
     }
-    
+
+    public class SimpleLineEffect extends PanelEffect {
+
+        public float color;
+        public Coord start, end, latest;
+
+        public SimpleLineEffect(float duration, Coord start, Coord end, Color coloring) {
+            super(fx, duration);
+            this.start = start;
+            this.end = end;
+            latest = start;
+            color = coloring.toFloatBits();
+        }
+
+        public SimpleLineEffect(float duration, Coord start, Coord end, float coloring) {
+            super(fx, duration);
+            this.start = start;
+            this.end = end;
+            latest = start;
+            color = coloring;
+        }
+
+        @Override
+        protected void end() {
+            super.end();
+            fx.clear(end.x, end.y, layer);
+        }
+
+        @Override
+        protected void update(float percent) {
+            fx.clear(latest.x, latest.y, layer);
+            latest = Coord.get(Math.round(MathUtils.lerp(start.x, end.x, percent)), Math.round(MathUtils.lerp(start.y, end.y, percent)));
+            String lines = Utilities.linesFor(Direction.toGoTo(start, end));
+
+            // put new line segment
+            fx.put(latest.x, latest.y, lines.charAt(0), color, 0f, layer);
+        }
+    }
+
     public class DustEffect extends PanelEffect {
 
         public float[] colors;
