@@ -37,7 +37,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
         public final double[][] xPositions,
                 yPositions,
                 zPositions;
-        
+
         /**
          * Constructs a concrete WorldMapGenerator for a map that can be used to wrap a sphere (as with a texture on a
          * 3D model), with seamless east-west wrapping, no north-south wrapping, and distortion that causes the poles to

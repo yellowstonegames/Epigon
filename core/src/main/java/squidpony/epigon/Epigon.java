@@ -32,13 +32,8 @@ import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
-import squidpony.epigon.display.ContextHandler;
-import squidpony.epigon.display.FallingHandler;
-import squidpony.epigon.display.FxHandler;
-import squidpony.epigon.display.InfoHandler;
-import squidpony.epigon.display.MapOverlayHandler;
+import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
-import squidpony.epigon.display.PanelSize;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.CastleGenerator;
@@ -114,7 +109,8 @@ public class Epigon extends Game {
     public static final FloatFilter
             //identityFilter = new FloatFilters.IdentityFilter(),
             grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
-    private SparseLayers mapSLayers;
+    private SquareSparseLayers mapSLayers;
+    private SquareSparseLayers passiveSLayers;
     private SparseLayers mapHoverSLayers;
     private SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
@@ -155,6 +151,7 @@ public class Epigon extends Game {
     
     public int depth;
     private FxHandler fxHandler;
+    private FxHandler fxHandlerPassive;
     private MapOverlayHandler mapOverlayHandler;
     private ContextHandler contextHandler;
     private InfoHandler infoHandler;
@@ -325,119 +322,20 @@ public class Epigon extends Game {
 //        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
-        mapSLayers = new SparseLayers(
+        mapSLayers = new SquareSparseLayers(
                 worldWidth,
                 worldHeight,
                 mapSize.cellWidth,
                 mapSize.cellHeight,
-                font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize()){
-            //we override draw() to center chars in their cells
-            @Override
-            public void draw(Batch batch, float parentAlpha) {
-                //super.draw(batch, parentAlpha);
-                float xo = getX(), yo = getY(), yOff = yo + 1f + gridHeight * font.actualCellHeight, gxo, gyo,
-                        conditionY = 1f, conditionCw = 1f, conditionCm = 1f,
-                        conditionYAdd = 0f, conditionCwAdd = 0f, conditionCmAdd = 0f;
-                if(player.visualCondition == null) {
-                    final int clen = player.conditions.size();
-                    for (int i = clen - 1; i >= 0; i--) {
-                        VisualCondition vis = player.conditions.getAt(i).parent.visual;
-                        if (vis != null) {
-                            vis.update();
-                            conditionY *= vis.lumaMul;
-                            conditionCw *= vis.warmMul;
-                            conditionCm *= vis.mildMul;
-                            conditionYAdd += vis.lumaAdd;
-                            conditionCwAdd += vis.warmAdd;
-                            conditionCmAdd += vis.mildAdd;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    VisualCondition vis = player.visualCondition;
-                    vis.update();
-                    conditionY *= vis.lumaMul;
-                    conditionCw *= vis.warmMul;
-                    conditionCm *= vis.mildMul;
-                    conditionYAdd += vis.lumaAdd;
-                    conditionCwAdd += vis.warmAdd;
-                    conditionCmAdd += vis.mildAdd;
-                }
-                filter.yMul  = 0.7f  * conditionY;
-                filter.cwMul = 0.65f * conditionCw;
-                filter.cmMul = 0.65f * conditionCm;
-                filter.yAdd  = 0.7f  * conditionYAdd;
-                filter.cwAdd = 0.65f * conditionCwAdd;
-                filter.cmAdd = 0.65f * conditionCmAdd;
-//                font.draw(batch, backgrounds, xo, yo);
-                font.draw(batch, backgrounds, xo - font.actualCellWidth * 0.25f, yo);
-                int len = layers.size();
-                Frustum frustum = null;
-                Stage stage = getStage();
-                if(stage != null) {
-                    Viewport viewport = stage.getViewport();
-                    if(viewport != null)
-                    {
-                        Camera camera = viewport.getCamera();
-                        if(camera != null)
-                        {
-                            if(
-                                    camera.frustum != null &&
-                                            (!camera.frustum.boundsInFrustum(xo, yOff - font.actualCellHeight - 1f, 0f, font.actualCellWidth, font.actualCellHeight, 0f) ||
-                                                    !camera.frustum.boundsInFrustum(xo + font.actualCellWidth * (gridWidth-1), yo, 0f, font.actualCellWidth, font.actualCellHeight, 0f))
-                            )
-                                frustum = camera.frustum;
-                        }
-                    }
-                }
-                filter.yMul  = 0.9f  * conditionY;
-                filter.cwMul = 0.95f * conditionCw;
-                filter.cmMul = 0.95f * conditionCm;
-                filter.yAdd  = 0.9f  * conditionYAdd;
-                filter.cwAdd = 0.95f * conditionCwAdd;
-                filter.cmAdd = 0.95f * conditionCmAdd;
-
-                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
-//                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
-
-                font.configureShader(batch);
-                if(frustum == null) {
-                    for (int i = 0; i < len; i++) {
-                        layers.get(i).draw(batch, font, xo, yOff);
-                    }
-
-                }
-                else
-                {
-                    for (int i = 0; i < len; i++) {
-                        layers.get(i).draw(batch, font, frustum, xo, yOff);
-                    }
-                }
-                filter.yMul  = 1.05f * conditionY;
-                filter.cwMul = 1.4f  * conditionCw;
-                filter.cmMul = 1.4f  * conditionCm;
-                filter.yAdd  = 1.05f * conditionYAdd;
-                filter.cwAdd = 1.4f  * conditionCwAdd;
-                filter.cmAdd = 1.4f  * conditionCmAdd;
-                int x, y;
-                for (int i = 0; i < glyphs.size(); i++) {
-                    TextCellFactory.Glyph glyph = glyphs.get(i);
-                    if(glyph == null)
-                        continue;
-                    glyph.act(Gdx.graphics.getDeltaTime());
-                    if(
-                            !glyph.isVisible() ||
-                                    (x = Math.round((gxo = glyph.getX() - xo) / font.actualCellWidth)) < 0 || x >= gridWidth ||
-                                    (y = Math.round((gyo = glyph.getY() - yo)  / -font.actualCellHeight + gridHeight)) < 0 || y >= gridHeight ||
-                                    backgrounds[x][y] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f)))
-                        continue;
-                    glyph.draw(batch, 1f);
-                }
-            }
-        };
+                font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize(), this);
         
+        passiveSLayers = new SquareSparseLayers(
+                worldWidth,
+                worldHeight,
+                mapSize.cellWidth,
+                mapSize.cellHeight,
+                mapSLayers.font, this);
+
         mapHoverSLayers = new SparseLayers(worldWidth * 2, worldHeight, messageSize.cellWidth, mapSize.cellHeight, font);
         
         infoHandler = new InfoHandler(infoSLayers, colorCenter);
@@ -477,6 +375,7 @@ public class Epigon extends Game {
         mapOverlaySLayers.setBounds(0, 0, mapSize.pixelWidth(), mapSize.pixelWidth());
         fallingSLayers.setPosition(0, 0);
         mapSLayers.setPosition(0, 0);
+        passiveSLayers.setPosition(0, 0);
         mapHoverSLayers.setPosition(-messageSize.cellWidth >> 1, 0);
 
         mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
@@ -501,6 +400,7 @@ public class Epigon extends Game {
         Gdx.input.setInputProcessor(multiplexer);
 
         mapStage.addActor(mapSLayers);
+        mapStage.addActor(passiveSLayers);
         mapStage.addActor(mapHoverSLayers);
         mapOverlayStage.addActor(mapOverlaySLayers);
         fallingStage.addActor(fallingSLayers);
@@ -680,6 +580,7 @@ public class Epigon extends Game {
         world = underground;
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.lighting.fovResult);
+        fxHandlerPassive = new FxHandler(passiveSLayers, 0, colorCenter, map.lighting.fovResult);
         floors = new GreasedRegion(map.width, map.height);
 
         simple = new char[map.width][map.height];
@@ -729,7 +630,7 @@ public class Epigon extends Game {
         map.contents[player.location.x][player.location.y].add(player);
         player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
 
-        fxHandler.seen = map.lighting.fovResult;
+        fxHandlerPassive.seen =fxHandler.seen = map.lighting.fovResult;
         creatures = map.creatures;
         simple = map.simpleChars();
         lineDungeon = map.line;
@@ -940,7 +841,7 @@ public class Epigon extends Game {
         for (Entry<ConstantKey, Double> entry : changes.entrySet()) {
             double val = entry.getValue();
             SColor color = val >= 0 ? SColor.CW_RICH_JADE : SColor.CW_RED;
-            fxHandler.floatText(target.location, String.format("%.1f %s", val, Utilities.capitalizeFirst(entry.getKey().toString())), color);
+            fxHandlerPassive.floatText(target.location, String.format("%.1f %s", val, Utilities.capitalizeFirst(entry.getKey().toString())), color);
         }
     }
 
@@ -1673,6 +1574,7 @@ public class Epigon extends Game {
             }
             else {
                 mapSLayers.draw(batch, 1f);
+                passiveSLayers.draw(batch, 1f);
             }
             mapHoverSLayers.draw(batch, 1f);
             batch.end();
@@ -2371,26 +2273,26 @@ public class Epigon extends Game {
                         }
                         int length = rng.between(4, 8);
                         Coord origin = Coord.get(end.x + length, end.y - length);
-                        fxHandler.rain(origin, end, drops, totalTime * ((float) i / quantity));
+                        fxHandlerPassive.rain(origin, end, drops, totalTime * ((float) i / quantity));
                     }
                     break;
                 case 'z':
                     message("Fritzzzz");
-                    fxHandler.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
+                    fxHandlerPassive.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
                     break;
                 case 'Z':
                     message("Twinkle time");
                     for (Coord c : rng.getRandomUniqueCells(0, 0, worldWidth, worldHeight, 400)) {
-                        fxHandler.twinkle(c, Element.LIGHT);
+                        fxHandlerPassive.twinkle(c, Element.LIGHT);
                     }
                     break;
                 case '=':
                     message("Layered sparkle small");
-                    fxHandler.layeredSparkle(player.location, 4, Radius.CIRCLE);
+                    fxHandlerPassive.layeredSparkle(player.location, 4, Radius.CIRCLE);
                     break;
                 case '+':
                     message("Layered sparkle large");
-                    fxHandler.layeredSparkle(player.location, 8, Radius.CIRCLE);
+                    fxHandlerPassive.layeredSparkle(player.location, 8, Radius.CIRCLE);
                     break;
                 case '|':
                     if (odinView) {
