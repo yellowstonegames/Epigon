@@ -22,9 +22,9 @@ import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
  * World map generator for a shuttlecock-shaped world.
- * Port of Zachary Carter's world generation technique, https://github.com/zacharycarter/mapgen
- * It seems to mostly work now, though it only generates one view of the map that it renders (but biome, moisture, heat,
- * and height maps can all be requested from it).
+ * Long story short, the world would look like a 3D version of
+ * <a href="https://www.desmos.com/calculator/eplcagwvon">this Desmos graph</>,
+ * but the rendered part is just the surface, projected onto a rectangle.
  */
 public class ShapedWorldMapDemo extends ApplicationAdapter {
     public static class ShapedMap extends WorldMapGenerator {
@@ -37,8 +37,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
         public final double[][] xPositions,
                 yPositions,
                 zPositions;
-
-
+        
         /**
          * Constructs a concrete WorldMapGenerator for a map that can be used to wrap a sphere (as with a texture on a
          * 3D model), with seamless east-west wrapping, no north-south wrapping, and distortion that causes the poles to
@@ -196,6 +195,7 @@ public class ShapedWorldMapDemo extends ApplicationAdapter {
                 qc = Math.sin(qs);
                 qs = Math.cos(qs);
                 qs = (3.375 * qs * (0.625 + qs)) / (3 + qc * qc);
+                //(cos(t),(3.375*sin(t)*(0.625+sin(t))/(3+cos(t)^2)))
                 //qs = Math.sin(qs);
                 for (int x = 0, xt = 0; x < width; x++) {
                     ps = trigTable[xt++] * qc;//Math.sin(p);
