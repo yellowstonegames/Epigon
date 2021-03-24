@@ -573,11 +573,11 @@ public class Epigon extends Game {
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int aboveGround = 7;
         EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth);
-        //EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveGround);
-        //world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
-//        depth = aboveGround+1; // higher is deeper; aboveGround is surface-level
-        depth = 0;
-        world = underground;
+        EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveGround);
+        world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
+        depth = aboveGround+1; // higher is deeper; aboveGround is surface-level
+//        depth = 0;
+//        world = underground;
         map = world[depth];
         fxHandler = new FxHandler(mapSLayers, 3, colorCenter, map.lighting.fovResult);
         fxHandlerPassive = new FxHandler(passiveSLayers, 0, colorCenter, map.lighting.fovResult);

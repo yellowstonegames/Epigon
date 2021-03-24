@@ -47,7 +47,7 @@ public class Castle {
     public int ground; // the index of the ground level
     public int width;
     public int height;
-    public int mapEdging = 2; // space between the edge of the map and the generation area
+    public int mapEdging = 10; // space between the edge of the map and the generation area
 
     GreasedRegion region,
         moat,

@@ -132,7 +132,7 @@ public class CastleGenerator {
         castle.moat.clear();
         connectPoints(castle.moat, corners);
 
-        castle.moat.expand8way();
+        castle.moat.expand8way(2).expand();
         castle.moatBank = castle.moat.copy();
         GreasedRegion nonMoat = castle.region.copy().andNot(castle.moat);
         for (Coord c : nonMoat) {
@@ -141,8 +141,8 @@ public class CastleGenerator {
 
         castle.moat.fray(0.3).fray(0.2);
         for (Coord c : castle.moat) {
-//            decorator.placeLava(map.contents[c.x][c.y]);
-            decorator.placeWater(map.contents[c.x][c.y]);
+            decorator.placeLava(map.contents[c.x][c.y]);
+//            decorator.placeWater(map.contents[c.x][c.y]);
         }
 
         castle.moatBank.andNot(castle.moat);
@@ -196,7 +196,7 @@ public class CastleGenerator {
 
     private void tearDownWalls(Castle castle) {
         EpiMap map = castle.buildZone[castle.ground];
-        castle.holes.expand(2);
+        castle.holes.expand(4);
         castle.holes.fray(0.2);
         castle.holes.fray(0.2);
         Physical rubble = RecipeMixer.buildPhysical(Physical.makeBasic("rubble", ';', SColor.GREYISH_DARK_GREEN));
