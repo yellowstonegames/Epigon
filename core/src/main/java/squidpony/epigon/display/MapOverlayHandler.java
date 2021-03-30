@@ -27,7 +27,7 @@ import squidpony.epigon.files.Config;
 public class MapOverlayHandler {
 
     public enum PrimaryMode {
-        EQUIPMENT, CRAFTING, HELP;
+        EQUIPMENT, CRAFTING, HELP, CONFIGURATION;
 
         private final String name;
 
