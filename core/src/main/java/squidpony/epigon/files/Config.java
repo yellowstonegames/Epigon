@@ -1,5 +1,10 @@
 package squidpony.epigon.files;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+
 /**
  * A class to hold the game's launch configurations.
  */
@@ -29,11 +34,22 @@ public class Config {
         }
 
         instance = new Config();
-        instance.load();
+        instance.loadAll();
         return instance;
     }
+    
+    public void saveGraphics(Graphics graphics){
+        displayConfig.windowHeight = graphics.getHeight();
+        displayConfig.windowWidth = graphics.getWidth();
+        displayConfig.monitorName = graphics.getMonitor().name;
+        
+        Lwjgl3Window window = ((Lwjgl3Graphics)Gdx.graphics).getWindow();
+    }
 
-    public void save() {
+    /**
+     * Saves all of the configs at their default location
+     */
+    public void saveAll() {
         FileManager fileManager = FileManager.instance();
 
         String text = fileManager.json().prettyPrint(debugConfig);
@@ -49,7 +65,10 @@ public class Config {
         fileManager.writeFile(audioConfigFilename, configPath, text);
     }
 
-    public void load() {
+    /**
+     * Loads all of the configs from their default location
+     */
+    public void loadAll() {
         String text;
         FileManager fileManager = FileManager.instance();
 

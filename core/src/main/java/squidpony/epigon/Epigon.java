@@ -4,12 +4,9 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -18,10 +15,19 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
 import squidpony.ArrayTools;
 import squidpony.Maker;
 import squidpony.Messaging;
 import squidpony.StringKit;
+import squidpony.panel.IColoredString;
+import squidpony.squidai.DijkstraMap;
+import squidpony.squidgrid.*;
+import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
+import squidpony.squidgrid.mapping.LineKit;
+import squidpony.squidmath.*;
+
 import squidpony.epigon.combat.ActionOutcome;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.control.DataPool;
@@ -34,6 +40,8 @@ import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
+import squidpony.epigon.files.Config;
+import squidpony.epigon.files.ScreenDisplayConfig;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.CastleGenerator;
@@ -45,13 +53,6 @@ import squidpony.epigon.mapping.MapDecorator;
 import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WobblyCanyonGenerator;
 import squidpony.epigon.util.Utilities;
-import squidpony.panel.IColoredString;
-import squidpony.squidai.DijkstraMap;
-import squidpony.squidgrid.*;
-import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
-import squidpony.squidgrid.mapping.LineKit;
-import squidpony.squidmath.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -1655,6 +1656,12 @@ public class Epigon extends Game {
         fallingViewport.update(width, height, false);
         fallingViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+        
+        // save changes to config for re-use at next launch
+        ScreenDisplayConfig displayConfig = Config.instance().displayConfig;
+        displayConfig.windowWidth = width;
+        displayConfig.windowHeight = height;
+        Config.instance().saveAll();
     }
 
     @Override
@@ -1672,6 +1679,10 @@ public class Epigon extends Game {
     @Override
     public void dispose() {
         System.out.println("Disposing game.");
+        System.out.println("Saving current configs.");
+        
+        Config.instance().saveAll();
+        System.out.println("Finished saving configs.");
         super.dispose();
     }
 

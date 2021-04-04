@@ -58,13 +58,14 @@ public class Lwjgl3Launcher {
             appConfig.setFullscreenMode(display);
         } else {
             appConfig.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight);
+            appConfig.setWindowPosition(config.displayConfig.windowXPosition, config.displayConfig.windowYPosition);
         }
 
         appConfig.setTitle(config.gameTitle);
         //uncomment if testing FPS
         appConfig.useVsync(false);
         appConfig.setWindowIcon(Files.FileType.Internal, "images/icons/libgdx128.png", "images/icons/libgdx64.png", "images/icons/libgdx32.png", "images/icons/libgdx16.png");
-        new Lwjgl3Application(new Epigon(), appConfig);
+        Lwjgl3Application masterApplication = new Lwjgl3Application(new Epigon(), appConfig);
     }
 
 }

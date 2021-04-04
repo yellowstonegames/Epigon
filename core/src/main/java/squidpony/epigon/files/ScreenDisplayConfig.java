@@ -8,7 +8,7 @@ public class ScreenDisplayConfig {
     public int windowHeight = Epigon.totalPixelHeight();
     public int windowXPosition;
     public int windowYPosition;
-    public int monitorIndex;
+    public int monitorIndex; // looks like for libgdx tracking by name might be better
     public boolean maximized;
     public boolean fullscreen;
     public String monitorName;
