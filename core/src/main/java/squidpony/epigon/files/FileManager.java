@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import com.badlogic.gdx.utils.Json;
@@ -46,7 +47,7 @@ public class FileManager {
      */
     public String readFile(String fileName, String path) {
         String localPath = "";
-        if (path != null && !path.isBlank()) {
+        if (path != null && !path.isEmpty()) {
             localPath = path + "/";
         }
         localPath += fileName;
@@ -70,17 +71,18 @@ public class FileManager {
      */
     public void writeFile(String fileName, String path, String contents) {
         String localPath = "";
-        if (path != null && !path.isBlank()) {
+        if (path != null && !path.isEmpty()) {
             localPath = path + "/";
         }
         localPath += fileName;
 
         Path foundPath = Paths.get(localPath);
-
         try {
-            Files.writeString(foundPath, contents, StandardCharsets.UTF_8);
+            Files.createDirectories(Paths.get(path));
+            Files.write(foundPath, Collections.singletonList(contents), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             System.out.println("Could not write path: " + localPath + "\nException: " + ex.getLocalizedMessage());
+            ex.printStackTrace();
         }
     }
 

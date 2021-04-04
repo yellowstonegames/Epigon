@@ -1,11 +1,14 @@
 package squidpony.epigon.lwjgl3;
 
 import com.badlogic.gdx.Files;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Graphics.Monitor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.files.Config;
 
@@ -36,6 +39,25 @@ public class Lwjgl3Launcher {
         //start dependent listeners
         //hand control over to the display
         Lwjgl3ApplicationConfiguration appConfig = new Lwjgl3ApplicationConfiguration();
+        appConfig.setWindowListener(new Lwjgl3WindowAdapter(){
+            private Lwjgl3Window win;
+            @Override
+            public void created(Lwjgl3Window window) {
+                super.created(window);
+                win = window;
+            }
+
+            @Override
+            public boolean closeRequested() {
+                config.displayConfig.windowXPosition = win.getPositionX();
+                config.displayConfig.windowYPosition = win.getPositionY();
+                config.displayConfig.windowWidth = Gdx.graphics.getWidth();
+                config.displayConfig.windowHeight = Gdx.graphics.getHeight();
+                config.displayConfig.monitorName = Gdx.graphics.getMonitor().name;
+
+                return super.closeRequested();
+            }
+        });
 
         if (config.displayConfig.maximized) {
             appConfig.setMaximized(true);

@@ -62,3 +62,7 @@ nb-configuration.xml
 
 ## OS Specific
 .DS_Store
+*~
+*#*#
+*#*.*#
+/lwjgl3/assets/Settings/
