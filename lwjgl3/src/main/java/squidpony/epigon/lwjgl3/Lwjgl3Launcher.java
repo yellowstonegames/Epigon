@@ -52,9 +52,11 @@ public class Lwjgl3Launcher {
             @Override
             public void maximized(boolean isMaximized) {
                 config.displayConfig.maximized = isMaximized;
-                
                 if (!isMaximized) {
-                    epigon.resize(config.displayConfig.windowWidth, config.displayConfig.windowHeight); // tettinger, why doesn't this cause the internals to scale even though the window does size as needed? (without this coming back froma  maximize makes the window default libgdx tiny)
+                    Gdx.app.postRunnable(
+                            () ->
+                                    Gdx.graphics.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight)
+                            );
                 }
 
                 super.maximized(isMaximized);
