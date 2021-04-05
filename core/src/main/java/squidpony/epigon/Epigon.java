@@ -74,8 +74,7 @@ public class Epigon extends Game {
     public static final PanelSize infoSize;
     public static final PanelSize contextSize;
     public static final int messageCount;
-    public static final long seed = "bananas".hashCode();
-    public final StatefulRNG rng = new StatefulRNG(seed);
+    public final StatefulRNG rng = new StatefulRNG(Config.instance().settings.seedValue);
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;

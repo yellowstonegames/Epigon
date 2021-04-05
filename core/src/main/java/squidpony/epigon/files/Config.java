@@ -63,44 +63,45 @@ public class Config {
         if (text.isEmpty()) {
             System.out.println("No debug config file found, writing new default config file.");
             debugConfig = new DebugConfig();
-            text = fileManager.json().prettyPrint(debugConfig);
-            fileManager.writeFile(debugConfigFilename, configPath, text);
         } else {
             System.out.println("Found debug config file, loaded.");
             debugConfig = fileManager.json().fromJson(DebugConfig.class, text);
         }
+        text = fileManager.json().prettyPrint(debugConfig);
+        fileManager.writeFile(debugConfigFilename, configPath, text);
 
         text = fileManager.readFile(settingsConfigFilename, configPath);
         if (text.isEmpty()) {
             System.out.println("No settings file found, writing new default config file.");
             settings = new Settings();
-            text = fileManager.json().prettyPrint(settings);
-            fileManager.writeFile(settingsConfigFilename, configPath, text);
         } else {
             System.out.println("Found settings file, loaded.");
             settings = fileManager.json().fromJson(Settings.class, text);
+            settings.calcSeed();
         }
+        text = fileManager.json().prettyPrint(settings);
+        fileManager.writeFile(settingsConfigFilename, configPath, text);
 
         text = fileManager.readFile(displayConfigFilename, configPath);
         if (text.isEmpty()) {
             System.out.println("No display config file found, writing new default config file.");
             displayConfig = new ScreenDisplayConfig();
-            text = fileManager.json().prettyPrint(displayConfig);
-            fileManager.writeFile(displayConfigFilename, configPath, text);
         } else {
             System.out.println("Found display config file, loaded.");
             displayConfig = fileManager.json().fromJson(ScreenDisplayConfig.class, text);
         }
+        text = fileManager.json().prettyPrint(displayConfig);
+        fileManager.writeFile(displayConfigFilename, configPath, text);
 
         text = fileManager.readFile(audioConfigFilename, configPath);
         if (text.isEmpty()) {
             System.out.println("No audio config file found, writing new default config file.");
             audioConfig = new AudioConfig();
-            text = fileManager.json().prettyPrint(audioConfig);
-            fileManager.writeFile(audioConfigFilename, configPath, text);
         } else {
             System.out.println("Found audio config file, loaded.");
             audioConfig = fileManager.json().fromJson(AudioConfig.class, text);
         }
+        text = fileManager.json().prettyPrint(audioConfig);
+        fileManager.writeFile(audioConfigFilename, configPath, text);
     }
 }
