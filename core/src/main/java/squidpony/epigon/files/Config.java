@@ -35,15 +35,9 @@ public class Config {
         instance.loadAll();
         return instance;
     }
-    
-    public void saveGraphics(Graphics graphics){
-        displayConfig.windowHeight = graphics.getHeight();
-        displayConfig.windowWidth = graphics.getWidth();
-        displayConfig.monitorName = graphics.getMonitor().name;
-    }
 
     /**
-     * Saves all of the configs at their default location
+     * Saves all of the configs at their default location with their current information.
      */
     public void saveAll() {
         FileManager fileManager = FileManager.instance();

@@ -30,6 +30,7 @@ public class Lwjgl3Launcher {
         Config config = Config.instance(); // will cause the config file to be read if it hasn't already
 
         System.out.println("Files loaded!");
+        Epigon epigon = new Epigon();
 
         //start independent listeners
         //load and initialize resources
@@ -39,8 +40,9 @@ public class Lwjgl3Launcher {
         //start dependent listeners
         //hand control over to the display
         Lwjgl3ApplicationConfiguration appConfig = new Lwjgl3ApplicationConfiguration();
-        appConfig.setWindowListener(new Lwjgl3WindowAdapter(){
+        appConfig.setWindowListener(new Lwjgl3WindowAdapter() {
             private Lwjgl3Window win;
+
             @Override
             public void created(Lwjgl3Window window) {
                 super.created(window);
@@ -48,12 +50,25 @@ public class Lwjgl3Launcher {
             }
 
             @Override
+            public void maximized(boolean isMaximized) {
+                config.displayConfig.maximized = isMaximized;
+                
+                if (!isMaximized) {
+                    epigon.resize(config.displayConfig.windowWidth, config.displayConfig.windowHeight); // tettinger, why doesn't this cause the internals to scale even though the window does size as needed? (without this coming back froma  maximize makes the window default libgdx tiny)
+                }
+
+                super.maximized(isMaximized);
+            }
+
+            @Override
             public boolean closeRequested() {
-                config.displayConfig.windowXPosition = win.getPositionX();
-                config.displayConfig.windowYPosition = win.getPositionY();
-                config.displayConfig.windowWidth = Gdx.graphics.getWidth();
-                config.displayConfig.windowHeight = Gdx.graphics.getHeight();
-                config.displayConfig.monitorName = Gdx.graphics.getMonitor().name;
+                if (!config.displayConfig.maximized && !config.displayConfig.fullscreen) {
+                    config.displayConfig.windowXPosition = win.getPositionX();
+                    config.displayConfig.windowYPosition = win.getPositionY();
+                    config.displayConfig.windowWidth = Gdx.graphics.getWidth();
+                    config.displayConfig.windowHeight = Gdx.graphics.getHeight();
+                    config.displayConfig.monitorName = Gdx.graphics.getMonitor().name;
+                }
 
                 return super.closeRequested();
             }
@@ -80,14 +95,21 @@ public class Lwjgl3Launcher {
             appConfig.setFullscreenMode(display);
         } else {
             appConfig.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight);
-            appConfig.setWindowPosition(config.displayConfig.windowXPosition, config.displayConfig.windowYPosition);
+
+            int x = config.displayConfig.windowXPosition;
+            int y = config.displayConfig.windowYPosition;
+
+            x = Math.max(x, 0);
+            y = Math.max(y, 0);
+
+            appConfig.setWindowPosition(x, y);
         }
 
         appConfig.setTitle(config.gameTitle);
         //uncomment if testing FPS
         appConfig.useVsync(false);
         appConfig.setWindowIcon(Files.FileType.Internal, "images/icons/libgdx128.png", "images/icons/libgdx64.png", "images/icons/libgdx32.png", "images/icons/libgdx16.png");
-        Lwjgl3Application masterApplication = new Lwjgl3Application(new Epigon(), appConfig);
+        Lwjgl3Application masterApplication = new Lwjgl3Application(epigon, appConfig);
     }
 
 }

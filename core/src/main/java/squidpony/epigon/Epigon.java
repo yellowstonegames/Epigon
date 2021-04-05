@@ -41,7 +41,6 @@ import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
 import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.files.Config;
-import squidpony.epigon.files.ScreenDisplayConfig;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.CastleGenerator;
@@ -1656,12 +1655,6 @@ public class Epigon extends Game {
         fallingViewport.update(width, height, false);
         fallingViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
-        
-        // save changes to config for re-use at next launch
-        ScreenDisplayConfig displayConfig = Config.instance().displayConfig;
-        displayConfig.windowWidth = width;
-        displayConfig.windowHeight = height;
-        Config.instance().saveAll();
     }
 
     @Override
@@ -1680,7 +1673,6 @@ public class Epigon extends Game {
     public void dispose() {
         System.out.println("Disposing game.");
         System.out.println("Saving current configs.");
-        
         Config.instance().saveAll();
         System.out.println("Finished saving configs.");
         super.dispose();
