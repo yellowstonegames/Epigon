@@ -16,8 +16,14 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import squidpony.ArrayTools;
-import squidpony.Maker;
 import squidpony.Messaging;
 import squidpony.StringKit;
 import squidpony.panel.IColoredString;
@@ -35,14 +41,17 @@ import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.raw.RawCreature;
-import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
-import squidpony.epigon.display.MapOverlayHandler.PrimaryMode;
 import squidpony.epigon.files.Config;
-import squidpony.epigon.input.ControlMapping;
-import squidpony.epigon.input.Verb;
+import squidpony.epigon.input.DebugKeyHandler;
+import squidpony.epigon.input.EquipmentKeyHandler;
+import squidpony.epigon.input.FallbackKeyHandler;
+import squidpony.epigon.input.FallingGameOverKeyHandler;
+import squidpony.epigon.input.FallingKeyHandler;
+import squidpony.epigon.input.HelpKeyHandler;
+import squidpony.epigon.input.MapKeyHandler;
 import squidpony.epigon.mapping.CastleGenerator;
 import squidpony.epigon.mapping.EpiMap;
 import squidpony.epigon.mapping.EpiTile;
@@ -53,13 +62,6 @@ import squidpony.epigon.mapping.RememberedTile;
 import squidpony.epigon.mapping.WobblyCanyonGenerator;
 import squidpony.epigon.util.Utilities;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 /**
@@ -67,7 +69,7 @@ import static squidpony.squidgrid.gui.gdx.SColor.*;
  * Doesn't use any platform-specific code.
  */
 public class Epigon extends Game {
-    private enum GameMode {
+    public enum GameMode {
         DIVE, CRAWL;
         private final String name;
 
@@ -92,12 +94,12 @@ public class Epigon extends Game {
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
-    private DataStarter dataStarter;
+    public DataStarter dataStarter;
     private MapDecorator mapDecorator;
 //    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
-    private GameMode mode = GameMode.CRAWL;
+    public GameMode mode = GameMode.CRAWL;
 
     // Audio
     private SoundManager sound;
@@ -111,31 +113,33 @@ public class Epigon extends Game {
             grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
     private SquareSparseLayers mapSLayers;
     private SquareSparseLayers passiveSLayers;
-    private SparseLayers mapHoverSLayers;
-    private SparseLayers mapOverlaySLayers;
+    public SparseLayers mapHoverSLayers;
+    public SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
     private SparseLayers contextSLayers;
     private SparseLayers messageSLayers;
 //    private ShapeRenderer shaper;
     private SubcellLayers fallingSLayers;
 
-    private InputSpecialMultiplexer multiplexer;
-    private SquidInput mapInput;
-    private SquidInput contextInput;
-    private SquidInput infoInput;
-    private SquidInput messageInput;
-    private SquidInput debugInput;
-    private SquidInput fallbackInput;
+    public InputSpecialMultiplexer multiplexer;
+    public SquidInput mapInput;
+    public SquidInput contextInput;
+    public SquidInput infoInput;
+    public SquidInput messageInput;
+    public SquidInput debugInput;
+    public SquidInput fallbackInput;
+
     private Color unseenColor;
     private float unseenCreatureColorFloat;
-    private ArrayList<Coord> toCursor;
+    public ArrayList<Coord> toCursor;
     private TextCellFactory font;
 
-    private boolean showingMenu = false;
-    private Coord menuLocation = null;
-    private Physical currentTarget = null;
-    private OrderedMap<String, Weapon> maneuverOptions = new OrderedMap<>(12);
-    private OrderedMap<String, Interactable> interactionOptions = new OrderedMap<>(8);
+    public boolean showingMenu = false;
+    public Coord menuLocation = null;
+    public Physical currentTarget = null;
+    public OrderedMap<String, Weapon> maneuverOptions = new OrderedMap<>(12);
+    public OrderedMap<String, Interactable> interactionOptions = new OrderedMap<>(8);
+
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
@@ -150,12 +154,12 @@ public class Epigon extends Game {
     public float[][] wallColors, walls;
     
     public int depth;
-    private FxHandler fxHandler;
-    private FxHandler fxHandlerPassive;
-    private MapOverlayHandler mapOverlayHandler;
-    private ContextHandler contextHandler;
-    private InfoHandler infoHandler;
-    private FallingHandler fallingHandler;
+    public FxHandler fxHandler;
+    public FxHandler fxHandlerPassive;
+    public MapOverlayHandler mapOverlayHandler;
+    public ContextHandler contextHandler;
+    public InfoHandler infoHandler;
+    public FallingHandler fallingHandler;
     private GreasedRegion blockage, floors;
     private DijkstraMap toPlayerDijkstra, monsterDijkstra;
     private LOS los;
@@ -168,12 +172,12 @@ public class Epigon extends Game {
     // Timing
     public static final long startMillis = TimeUtils.millis();
     private long fallDelay = 300;
-    private Instant nextFall = Instant.now();
-    private boolean paused = true;
-    private Instant pausedAt = Instant.now();
+    public Instant nextFall = Instant.now();
+    public boolean paused = true;
+    public Instant pausedAt = Instant.now();
     private Instant unpausedAt = Instant.now();
-    private long inputDelay = 100;
-    private Instant nextInput = Instant.now();
+    public long inputDelay = 100;
+    public Instant nextInput = Instant.now();
     private long fallDuration = 0L, currentFallDuration = 0L;
 
     private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage, fallingStage;
@@ -183,7 +187,7 @@ public class Epigon extends Game {
     public float startingY, finishY, timeToFall;
 
     private static final boolean DEBUG = true;
-    private boolean odinView = false;
+    public boolean odinView = false;
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
@@ -428,7 +432,7 @@ public class Epigon extends Game {
         return GDXMarkup.instance.styleString(text).toString();
     }
 
-    private void startGame() {
+    public void startGame() {
         messages.clear();
         mapSLayers.clear();
         mapSLayers.glyphs.clear();
@@ -464,7 +468,7 @@ public class Epigon extends Game {
         //message("Starting with " + EpiData.count + " EpiData instances.");
     }
 
-    private void initPlayer() {
+    public void initPlayer() {
         player = RecipeMixer.buildPhysical(dataStarter.playerBlueprint);
         player.stats.get(Stat.VIGOR).set(42.0);
         player.stats.get(Stat.NUTRITION).delta(-0.1);
@@ -479,7 +483,7 @@ public class Epigon extends Game {
         infoHandler.showPlayerHealthAndArmor();
     }
 
-    private void prepFall() {
+    public void prepFall() {
         message("Falling..... Press SPACE to continue");
         int w = MapConstants.DIVE_HEADER[0].length();
         WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
@@ -641,7 +645,7 @@ public class Epigon extends Game {
         contextHandler.setMap(map, world);
     }
 
-    private void runTurn() {
+    public void runTurn() {
         OrderedSet<Coord> creaturePositions = creatures.keysAsOrderedSet();
         Coord[] pa = new Coord[]{player.location};
         ArrayList<Coord> path = new ArrayList<>(9);
@@ -1019,7 +1023,7 @@ public class Epigon extends Game {
         }
     }
 
-    private void scheduleMove(Direction dir) {
+    public void scheduleMove(Direction dir) {
         awaitedMoves.add(player.location.translate(dir));
     }
 
@@ -1093,9 +1097,11 @@ public class Epigon extends Game {
         showingMenu = true;
         return Coord.get(startX - 2 >> 1, startY);
     }
-    private Coord showInteractOptions(Physical interactable, Physical user, Coord target, EpiMap map) {
-        if(interactable.interactableData == null || interactable.interactableData.isEmpty())
+
+    public Coord showInteractOptions(Physical interactable, Physical user, Coord target, EpiMap map) {
+        if (interactable.interactableData == null || interactable.interactableData.isEmpty()) {
             return null;
+        }
         mapOverlaySLayers.clear(1);
         mapOverlaySLayers.clear(2);
         int sz = interactable.interactableData.size(), len = 0;
@@ -1136,10 +1142,12 @@ public class Epigon extends Game {
         showingMenu = true;
         return Coord.get(startX, startY);
     }
-    private void buildInteractOptions(Physical interactable) {
+
+    public void buildInteractOptions(Physical interactable) {
         interactionOptions.clear();
-        if(interactable.interactableData == null || interactable.interactableData.isEmpty())
+        if (interactable.interactableData == null || interactable.interactableData.isEmpty()) {
             return;
+        }
         for (Interactable inter : interactable.interactableData) {
             interactionOptions.put(inter.verb, inter);
         }
@@ -1692,634 +1700,21 @@ public class Epigon extends Game {
         return mapSize.pixelHeight() + messageSize.pixelHeight();
     }
 
-    private final KeyHandler mapKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            if (ctrl && shift && key == SquidInput.BACKSPACE && !alt) // ctrl-shift-backspace
-            {
-                multiplexer.processedInput = true;
-                startGame();
-                return;
-            }
-            Verb verb = ControlMapping.allMappings.get(SquidInput.combineModifiers(key, alt, ctrl, shift));
-            if (!ControlMapping.defaultMapViewMapping.contains(verb)) {
-                return;
-            }
-            switch (verb) {
-                case MOVE_DOWN:
-                    scheduleMove(Direction.DOWN);
-                    break;
-                case MOVE_UP:
-                    scheduleMove(Direction.UP);
-                    break;
-                case MOVE_LEFT:
-                    scheduleMove(Direction.LEFT);
-                    break;
-                case MOVE_RIGHT:
-                    scheduleMove(Direction.RIGHT);
-                    break;
-                case MOVE_DOWN_LEFT:
-                    scheduleMove(Direction.DOWN_LEFT);
-                    break;
-                case MOVE_DOWN_RIGHT:
-                    scheduleMove(Direction.DOWN_RIGHT);
-                    break;
-                case MOVE_UP_LEFT:
-                    scheduleMove(Direction.UP_LEFT);
-                    break;
-                case MOVE_UP_RIGHT:
-                    scheduleMove(Direction.UP_RIGHT);
-                    break;
-                case MOVE_LOWER:// up '≤', down '≥'
-                    //  if (map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≥') {
-                        if (depth >= world.length - 1) {
-                            message("Theses down stairs turn out to lead nowhere.");
-                        } else {
-                            changeLevel(depth + 1, player.location);
-                        }
-//                    } else {
-//                        message("You're not on stairs going down.");
-//                    }
-                    break;
-                case MOVE_HIGHER:// up '≤', down '≥'
-//                    if (map.contents[player.location.x][player.location.y].getSymbolUninhabited() == '≤') {
-                        if (depth <= 0) {
-                            message("Theses up stairs turn out to lead nowhere.");
-                        } else {
-                            changeLevel(depth - 1, player.location);
-                        }
-//                    } else {
-//                        message("You're not on stairs going up.");
-//                    }
-                    break;
-                case OPEN: // Open all the doors nearby
-                    message("Opening nearby doors");
-                    for (Direction d : Direction.OUTWARDS) {
-                        Coord c = player.location.translate(d);
-                        if (!map.inBounds(c)) {
-                            continue;
-                        }
-                        if (map.lighting.fovResult[c.x][c.y] <= 0) {
-                            continue;
-                        }
-                        EpiTile tile = map.contents[c.x][c.y];
-                        if (tile.blockage != null && tile.blockage.countsAs(dataStarter.baseClosedDoor)){
-                                RecipeMixer.applyModification(tile.blockage, dataStarter.openDoor);
-                                tile.contents.add(tile.blockage);
-                                tile.blockage = null;
-                        }
-                    }
-                    calcFOV(player.location.x, player.location.y);
-                    calcDijkstra();
-                    break;
-                case SHUT: // Close all the doors nearby
-                    message("Closing nearby doors");
-                    for (Direction d : Direction.OUTWARDS) {
-                        Coord c = player.location.translate(d);
-                        if (!map.inBounds(c)) {
-                            continue;
-                        }
-                        if (map.lighting.fovResult[c.x][c.y] <= 0) {
-                            continue;
-                        }
-                        EpiTile tile = map.contents[c.x][c.y];
-                        for (Physical p : tile.contents) {
-                            if (p.countsAs(dataStarter.baseOpenDoor)) {
-                                if (tile.blockage != null) {
-                                    message("Can't shut the door to the " + d.toString() + " there's a " + tile.blockage.name + " in the way!");
-                                    continue;
-                                }
-                                RecipeMixer.applyModification(p, dataStarter.closeDoor);
-                                tile.remove(p);
-                                tile.blockage = p;
-                            }
-                        }
-                    }
-                    calcFOV(player.location.x, player.location.y);
-                    calcDijkstra();
-                    break;
-                case GATHER: // Pick everything nearby up
-                    List<Physical> pickedUp = new ArrayList<>();
-                    for (Direction dir : Direction.values()) {
-                        Coord c = player.location.translate(dir);
-                        if (map.inBounds(c) && map.lighting.fovResult[c.x][c.y] > 0) {
-                            EpiTile tile = map.contents[c.x][c.y];
-                            ListIterator<Physical> it = tile.contents.listIterator();
-                            Physical p;
-                            while (it.hasNext()) {
-                                p = it.next();
-                                if (p.attached || p.creatureData != null) {
-                                    continue;
-                                }
-                                player.addToInventory(p);
-                                pickedUp.add(p);
-                                it.remove();
-                            }
-                        }
-                    }
-                    if (pickedUp.isEmpty()) {
-                        message("Nothing to pick up nearby.");
-                    } else {
-                        message(pickedUp.stream().map(p -> Utilities.colorize(p.name, p.rarity.color())).collect(Collectors.joining(", ", "Picked up ", ".")));
-                    }
-                    break;
-                case EQUIPMENT:
-                    mapOverlayHandler.setMode(PrimaryMode.EQUIPMENT);
-                    mapInput.setKeyHandler(equipmentKeys);
-                    toCursor.clear();
-                    mapInput.setMouse(equipmentMouse);
-                    break;
-                case WIELD:
-                    equipItem();
-                    break;
-                case DROP:
-                    message("Dropping all held items");
-                    for (Physical dropped : player.unequip(Maker.makeList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND))) {
-                        for (int i = 0, offset = player.next(3); i < 8; i++) {
-                            Coord c = player.location.translate(Direction.OUTWARDS[i + offset & 7]);
-                            if (map.inBounds(c) && map.lighting.fovResult[c.x][c.y] > 0) {
-                                map.contents[c.x][c.y].add(dropped);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                case CONTEXT_PRIOR:
-                    contextHandler.prior();
-                    break;
-                case CONTEXT_NEXT:
-                    contextHandler.next();
-                    break;
-                case INFO_PRIOR:
-                    infoHandler.prior();
-                    break;
-                case INFO_NEXT:
-                    infoHandler.next();
-                    break;
-                case MESSAGE_PRIOR:
-                    scrollMessages(-1);
-                    break;
-                case MESSAGE_NEXT:
-                    scrollMessages(1);
-                    break;
-                case HELP:
-                    mapOverlayHandler.setMode(PrimaryMode.HELP);
-                    mapInput.setKeyHandler(helpKeys);
-                    toCursor.clear();
-                    mapInput.setMouse(helpMouse);
-                    break;
-                case QUIT:
-                    // TODO - confirmation
-                    Gdx.app.exit();
-                    return;
-                case WAIT:
-                    scheduleMove(Direction.NONE);
-                    break;
-                case REST:
-                    prepFall();
-                    break;
-                case INTERACT:
-                    Optional<Physical> t;
-                    if((t = player.inventory.stream().filter(ph -> ph.symbol == 'ῗ').findFirst()).isPresent())
-                    {
-                        if(player.creatureData.lastUsedItem != null && player.creatureData.lastUsedItem.symbol == 'ῗ')
-                            player.creatureData.lastUsedItem = null;
-                        else 
-                            player.creatureData.lastUsedItem = t.get();
-                    }
-                    break;
-                default:
-                    //message("Can't " + verb.name + " from main view.");
-                    return;
-            }
-            multiplexer.processedInput = true;
-            infoHandler.updateDisplay();
-            // check if the turn clock needs to run
-            if (verb.isAction()) {
-                runTurn();
-            }
-        }
-    };
+    public final KeyHandler mapKeys = new MapKeyHandler().setEpigon(this);
 
-    private final KeyHandler fallbackKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            Verb verb = ControlMapping.allMappings.get(SquidInput.combineModifiers(key, alt, ctrl, shift));
-            String m;
-            if (mapOverlaySLayers.isVisible()) {
-                switch (mapOverlayHandler.getMode()) {
-                    case HELP:
-                        if (!ControlMapping.defaultHelpViewMapping.contains(verb)) verb = null;
-                        m = "help";
-                        break;
-                    case CRAFTING:
-                        if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
-                        m = "crafting";
-                        break;
-                    default:
-                        if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) verb = null;
-                        m = "equipment";
-                        break;
-                }
-            } else {
-                switch (mode) {
-                    case DIVE:
-                        if (!ControlMapping.defaultFallingViewMapping.contains(verb)) verb = null;
-                        m = "dive";
-                        break;
-                    default:
-                        if (!ControlMapping.defaultMapViewMapping.contains(verb)) verb = null;
-                        m = "map";
-                        break;
-                }
-            }
-            if (verb == null) {
-                message("Unknown input for " + m + " mode: " + key);
-            } else {
-                message("Can't " + verb.name + " from " + m + " mode.");
-            }
-        }
-    };
+    public final KeyHandler fallbackKeys = new FallbackKeyHandler().setEpigon(this);
 
-    private final KeyHandler equipmentKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) {
-                return;
-            }
-            if (showingMenu) {
-                if(mapOverlayHandler.getSelected() == null || mapOverlayHandler.getSelected().interactableData == null
-                        || mapOverlayHandler.getSelected().interactableData.isEmpty())
-                {
-                    showingMenu = false;
-                    menuLocation = null;
-                    mapOverlayHandler.setSubselection(null);
-                    maneuverOptions.clear();
-                    interactionOptions.clear();
-                    currentTarget = null;
-                    mapOverlaySLayers.clear(1);
-                    mapOverlaySLayers.clear(2);
-                    multiplexer.processedInput = true;
-                    infoHandler.updateDisplay();
-                    return;
-                }
-                List<Interactable> interactableData = mapOverlayHandler.getSelected().interactableData;
-                Coord sub = mapOverlayHandler.getSubselection();
-                switch (verb)
-                {
-                    case MOVE_DOWN:
-                        if(sub.y + 1 < interactableData.size())
-                            mapOverlayHandler.setSubselection(sub.x, sub.y + 1);
-                        break;
-                    case MOVE_UP:
-                        if(sub.y > 0)
-                            mapOverlayHandler.setSubselection(sub.x, sub.y - 1);
-                        break;
-                    case CLOSE_SCREEN:
-                    case MOVE_LEFT:
-                        showingMenu = false;
-                        menuLocation = null;
-                        mapOverlayHandler.setSubselection(null);
-                        maneuverOptions.clear();
-                        interactionOptions.clear();
-                        currentTarget = null;
-                        mapOverlaySLayers.clear(1);
-                        mapOverlaySLayers.clear(2);
-                        multiplexer.processedInput = true;
-                        infoHandler.updateDisplay();
-                        return;
-                    case MOVE_RIGHT:
-                    case INTERACT:
-                        if (mapOverlayHandler.getSubselection() != null) {
-                            Interactable interaction = interactionOptions.getAt(sub.y);
-                            if (interaction == null)
-                                break;
-                            Physical selected = mapOverlayHandler.getSelected();
-                            if (interaction.consumes) {
-                                player.removeFromInventory(selected);
-                            }
-                            message(Messaging.transform(interaction.interaction.interact(player, selected, Epigon.this),
-                                    player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                            showingMenu = false;
-                            menuLocation = null;
-                            mapOverlayHandler.setSubselection(null);
-                            maneuverOptions.clear();
-                            interactionOptions.clear();
-                            currentTarget = null;
-                            mapOverlaySLayers.clear(1);
-                            mapOverlaySLayers.clear(2);
-                        }
-                        break;
-                    default:
-                        return;
-                }
+    public final KeyHandler equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
 
-                multiplexer.processedInput = true;
-                infoHandler.updateDisplay();
-                return;
-            }
-            switch (verb) {
-                case MOVE_DOWN:
-                    mapOverlayHandler.move(Direction.DOWN);
-                    break;
-                case MOVE_UP:
-                    mapOverlayHandler.move(Direction.UP);
-                    break;
-                case MOVE_LEFT:
-                    mapOverlayHandler.move(Direction.LEFT);
-                    break;
-                case MOVE_RIGHT:
-                    mapOverlayHandler.move(Direction.RIGHT);
-                    break;
-                case WIELD:
-                    equipItem(mapOverlayHandler.getSelected());
-                    break;
-                case DROP:
-                    map.contents[player.location.x][player.location.y].contents.add(player.removeFromInventory(mapOverlayHandler.getSelected()));
-                    break;
-                case INTERACT:
-                    Physical selected = mapOverlayHandler.getSelected();
-                    if(selected == null)
-                        break;
-                    if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
-                        buildInteractOptions(selected);
-                        menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
-                        mapOverlayHandler.setSubselection(0, 0);
-//                        message("Interactions for " + selected.name + ": " + selected.interactableData
-//                            .stream()
-//                            .map(interact -> interact.phrasing)
-//                            .collect(Collectors.joining(", ")));
-//                        Interactable interaction = selected.interactableData.get(0);
-//                        if (interaction.consumes) {
-//                            player.removeFromInventory(selected);
-//                        }
-//                        message(Messaging.transform(interaction.interaction.interact(player, selected, map),
-//                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                    } else if (selected.wearableData != null || selected.weaponData != null) {
-                        if (player.creatureData.equippedDistinct.contains(selected)) {
-                            player.unequip(selected);
-                            player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
-                        } else {
-                            player.equipItem(selected);
-                        }
-                    } else {
-                        message("No interaction for " + selected.name);
-                    }
-                    break;
-                case MESSAGE_PRIOR:
-                    scrollMessages(-1);
-                    break;
-                case MESSAGE_NEXT:
-                    scrollMessages(1);
-                    break;
-                case CONTEXT_PRIOR:
-                    contextHandler.prior();
-                    break;
-                case CONTEXT_NEXT:
-                    contextHandler.next();
-                    break;
-                case INFO_PRIOR:
-                    infoHandler.prior();
-                    break;
-                case INFO_NEXT:
-                    infoHandler.next();
-                    break;
-                case HELP:
-                    mapOverlayHandler.setMode(PrimaryMode.HELP);
-                    mapInput.setKeyHandler(helpKeys);
-                    mapInput.setMouse(helpMouse);
-                    break;
-                case EQUIPMENT:
-                case CLOSE_SCREEN:
-                    mapInput.setKeyHandler(mapKeys);
-                    mapInput.setMouse(mapMouse);
-                    mapOverlayHandler.hide();
-                    break;
-                default:
-                    //message("Can't " + verb.name + " from equipment view.");
-                    return; // note, this will not change processedInput
-            }
-            multiplexer.processedInput = true;
-            infoHandler.updateDisplay();
-        }
-    };
+    public final KeyHandler helpKeys = new HelpKeyHandler().setEpigon(this);
 
-    private final KeyHandler helpKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultHelpViewMapping.contains(verb)) {
-                return;
-            }
-            switch (verb) {
-                case MOVE_DOWN:
-                    mapOverlayHandler.move(Direction.DOWN);
-                    break;
-                case MOVE_UP:
-                    mapOverlayHandler.move(Direction.UP);
-                    break;
-                case MOVE_LEFT:
-                    mapOverlayHandler.move(Direction.LEFT);
-                    break;
-                case MOVE_RIGHT:
-                    mapOverlayHandler.move(Direction.RIGHT);
-                    break;
-                case MESSAGE_PRIOR:
-                    scrollMessages(-1);
-                    break;
-                case MESSAGE_NEXT:
-                    scrollMessages(1);
-                    break;
-                case CONTEXT_PRIOR:
-                    contextHandler.prior();
-                    break;
-                case CONTEXT_NEXT:
-                    contextHandler.next();
-                    break;
-                case INFO_PRIOR:
-                    infoHandler.prior();
-                    break;
-                case INFO_NEXT:
-                    infoHandler.next();
-                    break;
-                case EQUIPMENT:
-                    mapOverlayHandler.setMode(PrimaryMode.EQUIPMENT);
-                    mapInput.setKeyHandler(equipmentKeys);
-                    mapInput.setMouse(equipmentMouse);
-                    break;
-                case HELP:
-                case CLOSE_SCREEN:
-                    mapInput.setKeyHandler(mapKeys);
-                    mapInput.setMouse(mapMouse);
-                    mapOverlayHandler.hide();
-                    break;
-                default:
-                    //message("Can't " + verb.name + " from help view.");
-                    return;
-            }
-            multiplexer.processedInput = true;
-            infoHandler.updateDisplay();
-        }
-    };
+    private final KeyHandler fallingKeys = new FallingKeyHandler().setEpigon(this);
 
-    private final KeyHandler fallingKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultFallingViewMapping.contains(verb)) {
-                return;
-            }
-            switch (verb) {
-                case MOVE_UP:
-                    if (!paused) {
-                        nextInput = Instant.now().plusMillis(inputDelay);
-                        fallingHandler.move(Direction.UP);
-                    }
-                    break;
-                case MOVE_DOWN:
-                    if (!paused) {
-                        nextInput = Instant.now().plusMillis(inputDelay);
-                        fallingHandler.move(Direction.DOWN);
-                    }
-                    break;
-                case MOVE_LEFT:
-                    if (!paused) {
-                        nextInput = Instant.now().plusMillis(inputDelay);
-                        fallingHandler.move(Direction.LEFT);
-                    }
-                    break;
-                case MOVE_RIGHT:
-                    if (!paused) {
-                        nextInput = Instant.now().plusMillis(inputDelay);
-                        fallingHandler.move(Direction.RIGHT);
-                    }
-                    break;
-                case PAUSE:
-                    paused = !paused;
-                    if (paused) {
-                        pausedAt = Instant.now();
-                        message("You are hovering, have a look around!");
-                    } else { // need to calculate time offsets
-                        long pausedFor = pausedAt.until(Instant.now(), ChronoUnit.MILLIS);
-                        nextFall = nextFall.plusMillis(pausedFor);
-                        message("Falling once more!");
-                    }
-                    break;
-                case SAVE:
-                    // TODO
-                    break;
-                case QUIT:
-                    Gdx.app.exit();
-                    break;
-                default:
-                    //message("Can't " + verb.name + " from falling view.");
-                    return;
-            }
-            multiplexer.processedInput = true;
-        }
-    };
+    private final KeyHandler fallingGameOverKeys = new FallingGameOverKeyHandler().setEpigon(this);
 
-    private final KeyHandler fallingGameOverKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-            if (multiplexer.processedInput) return;
-            int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
-            Verb verb = ControlMapping.allMappings.get(combined);
-            if (!ControlMapping.defaultFallingViewGameOverMapping.contains(verb)) {
-                return;
-            }
-            switch (verb) {
-                case TRY_AGAIN:
-                    initPlayer();
-                    prepFall();
-                    break;
-                case QUIT:
-                    Gdx.app.exit();
-                    break;
-                default:
-                    //message("Can't " + verb.name + " from falling view.");
-                    return;
-            }
-            multiplexer.processedInput = true;
-        }
-    };
+    private final KeyHandler debugKeys = new DebugKeyHandler().setEpigon(this);
 
-    private final KeyHandler debugKeys = new KeyHandler() {
-        @Override
-        public void handle(char key, boolean alt, boolean ctrl, boolean shift) { // TODO - only the first 2 seem to be working currently
-            if (multiplexer.processedInput) return;
-            Element el;
-            switch (key) {
-                case 'x':
-                    el = rng.getRandomElement(Element.allEnergy);
-                    message("Sector blast " + el.styledName);
-                    fxHandler.sectorBlast(player.location, el, 7, Radius.CIRCLE);
-                    break;
-                case 'X':
-                    el = rng.getRandomElement(Element.allEnergy);
-                    message("Zap boom " + el.styledName);
-                    fxHandler.zapBoom(player.location, player.location.translateCapped(rng.between(-20, 20), rng.between(-10, 10), map.width, map.height), el);
-                    break;
-                case 'R':
-                    message("Raining");
-                    int quantity = 8000;
-                    float totalTime = 5; // in seconds
-                    // chooses an element for the rain by the player's current position
-                    Element drops = GauntRNG.getRandomElement(player.location.hashCode(), Element.allEnergy);
-                    for (int i = 0; i < quantity; i++) {
-                        Coord end = rng.nextCoord(worldWidth, worldHeight);
-                        if (map.contents[end.x][end.y].blockage != null) {
-                            continue; // skip hitting blocking areas
-                        }
-                        int length = rng.between(4, 8);
-                        Coord origin = Coord.get(end.x + length, end.y - length);
-                        fxHandlerPassive.rain(origin, end, drops, totalTime * ((float) i / quantity));
-                    }
-                    break;
-                case 'z':
-                    message("Fritzzzz");
-                    fxHandlerPassive.fritz(player.location, Element.ICE, 7, Radius.CIRCLE);
-                    break;
-                case 'Z':
-                    message("Twinkle time");
-                    for (Coord c : rng.getRandomUniqueCells(0, 0, worldWidth, worldHeight, 400)) {
-                        fxHandlerPassive.twinkle(c, Element.LIGHT);
-                    }
-                    break;
-                case '=':
-                    message("Layered sparkle small");
-                    fxHandlerPassive.layeredSparkle(player.location, 4, Radius.CIRCLE);
-                    break;
-                case '+':
-                    message("Layered sparkle large");
-                    fxHandlerPassive.layeredSparkle(player.location, 8, Radius.CIRCLE);
-                    break;
-                case '|':
-                    if (odinView) {
-                        message("Odinview disabled.");
-                        odinView = false;
-                    } else {
-                        message("Showing all");
-                        odinView = true;
-                    }
-                    calcFOV(player.location.x, player.location.y);
-                default:
-                    return;
-            }
-            multiplexer.processedInput = true;
-        }
-    };
-
-    private final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    public final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -2391,7 +1786,7 @@ public class Epigon extends Game {
         }
     });
 
-    private final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    public final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -2399,7 +1794,7 @@ public class Epigon extends Game {
         }
     });
 
-    private final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    public final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -2407,7 +1802,7 @@ public class Epigon extends Game {
         }
     });
 
-    private final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new InputAdapter() {
+    public final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new InputAdapter() {
 
         // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
         // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.

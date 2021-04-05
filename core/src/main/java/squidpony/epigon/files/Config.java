@@ -1,8 +1,5 @@
 package squidpony.epigon.files;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
-
 /**
  * A class to hold the game's launch configurations.
  */
