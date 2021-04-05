@@ -1600,10 +1600,10 @@ public class Epigon extends Game {
 
     @Override
     public void resize(int width, int height) {
-        // if not fullscreen, probably
-        if(Gdx.graphics.getDisplayMode().width != width){
-            Config.instance().displayConfig.windowWidth = Gdx.graphics.getWidth();
-            Config.instance().displayConfig.windowHeight = Gdx.graphics.getHeight();
+        // if not going to fullscreen, probably
+        if(Gdx.graphics.getDisplayMode().width != width && !Config.instance().displayConfig.maximized){
+            Config.instance().displayConfig.windowWidth = width;
+            Config.instance().displayConfig.windowHeight = height;
             Config.instance().displayConfig.monitorName = Gdx.graphics.getMonitor().name;
         }
         super.resize(width, height);
