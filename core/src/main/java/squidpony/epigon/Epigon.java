@@ -2,8 +2,6 @@ package squidpony.epigon;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -30,7 +28,6 @@ import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.*;
 import squidpony.squidgrid.gui.gdx.*;
-import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.mapping.LineKit;
 import squidpony.squidmath.*;
 
@@ -45,21 +42,9 @@ import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
 import squidpony.epigon.files.Config;
-import squidpony.epigon.input.DebugKeyHandler;
-import squidpony.epigon.input.EquipmentKeyHandler;
-import squidpony.epigon.input.FallbackKeyHandler;
-import squidpony.epigon.input.FallingGameOverKeyHandler;
-import squidpony.epigon.input.FallingKeyHandler;
-import squidpony.epigon.input.HelpKeyHandler;
-import squidpony.epigon.input.MapKeyHandler;
-import squidpony.epigon.mapping.CastleGenerator;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.LocalAreaGenerator;
-import squidpony.epigon.mapping.MapConstants;
-import squidpony.epigon.mapping.MapDecorator;
-import squidpony.epigon.mapping.RememberedTile;
-import squidpony.epigon.mapping.WobblyCanyonGenerator;
+import squidpony.epigon.input.key.*;
+import squidpony.epigon.input.mouse.*;
+import squidpony.epigon.mapping.*;
 import squidpony.epigon.util.Utilities;
 
 import static squidpony.squidgrid.gui.gdx.SColor.*;
@@ -161,12 +146,12 @@ public class Epigon extends Game {
     public InfoHandler infoHandler;
     public FallingHandler fallingHandler;
     private GreasedRegion blockage, floors;
-    private DijkstraMap toPlayerDijkstra, monsterDijkstra;
-    private LOS los;
-    private Coord cursor;
+    public DijkstraMap toPlayerDijkstra, monsterDijkstra;
+    public LOS los;
+    public Coord cursor;
     public Physical player;
-    private ArrayList<Coord> awaitedMoves;
-    private OrderedMap<Coord, Physical> creatures;
+    public ArrayList<Coord> awaitedMoves;
+    public OrderedMap<Coord, Physical> creatures;
     private int autoplayTurns = 0;
 
     // Timing
@@ -1027,7 +1012,7 @@ public class Epigon extends Game {
         awaitedMoves.add(player.location.translate(dir));
     }
 
-    private void buildAttackOptions(Physical target) {
+    public void buildAttackOptions(Physical target) {
         currentTarget = target;
         maneuverOptions.clear();
 
@@ -1039,12 +1024,12 @@ public class Epigon extends Game {
         }
     }
 
-    private Weapon chooseValidWeapon(Physical attacker, Physical target) {
+    public Weapon chooseValidWeapon(Physical attacker, Physical target) {
         List<Weapon> weapons = validAttackOptions(attacker, target);
         return weapons == null || weapons.isEmpty() ? null : rng.getRandomElement(weapons);
     }
 
-    private List<Weapon> validAttackOptions(Physical attacker, Physical target) {
+    public List<Weapon> validAttackOptions(Physical attacker, Physical target) {
         if (attacker == null || attacker.creatureData == null || attacker.creatureData.weaponChoices == null || target == null) {
             return null;
         }
@@ -1067,7 +1052,7 @@ public class Epigon extends Game {
         return weapons;
     }
 
-    private Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
+    public Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
         int sz = options.size(), len = 0;
         for (int i = 0; i < sz; i++) {
             len = Math.max(options.keyAt(i).length(), len);
@@ -1700,330 +1685,34 @@ public class Epigon extends Game {
         return mapSize.pixelHeight() + messageSize.pixelHeight();
     }
 
-    public final KeyHandler mapKeys = new MapKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler mapKeys = new MapKeyHandler().setEpigon(this);
 
-    public final KeyHandler fallbackKeys = new FallbackKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler fallbackKeys = new FallbackKeyHandler().setEpigon(this);
 
-    public final KeyHandler equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
 
-    public final KeyHandler helpKeys = new HelpKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler helpKeys = new HelpKeyHandler().setEpigon(this);
 
-    private final KeyHandler fallingKeys = new FallingKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler fallingKeys = new FallingKeyHandler().setEpigon(this);
 
-    private final KeyHandler fallingGameOverKeys = new FallingGameOverKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler fallingGameOverKeys = new FallingGameOver().setEpigon(this);
 
-    private final KeyHandler debugKeys = new DebugKeyHandler().setEpigon(this);
+    public final EpigonKeyHandler debugKeys = new DebugKeyHandler().setEpigon(this);
 
-    public final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
+    public final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
 
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (showingMenu) {
-                if (menuLocation.x <= screenX + 2 && menuLocation.y <= screenY
-                        && screenY - menuLocation.y < interactionOptions.size()
-                        && mapOverlaySLayers.getLayer(1).getChar(screenX + 2, screenY, '\uFFFF') == '\0') {
-                    Interactable interaction = interactionOptions.getAt(screenY - menuLocation.y);
-                    if (interaction == null)
-                        return false;
-                    Physical selected = mapOverlayHandler.getSelected();
-                    if (interaction.consumes) {
-                        player.removeFromInventory(selected);
-                    }
-                    message(Messaging.transform(interaction.interaction.interact(player, selected, Epigon.this),
-                            player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                }
-                showingMenu = false;
-                menuLocation = null;
-                maneuverOptions.clear();
-                interactionOptions.clear();
-                currentTarget = null;
-                mapOverlaySLayers.clear(1);
-                mapOverlaySLayers.clear(2);
-                return true;
-            }
+    public final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
 
-            if(!mapOverlayHandler.setSelection(screenX, screenY)) 
-                return false;
-            Physical selected = mapOverlayHandler.getSelected();
-            if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
-                buildInteractOptions(selected);
-                if (interactionOptions == null || interactionOptions.isEmpty()) {
-                    message("Cannot interact with the " + selected.name);
-                } else {
-                    menuLocation = showInteractOptions(selected, player, mapOverlayHandler.getSelection(), map);
-                    mapOverlayHandler.setSubselection(0, 0);
-                }
-                return true;
+    public final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
 
-//                message("Interactions for " + selected.name + ": " + selected.interactableData
-//                        .stream()
-//                        .map(interact -> interact.phrasing)
-//                        .collect(Collectors.joining(", ")));
-//                Interactable interaction = selected.interactableData.get(0);
-//                if (interaction.consumes) {
-//                    player.removeFromInventory(selected);
-//                }
-//                message(Messaging.transform(interaction.interaction.interact(player, selected, map),
-//                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-            } else if (selected.wearableData != null || selected.weaponData != null) {
-                if (player.creatureData.equippedDistinct.contains(selected)) {
-                    player.unequip(selected);
-                    player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
-                } else {
-                    player.equipItem(selected);
-                }
-            } else {
-                message("No interaction for " + selected.name);
-            }
-            return true;
-        }
+    public final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new MapMouseHandler().setEpigon(this));
 
-        @Override
-        public boolean mouseMoved(int screenX, int screenY) {
-            if(!showingMenu) 
-                mapOverlayHandler.setSelection(screenX, screenY);
-            return false;
-        }
-    });
-
-    public final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new InputAdapter() {
-
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            return false; // No-op for now
-        }
-    });
-
-    public final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new InputAdapter() {
-
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            return false; // No-op for now
-        }
-    });
-
-    public final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new InputAdapter() {
-
-        // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
-        // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            screenX += player.location.x - (mapSize.gridWidth >> 1);
-            screenY += player.location.y - (mapSize.gridHeight >> 1);
-
-            if (!map.inBounds(screenX, screenY) || (!showingMenu && map.lighting.fovResult[screenX][screenY] <= 0.0)) {
-                return false;
-            }
-
-            Physical thing = null;
-            if (map.contents[screenX][screenY] != null) {
-                thing = map.contents[screenX][screenY].getCreature();
-            }
-            switch (button) {
-                case Input.Buttons.LEFT:
-                    if (showingMenu) {
-                        if (menuLocation.x <= screenX && menuLocation.y <= screenY 
-                                && screenY - menuLocation.y < maneuverOptions.size() 
-                                && currentTarget != null && mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) 
-                        {
-                            attack(currentTarget, maneuverOptions.getAt(screenY - menuLocation.y));
-                            calcFOV(player.location.x, player.location.y);
-                            calcDijkstra();
-                            runTurn();
-                        }
-                        showingMenu = false;
-                        menuLocation = null;
-                        maneuverOptions.clear();
-                        interactionOptions.clear();
-                        currentTarget = null;
-                        mapHoverSLayers.clear();
-                        return true;
-                    }
-
-                    if (cursor.x != screenX || cursor.y != screenY) {// clear cursor if lifted in space other than the one it went down in
-                        toCursor.clear();
-                        return false;//cleaned up but not considered "handled"
-                    }
-
-                    if (thing == null) {
-                        if (toCursor.isEmpty()) {
-                            cursor = Coord.get(screenX, screenY);
-                            ((StatefulRNG)toPlayerDijkstra.rng).setState(player.location.hashCode() ^ (long)cursor.hashCode() << 32);
-                            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-                            if (!toCursor.isEmpty()) {
-                                toCursor.remove(0); // Remove cell you're in from list
-                            }
-                        }
-                        awaitedMoves.addAll(toCursor);
-                        return true;
-                    } else {
-                        List<Weapon> attackOptions = validAttackOptions(player, thing);
-                        if (attackOptions == null || attackOptions.isEmpty()) {
-                            message("Can't attack the " + thing.name + " from there.");
-                        } else {
-                            Weapon w = rng.getRandomElement(attackOptions);
-                            attack(thing, w);
-                            calcFOV(player.location.x, player.location.y);
-                            calcDijkstra();
-                            runTurn();
-                        }
-                    }
-
-                    return true;
-                case Input.Buttons.RIGHT:
-                    if (thing == null) {
-                        return false;
-                    }
-                    buildAttackOptions(thing);
-                    if (maneuverOptions == null || maneuverOptions.isEmpty()) {
-                        message("No attack options against the " + thing.name + " at this range.");
-                    } else {
-                        menuLocation = showAttackOptions(thing, maneuverOptions);
-                    }
-                    return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean touchDragged(int screenX, int screenY, int pointer) {
-            return mouseMoved(screenX, screenY);
-        }
-
-        @Override
-        public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-            if (!awaitedMoves.isEmpty()) {
-                cancelMove();
-                return true;
-            }
-
-            switch (button) {
-                case Input.Buttons.LEFT:
-                    return false;
-                case Input.Buttons.RIGHT:
-                    // TODO - add tooltip info for location
-                    break;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean mouseMoved(int screenX, int screenY) {
-            screenX += player.location.x - (mapSize.gridWidth >> 1);
-            screenY += player.location.y - (mapSize.gridHeight >> 1);
-            if (!map.inBounds(screenX, screenY) || map.lighting.fovResult[screenX][screenY] <= 0.0){
-                toCursor.clear();
-                return false;
-            }
-            contextHandler.tileContents(screenX, screenY, depth, map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
-            infoHandler.setTarget(map.contents[screenX][screenY].getCreature());
-
-            if (!awaitedMoves.isEmpty()) {
-                return false;
-            }
-
-            cursor = Coord.get(screenX, screenY);
-            toCursor.clear();
-            ((StatefulRNG)toPlayerDijkstra.rng).setState(player.location.hashCode() ^ (long)cursor.hashCode() << 32);
-            toPlayerDijkstra.findPathPreScanned(toCursor, cursor);
-            if (!toCursor.isEmpty()) {
-                toCursor.remove(0);
-            }
-            return false;
-        }
-    });
-    
     private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new InputAdapter() {
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (screenX < 0 || screenX >= contextSize.gridWidth || screenY < 0 || screenY >= contextSize.gridHeight) {
-                return false;
-            }
-            switch (button) {
-                case Input.Buttons.LEFT:
-                    if (screenX == contextHandler.arrowLeft.x && screenY == contextHandler.arrowLeft.y) {
-                        contextHandler.prior();
-                    } else if (screenX == contextHandler.arrowRight.x && screenY == contextHandler.arrowRight.y) {
-                        contextHandler.next();
-                    }
-                    return true;
-                case Input.Buttons.RIGHT:
-                default:
-                    return false;
-            }
-        }
-
-
-        @Override
-        public boolean touchDragged(int screenX, int screenY, int pointer) {
-            return mouseMoved(screenX, screenY);
-        }
-
-        @Override
-        public boolean mouseMoved(int screenX, int screenY) {
-            return false;
-        }
-    });
+        mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new ContextMouseHandler().setEpigon(this));
 
     private final SquidMouse infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InputAdapter() {
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            //System.out.println("info: " + screenX + ", " + screenY);
-            switch (button) {
-                case Input.Buttons.LEFT:
-                    if (screenX == infoHandler.arrowLeft.x && screenY == infoHandler.arrowLeft.y) {
-                        infoHandler.prior();
-                    } else if (screenX == infoHandler.arrowRight.x && screenY == infoHandler.arrowRight.y) {
-                        infoHandler.next();
-                    }
-                    return true;
-                case Input.Buttons.RIGHT:
-                default:
-                    return false;
-            }
-        }
+        mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InfoMouseHandler().setEpigon(this));
 
-
-        @Override
-        public boolean touchDragged(int screenX, int screenY, int pointer) {
-            return mouseMoved(screenX, screenY);
-        }
-
-        @Override
-        public boolean mouseMoved(int screenX, int screenY) {
-            return false;
-        }
-    });
     private final SquidMouse messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
-            messageSize.cellWidth, mapSize.pixelHeight(), new InputAdapter() {
-        @Override
-        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            //System.out.println("message: " + screenX + ", " + screenY);
-            switch (button) {
-                case Input.Buttons.LEFT:
-                    if (screenY <= 0) {
-                        scrollMessages(-1);
-                    } else if (screenY >= messageSize.gridHeight - 1) {
-                        scrollMessages(1);
-                    }
-                    return true;
-                case Input.Buttons.RIGHT:
-                default:
-                    return false;
-            }
-        }
-
-
-        @Override
-        public boolean touchDragged(int screenX, int screenY, int pointer) {
-            return mouseMoved(screenX, screenY);
-        }
-
-        @Override
-        public boolean mouseMoved(int screenX, int screenY) {
-            return false;
-        }
-    });
+        messageSize.cellWidth, mapSize.pixelHeight(), new MessageMouseHandler().setEpigon(this));
 }

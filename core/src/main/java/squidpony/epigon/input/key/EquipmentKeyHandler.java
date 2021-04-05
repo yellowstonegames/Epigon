@@ -1,4 +1,4 @@
-package squidpony.epigon.input;
+package squidpony.epigon.input.key;
 
 import java.util.List;
 
@@ -11,6 +11,8 @@ import squidpony.epigon.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.MapOverlayHandler;
+import squidpony.epigon.input.ControlMapping;
+import squidpony.epigon.input.Verb;
 
 /**
  * Handles input for actively falling in Falling mode

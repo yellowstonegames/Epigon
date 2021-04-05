@@ -1,4 +1,4 @@
-package squidpony.epigon.input;
+package squidpony.epigon.input.key;
 
 import com.badlogic.gdx.Gdx;
 
@@ -18,6 +18,8 @@ import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.slot.WieldSlot;
 import squidpony.epigon.display.MapOverlayHandler;
+import squidpony.epigon.input.ControlMapping;
+import squidpony.epigon.input.Verb;
 import squidpony.epigon.mapping.EpiTile;
 import squidpony.epigon.util.Utilities;
 

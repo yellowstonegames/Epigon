@@ -1,4 +1,4 @@
-package squidpony.epigon.input;
+package squidpony.epigon.input.key;
 
 import squidpony.squidgrid.Radius;
 import squidpony.squidmath.Coord;

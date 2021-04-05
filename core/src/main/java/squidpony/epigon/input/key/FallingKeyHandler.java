@@ -1,4 +1,4 @@
-package squidpony.epigon.input;
+package squidpony.epigon.input.key;
 
 import com.badlogic.gdx.Gdx;
 
@@ -9,6 +9,8 @@ import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 
 import squidpony.epigon.Epigon;
+import squidpony.epigon.input.ControlMapping;
+import squidpony.epigon.input.Verb;
 
 /**
  * Handles input for actively falling in Falling mode
