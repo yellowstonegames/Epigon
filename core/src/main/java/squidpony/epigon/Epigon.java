@@ -170,8 +170,6 @@ public class Epigon extends Game {
     public static final int worldWidth, worldHeight, worldDepth, totalDepth;
     public float startingY, finishY, timeToFall;
 
-    private static final boolean DEBUG = true;
-    public boolean odinView = false;
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
@@ -234,7 +232,7 @@ public class Epigon extends Game {
         batch = new FilterBatch(filter);
         // uncomment the line below to see the game with no filters
         //batch = new FilterBatch();
-        if(DEBUG) {
+        if(Config.instance().debugConfig.debugActive) {
             glp = new GLProfiler(Gdx.graphics);
             glp.enable();
         }
@@ -913,11 +911,11 @@ public class Epigon extends Game {
             }
         }
         map.lighting.calculateFOV(checkX, checkY,
-                checkX - 1 - (mapSize.gridWidth >>> 1), checkY - 1 - (mapSize.gridHeight >>> 1),
-                checkX + 1 + (mapSize.gridWidth >>> 1), checkY + 1 + (mapSize.gridHeight >>> 1));
+            checkX - 1 - (mapSize.gridWidth >>> 1), checkY - 1 - (mapSize.gridHeight >>> 1),
+            checkX + 1 + (mapSize.gridWidth >>> 1), checkY + 1 + (mapSize.gridHeight >>> 1));
         FOV.addFOVsInto(map.lighting.fovResult, FOV.reuseFOV(map.lighting.resistances, map.lighting.tempFOV,
-                checkX, checkY, 4.0, Radius.CIRCLE));
-        if (odinView) {
+            checkX, checkY, 4.0, Radius.CIRCLE));
+        if (Config.instance().debugConfig.odinView) {
             //choice of tempFOV is arbitrary; we just need a 2D array of all 0.6
             ArrayTools.fill(map.lighting.tempFOV, 0.6);
             //makes tempColorLighting filled with 0.6-strength white light
@@ -928,17 +926,14 @@ public class Epigon extends Game {
                 for (int y = 0; y < map.height; y++) {
                     //all of colorLighting will be lit now, so all of fovResult will have a value greater than 0.
                     map.lighting.fovResult[x][y]
-                            = MathUtils.clamp(map.lighting.fovResult[x][y] + map.lighting.colorLighting[0][x][y], 0, 1);
+                        = MathUtils.clamp(map.lighting.fovResult[x][y] + map.lighting.colorLighting[0][x][y], 0, 1);
                 }
             }
             map.seen.allOn();
             ArrayTools.insert(lineDungeon, prunedDungeon, 0, 0);
-        }
-        else 
-        {
+        } else {
             map.seen.or(map.tempSeen.refill(map.lighting.fovResult, 0.0001, Double.POSITIVE_INFINITY));
             LineKit.pruneLines(lineDungeon, map.seen, LineKit.lightAlt, prunedDungeon);
-
         }
 
         Physical creature;
@@ -1432,7 +1427,7 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        if(DEBUG)
+        if(Config.instance().debugConfig.debugActive)
             glp.reset();
         //super.render();
 
@@ -1516,7 +1511,7 @@ public class Epigon extends Game {
         batch.setProjectionMatrix(infoViewport.getCamera().combined);
         infoStage.getRoot().draw(batch, 1);
 
-        if (DEBUG) {
+        if (Config.instance().debugConfig.debugActive) {
             int drawCalls = glp.getDrawCalls();
             int textureBindings = glp.getTextureBindings();
             int calls = glp.getCalls();

@@ -6,6 +6,7 @@ import squidpony.squidmath.Coord;
 import squidpony.epigon.Epigon;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.Element;
+import squidpony.epigon.files.Config;
 
 /**
  * Handles input for debug actions
@@ -72,12 +73,12 @@ public class DebugKeyHandler implements EpigonKeyHandler {
                 epigon.fxHandlerPassive.layeredSparkle(epigon.player.location, 8, Radius.CIRCLE);
                 break;
             case '|':
-                if (epigon.odinView) {
+                if (Config.instance().debugConfig.odinView) {
                     epigon.message("Odinview disabled.");
-                    epigon.odinView = false;
+                    Config.instance().debugConfig.odinView = false;
                 } else {
                     epigon.message("Showing all");
-                    epigon.odinView = true;
+                    Config.instance().debugConfig.odinView = true;
                 }
                 epigon.calcFOV(epigon.player.location.x, epigon.player.location.y);
             default:
