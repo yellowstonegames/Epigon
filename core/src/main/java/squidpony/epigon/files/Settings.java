@@ -13,17 +13,20 @@ public class Settings {
 
     public String seed = "bananas";
 
-    public int worldWidth = 160;
-    public int worldHeight = 160;
-    public int worldDepth = 10;
-    public int totalDepth = 40 + MapConstants.DIVE_HEADER.length;
-    public int primaryAreaWidth = 102; //World.DIVE_HEADER[0].length() + 2;
-    public int primaryAreaHeight = 26;
-    public int smallAreaWidth = 50;
-    public int smallAreaHeight = 22;
-    public int cellWidth = 14;
-    public int cellHeight = 28;
-    public int bottomHeight = 8;
+    public int worldGridWidth = 160;
+    public int worldGridHeight = 160;
+    public int worldGridDepth = 10;
+    public int totalGridDepth = 40 + MapConstants.DIVE_HEADER.length;
+    public int primaryGridWidth = 102; //World.DIVE_HEADER[0].length() + 2;
+    public int primaryGridHeight = 26;
+    public int secondaryGridWidth = 50;
+    public int secondaryGridHeight = 22;
+    public int primaryCellWidth = 14;
+    public int primaryCellHeight = 28;
+    public int secondaryCellWidth = 9;
+    public int secondaryCellHeight = 20;
+    public double secondarySize = 7.0 / 5.0; // TODO - add calculation verification of this value on window construction
+    public int messageGridHeight = 8;
 
     transient public long seedValue;
 
@@ -49,35 +52,35 @@ public class Settings {
 
     public PanelSize mapSize() {
         if (mapSize == null) {
-            mapSize = new PanelSize(primaryAreaWidth / 2, primaryAreaHeight, cellHeight, cellHeight);
+            mapSize = new PanelSize(primaryGridWidth, primaryGridHeight, primaryCellHeight, primaryCellHeight);
         }
         return mapSize;
     }
 
     public PanelSize messageSize() {
         if (messageSize == null) {
-            messageSize = new PanelSize(primaryAreaWidth, bottomHeight, cellWidth, cellHeight);
+            messageSize = new PanelSize(primaryGridWidth, messageGridHeight, primaryCellWidth, primaryCellHeight);
         }
         return messageSize;
     }
 
     public PanelSize infoSize() {
         if (infoSize == null) {
-            infoSize = new PanelSize(smallAreaWidth, smallAreaHeight * 7 / 5, 9, 20); // some mmagic numbers to get things to fit well
+            infoSize = new PanelSize(secondaryGridWidth, (int) (secondaryGridHeight * secondarySize), secondaryCellWidth, secondaryCellHeight);
         }
         return infoSize;
     }
 
     public PanelSize contextSize() {
         if (contextSize == null) {
-            contextSize = new PanelSize(smallAreaWidth, (primaryAreaHeight + bottomHeight - smallAreaHeight) * 7 / 5, 9, 20); // some magic numbers to get things to fit well
+            contextSize = new PanelSize(secondaryGridWidth, (int) ((primaryGridHeight + messageGridHeight - secondaryGridHeight) * secondarySize), secondaryCellWidth, secondaryCellHeight);
         }
         return contextSize;
     }
 
     public int messageCount() {
         if (messageCount <= 0) {
-            messageCount = bottomHeight - 2; // have to leave room for the border
+            messageCount = messageGridHeight - 2; // have to leave room for the border
         }
         return messageCount;
     }

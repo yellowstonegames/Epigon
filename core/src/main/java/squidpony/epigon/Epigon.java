@@ -231,7 +231,7 @@ public class Epigon extends Game {
         System.out.println(rootChaos.getState());
 
         Settings settings = config.settings;
-        Coord.expandPoolTo(settings.worldWidth + 1, Math.max(settings.worldHeight, settings.totalDepth + MapConstants.DIVE_HEADER.length) + 1);
+        Coord.expandPoolTo(settings.worldGridWidth + 1, Math.max(settings.worldGridHeight, settings.totalGridDepth + MapConstants.DIVE_HEADER.length) + 1);
 
         // this matches the background color outside the map to the background color of unseen areas inside the map,
         // using the same filter (reducing brightness and saturation using YCwCm) as that stage of the map draw.
@@ -325,20 +325,20 @@ public class Epigon extends Game {
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SquareSparseLayers(
-            settings.worldWidth,
-            settings.worldHeight,
+            settings.worldGridWidth,
+            settings.worldGridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
             font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize(), this);
 
         passiveSLayers = new SquareSparseLayers(
-            settings.worldWidth,
-            settings.worldHeight,
+            settings.worldGridWidth,
+            settings.worldGridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
             mapSLayers.font, this);
 
-        mapHoverSLayers = new SparseLayers(settings.worldWidth * 2, settings.worldHeight, messageSize.cellWidth, mapSize.cellHeight, font);
+        mapHoverSLayers = new SparseLayers(settings.worldGridWidth * 2, settings.worldGridHeight, messageSize.cellWidth, mapSize.cellHeight, font);
 
         infoHandler = new InfoHandler(infoSLayers, colorCenter, this);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers, this);
@@ -357,7 +357,7 @@ public class Epigon extends Game {
 
         fallingSLayers = new SubcellLayers(
             100, // weird because falling uses a different view
-            settings.totalDepth,
+            settings.totalGridDepth,
             mapSize.cellWidth,
             mapSize.cellHeight,
             font);
@@ -411,7 +411,7 @@ public class Epigon extends Game {
         contextStage.addActor(contextHandler.group);
 
         fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight >> 1);
-        finishY = fallingSLayers.worldY(settings.totalDepth);
+        finishY = fallingSLayers.worldY(settings.totalGridDepth);
         timeToFall = Math.abs(finishY - startingY) * fallDelay / mapSize.cellHeight;
 //        lightLevels = new float[76];
 //        float initial = lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
@@ -485,7 +485,7 @@ public class Epigon extends Game {
         message("Falling..... Press SPACE to continue");
         int w = MapConstants.DIVE_HEADER[0].length();
         WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
-        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, config.settings.totalDepth), w, config.settings.totalDepth);
+        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, config.settings.totalGridDepth), w, config.settings.totalGridDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
@@ -574,8 +574,8 @@ public class Epigon extends Game {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int aboveGround = 7;
-        EpiMap[] underground = worldGenerator.buildWorld(config.settings.worldWidth, config.settings.worldHeight, config.settings.worldDepth);
-        EpiMap[] castle = castleGenerator.buildCastle(config.settings.worldWidth, config.settings.worldHeight, aboveGround);
+        EpiMap[] underground = worldGenerator.buildWorld(config.settings.worldGridWidth, config.settings.worldGridHeight, config.settings.worldGridDepth);
+        EpiMap[] castle = castleGenerator.buildCastle(config.settings.worldGridWidth, config.settings.worldGridHeight, aboveGround);
         world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
         depth = aboveGround + 1; // higher is deeper; aboveGround is surface-level
 //        depth = 0;
@@ -1192,8 +1192,8 @@ public class Epigon extends Game {
                                 return;
                             }
                             map.contents[targetX][targetY].add(item);
-                            int tx = MathUtils.clamp(targetX + player.between(-1, 2), 0, config.settings.worldWidth - 1),
-                                ty = MathUtils.clamp(targetY + player.between(-1, 2), 0, config.settings.worldHeight - 1);
+                            int tx = MathUtils.clamp(targetX + player.between(-1, 2), 0, config.settings.worldGridWidth - 1),
+                                ty = MathUtils.clamp(targetY + player.between(-1, 2), 0, config.settings.worldGridHeight - 1);
                             if (map.lighting.resistances[tx][ty] < 0.9) {
                                 map.contents[tx][ty].add(item);
                             }

@@ -52,7 +52,7 @@ public class DebugKeyHandler implements EpigonKeyHandler {
                 // chooses an element for the rain by the player's current position
                 Element drops = GauntRNG.getRandomElement(epigon.player.location.hashCode(), Element.allEnergy);
                 for (int i = 0; i < quantity; i++) {
-                    Coord end = epigon.rng.nextCoord(config.settings.worldWidth, config.settings.worldHeight);
+                    Coord end = epigon.rng.nextCoord(config.settings.worldGridWidth, config.settings.worldGridHeight);
                     if (epigon.map.contents[end.x][end.y].blockage != null) {
                         continue; // skip hitting blocking areas
                     }
@@ -67,7 +67,7 @@ public class DebugKeyHandler implements EpigonKeyHandler {
                 break;
             case 'Z':
                 epigon.message("Twinkle time");
-                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, config.settings.worldWidth, config.settings.worldHeight, 400)) {
+                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, config.settings.worldGridWidth, config.settings.worldGridHeight, 400)) {
                     epigon.fxHandlerPassive.twinkle(c, Element.LIGHT);
                 }
                 break;
