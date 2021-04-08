@@ -44,12 +44,20 @@ public class Config {
 
         text = fileManager.json().prettyPrint(settings);
         fileManager.writeFile(settingsConfigFilename, configPath, text);
-
-        text = fileManager.json().prettyPrint(displayConfig);
-        fileManager.writeFile(displayConfigFilename, configPath, text);
+        
+        saveDisplay();
 
         text = fileManager.json().prettyPrint(audioConfig);
         fileManager.writeFile(audioConfigFilename, configPath, text);
+    }
+    
+    /**
+     * Saves out just the Display configs, at the default location.
+     */
+    public void saveDisplay(){
+        FileManager fileManager = FileManager.instance();
+        String text = fileManager.json().prettyPrint(displayConfig);
+        fileManager.writeFile(displayConfigFilename, configPath, text);
     }
 
     /**

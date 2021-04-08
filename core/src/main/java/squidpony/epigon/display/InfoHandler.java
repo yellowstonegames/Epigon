@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import static squidpony.epigon.Epigon.infoSize;
+import squidpony.epigon.Epigon;
 
 /**
  * Handles the content relevant to the current stat mode.
@@ -69,12 +68,16 @@ public class InfoHandler {
     private Physical player;
     private Physical target;
     private OrderedMap<ConstantKey, Double> changes = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
+    private Epigon game;
 
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public InfoHandler(SparseLayers layers, SquidColorCenter colorCenter) {
+    public InfoHandler(SparseLayers layers, SquidColorCenter colorCenter, Epigon game) {
+        this.layers = layers;
         this.colorCenter = colorCenter;
+        this.game = game;
+        
         width = layers.gridWidth;
         height = layers.gridHeight;
         layers.addLayer();
@@ -84,7 +87,6 @@ public class InfoHandler {
         arrowRight = Coord.get(width - 2, 0);
 
         layers.fillBackground(layers.defaultPackedBackground);
-        this.layers = layers;
     }
 
     public void setPlayer(Physical player) {
@@ -409,7 +411,7 @@ public class InfoHandler {
         int biggestLength = Integer.toString((int) Math.ceil(biggest)).length();
         String format = "%" + biggestLength + "d / %" + biggestLength + "d";
 
-        for (int s = 0; s < stats.length && s < infoSize.gridHeight - 2; s++) {
+        for (int s = 0; s < stats.length && s < game.infoSize.gridHeight - 2; s++) {
             Color color = physical.statProgression.getOrDefault(stats[s], Rating.NONE).color();
             put(1, s + offset, stats[s].toString(), color);
 

@@ -3,6 +3,7 @@ package squidpony.epigon.input.key;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 
 import squidpony.epigon.Epigon;
+import squidpony.epigon.files.Config;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 
@@ -12,10 +13,17 @@ import squidpony.epigon.input.Verb;
 public class FallbackKeyHandler implements EpigonKeyHandler {
 
     private Epigon epigon;
+    private Config config;
 
     @Override
     public FallbackKeyHandler setEpigon(Epigon epigon) {
         this.epigon = epigon;
+        return this;
+    }
+
+    @Override
+    public FallbackKeyHandler setConfig(Config config) {
+        this.config = config;
         return this;
     }
 
@@ -48,7 +56,7 @@ public class FallbackKeyHandler implements EpigonKeyHandler {
                     break;
             }
         } else {
-            switch (epigon.mode) {
+            switch (config.settings.mode) {
                 case DIVE:
                     if (!ControlMapping.defaultFallingViewMapping.contains(verb)) {
                         verb = null;

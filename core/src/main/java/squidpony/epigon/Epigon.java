@@ -42,6 +42,7 @@ import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
 import squidpony.epigon.files.Config;
+import squidpony.epigon.files.Settings;
 import squidpony.epigon.input.key.*;
 import squidpony.epigon.input.mouse.*;
 import squidpony.epigon.mapping.*;
@@ -54,27 +55,8 @@ import static squidpony.squidgrid.gui.gdx.SColor.*;
  * Doesn't use any platform-specific code.
  */
 public class Epigon extends Game {
-    public enum GameMode {
-        DIVE, CRAWL;
-        private final String name;
 
-        GameMode() {
-            name = Utilities.caps(name(), "_", " ");
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    // Sets a view up to have a map area in the upper left, a info pane to the right, and a message output at the bottom
-    public static final PanelSize mapSize;
-    public static final PanelSize messageSize;
-    public static final PanelSize infoSize;
-    public static final PanelSize contextSize;
-    public static final int messageCount;
-    public final StatefulRNG rng = new StatefulRNG(Config.instance().settings.seedValue);
+    public final StatefulRNG rng;
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
     public final RecipeMixer mixer;
@@ -83,7 +65,8 @@ public class Epigon extends Game {
 //    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
-    public GameMode mode = GameMode.CRAWL;
+    private GameMode mode;
+    private Config config;
 
     // Audio
     private SoundManager sound;
@@ -127,6 +110,10 @@ public class Epigon extends Game {
     // Set up the text display portions
     private ArrayList<IColoredString<Color>> messages = new ArrayList<>();
     private int messageIndex;
+    public PanelSize mapSize;
+    public PanelSize messageSize;
+    public PanelSize infoSize;
+    public PanelSize contextSize;
 
     // World
     private LocalAreaGenerator worldGenerator;
@@ -137,6 +124,7 @@ public class Epigon extends Game {
     public char[][] lineDungeon, prunedDungeon;
     public float[][] wallColors, walls;
     
+    private int messageCount;
     public int depth;
     public FxHandler fxHandler;
     public FxHandler fxHandlerPassive;
@@ -166,37 +154,60 @@ public class Epigon extends Game {
 
     private Stage mapStage, messageStage, infoStage, contextStage, mapOverlayStage, fallingStage;
     private Viewport mapViewport, messageViewport, infoViewport, contextViewport, mapOverlayViewport, fallingViewport;
-    
-    public static final int worldWidth, worldHeight, worldDepth, totalDepth;
+
     public float startingY, finishY, timeToFall;
 
     private GLProfiler glp;
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
     public static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
+    
+    // input handlers
+    
+    public final EpigonKeyHandler mapKeys;
+    public final EpigonKeyHandler fallbackKeys;
+    public final EpigonKeyHandler equipmentKeys;
+    public final EpigonKeyHandler helpKeys;
+    public final EpigonKeyHandler fallingKeys;
+    public final EpigonKeyHandler fallingGameOverKeys;
+    public final EpigonKeyHandler debugKeys;
+    public final SquidMouse equipmentMouse;
+    public final SquidMouse helpMouse;
+    public final SquidMouse fallingMouse;
+    public final SquidMouse mapMouse;
+    public final SquidMouse contextMouse;
+    public final SquidMouse infoMouse;
+    public final SquidMouse messageMouse;
 
-    // Set up sizing all in one place
-    static {
-        worldWidth = 160;
-        worldHeight = 160;
-        worldDepth = 10;
-        totalDepth = 40 + MapConstants.DIVE_HEADER.length;
-        int bigW = 102;//World.DIVE_HEADER[0].length() + 2;
-        int bigH = 26;
-        int smallW = 50;
-        int smallH = 22;
-        int cellW = 14;
-        int cellH = 28;
-        int bottomH = 8;
-        mapSize = new PanelSize(bigW / 2, bigH, cellH, cellH);
-        messageSize = new PanelSize(bigW, bottomH, cellW, cellH);
-        infoSize = new PanelSize(smallW, smallH * 7 / 5, 9, 20);
-        contextSize = new PanelSize(smallW, (bigH + bottomH - smallH) * 7 / 5, 9, 20);
-//        contextSize = new PanelSize(smallW, bottomH * 7 / 5, 8, 16);
-        messageCount = bottomH - 2;
-    }
+    public Epigon(Config config) {
+        this.config = config;
+        rng = new StatefulRNG(config.settings.seedValue);
+        mode = config.settings.mode;
+        mapSize = config.settings.mapSize();
+        messageSize = config.settings.messageSize();
+        infoSize = config.settings.infoSize();
+        contextSize = config.settings.contextSize();
+        messageCount = config.settings.messageCount();
 
-    public Epigon() {
+        // set up input handlers
+        mapKeys = new MapKeyHandler().setEpigon(this);
+        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
+        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
+        helpKeys = new HelpKeyHandler().setEpigon(this);
+        fallingKeys = new FallingKeyHandler().setEpigon(this);
+        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
+        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
+        equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
+        helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
+        fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
+        mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new MapMouseHandler().setEpigon(this));
+        contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
+            mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new ContextMouseHandler().setEpigon(this));
+        infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
+            mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InfoMouseHandler().setEpigon(this));
+        messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
+            messageSize.cellWidth, mapSize.pixelHeight(), new MessageMouseHandler().setEpigon(this));
+
         mixer = new RecipeMixer();
         //handBuilt = new DataStarter(mixer);
         Weapon.init();
@@ -215,27 +226,31 @@ public class Epigon extends Game {
 //        filter = new FloatFilters.YCbCrFilter(0.9f, 1.3f, 1.3f);
 //        identityFilter = new FloatFilters.IdentityFilter();
         // mostly mutes colors but doesn't fully grayscale everything; also darkens colors slightly
-        
+
         //grayscale = new FloatFilters.YCbCrFilter(0.75f, 0f, 0f); // an option to fully grayscale/darken
         System.out.println(rootChaos.getState());
 
-        Coord.expandPoolTo(worldWidth + 1, Math.max(worldHeight, totalDepth + MapConstants.DIVE_HEADER.length) + 1);
+        Settings settings = config.settings;
+        Coord.expandPoolTo(settings.worldWidth + 1, Math.max(settings.worldHeight, settings.totalDepth + MapConstants.DIVE_HEADER.length) + 1);
 
         // this matches the background color outside the map to the background color of unseen areas inside the map,
         // using the same filter (reducing brightness and saturation using YCwCm) as that stage of the map draw.
         float unseenY = lumaYCwCm(DB_INK) * 0.7f,
-                unseenCw = chromaWarm(DB_INK) * 0.65f,
-                unseenCm = chromaMild(DB_INK) * 0.65f;
+            unseenCw = chromaWarm(DB_INK) * 0.65f,
+            unseenCm = chromaMild(DB_INK) * 0.65f;
         unseenColor = colorFromFloat(floatGetYCwCm(unseenY, unseenCw, unseenCm, 1f));
         unseenCreatureColorFloat = SColor.CW_DARK_GRAY.toFloatBits();
+
         //FilterBatch is new, and automatically filters all text colors and image tints with a FloatFilter
         batch = new FilterBatch(filter);
         // uncomment the line below to see the game with no filters
         //batch = new FilterBatch();
-        if(Config.instance().debugConfig.debugActive) {
+
+        if (config.debugConfig.debugActive) {
             glp = new GLProfiler(Gdx.graphics);
             glp.enable();
         }
+
         System.out.println("Putting together display.");
         mapViewport = new StretchViewport(mapSize.pixelWidth(), mapSize.pixelHeight());
         messageViewport = new StretchViewport(messageSize.pixelWidth(), messageSize.pixelHeight());
@@ -263,6 +278,7 @@ public class Epigon extends Game {
         //smallFont.bmpFont.getData().scale(2);
 //        font = DefaultResources.getCrispLeanFamily();
 //        TextCellFactory smallFont = font.copy();
+
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         messageIndex = messageCount;
         for (int i = 0; i <= messageCount; i++) {
@@ -270,14 +286,14 @@ public class Epigon extends Game {
         }
 
         messageSLayers = new SparseLayers(
-                messageSize.gridWidth,
-                messageSize.gridHeight,
-                messageSize.cellWidth,
-                messageSize.cellHeight,
-                font);
+            messageSize.gridWidth,
+            messageSize.gridHeight,
+            messageSize.cellWidth,
+            messageSize.cellHeight,
+            font);
 
         messageSLayers.setDefaultBackground(unseenColor);
-        
+
 //        shaper = new ShapeRenderer();
 /*
                 messageSize.gridWidth,
@@ -285,54 +301,54 @@ public class Epigon extends Game {
                 messageSize.cellWidth,
                 messageSize.cellHeight,
 
- */
+         */
         infoSLayers = new SparseLayers(
-                infoSize.gridWidth,
-                infoSize.gridHeight,
-                infoSize.cellWidth,
-                infoSize.cellHeight,
-                smallFont);
+            infoSize.gridWidth,
+            infoSize.gridHeight,
+            infoSize.cellWidth,
+            infoSize.cellHeight,
+            smallFont);
         infoSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         infoSLayers.setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 //        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SparseLayers(
-                contextSize.gridWidth,
-                contextSize.gridHeight,
-                contextSize.cellWidth,
-                contextSize.cellHeight,
-                smallFont);
+            contextSize.gridWidth,
+            contextSize.gridHeight,
+            contextSize.cellWidth,
+            contextSize.cellHeight,
+            smallFont);
         contextSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
 //        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SquareSparseLayers(
-                worldWidth,
-                worldHeight,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize(), this);
-        
-        passiveSLayers = new SquareSparseLayers(
-                worldWidth,
-                worldHeight,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                mapSLayers.font, this);
+            settings.worldWidth,
+            settings.worldHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize(), this);
 
-        mapHoverSLayers = new SparseLayers(worldWidth * 2, worldHeight, messageSize.cellWidth, mapSize.cellHeight, font);
-        
-        infoHandler = new InfoHandler(infoSLayers, colorCenter);
+        passiveSLayers = new SquareSparseLayers(
+            settings.worldWidth,
+            settings.worldHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            mapSLayers.font, this);
+
+        mapHoverSLayers = new SparseLayers(settings.worldWidth * 2, settings.worldHeight, messageSize.cellWidth, mapSize.cellHeight, font);
+
+        infoHandler = new InfoHandler(infoSLayers, colorCenter, this);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers, this);
 
         mapOverlaySLayers = new SparseLayers(
-                messageSize.gridWidth,
-                mapSize.gridHeight,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                font);
+            messageSize.gridWidth,
+            mapSize.gridHeight,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font);
         mapOverlaySLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
         mapOverlaySLayers.setDefaultForeground(SColor.LIME);
         mapOverlaySLayers.addLayer();
@@ -340,11 +356,11 @@ public class Epigon extends Game {
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         fallingSLayers = new SubcellLayers(
-                100, // weird because falling uses a different view
-                totalDepth,
-                mapSize.cellWidth,
-                mapSize.cellHeight,
-                font);
+            100, // weird because falling uses a different view
+            settings.totalDepth,
+            mapSize.cellWidth,
+            mapSize.cellHeight,
+            font);
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
         fallingSLayers.setDefaultForeground(SColor.LIME);
         fallingHandler = new FallingHandler(fallingSLayers);
@@ -395,7 +411,7 @@ public class Epigon extends Game {
         contextStage.addActor(contextHandler.group);
 
         fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight >> 1);
-        finishY = fallingSLayers.worldY(totalDepth);
+        finishY = fallingSLayers.worldY(settings.totalDepth);
         timeToFall = Math.abs(finishY - startingY) * fallDelay / mapSize.cellHeight;
 //        lightLevels = new float[76];
 //        float initial = lerpFloatColors(RememberedTile.memoryColorFloat, -0x1.7583e6p125F, 0.4f); // the float is SColor.AMUR_CORK_TREE
@@ -469,7 +485,7 @@ public class Epigon extends Game {
         message("Falling..... Press SPACE to continue");
         int w = MapConstants.DIVE_HEADER[0].length();
         WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
-        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, totalDepth), w, totalDepth);
+        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, config.settings.totalDepth), w, config.settings.totalDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
@@ -558,10 +574,10 @@ public class Epigon extends Game {
         message("Generating crawl.");
         //world = worldGenerator.buildWorld(worldWidth, worldHeight, 8, handBuilt);
         int aboveGround = 7;
-        EpiMap[] underground = worldGenerator.buildWorld(worldWidth, worldHeight, worldDepth);
-        EpiMap[] castle = castleGenerator.buildCastle(worldWidth, worldHeight, aboveGround);
+        EpiMap[] underground = worldGenerator.buildWorld(config.settings.worldWidth, config.settings.worldHeight, config.settings.worldDepth);
+        EpiMap[] castle = castleGenerator.buildCastle(config.settings.worldWidth, config.settings.worldHeight, aboveGround);
         world = Stream.of(castle, underground).flatMap(Stream::of).toArray(EpiMap[]::new);
-        depth = aboveGround+1; // higher is deeper; aboveGround is surface-level
+        depth = aboveGround + 1; // higher is deeper; aboveGround is surface-level
 //        depth = 0;
 //        world = underground;
         map = world[depth];
@@ -915,7 +931,7 @@ public class Epigon extends Game {
             checkX + 1 + (mapSize.gridWidth >>> 1), checkY + 1 + (mapSize.gridHeight >>> 1));
         FOV.addFOVsInto(map.lighting.fovResult, FOV.reuseFOV(map.lighting.resistances, map.lighting.tempFOV,
             checkX, checkY, 4.0, Radius.CIRCLE));
-        if (Config.instance().debugConfig.odinView) {
+        if (config.debugConfig.odinView) {
             //choice of tempFOV is arbitrary; we just need a 2D array of all 0.6
             ArrayTools.fill(map.lighting.tempFOV, 0.6);
             //makes tempColorLighting filled with 0.6-strength white light
@@ -1176,8 +1192,8 @@ public class Epigon extends Game {
                                 return;
                             }
                             map.contents[targetX][targetY].add(item);
-                            int tx = MathUtils.clamp(targetX + player.between(-1, 2), 0, worldWidth - 1),
-                                    ty = MathUtils.clamp(targetY + player.between(-1, 2), 0, worldHeight - 1);
+                            int tx = MathUtils.clamp(targetX + player.between(-1, 2), 0, config.settings.worldWidth - 1),
+                                ty = MathUtils.clamp(targetY + player.between(-1, 2), 0, config.settings.worldHeight - 1);
                             if (map.lighting.resistances[tx][ty] < 0.9) {
                                 map.contents[tx][ty].add(item);
                             }
@@ -1427,7 +1443,7 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        if(Config.instance().debugConfig.debugActive)
+        if(config.debugConfig.debugActive)
             glp.reset();
         //super.render();
 
@@ -1511,7 +1527,7 @@ public class Epigon extends Game {
         batch.setProjectionMatrix(infoViewport.getCamera().combined);
         infoStage.getRoot().draw(batch, 1);
 
-        if (Config.instance().debugConfig.debugActive) {
+        if (config.debugConfig.debugActive) {
             int drawCalls = glp.getDrawCalls();
             int textureBindings = glp.getTextureBindings();
             int calls = glp.getCalls();
@@ -1588,15 +1604,15 @@ public class Epigon extends Game {
     @Override
     public void resize(int width, int height) {
         // if not going to fullscreen, probably
-        if(Gdx.graphics.getDisplayMode().width != width && !Config.instance().displayConfig.maximized){
-            Config.instance().displayConfig.windowWidth = width;
-            Config.instance().displayConfig.windowHeight = height;
-            Config.instance().displayConfig.monitorName = Gdx.graphics.getMonitor().name;
+        if (Gdx.graphics.getDisplayMode().width != width && !config.displayConfig.maximized) {
+            config.displayConfig.windowWidth = width;
+            config.displayConfig.windowHeight = height;
+            config.displayConfig.monitorName = Gdx.graphics.getMonitor().name;
         }
         super.resize(width, height);
 
-        float currentZoomX = (float) width / totalPixelWidth();
-        float currentZoomY = (float) height / totalPixelHeight();
+        float currentZoomX = (float) width / config.settings.defaultPixelWidth();
+        float currentZoomY = (float) height / config.settings.defaultPixelHeight();
 
         messageSLayers.setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
@@ -1648,6 +1664,10 @@ public class Epigon extends Game {
         fallingViewport.update(width, height, false);
         fallingViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
                 width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+        
+        config.displayConfig.windowWidth = width;
+        config.displayConfig.windowHeight = height;
+        config.saveDisplay();
     }
 
     @Override
@@ -1666,47 +1686,9 @@ public class Epigon extends Game {
     public void dispose() {
         System.out.println("Disposing game.");
         System.out.println("Saving current configs.");
-        Config.instance().saveAll();
+        config.saveAll();
         System.out.println("Finished saving configs.");
         super.dispose();
     }
 
-    public static int totalPixelWidth() {
-        return mapSize.pixelWidth() + infoSize.pixelWidth();
-    }
-
-    public static int totalPixelHeight() {
-        return mapSize.pixelHeight() + messageSize.pixelHeight();
-    }
-
-    public final EpigonKeyHandler mapKeys = new MapKeyHandler().setEpigon(this);
-
-    public final EpigonKeyHandler fallbackKeys = new FallbackKeyHandler().setEpigon(this);
-
-    public final EpigonKeyHandler equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
-
-    public final EpigonKeyHandler helpKeys = new HelpKeyHandler().setEpigon(this);
-
-    public final EpigonKeyHandler fallingKeys = new FallingKeyHandler().setEpigon(this);
-
-    public final EpigonKeyHandler fallingGameOverKeys = new FallingGameOver().setEpigon(this);
-
-    public final EpigonKeyHandler debugKeys = new DebugKeyHandler().setEpigon(this);
-
-    public final SquidMouse equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
-
-    public final SquidMouse helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
-
-    public final SquidMouse fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
-
-    public final SquidMouse mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new MapMouseHandler().setEpigon(this));
-
-    private final SquidMouse contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
-        mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new ContextMouseHandler().setEpigon(this));
-
-    private final SquidMouse infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
-        mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InfoMouseHandler().setEpigon(this));
-
-    private final SquidMouse messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
-        messageSize.cellWidth, mapSize.pixelHeight(), new MessageMouseHandler().setEpigon(this));
 }

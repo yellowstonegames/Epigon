@@ -29,8 +29,16 @@ public class Lwjgl3Launcher {
         //read in all external data files
         Config config = Config.instance(); // will cause the config file to be read if it hasn't already
 
+        // need to cross-config set window size if it's not in the configs
+        if (config.displayConfig.windowWidth <= 0) {
+            config.displayConfig.windowWidth = config.settings.defaultPixelWidth();
+        }
+        if (config.displayConfig.windowHeight <= 0) {
+            config.displayConfig.windowHeight = config.settings.defaultPixelHeight();
+        }
+
         System.out.println("Files loaded!");
-        Epigon epigon = new Epigon();
+        Epigon epigon = new Epigon(config);
 
         //start independent listeners
         //load and initialize resources
@@ -40,7 +48,7 @@ public class Lwjgl3Launcher {
         //start dependent listeners
         //hand control over to the display
         Lwjgl3ApplicationConfiguration appConfig = new Lwjgl3ApplicationConfiguration();
-        appConfig.setWindowListener(new Lwjgl3WindowAdapter() {
+        Lwjgl3WindowAdapter primaryWindowListener = new Lwjgl3WindowAdapter() {
             private Lwjgl3Window win;
 
             @Override
@@ -53,10 +61,9 @@ public class Lwjgl3Launcher {
             public void maximized(boolean isMaximized) {
                 config.displayConfig.maximized = isMaximized;
                 if (!isMaximized) {
-                    Gdx.app.postRunnable(
-                            () ->
-                                    Gdx.graphics.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight)
-                            );
+                    Gdx.app.postRunnable(()
+                        -> Gdx.graphics.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight)
+                    );
                 }
 
                 super.maximized(isMaximized);
@@ -70,48 +77,66 @@ public class Lwjgl3Launcher {
                     config.displayConfig.windowWidth = Gdx.graphics.getWidth();
                     config.displayConfig.windowHeight = Gdx.graphics.getHeight();
                     config.displayConfig.monitorName = Gdx.graphics.getMonitor().name;
+                    config.saveDisplay();
                 }
 
                 return super.closeRequested();
             }
-        });
+        };
+
+        appConfig.setWindowListener(primaryWindowListener);
+
+        // get monitor info for display
+        String lastMonitorName = config.displayConfig.monitorName;
+        Monitor monitor = null;
+        if (lastMonitorName != null && !lastMonitorName.isEmpty()) {
+            for (Monitor m : Lwjgl3ApplicationConfiguration.getMonitors()) {
+                if (m.name.equals(lastMonitorName)) {
+                    monitor = m;
+                    break;
+                }
+            }
+        }
+        if (monitor == null) {
+            monitor = Lwjgl3ApplicationConfiguration.getPrimaryMonitor();
+        }
+
+        DisplayMode display = Lwjgl3ApplicationConfiguration.getDisplayMode(monitor);
 
         if (config.displayConfig.maximized) {
             appConfig.setMaximized(true);
         } else if (config.displayConfig.fullscreen) {
-            String lastMonitorName = config.displayConfig.monitorName;
-            Monitor monitor = null;
-            if (lastMonitorName != null && !lastMonitorName.isEmpty()) {
-                for (Monitor m : Lwjgl3ApplicationConfiguration.getMonitors()) {
-                    if (m.name.equals(lastMonitorName)) {
-                        monitor = m;
-                        break;
-                    }
-                }
-            }
-            if (monitor == null) {
-                monitor = Lwjgl3ApplicationConfiguration.getPrimaryMonitor();
-            }
-
-            DisplayMode display = Lwjgl3ApplicationConfiguration.getDisplayMode(monitor);
             appConfig.setFullscreenMode(display);
         } else {
             appConfig.setWindowedMode(config.displayConfig.windowWidth, config.displayConfig.windowHeight);
 
             int x = config.displayConfig.windowXPosition;
             int y = config.displayConfig.windowYPosition;
+            System.out.println("Window position: (" + x + ", " + y + ")");
 
-            x = Math.max(x, 0);
-            y = Math.max(y, 0);
+            if (x < 0) {
+                x = (display.width - config.displayConfig.windowWidth) / 2;
+                config.displayConfig.windowXPosition = x;
+            }
+            if (y < 0) {
+                y = (display.height - config.displayConfig.windowHeight) / 2;
+                config.displayConfig.windowYPosition = y;
+            }
 
-            appConfig.setWindowPosition(x, y);
+            appConfig.setWindowPosition(x, y); // This doesn't take into account the upper left including title bar, just content (libgdx / lwjgl limitation)
         }
 
         appConfig.setTitle(config.gameTitle);
         //uncomment if testing FPS
         appConfig.useVsync(false);
         appConfig.setWindowIcon(Files.FileType.Internal, "images/icons/libgdx128.png", "images/icons/libgdx64.png", "images/icons/libgdx32.png", "images/icons/libgdx16.png");
-        Lwjgl3Application masterApplication = new Lwjgl3Application(epigon, appConfig);
+        Lwjgl3Application masterApplication = new Lwjgl3Application(epigon, appConfig) {
+            @Override
+            public void exit() {
+                primaryWindowListener.closeRequested(); // have the primary window do it's thing before leaving
+                super.exit();
+            }
+        };
     }
 
 }

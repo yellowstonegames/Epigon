@@ -87,16 +87,17 @@ public class ContextHandler {
     public Coord arrowRight;
 
     public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game) {
-        group = new Group();
         this.layers = layers;
-        group.addActor(this.layers);
         this.mainMap = mainMap;
+        this.game = game;
+
+        group = new Group();
+        group.addActor(this.layers);
         width = layers.gridWidth;
         height = layers.gridHeight;
         epiMap = null;
         arrowLeft = Coord.get(1, 0);
         arrowRight = Coord.get(width - 2, 0);
-        this.game = game;
         defaultFrontColor = layers.defaultPackedForeground;
         for (ContextMode mode : ContextMode.values()) {
             cachedTexts.put(mode, ArrayTools.fill(' ', width, height));
@@ -127,12 +128,12 @@ public class ContextHandler {
                 @Override
                 public void draw(Batch batch, float parentAlpha) {
                     super.draw(batch, parentAlpha);
-                    float xo = getX() + Epigon.contextSize.cellWidth,
+                    float xo = getX() + game.contextSize.cellWidth,
                         yo = getY(), yOff;
                     //mainMap.font.configureShader(batch);
                     float widthInc = miniMapFont.actualCellWidth, heightInc = -miniMapFont.actualCellHeight;
                     int x, y;
-                    yOff = yo + Epigon.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
+                    yOff = yo + game.contextSize.cellHeight + mainMap.gridHeight * miniMapFont.actualCellHeight;
                     RememberedTile memory;
                     for (int i = 0; i < epiMap.width; i++) {
                         for (int j = 0; j < epiMap.height; j++) {
@@ -167,8 +168,8 @@ public class ContextHandler {
                     }
                 }
             };
-            float fontWidth = (layers.getWidth() - Epigon.contextSize.cellWidth * 2) / mainMap.gridWidth();
-            float fontHeight = (layers.getHeight() - Epigon.contextSize.cellHeight * 2) / mainMap.gridHeight();
+            float fontWidth = (layers.getWidth() - game.contextSize.cellWidth * 2) / mainMap.gridWidth();
+            float fontHeight = (layers.getHeight() - game.contextSize.cellHeight * 2) / mainMap.gridHeight();
             miniMapFont = mainMap.font.copy().width(fontWidth).height(fontHeight).initBySize();
             group.addActor(miniMap);
             miniMap.setVisible(contextMode == ContextMode.MINI_MAP);
@@ -177,12 +178,12 @@ public class ContextHandler {
                 @Override
                 public void draw(Batch batch, float parentAlpha) {
                     super.draw(batch, parentAlpha);
-                    float xo = getX() + Epigon.contextSize.cellWidth,
+                    float xo = getX() + game.contextSize.cellWidth,
                         yo = getY(), yOff;
                     //mainMap.font.configureShader(batch);
                     float widthInc = miniMapSideFont.actualCellWidth, heightInc = -miniMapSideFont.actualCellHeight;
                     int x, y;
-                    yOff = yo + Epigon.contextSize.cellHeight + world.length * miniMapSideFont.actualCellHeight;
+                    yOff = yo + game.contextSize.cellHeight + world.length * miniMapSideFont.actualCellHeight;
                     int sky = world.length;
                     int width = world[0].width;
                     int height = world[0].height;
@@ -200,12 +201,12 @@ public class ContextHandler {
                     }
                 }
             };
-            float sideFontWidth = (layers.getWidth() - Epigon.contextSize.cellWidth * 2) / mainMap.gridWidth();
-            float sideFontHeight = (layers.getHeight() - Epigon.contextSize.cellHeight * 2) / world.length;
+            float sideFontWidth = (layers.getWidth() - game.contextSize.cellWidth * 2) / mainMap.gridWidth();
+            float sideFontHeight = (layers.getHeight() - game.contextSize.cellHeight * 2) / world.length;
 
-            if (sideFontHeight > sideFontWidth * 3){
+            if (sideFontHeight > sideFontWidth * 3) {
                 sideFontHeight = sideFontWidth * 3;
-            } else if (sideFontWidth > sideFontHeight){
+            } else if (sideFontWidth > sideFontHeight) {
                 sideFontHeight = sideFontWidth;
             }
 

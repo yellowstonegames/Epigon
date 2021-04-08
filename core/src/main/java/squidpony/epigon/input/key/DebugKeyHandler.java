@@ -14,10 +14,17 @@ import squidpony.epigon.files.Config;
 public class DebugKeyHandler implements EpigonKeyHandler {
 
     private Epigon epigon;
+    private Config config;
 
     @Override
     public DebugKeyHandler setEpigon(Epigon epigon) {
         this.epigon = epigon;
+        return this;
+    }
+
+    @Override
+    public DebugKeyHandler setConfig(Config config) {
+        this.config = config;
         return this;
     }
 
@@ -45,7 +52,7 @@ public class DebugKeyHandler implements EpigonKeyHandler {
                 // chooses an element for the rain by the player's current position
                 Element drops = GauntRNG.getRandomElement(epigon.player.location.hashCode(), Element.allEnergy);
                 for (int i = 0; i < quantity; i++) {
-                    Coord end = epigon.rng.nextCoord(Epigon.worldWidth, Epigon.worldHeight);
+                    Coord end = epigon.rng.nextCoord(config.settings.worldWidth, config.settings.worldHeight);
                     if (epigon.map.contents[end.x][end.y].blockage != null) {
                         continue; // skip hitting blocking areas
                     }
@@ -60,7 +67,7 @@ public class DebugKeyHandler implements EpigonKeyHandler {
                 break;
             case 'Z':
                 epigon.message("Twinkle time");
-                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, Epigon.worldWidth, Epigon.worldHeight, 400)) {
+                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, config.settings.worldWidth, config.settings.worldHeight, 400)) {
                     epigon.fxHandlerPassive.twinkle(c, Element.LIGHT);
                 }
                 break;
