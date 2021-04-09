@@ -59,7 +59,7 @@ public class Epigon extends Game {
     public final StatefulRNG rng;
     // meant to be used to generate seeds for other RNGs; can be seeded when they should be fixed
     public static final DiverRNG rootChaos = new DiverRNG();
-    public final RecipeMixer mixer;
+    public RecipeMixer mixer;
     public DataStarter dataStarter;
     private MapDecorator mapDecorator;
 //    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
@@ -78,8 +78,8 @@ public class Epigon extends Game {
     public static final FloatFilter
             //identityFilter = new FloatFilters.IdentityFilter(),
             grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
-    private SquareSparseLayers mapSLayers;
-    private SquareSparseLayers passiveSLayers;
+    private SparseLayers mapSLayers;
+    private SparseLayers passiveSLayers;
     public SparseLayers mapHoverSLayers;
     public SparseLayers mapOverlaySLayers;
     private SparseLayers infoSLayers;
@@ -161,56 +161,26 @@ public class Epigon extends Game {
     private StringBuilder tempSB = new StringBuilder(16);
     private Vector2 screenPosition = new Vector2(20, 20);
     public static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
-    
+
     // input handlers
-    
-    public final EpigonKeyHandler mapKeys;
-    public final EpigonKeyHandler fallbackKeys;
-    public final EpigonKeyHandler equipmentKeys;
-    public final EpigonKeyHandler helpKeys;
-    public final EpigonKeyHandler fallingKeys;
-    public final EpigonKeyHandler fallingGameOverKeys;
-    public final EpigonKeyHandler debugKeys;
-    public final SquidMouse equipmentMouse;
-    public final SquidMouse helpMouse;
-    public final SquidMouse fallingMouse;
-    public final SquidMouse mapMouse;
-    public final SquidMouse contextMouse;
-    public final SquidMouse infoMouse;
-    public final SquidMouse messageMouse;
+    public EpigonKeyHandler mapKeys;
+    public EpigonKeyHandler fallbackKeys;
+    public EpigonKeyHandler equipmentKeys;
+    public EpigonKeyHandler helpKeys;
+    public EpigonKeyHandler fallingKeys;
+    public EpigonKeyHandler fallingGameOverKeys;
+    public EpigonKeyHandler debugKeys;
+    public SquidMouse equipmentMouse;
+    public SquidMouse helpMouse;
+    public SquidMouse fallingMouse;
+    public SquidMouse mapMouse;
+    public SquidMouse contextMouse;
+    public SquidMouse infoMouse;
+    public SquidMouse messageMouse;
 
     public Epigon(Config config) {
         this.config = config;
         rng = new StatefulRNG(config.settings.seedValue);
-        mode = config.settings.mode;
-        mapSize = config.settings.mapSize();
-        messageSize = config.settings.messageSize();
-        infoSize = config.settings.infoSize();
-        contextSize = config.settings.contextSize();
-        messageCount = config.settings.messageCount();
-
-        // set up input handlers
-        mapKeys = new MapKeyHandler().setEpigon(this);
-        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
-        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
-        helpKeys = new HelpKeyHandler().setEpigon(this);
-        fallingKeys = new FallingKeyHandler().setEpigon(this);
-        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
-        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
-        equipmentMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
-        helpMouse = new SquidMouse(mapSize.cellWidth * 0.5f, mapSize.cellHeight, mapSize.gridWidth * 2f, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
-        fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
-        mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, messageSize.cellWidth, 0, new MapMouseHandler().setEpigon(this));
-        contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1), new ContextMouseHandler().setEpigon(this));
-        infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
-            mapSize.gridWidth * mapSize.cellWidth, contextSize.gridHeight * contextSize.cellHeight, new InfoMouseHandler().setEpigon(this));
-        messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
-            messageSize.cellWidth, mapSize.pixelHeight(), new MessageMouseHandler().setEpigon(this));
-
-        mixer = new RecipeMixer();
-        //handBuilt = new DataStarter(mixer);
-        Weapon.init();
     }
 
     @Override
@@ -231,6 +201,48 @@ public class Epigon extends Game {
         System.out.println(rootChaos.getState());
 
         Settings settings = config.settings;
+
+        mode = config.settings.mode;
+        mapSize = config.settings.mapSize();
+        messageSize = config.settings.messageSize();
+        infoSize = config.settings.infoSize();
+        contextSize = config.settings.contextSize();
+        messageCount = config.settings.messageCount();
+
+        // set up input handlers
+        mapKeys = new MapKeyHandler().setEpigon(this);
+        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
+        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
+        helpKeys = new HelpKeyHandler().setEpigon(this);
+        fallingKeys = new FallingKeyHandler().setEpigon(this);
+        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
+        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
+
+        // Upper left
+        equipmentMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
+        helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
+        fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
+        mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new MapMouseHandler().setEpigon(this));
+
+        // Lower right
+        int xOffset = mapSize.pixelWidth(); // mapSize.gridWidth * mapSize.cellWidth;
+        int yOffset = infoSize.pixelHeight(); // infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1);
+        contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, xOffset, yOffset, new ContextMouseHandler().setEpigon(this));
+
+        // Upper right
+        xOffset = mapSize.pixelWidth(); // mapSize.gridWidth * mapSize.cellWidth;
+        yOffset = 0; //contextSize.gridHeight * contextSize.cellHeight;
+        infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight, xOffset, yOffset, new InfoMouseHandler().setEpigon(this));
+
+        // Lower left
+        xOffset = messageSize.cellWidth;
+        yOffset = mapSize.pixelHeight();
+        messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight, xOffset, yOffset, new MessageMouseHandler().setEpigon(this));
+
+        mixer = new RecipeMixer();
+        //handBuilt = new DataStarter(mixer);
+        Weapon.init();
+        
         Coord.expandPoolTo(settings.worldGridWidth + 1, Math.max(settings.worldGridHeight, settings.totalGridDepth + MapConstants.DIVE_HEADER.length) + 1);
 
         // this matches the background color outside the map to the background color of unseen areas inside the map,
@@ -324,21 +336,21 @@ public class Epigon extends Game {
 //        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
 //        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
-        mapSLayers = new SquareSparseLayers(
+        mapSLayers = new SparseLayers(
             settings.worldGridWidth,
             settings.worldGridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize(), this);
+            font.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize());
 
-        passiveSLayers = new SquareSparseLayers(
+        passiveSLayers = new SparseLayers(
             settings.worldGridWidth,
             settings.worldGridHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            mapSLayers.font, this);
+            mapSLayers.font);
 
-        mapHoverSLayers = new SparseLayers(settings.worldGridWidth * 2, settings.worldGridHeight, messageSize.cellWidth, mapSize.cellHeight, font);
+        mapHoverSLayers = new SparseLayers(settings.worldGridWidth, settings.worldGridHeight, messageSize.cellWidth, mapSize.cellHeight, font);
 
         infoHandler = new InfoHandler(infoSLayers, colorCenter, this);
         contextHandler = new ContextHandler(contextSLayers, mapSLayers, this);
@@ -378,10 +390,13 @@ public class Epigon extends Game {
         fallingSLayers.setPosition(0, 0);
         mapSLayers.setPosition(0, 0);
         passiveSLayers.setPosition(0, 0);
-        mapHoverSLayers.setPosition(-messageSize.cellWidth >> 1, 0);
+        mapHoverSLayers.setPosition(0, 0);
 
-        mapViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
-        infoViewport.setScreenBounds(mapSize.pixelWidth(), contextSize.pixelHeight(), infoSize.pixelWidth(), infoSize.pixelHeight());
+        messageViewport.setScreenBounds(0, 0, messageSize.pixelWidth(), messageSize.pixelHeight());
+        int top = Gdx.graphics.getHeight() - mapSize.pixelHeight(); // messageSize.pixelHeight(
+        mapViewport.setScreenBounds(0, top, mapSize.pixelWidth(), mapSize.pixelHeight());
+        top = Gdx.graphics.getHeight() - infoSize.pixelHeight(); // contextSize.pixelHeight()
+        infoViewport.setScreenBounds(mapSize.pixelWidth(), top, infoSize.pixelWidth(), infoSize.pixelHeight());
         contextViewport.setScreenBounds(mapSize.pixelWidth(), 0, contextSize.pixelWidth(), contextSize.pixelHeight());
         mapOverlayViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
         fallingViewport.setScreenBounds(0, messageSize.pixelHeight(), mapSize.pixelWidth(), mapSize.pixelHeight());
@@ -421,6 +436,8 @@ public class Epigon extends Game {
 //        for (int i = 0; i < 64; i++) {
 //            lightLevels[12 + i] = lerpFloatColors(-0x1.7583e6p125F, -0x1.fff1ep126F, Interpolation.sineOut.apply(i / 63f)); // AMUR_CORK_TREE , then ALICE_BLUE
 //        }
+
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // force a refresh to align all the windows and listeners
 
         startGame();
     }
@@ -1614,57 +1631,52 @@ public class Epigon extends Game {
         float currentZoomX = (float) width / config.settings.defaultPixelWidth();
         float currentZoomY = (float) height / config.settings.defaultPixelHeight();
 
+        mapSLayers.setBounds(0, 0, currentZoomX * mapSize.pixelWidth(), currentZoomY * mapSize.pixelHeight());
+        mapOverlaySLayers.setBounds(0, 0, currentZoomX * mapSize.pixelWidth(), currentZoomY * mapSize.pixelHeight());
         messageSLayers.setBounds(0, 0, currentZoomX * messageSize.pixelWidth(), currentZoomY * messageSize.pixelHeight());
         contextSLayers.setBounds(0, 0, currentZoomX * contextSize.pixelWidth(), currentZoomY * contextSize.pixelHeight());
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
+
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
-        mapMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-                mapSize.gridWidth, mapSize.gridHeight,
-                //(mapSize.gridWidth & 1)
-                (int) (messageSize.cellWidth * currentZoomX * -0.5), // this one's special
-                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
-        equipmentMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight,
-                mapSize.gridWidth, mapSize.gridHeight,
-                (mapSize.gridWidth & 1) * (int) (mapSize.cellWidth * currentZoomX * -0.5f),
-                (mapSize.gridHeight & 1) * (int) (mapSize.cellHeight * currentZoomY * -0.5f));
-        contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight,
-                contextSize.gridWidth, contextSize.gridHeight,
-                (contextSize.gridWidth & 1) * (int) (contextSize.cellWidth * currentZoomX * 0.5f) - (int)(Gdx.graphics.getWidth() - currentZoomX * contextSize.pixelWidth()),
-                (contextSize.gridHeight & 1) * (int) (contextSize.cellHeight * currentZoomY * 0.5f) - (int) (infoSLayers.getTop() + infoSize.cellHeight * currentZoomY));
-        infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight,
-                infoSize.gridWidth, infoSize.gridHeight,
-                (infoSize.gridWidth & 1) * (int) (infoSize.cellWidth * currentZoomX * 0.5f) - (int)(Gdx.graphics.getWidth() - currentZoomX * infoSize.pixelWidth()),
-                (~infoSize.gridHeight & 1) * (int) (infoSize.cellHeight * currentZoomY * -0.5f));
-        messageMouse.reinitialize(currentZoomX * messageSize.cellWidth, currentZoomY * messageSize.cellHeight,
-                messageSize.gridWidth, messageSize.gridHeight,
-                (int) (messageSize.cellWidth * currentZoomX * -0.5),
-                (messageSize.gridHeight & 1) * (int) (messageSize.cellHeight * currentZoomY * 0.5f) - (int) (mapSize.gridHeight * mapSize.cellHeight * currentZoomY));
-// - (int) (infoSize.cellHeight * currentZoomY)
-        contextViewport.update(width, height, false);
-        contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0,
-                (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
+        float oddAddX = width % 2 == 0 ? 0 : 0.5f;
+        float oddAddY = height % 2 == 0 ? 0 : 0.5f;
 
-        infoViewport.update(width, height, false);
-        infoViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()),
-                (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
+        mapMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight,
+            (int) (messageSize.cellWidth * currentZoomX * oddAddX), (int) (mapSize.cellHeight * currentZoomY * oddAddY));
 
-        messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0,
-                (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
+        equipmentMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight,
+            (int) (mapSize.cellWidth * currentZoomX * oddAddX), (int) (mapSize.cellHeight * currentZoomY * oddAddY));
 
+        contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
+            (int) (contextSize.cellWidth * currentZoomX * oddAddX), (int) (contextSize.cellHeight * currentZoomY * oddAddY));
+
+        infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
+            (int) (infoSize.cellWidth * currentZoomX * oddAddX), (int) (infoSize.cellHeight * currentZoomY * oddAddY));
+
+        messageMouse.reinitialize(currentZoomX * messageSize.cellWidth, currentZoomY * messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
+            (int) (messageSize.cellWidth * currentZoomX * oddAddX), (int) (messageSize.cellHeight * currentZoomY * oddAddY));
+
+        int top = (int) (height - mapSize.pixelHeight() * currentZoomY); // messageSize.pixelHeight(
         mapViewport.update(width, height, false);
-        mapViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
-                width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+        mapViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
 
         mapOverlayViewport.update(width, height, false);
-        mapOverlayViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
-                width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
+        mapOverlayViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
 
         fallingViewport.update(width, height, false);
-        fallingViewport.setScreenBounds(0, (int) (currentZoomY * messageSize.pixelHeight()),
-                width - (int) (currentZoomX * infoSize.pixelWidth()), height - (int) (currentZoomY * messageSize.pixelHeight()));
-        
+        fallingViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
+
+        contextViewport.update(width, height, false);
+        contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0, (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
+
+        top = (int) (height - infoSize.pixelHeight() * currentZoomY); // contextSize.pixelHeight()
+        infoViewport.update(width, height, false);
+        infoViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), top, (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
+
+        messageViewport.update(width, height, false);
+        messageViewport.setScreenBounds(0, 0, (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
+
         config.displayConfig.windowWidth = width;
         config.displayConfig.windowHeight = height;
         config.saveDisplay();

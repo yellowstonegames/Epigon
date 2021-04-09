@@ -45,14 +45,9 @@ public class Settings {
         }
     }
 
-    public void setSeed(long value) {
-        seedValue = value;
-        seed = String.valueOf(value);
-    }
-
     public PanelSize mapSize() {
         if (mapSize == null) {
-            mapSize = new PanelSize(primaryGridWidth, primaryGridHeight, primaryCellHeight, primaryCellHeight);
+            mapSize = new PanelSize(primaryGridWidth, primaryGridHeight, primaryCellWidth, primaryCellHeight);
         }
         return mapSize;
     }
