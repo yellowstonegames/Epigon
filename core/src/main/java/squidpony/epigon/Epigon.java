@@ -1686,12 +1686,12 @@ public class Epigon extends Game {
                 continue;
             }
             glyphX = glyph.getX() - layerX;
-            x = Math.round((glyphX) / font.actualCellWidth);
+            x = Math.round(glyphX / font.actualCellWidth);
             if (x < 0 || x >= sLayers.gridWidth) { // glyph off the view horizontally
                 continue;
             }
             glyphY = glyph.getY() - layerY;
-            y = Math.round((glyphY) / -font.actualCellHeight + sLayers.gridHeight);
+            y = Math.round(glyphY / -font.actualCellHeight + sLayers.gridHeight);
             if (y < 0 || y >= sLayers.gridHeight) { // glyph off the view vertically
                 continue;
             }
