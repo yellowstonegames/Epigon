@@ -209,36 +209,6 @@ public class Epigon extends Game {
         contextSize = config.settings.contextSize();
         messageCount = config.settings.messageCount();
 
-        // set up input handlers
-        mapKeys = new MapKeyHandler().setEpigon(this);
-        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
-        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
-        helpKeys = new HelpKeyHandler().setEpigon(this);
-        fallingKeys = new FallingKeyHandler().setEpigon(this);
-        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
-        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
-
-        // Upper left
-        equipmentMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new EquipmentMouseHandler().setEpigon(this));
-        helpMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new HelpMouseHandler().setEpigon(this));
-        fallingMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new FallingMouseHandler().setEpigon(this));
-        mapMouse = new SquidMouse(mapSize.cellWidth, mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight, 0, 0, new MapMouseHandler().setEpigon(this));
-
-        // Lower right
-        int xOffset = mapSize.pixelWidth(); // mapSize.gridWidth * mapSize.cellWidth;
-        int yOffset = infoSize.pixelHeight(); // infoSize.gridHeight * infoSize.cellHeight + (infoSize.cellHeight >> 1);
-        contextMouse = new SquidMouse(contextSize.cellWidth, contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight, xOffset, yOffset, new ContextMouseHandler().setEpigon(this));
-
-        // Upper right
-        xOffset = mapSize.pixelWidth(); // mapSize.gridWidth * mapSize.cellWidth;
-        yOffset = 0; //contextSize.gridHeight * contextSize.cellHeight;
-        infoMouse = new SquidMouse(infoSize.cellWidth, infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight, xOffset, yOffset, new InfoMouseHandler().setEpigon(this));
-
-        // Lower left
-        xOffset = messageSize.cellWidth;
-        yOffset = mapSize.pixelHeight();
-        messageMouse = new SquidMouse(messageSize.cellWidth, messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight, xOffset, yOffset, new MessageMouseHandler().setEpigon(this));
-
         mixer = new RecipeMixer();
         //handBuilt = new DataStarter(mixer);
         Weapon.init();
@@ -406,6 +376,28 @@ public class Epigon extends Game {
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<>(100);
         awaitedMoves = new ArrayList<>(100);
+
+        // set up input handlers
+        mapKeys = new MapKeyHandler().setEpigon(this);
+        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
+        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
+        helpKeys = new HelpKeyHandler().setEpigon(this);
+        fallingKeys = new FallingKeyHandler().setEpigon(this);
+        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
+        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
+
+        // NOTE - a resize() operation is called after everything is initialized, so below values are set to min values for simplicity
+        // Upper left
+        equipmentMouse = new SquidMouse(1, 1, new EquipmentMouseHandler().setEpigon(this));
+        helpMouse = new SquidMouse(1, 1, new HelpMouseHandler());
+        fallingMouse = new SquidMouse(1, 1, new FallingMouseHandler());
+        mapMouse = new SquidMouse(1, 1, new MapMouseHandler().setEpigon(this));
+        // Lower right
+        contextMouse = new SquidMouse(1, 1, new ContextMouseHandler().setContextHandler(contextHandler));
+        // Upper right
+        infoMouse = new SquidMouse(1, 1, new InfoMouseHandler().setInfoHandler(infoHandler));
+        // Lower left
+        messageMouse = new SquidMouse(1, 1, new MessageMouseHandler().setEpigon(this));
 
         mapInput = new SquidInput(mapKeys, mapMouse);
         contextInput = new SquidInput(contextMouse);
@@ -1620,6 +1612,7 @@ public class Epigon extends Game {
 
     @Override
     public void resize(int width, int height) {
+        System.out.println("Resizing to (" + width + ", " + height);
         // if not going to fullscreen, probably
         if (Gdx.graphics.getDisplayMode().width != width && !config.displayConfig.maximized) {
             config.displayConfig.windowWidth = width;
@@ -1639,44 +1632,71 @@ public class Epigon extends Game {
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
-        float oddAddX = width % 2 == 0 ? 0 : 0.5f;
-        float oddAddY = height % 2 == 0 ? 0 : 0.5f;
+        float oddAddX = width % 2 == 0 ? 0 : 0;//.5f;
+        float oddAddY = height % 2 == 0 ? 0 : 0;//.5f;
 
-        mapMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight,
-            (int) (messageSize.cellWidth * currentZoomX * oddAddX), (int) (mapSize.cellHeight * currentZoomY * oddAddY));
-
-        equipmentMouse.reinitialize(currentZoomX * mapSize.cellWidth, currentZoomY * mapSize.cellHeight, mapSize.gridWidth, mapSize.gridHeight,
-            (int) (mapSize.cellWidth * currentZoomX * oddAddX), (int) (mapSize.cellHeight * currentZoomY * oddAddY));
-
-        contextMouse.reinitialize(currentZoomX * contextSize.cellWidth, currentZoomY * contextSize.cellHeight, contextSize.gridWidth, contextSize.gridHeight,
-            (int) (contextSize.cellWidth * currentZoomX * oddAddX), (int) (contextSize.cellHeight * currentZoomY * oddAddY));
-
-        infoMouse.reinitialize(currentZoomX * infoSize.cellWidth, currentZoomY * infoSize.cellHeight, infoSize.gridWidth, infoSize.gridHeight,
-            (int) (infoSize.cellWidth * currentZoomX * oddAddX), (int) (infoSize.cellHeight * currentZoomY * oddAddY));
-
-        messageMouse.reinitialize(currentZoomX * messageSize.cellWidth, currentZoomY * messageSize.cellHeight, messageSize.gridWidth, messageSize.gridHeight,
-            (int) (messageSize.cellWidth * currentZoomX * oddAddX), (int) (messageSize.cellHeight * currentZoomY * oddAddY));
-
-        int top = (int) (height - mapSize.pixelHeight() * currentZoomY); // messageSize.pixelHeight(
+        // Top Left
+        int x = 0;
+        int y = (int) (height - mapSize.pixelHeight() * currentZoomY);
+        int pixelWidth = (int) (currentZoomX * mapSize.pixelWidth());
+        int pixelHeight = (int) (currentZoomY * mapSize.pixelHeight());
         mapViewport.update(width, height, false);
-        mapViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
-
+        mapViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
         mapOverlayViewport.update(width, height, false);
-        mapOverlayViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
-
+        mapOverlayViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
         fallingViewport.update(width, height, false);
-        fallingViewport.setScreenBounds(0, top, (int) (currentZoomX * mapSize.pixelWidth()), (int) (currentZoomY * mapSize.pixelHeight()));
+        fallingViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
 
-        contextViewport.update(width, height, false);
-        contextViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), 0, (int) (currentZoomX * contextSize.pixelWidth()), (int) (currentZoomY * contextSize.pixelHeight()));
+        float cellWidth = currentZoomX * mapSize.cellWidth;
+        float cellHeight = currentZoomY * mapSize.cellHeight;
+        int offsetX = (int) (mapSize.cellWidth * currentZoomX * oddAddX);
+        int offsetY = (int) (mapSize.cellHeight * currentZoomY * oddAddY);
+        mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
+        equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
 
-        top = (int) (height - infoSize.pixelHeight() * currentZoomY); // contextSize.pixelHeight()
-        infoViewport.update(width, height, false);
-        infoViewport.setScreenBounds((int) (currentZoomX * mapSize.pixelWidth()), top, (int) (currentZoomX * infoSize.pixelWidth()), (int) (currentZoomY * infoSize.pixelHeight()));
-
+        // Bottom Left
         messageViewport.update(width, height, false);
-        messageViewport.setScreenBounds(0, 0, (int) (currentZoomX * messageSize.pixelWidth()), (int) (currentZoomY * messageSize.pixelHeight()));
+        x = 0;
+        y = 0;
+        pixelWidth = (int) (currentZoomX * messageSize.pixelWidth());
+        pixelHeight = (int) (currentZoomY * messageSize.pixelHeight());
+        messageViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
 
+        cellWidth = currentZoomX * messageSize.cellWidth;
+        cellHeight = currentZoomY * messageSize.cellHeight;
+        offsetX = (int) (messageSize.cellWidth * currentZoomX * oddAddX);
+        offsetY = (int) (height - cellHeight * messageSize.gridHeight) + (int) (messageSize.cellHeight * currentZoomY * oddAddY);
+        messageMouse.reinitialize(cellWidth, cellHeight, messageSize.gridWidth, messageSize.gridHeight, -offsetX, -offsetY);
+
+        // Top Right
+        x = (int) (currentZoomX * mapSize.pixelWidth());
+        y = (int) (height - infoSize.pixelHeight() * currentZoomY);
+        pixelWidth = (int) (currentZoomX * infoSize.pixelWidth());
+        pixelHeight = (int) (currentZoomY * infoSize.pixelHeight());
+        infoViewport.update(width, height, false);
+        infoViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
+
+        cellWidth = currentZoomX * infoSize.cellWidth;
+        cellHeight = currentZoomY * infoSize.cellHeight;
+        offsetX = x + (int) (infoSize.cellWidth * currentZoomX * oddAddX);
+        offsetY = (int) (infoSize.cellHeight * currentZoomY * oddAddY);
+        infoMouse.reinitialize(cellWidth, cellHeight, infoSize.gridWidth, infoSize.gridHeight, -offsetX, -offsetY);
+
+        // Bottom Right
+        x = (int) (currentZoomX * mapSize.pixelWidth());
+        y = 0;
+        pixelWidth = (int) (currentZoomX * contextSize.pixelWidth());
+        pixelHeight = (int) (currentZoomY * contextSize.pixelHeight());
+        contextViewport.update(width, height, false);
+        contextViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
+
+        cellWidth = currentZoomX * contextSize.cellWidth;
+        cellHeight = currentZoomY * contextSize.cellHeight;
+        offsetX = x + (int) (contextSize.cellWidth * currentZoomX * oddAddX);
+        offsetY = (int) (height - cellHeight * contextSize.gridHeight) + (int) (contextSize.cellHeight * currentZoomY * oddAddY);
+        contextMouse.reinitialize(cellWidth, cellHeight, contextSize.gridWidth, contextSize.gridHeight, -offsetX, -offsetY);
+
+        // save current settings
         config.displayConfig.windowWidth = width;
         config.displayConfig.windowHeight = height;
         config.saveDisplay();

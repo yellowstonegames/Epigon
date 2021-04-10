@@ -1,6 +1,7 @@
 package squidpony.epigon.input.mouse;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 
 import java.util.List;
 
@@ -14,12 +15,11 @@ import squidpony.epigon.data.Weapon;
 /**
  * Handles mouse input for the main map screen
  */
-public class MapMouseHandler extends EpigonMouseHandler {
+public class MapMouseHandler extends InputAdapter {
 
     private Epigon epigon;
 
-    @Override
-    public EpigonMouseHandler setEpigon(Epigon epigon) {
+    public MapMouseHandler setEpigon(Epigon epigon) {
         this.epigon = epigon;
         return this;
     }
@@ -27,24 +27,24 @@ public class MapMouseHandler extends EpigonMouseHandler {
     // if the user clicks within FOV range and there are no awaitedMoves queued up, generate toCursor if it
     // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
     @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        screenX += epigon.player.location.x - (epigon.mapSize.gridWidth >> 1);
-        screenY += epigon.player.location.y - (epigon.mapSize.gridHeight >> 1);
+    public boolean touchUp(int gridX, int gridY, int pointer, int button) {
+        gridX += epigon.player.location.x - (epigon.mapSize.gridWidth >> 1);
+        gridY += epigon.player.location.y - (epigon.mapSize.gridHeight >> 1);
 
-        if (!epigon.map.inBounds(screenX, screenY) || (!epigon.showingMenu && epigon.map.lighting.fovResult[screenX][screenY] <= 0.0)) {
+        if (!epigon.map.inBounds(gridX, gridY) || (!epigon.showingMenu && epigon.map.lighting.fovResult[gridX][gridY] <= 0.0)) {
             return false;
         }
 
         Physical thing = null;
-        if (epigon.map.contents[screenX][screenY] != null) {
-            thing = epigon.map.contents[screenX][screenY].getCreature();
+        if (epigon.map.contents[gridX][gridY] != null) {
+            thing = epigon.map.contents[gridX][gridY].getCreature();
         }
         switch (button) {
             case Input.Buttons.LEFT:
                 if (epigon.showingMenu) {
-                    boolean menuInBounds = epigon.menuLocation.x <= screenX && epigon.menuLocation.y <= screenY && screenY - epigon.menuLocation.y < epigon.maneuverOptions.size();
-                    if (menuInBounds && epigon.currentTarget != null && epigon.mapHoverSLayers.backgrounds[screenX << 1][screenY] != 0f) {
-                        epigon.attack(epigon.currentTarget, epigon.maneuverOptions.getAt(screenY - epigon.menuLocation.y));
+                    boolean menuInBounds = epigon.menuLocation.x <= gridX && epigon.menuLocation.y <= gridY && gridY - epigon.menuLocation.y < epigon.maneuverOptions.size();
+                    if (menuInBounds && epigon.currentTarget != null && epigon.mapHoverSLayers.backgrounds[gridX << 1][gridY] != 0f) {
+                        epigon.attack(epigon.currentTarget, epigon.maneuverOptions.getAt(gridY - epigon.menuLocation.y));
                         epigon.calcFOV(epigon.player.location.x, epigon.player.location.y);
                         epigon.calcDijkstra();
                         epigon.runTurn();
@@ -58,14 +58,14 @@ public class MapMouseHandler extends EpigonMouseHandler {
                     return true;
                 }
 
-                if (epigon.cursor.x != screenX || epigon.cursor.y != screenY) {// clear cursor if lifted in space other than the one it went down in
+                if (epigon.cursor.x != gridX || epigon.cursor.y != gridY) {// clear cursor if lifted in space other than the one it went down in
                     epigon.toCursor.clear();
                     return false;//cleaned up but not considered "handled"
                 }
 
                 if (thing == null) {
                     if (epigon.toCursor.isEmpty()) {
-                        epigon.cursor = Coord.get(screenX, screenY);
+                        epigon.cursor = Coord.get(gridX, gridY);
                         ((StatefulRNG) epigon.toPlayerDijkstra.rng).setState(epigon.player.location.hashCode() ^ (long) epigon.cursor.hashCode() << 32);
                         epigon.toPlayerDijkstra.findPathPreScanned(epigon.toCursor, epigon.cursor);
                         if (!epigon.toCursor.isEmpty()) {
@@ -104,12 +104,12 @@ public class MapMouseHandler extends EpigonMouseHandler {
     }
 
     @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return mouseMoved(screenX, screenY);
+    public boolean touchDragged(int gridX, int gridY, int pointer) {
+        return mouseMoved(gridX, gridY);
     }
 
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    public boolean touchDown(int gridX, int gridY, int pointer, int button) {
         if (!epigon.awaitedMoves.isEmpty()) {
             epigon.cancelMove();
             return true;
@@ -126,21 +126,21 @@ public class MapMouseHandler extends EpigonMouseHandler {
     }
 
     @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        screenX += epigon.player.location.x - (epigon.mapSize.gridWidth >> 1);
-        screenY += epigon.player.location.y - (epigon.mapSize.gridHeight >> 1);
-        if (!epigon.map.inBounds(screenX, screenY) || epigon.map.lighting.fovResult[screenX][screenY] <= 0.0) {
+    public boolean mouseMoved(int gridX, int gridY) {
+        gridX += epigon.player.location.x - (epigon.mapSize.gridWidth >> 1);
+        gridY += epigon.player.location.y - (epigon.mapSize.gridHeight >> 1);
+        if (!epigon.map.inBounds(gridX, gridY) || epigon.map.lighting.fovResult[gridX][gridY] <= 0.0) {
             epigon.toCursor.clear();
             return false;
         }
-        epigon.contextHandler.tileContents(screenX, screenY, epigon.depth, epigon.map.contents[screenX][screenY]); // TODO - have ground level read as depth 0
-        epigon.infoHandler.setTarget(epigon.map.contents[screenX][screenY].getCreature());
+        epigon.contextHandler.tileContents(gridX, gridY, epigon.depth, epigon.map.contents[gridX][gridY]); // TODO - have ground level read as depth 0
+        epigon.infoHandler.setTarget(epigon.map.contents[gridX][gridY].getCreature());
 
         if (!epigon.awaitedMoves.isEmpty()) {
             return false;
         }
 
-        epigon.cursor = Coord.get(screenX, screenY);
+        epigon.cursor = Coord.get(gridX, gridY);
         epigon.toCursor.clear();
         ((StatefulRNG) epigon.toPlayerDijkstra.rng).setState(epigon.player.location.hashCode() ^ (long) epigon.cursor.hashCode() << 32);
         epigon.toPlayerDijkstra.findPathPreScanned(epigon.toCursor, epigon.cursor);

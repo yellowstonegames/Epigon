@@ -1,23 +1,14 @@
 package squidpony.epigon.input.mouse;
 
-
-import squidpony.epigon.Epigon;
+import com.badlogic.gdx.InputAdapter;
 
 /**
  * Handles mouse input for the falling game mode
  */
-public class FallingMouseHandler extends EpigonMouseHandler {
-
-    private Epigon epigon;
+public class FallingMouseHandler extends InputAdapter {
 
     @Override
-    public EpigonMouseHandler setEpigon(Epigon epigon) {
-        this.epigon = epigon;
-        return this;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    public boolean touchUp(int gridX, int gridY, int pointer, int button) {
         return false; // No-op for now
     }
 }

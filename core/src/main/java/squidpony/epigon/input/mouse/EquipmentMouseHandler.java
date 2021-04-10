@@ -1,5 +1,7 @@
 package squidpony.epigon.input.mouse;
 
+import com.badlogic.gdx.InputAdapter;
+
 import squidpony.Messaging;
 
 import squidpony.epigon.Epigon;
@@ -9,23 +11,22 @@ import squidpony.epigon.data.trait.Interactable;
 /**
  * Handles mouse input for the equipment screen
  */
-public class EquipmentMouseHandler extends EpigonMouseHandler {
+public class EquipmentMouseHandler extends InputAdapter {
 
     private Epigon epigon;
 
-    @Override
-    public EpigonMouseHandler setEpigon(Epigon epigon) {
+    public EquipmentMouseHandler setEpigon(Epigon epigon) {
         this.epigon = epigon;
         return this;
     }
 
     @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    public boolean touchUp(int gridX, int gridY, int pointer, int button) {
         if (epigon.showingMenu) {
-            if (epigon.menuLocation.x <= screenX + 2 && epigon.menuLocation.y <= screenY
-                && screenY - epigon.menuLocation.y < epigon.interactionOptions.size()
-                && epigon.mapOverlaySLayers.getLayer(1).getChar(screenX + 2, screenY, '\uFFFF') == '\0') {
-                Interactable interaction = epigon.interactionOptions.getAt(screenY - epigon.menuLocation.y);
+            if (epigon.menuLocation.x <= gridX + 2 && epigon.menuLocation.y <= gridY
+                && gridY - epigon.menuLocation.y < epigon.interactionOptions.size()
+                && epigon.mapOverlaySLayers.getLayer(1).getChar(gridX + 2, gridY, '\uFFFF') == '\0') {
+                Interactable interaction = epigon.interactionOptions.getAt(gridY - epigon.menuLocation.y);
                 if (interaction == null) {
                     return false;
                 }
@@ -46,7 +47,7 @@ public class EquipmentMouseHandler extends EpigonMouseHandler {
             return true;
         }
 
-        if (!epigon.mapOverlayHandler.setSelection(screenX, screenY)) {
+        if (!epigon.mapOverlayHandler.setSelection(gridX, gridY)) {
             return false;
         }
         Physical selected = epigon.mapOverlayHandler.getSelected();
@@ -84,9 +85,9 @@ public class EquipmentMouseHandler extends EpigonMouseHandler {
     }
 
     @Override
-    public boolean mouseMoved(int screenX, int screenY) {
+    public boolean mouseMoved(int gridX, int gridY) {
         if (!epigon.showingMenu) {
-            epigon.mapOverlayHandler.setSelection(screenX, screenY);
+            epigon.mapOverlayHandler.setSelection(gridX, gridY);
         }
         return false;
     }
