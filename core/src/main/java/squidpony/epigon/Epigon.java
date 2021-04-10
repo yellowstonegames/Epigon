@@ -1341,7 +1341,7 @@ public class Epigon extends Game {
     public void putCrawlMap() {
         ArrayTools.fill(mapSLayers.backgrounds, map.lighting.backgroundColor);
         map.lighting.update();
-        if(!showingMenu) {
+        if (!showingMenu) {
             for (int i = 0; i < toCursor.size(); i++) {
                 map.lighting.updateUI(toCursor.get(i), softWhiteChain[i * 3 & 7]);
             }
@@ -1355,15 +1355,13 @@ public class Epigon extends Game {
                     EpiTile tile = map.contents[x][y];
                     mapSLayers.clear(x, y, 1);
                     if ((creature = creatures.get(Coord.get(x, y))) != null) {
-                        if(creature.appearance == null)
-                            creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);                         
-                        else
-                        {
+                        if (creature.appearance == null) {
+                            creature.appearance = mapSLayers.glyph(creature.symbol, lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight), x, y);
+                        } else {
                             creature.appearance.setVisible(true);
                             creature.appearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.color, 0.5f + 0.35f * (float) sight));
                         }
-                        if (creature.overlayAppearance != null)
-                        {
+                        if (creature.overlayAppearance != null) {
                             creature.overlayAppearance.setVisible(true);
                             creature.overlayAppearance.setPackedColor(lerpFloatColorsBlended(unseenCreatureColorFloat, creature.overlayColor, 0.5f + 0.35f * (float) sight));
                         }
@@ -1372,10 +1370,10 @@ public class Epigon extends Game {
                             cancelMove();
                             creature.creatureData.culture.messaging.language.shift = creature.nextLong();
                             message(creature.creatureData.culture.messaging.transform(
-//                                    creature.creatureData.sayings[creature.creatureData.sayings.length - 1], 
-                                    creature.getRandomElement(creature.creatureData.sayings), 
-                                    creature.name, creature.creatureData.genderPronoun, 
-                                    player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                                //                                    creature.creatureData.sayings[creature.creatureData.sayings.length - 1], 
+                                creature.getRandomElement(creature.creatureData.sayings),
+                                creature.name, creature.creatureData.genderPronoun,
+                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                         }
                         creature.wasSeen = true;
                     } else {
@@ -1385,10 +1383,11 @@ public class Epigon extends Game {
                     RememberedTile rt = map.remembered[x][y];
                     if (rt != null) {
                         mapSLayers.clear(x, y, 0);
-                        if(rt.symbol == '#')
+                        if (rt.symbol == '#') {
                             wallColors[x][y] = rt.front;
-                        else 
+                        } else {
                             mapSLayers.put(x, y, rt.symbol, rt.front, rt.back, 0);
+                        }
                     }
                 }
             }
@@ -1631,9 +1630,6 @@ public class Epigon extends Game {
         infoSLayers.setBounds(0, 0, currentZoomX * infoSize.pixelWidth(), currentZoomY * infoSize.pixelHeight());
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
-        // a quirk of how the camera works requires the mouse to be offset by half a cell if the width or height is odd
-        float oddAddX = width % 2 == 0 ? 0 : 0;//.5f;
-        float oddAddY = height % 2 == 0 ? 0 : 0;//.5f;
 
         // Top Left
         int x = 0;
@@ -1649,8 +1645,8 @@ public class Epigon extends Game {
 
         float cellWidth = currentZoomX * mapSize.cellWidth;
         float cellHeight = currentZoomY * mapSize.cellHeight;
-        int offsetX = (int) (mapSize.cellWidth * currentZoomX * oddAddX);
-        int offsetY = (int) (mapSize.cellHeight * currentZoomY * oddAddY);
+        int offsetX = 0;
+        int offsetY = 0;
         mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
         equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
 
@@ -1664,13 +1660,13 @@ public class Epigon extends Game {
 
         cellWidth = currentZoomX * messageSize.cellWidth;
         cellHeight = currentZoomY * messageSize.cellHeight;
-        offsetX = (int) (messageSize.cellWidth * currentZoomX * oddAddX);
-        offsetY = (int) (height - cellHeight * messageSize.gridHeight) + (int) (messageSize.cellHeight * currentZoomY * oddAddY);
+        offsetX = 0;
+        offsetY = (int) (height - cellHeight * messageSize.gridHeight);
         messageMouse.reinitialize(cellWidth, cellHeight, messageSize.gridWidth, messageSize.gridHeight, -offsetX, -offsetY);
 
         // Top Right
         x = (int) (currentZoomX * mapSize.pixelWidth());
-        y = (int) (height - infoSize.pixelHeight() * currentZoomY);
+        y = (int) (height - infoSize.pixelHeight() * currentZoomY); // isn't pinned to Context panel below it
         pixelWidth = (int) (currentZoomX * infoSize.pixelWidth());
         pixelHeight = (int) (currentZoomY * infoSize.pixelHeight());
         infoViewport.update(width, height, false);
@@ -1678,8 +1674,8 @@ public class Epigon extends Game {
 
         cellWidth = currentZoomX * infoSize.cellWidth;
         cellHeight = currentZoomY * infoSize.cellHeight;
-        offsetX = x + (int) (infoSize.cellWidth * currentZoomX * oddAddX);
-        offsetY = (int) (infoSize.cellHeight * currentZoomY * oddAddY);
+        offsetX = x;
+        offsetY = 0;
         infoMouse.reinitialize(cellWidth, cellHeight, infoSize.gridWidth, infoSize.gridHeight, -offsetX, -offsetY);
 
         // Bottom Right
@@ -1692,8 +1688,8 @@ public class Epigon extends Game {
 
         cellWidth = currentZoomX * contextSize.cellWidth;
         cellHeight = currentZoomY * contextSize.cellHeight;
-        offsetX = x + (int) (contextSize.cellWidth * currentZoomX * oddAddX);
-        offsetY = (int) (height - cellHeight * contextSize.gridHeight) + (int) (contextSize.cellHeight * currentZoomY * oddAddY);
+        offsetX = x;
+        offsetY = (int) (height - cellHeight * contextSize.gridHeight); // isn't pinned to Info panel above it
         contextMouse.reinitialize(cellWidth, cellHeight, contextSize.gridWidth, contextSize.gridHeight, -offsetX, -offsetY);
 
         // save current settings
