@@ -1632,14 +1632,17 @@ public class Epigon extends Game {
     }
 
     private void drawMap(SparseLayers sLayers, Batch batch) {
-        
-        updateVisionFilter(0.7f, 0.65f, 0.65f, 0.7f, 0.65f, 0.65f);
-
         float layerX = sLayers.getX();
         float layerY = sLayers.getY();
+
+        // Draw backgrounds
+        updateVisionFilter(0.7f, 0.65f, 0.65f, 0.7f, 0.65f, 0.65f);
         font.draw(batch, sLayers.backgrounds, layerX - font.actualCellWidth * 0.25f, layerY);
 
-        int len = sLayers.layers.size();
+        // Draw walls
+        updateVisionFilter(0.9f, 0.95f, 0.95f, 0.9f, 0.95f, 0.95f);
+        font.draw(batch, walls, layerX - font.actualCellWidth * 0.25f, layerY, 3, 3);
+
         Frustum frustum = null;
         Stage stage = sLayers.getStage();
         float yOff = layerY + 1f + sLayers.gridHeight * font.actualCellHeight;
@@ -1655,11 +1658,9 @@ public class Epigon extends Game {
                 }
             }
         }
-        updateVisionFilter(0.9f, 0.95f, 0.95f, 0.9f, 0.95f, 0.95f);
-
-        font.draw(batch, walls, layerX - font.actualCellWidth * 0.25f, layerY, 3, 3);
 
         font.configureShader(batch);
+        int len = sLayers.layers.size();
         if (frustum == null) {
             for (int i = 0; i < len; i++) {
                 sLayers.layers.get(i).draw(batch, font, layerX, yOff);
@@ -1669,11 +1670,12 @@ public class Epigon extends Game {
                 sLayers.layers.get(i).draw(batch, font, frustum, layerX, yOff);
             }
         }
-        updateVisionFilter(1.05f, 1.4f, 1.4f, 1.05f, 1.4f, 1.4f);
 
+        // Draw foreground
         int x, y;
         float glyphX;
         float glyphY;
+        updateVisionFilter(1.05f, 1.4f, 1.4f, 1.05f, 1.4f, 1.4f);
         for (int i = 0; i < sLayers.glyphs.size(); i++) {
             TextCellFactory.Glyph glyph = sLayers.glyphs.get(i);
             if (glyph == null) { // no glyph to draw
