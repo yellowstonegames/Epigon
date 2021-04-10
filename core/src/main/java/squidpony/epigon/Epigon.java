@@ -77,8 +77,8 @@ public class Epigon extends Game {
     // Display
     private FilterBatch batch;
     private SquidColorCenter colorCenter;
-    public static final FloatFilters.YCwCmFilter filter = new FloatFilters.YCwCmFilter(0.9f, 1.3f, 1.3f);
-    public static final FloatFilter
+    private FloatFilters.YCwCmFilter filter = new FloatFilters.YCwCmFilter(0.9f, 1.3f, 1.3f);
+    private FloatFilter
             //identityFilter = new FloatFilters.IdentityFilter(),
             grayscale = new FloatFilters.YCwCmFilter(0.75f, 0.2f, 0.2f);
     private SparseLayers mapSLayers;
@@ -480,6 +480,7 @@ public class Epigon extends Game {
 
     public void initPlayer() {
         player = RecipeMixer.buildPhysical(dataStarter.playerBlueprint);
+        player.visualCondition = new VisualCondition();
         player.stats.get(Stat.VIGOR).set(42.0);
         player.stats.get(Stat.NUTRITION).delta(-0.1);
         player.stats.get(Stat.NUTRITION).min(0);
@@ -1578,6 +1579,24 @@ public class Epigon extends Game {
             //then we start a batch and manually draw the stage without having it handle its batch...
 //            batch.begin();
             mapSLayers.font.configureShader(batch);
+
+            // Update player vision modifications
+            final int clen = player.conditions.size();
+            player.visualCondition = new VisualCondition(); // TODO - marking conditions as changed can help prevent have to re-calculate every frame
+            for (int i = clen - 1; i >= 0; i--) {
+                VisualCondition vis = player.conditions.getAt(i).parent.visual;
+                if (vis != null) {
+                    vis.update();
+                    player.visualCondition.lumaMul *= vis.lumaMul;
+                    player.visualCondition.warmMul *= vis.warmMul;
+                    player.visualCondition.mildMul *= vis.mildMul;
+                    player.visualCondition.lumaAdd += vis.lumaAdd;
+                    player.visualCondition.warmAdd += vis.warmAdd;
+                    player.visualCondition.mildAdd += vis.mildAdd;
+                    break;
+                }
+            }
+
             if (mapOverlaySLayers.isVisible()) {
                 mapOverlayStage.act();
                 mapOverlayHandler.updateDisplay();
@@ -1587,13 +1606,10 @@ public class Epigon extends Game {
                 batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
                 mapOverlayStage.getRoot().draw(batch, 1f);
             } else {
-                //mapSLayers.draw(batch, 1f);
-                //passiveSLayers.draw(batch, 1f);
-                drawMap(mapSLayers, batch, 1f);
-                drawMap(passiveSLayers, batch, 1f);
+                drawMap(mapSLayers, batch);
+                drawMap(passiveSLayers, batch);
             }
-            //mapHoverSLayers.draw(batch, 1f);
-            drawMap(mapHoverSLayers, batch, 1f);
+            drawMap(mapHoverSLayers, batch);
             batch.end();
         } else {
             //here we apply the other viewport, which clips a different area while leaving the message area intact.
@@ -1614,105 +1630,86 @@ public class Epigon extends Game {
         //this needs vsync set to false in DesktopLauncher.
         Gdx.graphics.setTitle(Gdx.graphics.getFramesPerSecond() + " FPS");
     }
-    
-    private void drawMap(SparseLayers layers, Batch batch, float parentAlpha) { // replacing SquareSparseLayers.java
-        //super.draw(batch, parentAlpha);
-        float xo = layers.getX(), yo = layers.getY(), yOff = yo + 1f + layers.gridHeight * font.actualCellHeight, gxo, gyo,
-            conditionY = 1f, conditionCw = 1f, conditionCm = 1f,
-            conditionYAdd = 0f, conditionCwAdd = 0f, conditionCmAdd = 0f;
-        Physical player = this.player;
-        float[][] walls = this.walls;
-        if (player.visualCondition == null) {
-            final int clen = player.conditions.size();
-            for (int i = clen - 1; i >= 0; i--) {
-                VisualCondition vis = player.conditions.getAt(i).parent.visual;
-                if (vis != null) {
-                    vis.update();
-                    conditionY *= vis.lumaMul;
-                    conditionCw *= vis.warmMul;
-                    conditionCm *= vis.mildMul;
-                    conditionYAdd += vis.lumaAdd;
-                    conditionCwAdd += vis.warmAdd;
-                    conditionCmAdd += vis.mildAdd;
-                    break;
-                }
-            }
-        } else {
-            VisualCondition vis = player.visualCondition;
-            vis.update();
-            conditionY *= vis.lumaMul;
-            conditionCw *= vis.warmMul;
-            conditionCm *= vis.mildMul;
-            conditionYAdd += vis.lumaAdd;
-            conditionCwAdd += vis.warmAdd;
-            conditionCmAdd += vis.mildAdd;
-        }
-        Epigon.filter.yMul = 0.7f * conditionY;
-        Epigon.filter.cwMul = 0.65f * conditionCw;
-        Epigon.filter.cmMul = 0.65f * conditionCm;
-        Epigon.filter.yAdd = 0.7f * conditionYAdd;
-        Epigon.filter.cwAdd = 0.65f * conditionCwAdd;
-        Epigon.filter.cmAdd = 0.65f * conditionCmAdd;
-//                font.draw(batch, backgrounds, xo, yo);
-        font.draw(batch, layers.backgrounds, xo - font.actualCellWidth * 0.25f, yo);
-        int len = layers.layers.size();
+
+    private void drawMap(SparseLayers sLayers, Batch batch) {
+        
+        updateVisionFilter(0.7f, 0.65f, 0.65f, 0.7f, 0.65f, 0.65f);
+
+        float layerX = sLayers.getX();
+        float layerY = sLayers.getY();
+        font.draw(batch, sLayers.backgrounds, layerX - font.actualCellWidth * 0.25f, layerY);
+
+        int len = sLayers.layers.size();
         Frustum frustum = null;
-        Stage stage = layers.getStage();
+        Stage stage = sLayers.getStage();
+        float yOff = layerY + 1f + sLayers.gridHeight * font.actualCellHeight;
         if (stage != null) {
             Viewport viewport = stage.getViewport();
             if (viewport != null) {
                 Camera camera = viewport.getCamera();
-                if (camera != null) {
-                    if (camera.frustum != null
-                        && (!camera.frustum.boundsInFrustum(xo, yOff - font.actualCellHeight - 1f, 0f, font.actualCellWidth, font.actualCellHeight, 0f)
-                        || !camera.frustum.boundsInFrustum(xo + font.actualCellWidth * (layers.gridWidth - 1), yo, 0f, font.actualCellWidth, font.actualCellHeight, 0f))) {
+                if (camera != null && camera.frustum != null) {
+                    if (!camera.frustum.boundsInFrustum(layerX, yOff - font.actualCellHeight - 1f, 0f, font.actualCellWidth, font.actualCellHeight, 0f)
+                        || !camera.frustum.boundsInFrustum(layerX + font.actualCellWidth * (sLayers.gridWidth - 1), layerY, 0f, font.actualCellWidth, font.actualCellHeight, 0f)) {
                         frustum = camera.frustum;
                     }
                 }
             }
         }
-        Epigon.filter.yMul = 0.9f * conditionY;
-        Epigon.filter.cwMul = 0.95f * conditionCw;
-        Epigon.filter.cmMul = 0.95f * conditionCm;
-        Epigon.filter.yAdd = 0.9f * conditionYAdd;
-        Epigon.filter.cwAdd = 0.95f * conditionCwAdd;
-        Epigon.filter.cmAdd = 0.95f * conditionCmAdd;
+        updateVisionFilter(0.9f, 0.95f, 0.95f, 0.9f, 0.95f, 0.95f);
 
-        font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
-//                font.draw(batch, walls, xo - font.actualCellWidth * 0.25f, yo, 3, 3);
+        font.draw(batch, walls, layerX - font.actualCellWidth * 0.25f, layerY, 3, 3);
 
         font.configureShader(batch);
         if (frustum == null) {
             for (int i = 0; i < len; i++) {
-                layers.layers.get(i).draw(batch, font, xo, yOff);
+                sLayers.layers.get(i).draw(batch, font, layerX, yOff);
             }
-
         } else {
             for (int i = 0; i < len; i++) {
-                layers.layers.get(i).draw(batch, font, frustum, xo, yOff);
+                sLayers.layers.get(i).draw(batch, font, frustum, layerX, yOff);
             }
         }
-        Epigon.filter.yMul = 1.05f * conditionY;
-        Epigon.filter.cwMul = 1.4f * conditionCw;
-        Epigon.filter.cmMul = 1.4f * conditionCm;
-        Epigon.filter.yAdd = 1.05f * conditionYAdd;
-        Epigon.filter.cwAdd = 1.4f * conditionCwAdd;
-        Epigon.filter.cmAdd = 1.4f * conditionCmAdd;
+        updateVisionFilter(1.05f, 1.4f, 1.4f, 1.05f, 1.4f, 1.4f);
+
         int x, y;
-        for (int i = 0; i < layers.glyphs.size(); i++) {
-            TextCellFactory.Glyph glyph = layers.glyphs.get(i);
-            if (glyph == null) {
+        float glyphX;
+        float glyphY;
+        for (int i = 0; i < sLayers.glyphs.size(); i++) {
+            TextCellFactory.Glyph glyph = sLayers.glyphs.get(i);
+            if (glyph == null) { // no glyph to draw
                 continue;
             }
             glyph.act(Gdx.graphics.getDeltaTime());
-            if (!glyph.isVisible()
-                || (x = Math.round((gxo = glyph.getX() - xo) / font.actualCellWidth)) < 0 || x >= layers.gridWidth
-                || (y = Math.round((gyo = glyph.getY() - yo) / -font.actualCellHeight + layers.gridHeight)) < 0 || y >= layers.gridHeight
-                || layers.backgrounds[x][y] == 0f || (frustum != null && !frustum.boundsInFrustum(gxo, gyo, 0f, font.actualCellWidth, font.actualCellHeight, 0f))) {
+            if (!glyph.isVisible()) { // can't see the glyph
+                continue;
+            }
+            glyphX = glyph.getX() - layerX;
+            x = Math.round((glyphX) / font.actualCellWidth);
+            if (x < 0 || x >= sLayers.gridWidth) { // glyph off the view horizontally
+                continue;
+            }
+            glyphY = glyph.getY() - layerY;
+            y = Math.round((glyphY) / -font.actualCellHeight + sLayers.gridHeight);
+            if (y < 0 || y >= sLayers.gridHeight) { // glyph off the view vertically
+                continue;
+            }
+            if (sLayers.backgrounds[x][y] == 0f) { // marked to not be drawn
+                continue;
+            }
+            if (frustum != null && !frustum.boundsInFrustum(glyphX, glyphY, 0f, font.actualCellWidth, font.actualCellHeight, 0f)) { // outside camera view
                 continue;
             }
             glyph.draw(batch, 1f);
         }
+    }
+
+    private void updateVisionFilter(float yMultiplier, float cwMultiplier, float cmMultiplier, float yAdditive, float cwAdditive, float cmAdditive) {
+        filter.yMul = player.visualCondition.lumaMul * yMultiplier;
+        filter.cwMul = player.visualCondition.warmMul * cwMultiplier;
+        filter.cmMul = player.visualCondition.mildMul * cmMultiplier;
+        filter.yAdd = player.visualCondition.lumaAdd * yAdditive;
+        filter.cwAdd = player.visualCondition.warmAdd * cwAdditive;
+        filter.cmAdd = player.visualCondition.mildAdd * cmAdditive;
     }
 
     @Override
