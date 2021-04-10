@@ -1647,8 +1647,8 @@ public class Epigon extends Game {
         float cellHeight = currentZoomY * mapSize.cellHeight;
         int offsetX = 0;
         int offsetY = 0;
-        mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
-        equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, offsetX, offsetY);
+        mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
+        equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
 
         // Bottom Left
         messageViewport.update(width, height, false);
