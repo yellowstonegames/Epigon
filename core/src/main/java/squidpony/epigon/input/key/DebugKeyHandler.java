@@ -1,6 +1,7 @@
 package squidpony.epigon.input.key;
 
 import squidpony.squidgrid.Radius;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 
 import squidpony.epigon.Epigon;
@@ -11,21 +12,14 @@ import squidpony.epigon.files.Config;
 /**
  * Handles input for debug actions
  */
-public class DebugKeyHandler implements EpigonKeyHandler {
+public class DebugKeyHandler implements KeyHandler {
 
-    private Epigon epigon;
-    private Config config;
+    private final Epigon epigon;
+    private final Config config;
 
-    @Override
-    public DebugKeyHandler setEpigon(Epigon epigon) {
+    public DebugKeyHandler(Epigon epigon, Config config) {
         this.epigon = epigon;
-        return this;
-    }
-
-    @Override
-    public DebugKeyHandler setConfig(Config config) {
         this.config = config;
-        return this;
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
 import squidpony.epigon.Epigon;
 import squidpony.epigon.input.ControlMapping;
@@ -15,14 +16,12 @@ import squidpony.epigon.input.Verb;
 /**
  * Handles input for actively falling in Falling mode
  */
-public class FallingKeyHandler implements EpigonKeyHandler {
+public class FallingKeyHandler implements KeyHandler {
 
-    private Epigon epigon;
+    private final Epigon epigon;
 
-    @Override
-    public FallingKeyHandler setEpigon(Epigon epigon) {
+    public FallingKeyHandler(Epigon epigon) {
         this.epigon = epigon;
-        return this;
     }
 
     @Override

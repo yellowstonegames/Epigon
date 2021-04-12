@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import squidpony.Maker;
 import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 
 import squidpony.epigon.Epigon;
@@ -26,14 +27,12 @@ import squidpony.epigon.util.Utilities;
 /**
  * Handles input for when the main map is displayed.
  */
-public class MapKeyHandler implements EpigonKeyHandler {
+public class MapKeyHandler implements KeyHandler {
 
-    private Epigon epigon;
+    private final Epigon epigon;
 
-    @Override
-    public MapKeyHandler setEpigon(Epigon epigon) {
+    public MapKeyHandler(Epigon epigon) {
         this.epigon = epigon;
-        return this;
     }
 
     @Override

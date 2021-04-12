@@ -29,8 +29,8 @@ public class QuickHull {
             throw new IllegalArgumentException("Cannot compute convex hull of zero points.");
         }
 
-        System.out.println("Starting quickhull for " + inputPoints.length + " points.");
-        long millis = System.currentTimeMillis();
+//        System.out.println("Starting quickhull for " + inputPoints.length + " points.");
+//        long millis = System.currentTimeMillis();
 
         // search extreme values
         Coord rightmostPoint = inputPoints[0];
@@ -66,9 +66,8 @@ public class QuickHull {
         hull = divide(rightOfLine, rightmostPoint, leftmostPoint);
         convexHull.addAll(hull);
 
-        millis = System.currentTimeMillis() - millis;
-        System.out.println("Quickhull took " + millis + " milliseconds.");
-
+//        millis = System.currentTimeMillis() - millis;
+//        System.out.println("Quickhull took " + millis + " milliseconds.");
         return convexHull;
     }
 

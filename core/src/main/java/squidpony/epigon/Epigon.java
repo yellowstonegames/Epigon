@@ -31,6 +31,7 @@ import squidpony.panel.IColoredString;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.*;
 import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidgrid.mapping.LineKit;
 import squidpony.squidmath.*;
 
@@ -166,13 +167,13 @@ public class Epigon extends Game {
     public static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
 
     // input handlers
-    public EpigonKeyHandler mapKeys;
-    public EpigonKeyHandler fallbackKeys;
-    public EpigonKeyHandler equipmentKeys;
-    public EpigonKeyHandler helpKeys;
-    public EpigonKeyHandler fallingKeys;
-    public EpigonKeyHandler fallingGameOverKeys;
-    public EpigonKeyHandler debugKeys;
+    public KeyHandler mapKeys;
+    public KeyHandler fallbackKeys;
+    public KeyHandler equipmentKeys;
+    public KeyHandler helpKeys;
+    public KeyHandler fallingKeys;
+    public KeyHandler fallingGameOverKeys;
+    public KeyHandler debugKeys;
     public SquidMouse equipmentMouse;
     public SquidMouse helpMouse;
     public SquidMouse fallingMouse;
@@ -205,12 +206,12 @@ public class Epigon extends Game {
 
         Settings settings = config.settings;
 
-        mode = config.settings.mode;
-        mapSize = config.settings.mapSize();
-        messageSize = config.settings.messageSize();
-        infoSize = config.settings.infoSize();
-        contextSize = config.settings.contextSize();
-        messageCount = config.settings.messageCount();
+        mode = settings.mode;
+        mapSize = settings.mapSize;
+        messageSize = settings.messageSize;
+        infoSize = settings.infoSize;
+        contextSize = settings.contextSize;
+        messageCount = settings.messageCount;
 
         mixer = new RecipeMixer();
         //handBuilt = new DataStarter(mixer);
@@ -251,18 +252,12 @@ public class Epigon extends Game {
         contextStage = new Stage(contextViewport, batch);
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
-//        font = new TextCellFactory().font("7-12-serif.fnt");
         font = DefaultResources.getCrispLeanFamily();
         font.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         TextCellFactory smallFont = font.copy();
         smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         font.setSmoothingMultiplier(1.5f);
         smallFont.setSmoothingMultiplier(1.5f);
-//        TextCellFactory smallFont = new TextCellFactory().font("7-12-serif.fnt");
-//        smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
-        //smallFont.bmpFont.getData().scale(2);
-//        font = DefaultResources.getCrispLeanFamily();
-//        TextCellFactory smallFont = font.copy();
 
         IColoredString<Color> emptyICS = IColoredString.Impl.create();
         messageIndex = messageCount;
@@ -279,14 +274,6 @@ public class Epigon extends Game {
 
         messageSLayers.setDefaultBackground(unseenColor);
 
-//        shaper = new ShapeRenderer();
-/*
-                messageSize.gridWidth,
-                messageSize.gridHeight,
-                messageSize.cellWidth,
-                messageSize.cellHeight,
-
-         */
         infoSLayers = new SparseLayers(
             infoSize.gridWidth,
             infoSize.gridHeight,
@@ -295,8 +282,6 @@ public class Epigon extends Game {
             smallFont);
         infoSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         infoSLayers.setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
-//        infoSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
-//        infoSLayers.getForegroundLayer().setDefaultForeground(colorCenter.lighter(SColor.CW_PALE_AZURE));
 
         contextSLayers = new SparseLayers(
             contextSize.gridWidth,
@@ -306,8 +291,6 @@ public class Epigon extends Game {
             smallFont);
         contextSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
-//        contextSLayers.getBackgroundLayer().setDefaultForeground(SColor.CW_ALMOST_BLACK);
-//        contextSLayers.getForegroundLayer().setDefaultForeground(SColor.CW_PALE_LIME);
 
         mapSLayers = new SparseLayers(
             settings.worldGridWidth,
@@ -381,13 +364,13 @@ public class Epigon extends Game {
         awaitedMoves = new ArrayList<>(100);
 
         // set up input handlers
-        mapKeys = new MapKeyHandler().setEpigon(this);
-        fallbackKeys = new FallbackKeyHandler().setEpigon(this).setConfig(config);
-        equipmentKeys = new EquipmentKeyHandler().setEpigon(this);
-        helpKeys = new HelpKeyHandler().setEpigon(this);
-        fallingKeys = new FallingKeyHandler().setEpigon(this);
-        fallingGameOverKeys = new FallingGameOver().setEpigon(this);
-        debugKeys = new DebugKeyHandler().setEpigon(this).setConfig(config);
+        mapKeys = new MapKeyHandler(this);
+        fallbackKeys = new FallbackKeyHandler(this, config);
+        equipmentKeys = new EquipmentKeyHandler(this);
+        helpKeys = new HelpKeyHandler(this);
+        fallingKeys = new FallingKeyHandler(this);
+        fallingGameOverKeys = new FallingGameOver(this);
+        debugKeys = new DebugKeyHandler(this, config);
 
         // NOTE - a resize() operation is called after everything is initialized, so below values are set to min values for simplicity
         // Upper left
@@ -1299,25 +1282,24 @@ public class Epigon extends Game {
                 calcFOV(player.location.x, player.location.y);
                 calcDijkstra();
                 runTurn();
-            } else if(!map.contents[newX][newY].contents.isEmpty()
-                    && (thing = map.contents[newX][newY].contents.get(0)).interactableData != null
-                    && !thing.interactableData.isEmpty()
-                    && thing.interactableData.get(0).bumpAction
-            ){
+            } else if (!map.contents[newX][newY].contents.isEmpty()
+                && (thing = map.contents[newX][newY].contents.get(0)).interactableData != null
+                && !thing.interactableData.isEmpty()
+                && thing.interactableData.get(0).bumpAction) {
                 cancelMove();
                 thing.location = newPos; // total hack; needed by door-opening interaction
                 message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, this),
-                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                    player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 runTurn();
             } else if ((thing = map.contents[newX][newY].getLargeNonCreature()) != null) {
                 cancelMove();
-                if(thing.interactableData != null && !thing.interactableData.isEmpty() && thing.interactableData.get(0).bumpAction) {
+                if (thing.interactableData != null && !thing.interactableData.isEmpty() && thing.interactableData.get(0).bumpAction) {
                     thing.location = newPos; // total hack; needed by door-opening interaction
                     message(Messaging.transform(thing.interactableData.get(0).interaction.interact(player, thing, this),
-                            player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                }
-                else 
+                        player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                } else {
                     message("Ran into " + thing.name);
+                }
                 runTurn();
             } else {
                 runTurn();
@@ -1400,20 +1382,6 @@ public class Epigon extends Game {
         mapSLayers.clear(player.location.x, player.location.y, 0);
 
         mapSLayers.clear(2);
-//        if (!showingMenu) {
-//            for (int i = 0; i < toCursor.size(); i++) {
-//                Coord c = toCursor.get(i);
-//                Direction dir;
-//                if (i == toCursor.size() - 1) {
-//                    dir = Direction.NONE; // last spot shouldn't have arrow
-//                } else if (i == 0) {
-//                    dir = Direction.toGoTo(player.location, c);
-//                } else {
-//                    dir = Direction.toGoTo(toCursor.get(i - 1), c);
-//                }
-//                mapSLayers.put(c.x, c.y, Utilities.arrowsFor(dir).charAt(0), SColor.CW_PURPLE.toFloatBits(), 0f, 2);
-//            }
-//        }
     }
 
     public void showFallingGameOver() {
@@ -1455,9 +1423,9 @@ public class Epigon extends Game {
 
     @Override
     public void render() {
-        if(config.debugConfig.debugActive)
+        if (config.debugConfig.debugActive) {
             glp.reset();
-        //super.render();
+        }
 
         // standard clear the background routine for libGDX
         Gdx.gl.glClearColor(unseenColor.r, unseenColor.g, unseenColor.b, 1.0f);
@@ -1481,7 +1449,7 @@ public class Epigon extends Game {
                 }
                 // this goes here; otherwise the player "skips" abruptly when coming out of pause
                 fallingHandler.setCurrentDepth(fallingSLayers.gridY(fallingStage.getCamera().position.y = MathUtils.lerp(startingY, finishY,
-                        (currentFallDuration + fallDuration) / timeToFall)));
+                    (currentFallDuration + fallDuration) / timeToFall)));
                 if (!paused) {
                     currentFallDuration = (unpausedAt.until(Instant.now(), ChronoUnit.MILLIS));
                     if (Instant.now().isAfter(nextInput)) {
@@ -1508,34 +1476,35 @@ public class Epigon extends Game {
                 }
                 break;
         }
+
         // if the user clicked, we have a list of moves to perform.
         if (!awaitedMoves.isEmpty()) {
             // this doesn't check for input, but instead processes and removes Points from awaitedMoves.
             if (!mapSLayers.hasActiveAnimations()) {
-                if(player.creatureData.lastUsedItem != null && 
-                        player.creatureData.lastUsedItem.radiance != null && player.creatureData.lastUsedItem.radiance.flare > 0f)
+                if (player.creatureData.lastUsedItem != null && player.creatureData.lastUsedItem.radiance != null && player.creatureData.lastUsedItem.radiance.flare > 0f) {
                     player.creatureData.lastUsedItem.radiance.flare = 0f;
+                }
                 Coord m = awaitedMoves.remove(0);
-                if (!toCursor.isEmpty())
+                if (!toCursor.isEmpty()) {
                     toCursor.remove(0);
+                }
                 move(Direction.toGoTo(player.location, m));
                 infoHandler.updateDisplay();
             }
         } else {
             multiplexer.process();
         }
-        // the order here matters. We apply multiple viewports at different times to clip different areas.
-        contextViewport.apply(false);
-        contextStage.act();
 
+        // the order here matters. We apply multiple viewports at different times to clip different areas.
         batch.begin();
 
+        contextViewport.apply(false);
+        contextStage.act();
         batch.setProjectionMatrix(contextViewport.getCamera().combined);
         contextStage.getRoot().draw(batch, 1);
 
         infoViewport.apply(false);
         infoStage.act();
-//        infoStage.draw();
         batch.setProjectionMatrix(infoViewport.getCamera().combined);
         infoStage.getRoot().draw(batch, 1);
 
@@ -1546,38 +1515,25 @@ public class Epigon extends Game {
             int switches = glp.getShaderSwitches();
             tempSB.setLength(0);
             tempSB.append(Gdx.graphics.getFramesPerSecond())
-                    .append(" FPS, Draw Calls: ").append(drawCalls)
-                    .append(", Calls: ").append(calls)
-                    .append(", Texture Binds: ").append(textureBindings)
-                    .append(", Shader Switches: ").append(switches)
-                    .append(", Lights: ").append(map.lighting.lights.size())
-            ;
+                .append(" FPS, Draw Calls: ").append(drawCalls)
+                .append(", Calls: ").append(calls)
+                .append(", Texture Binds: ").append(textureBindings)
+                .append(", Shader Switches: ").append(switches)
+                .append(", Lights: ").append(map.lighting.lights.size());
             screenPosition.set(16, 8);
             mapViewport.unproject(screenPosition);
             messageSLayers.put(1, 1, tempSB.toString(), WHITE);
-//            font.bmpFont.draw(batch, tempSB, screenPosition.x, screenPosition.y);
         }
         messageViewport.apply(false);
         messageStage.act();
-//        messageStage.draw();
         batch.setProjectionMatrix(messageViewport.getCamera().combined);
         messageStage.getRoot().draw(batch, 1);
 
-//        batch.end();
-
-//        shaper.setProjectionMatrix(messageStage.getCamera().combined);
-//        UIUtil.drawRectangle(shaper, 1, 1, messageSize.pixelWidth() - 2, messageSize.pixelHeight() - 2,
-//                ShapeRenderer.ShapeType.Line, CW_LIGHT_APRICOT);
-//        messageSLayers.drawBorder(batch);
-
         if (mode.equals(GameMode.CRAWL)) {
-            //here we apply the other viewport, which clips a different area while leaving the message area intact.
             mapViewport.apply(false);
             mapStage.act();
-            //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
             batch.setProjectionMatrix(mapStage.getCamera().combined);
-            //then we start a batch and manually draw the stage without having it handle its batch...
-//            batch.begin();
+
             mapSLayers.font.configureShader(batch);
 
             // Update player vision modifications
@@ -1606,32 +1562,25 @@ public class Epigon extends Game {
                 batch.setProjectionMatrix(mapOverlayStage.getCamera().combined);
                 mapOverlayStage.getRoot().draw(batch, 1f);
             } else {
-                drawMap(mapSLayers, batch);
-                drawMap(passiveSLayers, batch);
+                renderMapLayer(mapSLayers, batch);
+                renderMapLayer(passiveSLayers, batch);
             }
-            drawMap(mapHoverSLayers, batch);
-            batch.end();
+            renderMapLayer(mapHoverSLayers, batch);
         } else {
-            //here we apply the other viewport, which clips a different area while leaving the message area intact.
             fallingViewport.apply(false);
             fallingStage.act();
-            //we use a different approach here because we can avoid ending the batch by setting this matrix outside a batch
             batch.setProjectionMatrix(fallingStage.getCamera().combined);
-            //then we start a batch and manually draw the stage without having it handle its batch...
-//            batch.begin();
             fallingSLayers.font.configureShader(batch);
             fallingStage.getRoot().draw(batch, 1f);
-            //so we can draw the actors independently of the stage while still in the same batch
-            //player.appearance.draw(batch, 1.0f);
-            //we still need to end
-            batch.end();
         }
+
+        batch.end();
         //uncomment the upcoming line if you want to see how fast this can run at top speed...
         //this needs vsync set to false in DesktopLauncher.
         Gdx.graphics.setTitle(Gdx.graphics.getFramesPerSecond() + " FPS");
     }
 
-    private void drawMap(SparseLayers sLayers, Batch batch) {
+    private void renderMapLayer(SparseLayers sLayers, Batch batch) {
         float layerX = sLayers.getX();
         float layerY = sLayers.getY();
 

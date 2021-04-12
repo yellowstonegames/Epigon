@@ -57,7 +57,7 @@ public class FileManager {
         try {
             return Files.readAllLines(foundPath).stream().collect(Collectors.joining("\n"));
         } catch (IOException ex) {
-            System.out.println("Could not read path: " + localPath + "\nException: " + ex.getLocalizedMessage());
+            System.out.println("Could not read path: " + localPath + " with Exception: " + ex.getLocalizedMessage());
             return "";
         }
     }
@@ -82,7 +82,7 @@ public class FileManager {
             Files.write(foundPath, Collections.singletonList(contents), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             System.out.println("Could not write path: " + localPath + "\nException: " + ex.getLocalizedMessage());
-            ex.printStackTrace();
+            // TODO figure out what game should do if write fails
         }
     }
 

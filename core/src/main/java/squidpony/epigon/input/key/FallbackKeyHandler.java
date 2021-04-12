@@ -1,6 +1,7 @@
 package squidpony.epigon.input.key;
 
 import squidpony.squidgrid.gui.gdx.SquidInput;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
 import squidpony.epigon.Epigon;
 import squidpony.epigon.files.Config;
@@ -10,21 +11,14 @@ import squidpony.epigon.input.Verb;
 /**
  * Handles input for actively falling in Falling mode
  */
-public class FallbackKeyHandler implements EpigonKeyHandler {
+public class FallbackKeyHandler implements KeyHandler {
 
-    private Epigon epigon;
-    private Config config;
+    private final Epigon epigon;
+    private final Config config;
 
-    @Override
-    public FallbackKeyHandler setEpigon(Epigon epigon) {
+    public FallbackKeyHandler(Epigon epigon, Config config) {
         this.epigon = epigon;
-        return this;
-    }
-
-    @Override
-    public FallbackKeyHandler setConfig(Config config) {
         this.config = config;
-        return this;
     }
 
     @Override
