@@ -65,7 +65,6 @@ public class Epigon extends Game {
     public RecipeMixer mixer;
     public DataStarter dataStarter;
     private MapDecorator mapDecorator;
-//    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
     public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     private GameMode mode;
@@ -159,10 +158,9 @@ public class Epigon extends Game {
 
     public float startingY, finishY, timeToFall;
 
-    public GLProfiler glp;
-    private StringBuilder tempSB = new StringBuilder(16);
-    private Vector2 screenPosition = new Vector2(20, 20);
-    public static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
+    private GLProfiler glp;
+    private final StringBuilder tempSB = new StringBuilder(16);
+    private static final Radiance[] softWhiteChain = Radiance.makeChain(8, 1.2f, SColor.FLOAT_WHITE, 0.4f);
 
     // input handlers
     public KeyHandler mapKeys;
@@ -985,7 +983,7 @@ public class Epigon extends Game {
         monsterDijkstra.clearGoals();
         monsterDijkstra.resetMap();
         blockage.refill(map.lighting.fovResult, 0.0);
-        blockage.fringe8way();
+        //blockage.fringe8way(); // seems like this is preventing the player from clicking into tiles they can see at the edge of light
         toPlayerDijkstra.setGoal(player.location);
         toPlayerDijkstra.scan(blockage);
     }
@@ -1062,7 +1060,7 @@ public class Epigon extends Game {
         return weapons;
     }
 
-    public Coord showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
+    public void showAttackOptions(Physical target, OrderedMap<String, Weapon> options) {
         int sz = options.size(), len = 0;
         for (int i = 0; i < sz; i++) {
             len = Math.max(options.keyAt(i).length(), len);
@@ -1090,7 +1088,8 @@ public class Epigon extends Game {
             }
         }
         showingMenu = true;
-        return Coord.get(startX - 2 >> 1, startY);
+        menuLocation = Coord.get(startX - 2 >> 1, startY);
+        System.out.println("Target at " + target.location + " menu at " + menuLocation); // not sure why menu isn't visible, it's near the target...
     }
 
     public Coord showInteractOptions(Physical interactable, Physical user, Coord target, EpiMap map) {
@@ -1156,6 +1155,11 @@ public class Epigon extends Game {
 
     public void attack(Physical target, Weapon choice) {
         int targetX = target.location.x, targetY = target.location.y;
+        if (target == player){
+            message("It's not wise to attack yourself!");
+            return;
+        }
+
         ActionOutcome ao = ActionOutcome.attack(player, choice, target);
         Element element = ao.element;
         Direction dir = Direction.getDirection(target.location.x - player.location.x, target.location.y - player.location.y);
@@ -1456,7 +1460,7 @@ public class Epigon extends Game {
     public void setOdinView(boolean shouldShow) {
         config.debugConfig.odinView = shouldShow;
         if (shouldShow) {
-            // nnop for now
+            // noop for now
         } else {
             map.tempSeen.clear();
             map.seen.clear();

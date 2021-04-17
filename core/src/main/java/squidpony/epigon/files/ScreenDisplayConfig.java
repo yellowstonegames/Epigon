@@ -11,7 +11,7 @@ public class ScreenDisplayConfig {
         "If you ever want to reset your settings, you can simply delete this file.",
         "While grid and pixel sizes will attempt to be respected, there are some contraints internally that will override settings sizes in some cases.",
         "The widest pixel size of map or message will be used to choose grid width of both.",
-        "Info has strict height and minimum width requirments. Where needed, context will be shrunk or grown to accomidate that.",
+        "Info has strict height and minimum width requirments. Where needed, context will be shrunk or grown to accommodate that.",
         "The widest pixel size of info or context will be used to choose the grid width of both."
     };
 
@@ -32,7 +32,6 @@ public class ScreenDisplayConfig {
 
     // In-flight values that shouldn't be saved to settings file
     transient public int messageCount = -1;
-    // End contstants
 
     // Constants for when there is no config
     transient private static final int mapGridWidth = 102; //World.DIVE_HEADER[0].length() + 2;
@@ -47,6 +46,7 @@ public class ScreenDisplayConfig {
     transient private static final int contextGridHeight = 17;
     transient private static final int secondaryCellWidth = 9;
     transient private static final int secondaryCellHeight = 20;
+    // End constants
 
     /**
      * Using the current primary cell and grid heights, calculates the maximum whole-integer grid height for secondary cells.

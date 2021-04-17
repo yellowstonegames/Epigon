@@ -28,26 +28,28 @@ public class MapMouseHandler extends InputAdapter {
     // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
     @Override
     public boolean touchUp(int gridX, int gridY, int pointer, int button) {
-        gridX += epigon.player.location.x - (epigon.mapSize.gridWidth >> 1);
-        gridY += epigon.player.location.y - (epigon.mapSize.gridHeight >> 1);
+        int worldX = gridX+ (epigon.player.location.x - (epigon.mapSize.gridWidth >> 1));
+        int worldY = gridY + (epigon.player.location.y - (epigon.mapSize.gridHeight >> 1));
 
-        if (!epigon.map.inBounds(gridX, gridY) || (!epigon.showingMenu && epigon.map.lighting.fovResult[gridX][gridY] <= 0.0)) {
+        if (!epigon.map.inBounds(worldX, worldY) || (!epigon.showingMenu && epigon.map.lighting.fovResult[worldX][worldY] <= 0.0)) {
             return false;
         }
 
         Physical thing = null;
-        if (epigon.map.contents[gridX][gridY] != null) {
-            thing = epigon.map.contents[gridX][gridY].getCreature();
+        if (epigon.map.contents[worldX][worldY] != null) {
+            thing = epigon.map.contents[worldX][worldY].getCreature();
         }
         switch (button) {
             case Input.Buttons.LEFT:
                 if (epigon.showingMenu) {
-                    boolean menuInBounds = epigon.menuLocation.x <= gridX && epigon.menuLocation.y <= gridY && gridY - epigon.menuLocation.y < epigon.maneuverOptions.size();
-                    if (menuInBounds && epigon.currentTarget != null && epigon.mapHoverSLayers.backgrounds[gridX << 1][gridY] != 0f) {
-                        epigon.attack(epigon.currentTarget, epigon.maneuverOptions.getAt(gridY - epigon.menuLocation.y));
-                        epigon.calcFOV(epigon.player.location.x, epigon.player.location.y);
-                        epigon.calcDijkstra();
-                        epigon.runTurn();
+                    boolean menuInBounds = epigon.menuLocation.x <= worldX && epigon.menuLocation.y <= worldY && worldY - epigon.menuLocation.y < epigon.maneuverOptions.size();
+                    if (menuInBounds && epigon.currentTarget != null) {
+                        if (epigon.mapHoverSLayers.backgrounds[worldX][worldY] != 0f) {
+                            epigon.attack(epigon.currentTarget, epigon.maneuverOptions.getAt(worldY - epigon.menuLocation.y));
+                            epigon.calcFOV(epigon.player.location.x, epigon.player.location.y);
+                            epigon.calcDijkstra();
+                            epigon.runTurn();
+                        }
                     }
                     epigon.showingMenu = false;
                     epigon.menuLocation = null;
@@ -58,14 +60,14 @@ public class MapMouseHandler extends InputAdapter {
                     return true;
                 }
 
-                if (epigon.cursor.x != gridX || epigon.cursor.y != gridY) {// clear cursor if lifted in space other than the one it went down in
+                if (epigon.cursor.x != worldX || epigon.cursor.y != worldY) {// clear cursor if lifted in space other than the one it went down in
                     epigon.toCursor.clear();
                     return false;//cleaned up but not considered "handled"
                 }
 
                 if (thing == null) {
                     if (epigon.toCursor.isEmpty()) {
-                        epigon.cursor = Coord.get(gridX, gridY);
+                        epigon.cursor = Coord.get(worldX, worldY);
                         ((StatefulRNG) epigon.toPlayerDijkstra.rng).setState(epigon.player.location.hashCode() ^ (long) epigon.cursor.hashCode() << 32);
                         epigon.toPlayerDijkstra.findPathPreScanned(epigon.toCursor, epigon.cursor);
                         if (!epigon.toCursor.isEmpty()) {
@@ -96,7 +98,7 @@ public class MapMouseHandler extends InputAdapter {
                 if (epigon.maneuverOptions == null || epigon.maneuverOptions.isEmpty()) {
                     epigon.message("No attack options against the " + thing.name + " at this range.");
                 } else {
-                    epigon.menuLocation = epigon.showAttackOptions(thing, epigon.maneuverOptions);
+                    epigon.showAttackOptions(thing, epigon.maneuverOptions);
                 }
                 return true;
         }

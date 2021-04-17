@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
 import squidpony.epigon.Epigon;
 
 /**
@@ -219,7 +220,7 @@ public class InfoHandler {
      * values adjusted prior to calling this.
      *
      * @param physical
-     * @param changes a Map of the changes to stats
+     * @param changes  a Map of the changes to stats
      */
     public void updateDisplay(Physical physical, OrderedMap<ConstantKey, Double> changes) {
         this.changes.clear();// = new OrderedMap<>(ConstantKey.ConstantKeyHasher.instance);
@@ -299,17 +300,25 @@ public class InfoHandler {
                 offenseFound = true;
             }
 
+            int xOffset = 3;
             if (physical.creatureData.weaponChoices != null && physical.creatureData.weaponChoices.items() != null && !physical.creatureData.weaponChoices.items().isEmpty()) {
                 Weapon currentWeapon = physical.creatureData.weaponChoices.items().first();
-                put(3, yOffset++, "BARE " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon));
+                String text = "BARE " + currentWeapon.rawWeapon.name + Utilities.getRangeText(currentWeapon) + " ₩" + physical.creatureData.skillWithWeapon(currentWeapon);
+                int workingLength = width - 2; //inside the border width
+                workingLength -= xOffset;
+                if (text.length() > workingLength) { // TODO - refactor to be in string-based put operation
+                    text = text.substring(0, workingLength - 1);
+                    text += "…";
+                }
+                put(xOffset, yOffset++, text);
             } else if (!offenseFound) {
-                put(3, yOffset++, "Offenseless");
+                put(xOffset, yOffset++, "Offenseless");
             }
             yOffset++;
             if (physical.conditions.isEmpty()) {
-                put(3, yOffset, "Condition: healthy ([/]for now...[/])");
+                put(xOffset, yOffset, "Condition: healthy ([/]for now...[/])");
             } else if (physical.conditions.size() == 1) {
-                put(3, yOffset, "Condition: " + physical.conditions.getAt(0).parent.adjective);
+                put(xOffset, yOffset, "Condition: " + physical.conditions.getAt(0).parent.adjective);
             } else {
                 StringBuilder sb = new StringBuilder("Conditions: ").append(physical.conditions.getAt(0).parent.adjective);
                 for (int i = 1; i < physical.conditions.size(); i++) {
@@ -318,7 +327,7 @@ public class InfoHandler {
                 ArrayList<String> wrapped = new ArrayList<>();
                 StringKit.wrap(wrapped, sb, width - 6);
                 for (int i = 0; i < wrapped.size(); i++) {
-                    put(3, yOffset++, wrapped.get(i));
+                    put(xOffset, yOffset++, wrapped.get(i));
                 }
 
             }
@@ -468,8 +477,7 @@ public class InfoHandler {
     }
 
     private void damage(int originX, int originY, Color color, IRNG rng) {
-        layers.addAction(new DamageEffect(rng.nextFloat() * 1.9f + 1.2f, rng.between(2, 4), originX, originY,
-            new float[]{
+        layers.addAction(new DamageEffect(rng.nextFloat() * 1.9f + 1.2f, rng.between(2, 4), originX, originY, new float[]{
                 SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
                 SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
                 SColor.toEditedFloat(color, 0f, 0.3f, 0f, -0.1f),
@@ -478,7 +486,10 @@ public class InfoHandler {
                 SColor.toEditedFloat(color, 0f, -0.15f, 0.3f, 0f),
                 SColor.toEditedFloat(color, 0f, -0.3f, 0f, 0f),
                 SColor.toEditedFloat(color, 0f, -0.45f, -0.1f, 0.15f),
-                SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),}));
+                SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
+                }
+            )
+        );
     }
 
     public class DamageEffect extends PanelEffect {
