@@ -1066,7 +1066,7 @@ public class Epigon extends Game {
             len = Math.max(options.keyAt(i).length(), len);
         }
         int startY = MathUtils.clamp(target.location.y - (sz >> 1), 0, map.height - sz - 1),
-            startX = target.location.x * 2 + 2;
+            startX = target.location.x + 2;
         final float smoke = SColor.DB_DARK_LEATHER.toFloatBits();//-0x1.fefefep125F;//SColor.CW_GRAY
 
         if (target.location.x + len + 1 < map.width) {
@@ -1078,17 +1078,17 @@ public class Epigon extends Game {
                 mapHoverSLayers.put(startX, startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null);
             }
         } else {
-            startX = target.location.x * 2 - len;
+            startX = target.location.x - len;
             for (int i = 0; i < sz; i++) {
                 String name = options.keyAt(i);
                 for (int j = 0; j < len; j++) {
                     mapHoverSLayers.put(startX + j, startY + i, smoke);
                 }
-                mapHoverSLayers.put(target.location.x * 2 - name.length(), startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null);
+                mapHoverSLayers.put(target.location.x - name.length(), startY + i, name, SColor.COLOR_WHEEL_PALETTE_LIGHT[(i * 3) & 15], null);
             }
         }
         showingMenu = true;
-        menuLocation = Coord.get(startX - 2 >> 1, startY);
+        menuLocation = Coord.get(startX - 2, startY);
         System.out.println("Target at " + target.location + " menu at " + menuLocation); // not sure why menu isn't visible, it's near the target...
     }
 

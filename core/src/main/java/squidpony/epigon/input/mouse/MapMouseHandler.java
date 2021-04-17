@@ -28,7 +28,7 @@ public class MapMouseHandler extends InputAdapter {
     // hasn't been generated already by mouseMoved, then copy it over to awaitedMoves.
     @Override
     public boolean touchUp(int gridX, int gridY, int pointer, int button) {
-        int worldX = gridX+ (epigon.player.location.x - (epigon.mapSize.gridWidth >> 1));
+        int worldX = gridX + (epigon.player.location.x - (epigon.mapSize.gridWidth >> 1));
         int worldY = gridY + (epigon.player.location.y - (epigon.mapSize.gridHeight >> 1));
 
         if (!epigon.map.inBounds(worldX, worldY) || (!epigon.showingMenu && epigon.map.lighting.fovResult[worldX][worldY] <= 0.0)) {
