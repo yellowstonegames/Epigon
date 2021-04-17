@@ -414,6 +414,14 @@ public class MapOverlayHandler {
         put(descX, y, "Shut - shuts all nearby doors");
         y += 2;
 
+        put(1, y, "Other Commands", headingColor);
+        y++;
+        put(x, y, "~", keyColor);
+        put(descX, y, "Toggle debug - toggles debug mode on and off");
+        y++;
+        put(descX, y, "               (debug key input may override other key input)");
+        y += 2;
+
         helpHeight = y - startY;
         doBorder(startY, helpHeight);
     }

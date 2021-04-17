@@ -16,8 +16,6 @@ import squidpony.squidmath.OrderedMap;
  * their list.
  *
  * In general the title of the Profession with the highest rating should be used when a title is shown.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Profession extends EpiData {
 

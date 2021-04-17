@@ -28,15 +28,14 @@ import java.util.*;
  * Base rock: generic = true, unique = false, buildingBlock = true;
  *
  * A longsword: generic = false, unique = false, buildingBlock = true;
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Physical extends EpiData {
+
     public static final int PRECISION = 0, DAMAGE = 1, CRIT = 2, INFLUENCE = 3,
-            EVASION = 4, DEFENSE = 5, STEALTH = 6, LUCK = 7, RANGE = 8, AREA= 9, PREPARE = 10;
+        EVASION = 4, DEFENSE = 5, STEALTH = 6, LUCK = 7, RANGE = 8, AREA = 9, PREPARE = 10;
 
     private static long createdQuantity = 0;
-    
+
     // operational bits for live objects
     public Coord location;
     public boolean attached; // cannot be removed from its location (or inventory pile) without special means
@@ -60,7 +59,7 @@ public class Physical extends EpiData {
 
     public double baseValue;
     public boolean blocking;
-    
+
     public ArrayList<Modification> whenUsedAsMaterial = new ArrayList<>();
     public ArrayList<Modification> modifications = new ArrayList<>(); // modifications applied both during instantiation and through later effects
     public ArrayList<Modification> requiredModifications = new ArrayList<>(); // Must apply all of these on instantiation
@@ -98,7 +97,7 @@ public class Physical extends EpiData {
 
     /*
     * The rarity level applied.
-    */
+     */
     public Rating rarity;
 
     /**
@@ -112,7 +111,7 @@ public class Physical extends EpiData {
     public Creature creatureData;
 
     public Material mainMaterial;
-    
+
     public Ammunition ammunitionData;
     public Container containerData;
     public Grouping groupingData;
@@ -134,13 +133,12 @@ public class Physical extends EpiData {
         name = "P-" + createdQuantity;
 
     }
-    public static Physical makeBasic(String name, char symbol, Color color)
-    {
+
+    public static Physical makeBasic(String name, char symbol, Color color) {
         return makeBasic(name, symbol, color.toFloatBits());
     }
 
-    public static Physical makeBasic(String name, char symbol, float color)
-    {
+    public static Physical makeBasic(String name, char symbol, float color) {
         Physical p = new Physical();
         p.name = name;
         p.symbol = symbol;
@@ -148,17 +146,17 @@ public class Physical extends EpiData {
         return p;
     }
     public static final Physical basePhysical = new Physical();
+
     static {
         basePhysical.generic = true;
         basePhysical.unique = true;
     }
 
-    public void update()
-    {
-        for(Condition c : conditions)
-        {
-            if(c.update())
+    public void update() {
+        for (Condition c : conditions) {
+            if (c.update()) {
                 conditionsToRemove.add(c);
+            }
         }
         conditions.removeAll(conditionsToRemove);
         conditionsToRemove.clear();
@@ -230,13 +228,12 @@ public class Physical extends EpiData {
                     return false;
                 }
             }
-        }         
+        }
         condition.attach(this);
         return true;
     }
-    
-    public boolean removeCondition(ConditionBlueprint condition)
-    {
+
+    public boolean removeCondition(ConditionBlueprint condition) {
         boolean removed = false;
         for (int i = 0; i < conditions.size(); i++) {
             if (conditions.getAt(i).hasParent(condition)) {
@@ -282,13 +279,13 @@ public class Physical extends EpiData {
                     equip(item, Maker.makeList(WieldSlot.RIGHT_HAND, WieldSlot.LEFT_HAND));
                     break;
                 case 3:
-                        equip(item, Maker.makeList(WieldSlot.HEAD));
+                    equip(item, Maker.makeList(WieldSlot.HEAD));
                     break;
                 case 4:
-                        equip(item, Maker.makeList(WieldSlot.NECK));
+                    equip(item, Maker.makeList(WieldSlot.NECK));
                     break;
                 case 5:
-                        equip(item, Maker.makeList(WieldSlot.LEFT_FOOT, WieldSlot.RIGHT_FOOT));
+                    equip(item, Maker.makeList(WieldSlot.LEFT_FOOT, WieldSlot.RIGHT_FOOT));
                     break;
             }
         }
@@ -310,16 +307,18 @@ public class Physical extends EpiData {
         unequip(slots).stream().forEach(this::addToInventory); // put old equipment back into inventory
 
         removeFromInventory(item);
-        if (item.wearableData != null){
+        if (item.wearableData != null) {
             item.wearableData.worn = true;
         }
 
         for (BodySlot ws : slots) {
             Physical old = creatureData.equippedBySlot.put(ws, item);
-            if(old != null)
+            if (old != null) {
                 creatureData.weaponChoices.remove(old.weaponData);
-            if(!item.equals(old) && item.weaponData != null)
+            }
+            if (!item.equals(old) && item.weaponData != null) {
                 creatureData.weaponChoices.add(item.weaponData, 2);
+            }
             creatureData.equippedDistinct.add(item);
         }
         // TODO - apply changes based on adding equipment (may be done?)
@@ -334,12 +333,12 @@ public class Physical extends EpiData {
         if (item.wearableData != null) {
             unequip(item.wearableData.slotsUsed);
         }
-        
+
         if (item.weaponData != null && creatureData != null) {
             unequip(Arrays.stream(WieldSlot.ALL)
                 .filter(ws -> item.equals(creatureData.equippedBySlot.get(ws)))
                 .<ArrayList<BodySlot>>collect(ArrayList::new, ArrayList::add, ArrayList::addAll));
-        } 
+        }
     }
 
     /**
@@ -401,13 +400,13 @@ public class Physical extends EpiData {
         return removed;
     }
 
-    public void addToInventory(Physical adding){
+    public void addToInventory(Physical adding) {
         Physical owned = inventory.stream().filter(p -> p.equals(adding)).findAny().orElse(null);
-        if (owned == null){
+        if (owned == null) {
             inventory.add(adding);
         } else { // This is meant to work with groupingData not counting in equality comparison
             int quantity = adding.groupingData == null ? 1 : adding.groupingData.quantity;
-            if (adding.groupingData == null){
+            if (adding.groupingData == null) {
                 owned.groupingData = new Grouping(1 + quantity);
             } else {
                 owned.groupingData.quantity += quantity;
@@ -438,74 +437,130 @@ public class Physical extends EpiData {
     public void calculateStats() {
         for (int lim = next(3) + 4; lim >= 0; lim--) {
             CalcStat stat = getRandomElement(CalcStat.all);
-            if(stats.containsKey(stat)) 
+            if (stats.containsKey(stat)) {
                 stats.get(stat).addActual(nextCurvedDouble());
-            else
+            } else {
                 stats.put(stat, new LiveValue(0.0, 99.0));
+            }
         }
     }
-    
-    public double actualStat(ConstantKey stat)
-    {
+
+    public double actualStat(ConstantKey stat) {
         return stats.getOrDefault(stat, LiveValue.ZERO).actual();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Physical physical = (Physical) o;
-        if (name != null ? !name.equals(physical.name) : physical.name != null) return false;
-        if (description != null ? !description.equals(physical.description) : physical.description != null) return false;
-        if (attached != physical.attached) return false;
-        if (symbol != physical.symbol) return false;
-        if (overlaySymbol != physical.overlaySymbol) return false;
-        if (Float.compare(physical.color, color) != 0) return false;
-        if (Float.compare(physical.overlayColor, overlayColor) != 0) return false;
-        if (generic != physical.generic) return false;
-        if (unique != physical.unique) return false;
-        if (buildingBlock != physical.buildingBlock) return false;
-        if (Double.compare(physical.baseValue, baseValue) != 0) return false;
-        if (blocking != physical.blocking) return false;
-        if (radiance != null ? !radiance.equals(physical.radiance) : physical.radiance != null) return false;
-        if (parent != null ? !parent.equals(physical.parent) : physical.parent != null) return false;
-        if (possibleAliases != null ? !possibleAliases.equals(physical.possibleAliases) : physical.possibleAliases != null)
+        if (name != null ? !name.equals(physical.name) : physical.name != null) {
             return false;
-        if (modifications != null ? !modifications.equals(physical.modifications) : physical.modifications != null)
+        }
+        if (description != null ? !description.equals(physical.description) : physical.description != null) {
             return false;
-        if (elementalDamageMultiplier != null ? !elementalDamageMultiplier.equals(physical.elementalDamageMultiplier) : physical.elementalDamageMultiplier != null)
+        }
+        if (attached != physical.attached) {
             return false;
-        if (inventory != null ? !inventory.equals(physical.inventory) : physical.inventory != null) return false;
-        if (optionalInventory != null ? !optionalInventory.equals(physical.optionalInventory) : physical.optionalInventory != null)
+        }
+        if (symbol != physical.symbol) {
             return false;
-        if (physicalDrops != null ? !physicalDrops.equals(physical.physicalDrops) : physical.physicalDrops != null)
+        }
+        if (overlaySymbol != physical.overlaySymbol) {
             return false;
-        if (elementDrops != null ? !elementDrops.equals(physical.elementDrops) : physical.elementDrops != null)
+        }
+        if (Float.compare(physical.color, color) != 0) {
             return false;
-        if (rarity != physical.rarity) return false;
-        if (rarityModifications != null ? !rarityModifications.equals(physical.rarityModifications) : physical.rarityModifications != null)
+        }
+        if (Float.compare(physical.overlayColor, overlayColor) != 0) {
             return false;
-        if (creatureData != null ? !creatureData.equals(physical.creatureData) : physical.creatureData != null)
+        }
+        if (generic != physical.generic) {
             return false;
-        if (mainMaterial != null ? !mainMaterial.equals(physical.mainMaterial) : physical.mainMaterial != null)
+        }
+        if (unique != physical.unique) {
             return false;
-        if (ammunitionData != null ? !ammunitionData.equals(physical.ammunitionData) : physical.ammunitionData != null)
+        }
+        if (buildingBlock != physical.buildingBlock) {
             return false;
-        if (containerData != null ? !containerData.equals(physical.containerData) : physical.containerData != null)
+        }
+        if (Double.compare(physical.baseValue, baseValue) != 0) {
             return false;
-        if (groupingData != null ? !groupingData.equals(physical.groupingData) : physical.groupingData != null)
+        }
+        if (blocking != physical.blocking) {
             return false;
-        if (interactableData != null ? !interactableData.equals(physical.interactableData) : physical.interactableData != null)
+        }
+        if (radiance != null ? !radiance.equals(physical.radiance) : physical.radiance != null) {
             return false;
-        if (liquidData != null ? !liquidData.equals(physical.liquidData) : physical.liquidData != null) return false;
-        if (legibleData != null ? !legibleData.equals(physical.legibleData) : physical.legibleData != null)
+        }
+        if (parent != null ? !parent.equals(physical.parent) : physical.parent != null) {
             return false;
-        if (wearableData != null ? !wearableData.equals(physical.wearableData) : physical.wearableData != null)
+        }
+        if (possibleAliases != null ? !possibleAliases.equals(physical.possibleAliases) : physical.possibleAliases != null) {
             return false;
-        if (weaponData != null ? !weaponData.equals(physical.weaponData) : physical.weaponData != null) return false;
-        if (zappableData != null ? !zappableData.equals(physical.zappableData) : physical.zappableData != null)
+        }
+        if (modifications != null ? !modifications.equals(physical.modifications) : physical.modifications != null) {
             return false;
+        }
+        if (elementalDamageMultiplier != null ? !elementalDamageMultiplier.equals(physical.elementalDamageMultiplier) : physical.elementalDamageMultiplier != null) {
+            return false;
+        }
+        if (inventory != null ? !inventory.equals(physical.inventory) : physical.inventory != null) {
+            return false;
+        }
+        if (optionalInventory != null ? !optionalInventory.equals(physical.optionalInventory) : physical.optionalInventory != null) {
+            return false;
+        }
+        if (physicalDrops != null ? !physicalDrops.equals(physical.physicalDrops) : physical.physicalDrops != null) {
+            return false;
+        }
+        if (elementDrops != null ? !elementDrops.equals(physical.elementDrops) : physical.elementDrops != null) {
+            return false;
+        }
+        if (rarity != physical.rarity) {
+            return false;
+        }
+        if (rarityModifications != null ? !rarityModifications.equals(physical.rarityModifications) : physical.rarityModifications != null) {
+            return false;
+        }
+        if (creatureData != null ? !creatureData.equals(physical.creatureData) : physical.creatureData != null) {
+            return false;
+        }
+        if (mainMaterial != null ? !mainMaterial.equals(physical.mainMaterial) : physical.mainMaterial != null) {
+            return false;
+        }
+        if (ammunitionData != null ? !ammunitionData.equals(physical.ammunitionData) : physical.ammunitionData != null) {
+            return false;
+        }
+        if (containerData != null ? !containerData.equals(physical.containerData) : physical.containerData != null) {
+            return false;
+        }
+        if (groupingData != null ? !groupingData.equals(physical.groupingData) : physical.groupingData != null) {
+            return false;
+        }
+        if (interactableData != null ? !interactableData.equals(physical.interactableData) : physical.interactableData != null) {
+            return false;
+        }
+        if (liquidData != null ? !liquidData.equals(physical.liquidData) : physical.liquidData != null) {
+            return false;
+        }
+        if (legibleData != null ? !legibleData.equals(physical.legibleData) : physical.legibleData != null) {
+            return false;
+        }
+        if (wearableData != null ? !wearableData.equals(physical.wearableData) : physical.wearableData != null) {
+            return false;
+        }
+        if (weaponData != null ? !weaponData.equals(physical.weaponData) : physical.weaponData != null) {
+            return false;
+        }
+        if (zappableData != null ? !zappableData.equals(physical.zappableData) : physical.zappableData != null) {
+            return false;
+        }
         return terrainData != null ? terrainData.equals(physical.terrainData) : physical.terrainData == null;
     }
 
@@ -555,15 +610,17 @@ public class Physical extends EpiData {
             System.err.println("Can't disarm the Physical " + name + "; it is not a creature");
             return "";
         }
-        if(!creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_HAND) && !creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND))
+        if (!creatureData.equippedBySlot.containsKey(ClothingSlot.LEFT_HAND) && !creatureData.equippedBySlot.containsKey(ClothingSlot.RIGHT_HAND)) {
             return "";
+        }
         Physical p = nextBoolean()
-                ? creatureData.equippedBySlot.remove(ClothingSlot.LEFT_HAND)
-                : creatureData.equippedBySlot.remove(ClothingSlot.RIGHT_HAND);
+            ? creatureData.equippedBySlot.remove(ClothingSlot.LEFT_HAND)
+            : creatureData.equippedBySlot.remove(ClothingSlot.RIGHT_HAND);
         if (p != null) {
             creatureData.equippedDistinct.remove(p);
-            if (p.weaponData != null)
+            if (p.weaponData != null) {
                 creatureData.weaponChoices.remove(p.weaponData);
+            }
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equippedBySlot.get(subSlot))) {
                     creatureData.equippedBySlot.remove(subSlot);
@@ -580,16 +637,19 @@ public class Physical extends EpiData {
             System.err.println("Can't sunder the equipment of Physical " + name + "; it is not a creature");
             return "";
         }
-        if(creatureData.equippedBySlot.isEmpty())
+        if (creatureData.equippedBySlot.isEmpty()) {
             return "";
+        }
         int pos = nextInt(creatureData.equippedBySlot.size());
         Physical p = creatureData.equippedBySlot.getAt(pos);
         if (p != null) {
-            if(p.mainMaterial == null || p.mainMaterial.getHardness() > nextDouble(power * 500))
+            if (p.mainMaterial == null || p.mainMaterial.getHardness() > nextDouble(power * 500)) {
                 return ""; // didn't break anything
+            }
             creatureData.equippedDistinct.remove(p);
-            if (p.weaponData != null)
+            if (p.weaponData != null) {
                 creatureData.weaponChoices.remove(p.weaponData);
+            }
             //creatureData.equippedBySlot.removeAt(pos);
             for (BodySlot subSlot : ClothingSlot.values()) { // make sure to clear out multi-handed unequips
                 if (p.equals(creatureData.equippedBySlot.get(subSlot))) {

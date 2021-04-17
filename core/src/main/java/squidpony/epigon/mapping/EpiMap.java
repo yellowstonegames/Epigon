@@ -16,8 +16,6 @@ import static squidpony.epigon.Epigon.rootChaos;
  *
  * A null tile represents open space with no special properties or opacities to things passing through. They should not
  * be considered a vacuum, but rather normal air.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class EpiMap {
 
@@ -46,7 +44,7 @@ public class EpiMap {
         downStairPositions = new GreasedRegion(width, height);
         upStairPositions = new GreasedRegion(width, height);
         seen = new GreasedRegion(width, height);
-        tempSeen = new GreasedRegion(width,height);
+        tempSeen = new GreasedRegion(width, height);
         creatures = new OrderedMap<>();
     }
 

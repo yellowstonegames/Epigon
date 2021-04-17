@@ -2,8 +2,6 @@ package squidpony.epigon.data;
 
 /**
  * Represents an achievement that the player can earn in the course of the game.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Achievement {
 

@@ -7,9 +7,7 @@ import squidpony.squidmath.OrderedMap;
  * acquire and use to create items.
  *
  * A specific recipe will always produce a specific result when successfully used, although the
- * quality of that result may be dependant on the skill level of the creator.
- *
- * @author Eben Howard - http://squidpony.com
+ * quality of that result may be dependent on the skill level of the creator.
  */
 public class Recipe extends EpiData {
 

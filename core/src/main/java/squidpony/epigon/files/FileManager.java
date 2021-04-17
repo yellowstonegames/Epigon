@@ -65,11 +65,15 @@ public class FileManager {
     /**
      * Writes the string directly into the given file.
      *
+     * IOExceptions are swallowed, use the return value to handle success and failure of saving.
+     *
      * @param fileName
      * @param path
      * @param contents
+     *
+     * @return true if the file write operation was a success, false if it was not
      */
-    public void writeFile(String fileName, String path, String contents) {
+    public boolean writeFile(String fileName, String path, String contents) {
         String localPath = "";
         if (path != null && !path.isEmpty()) {
             localPath = path + "/";
@@ -82,8 +86,10 @@ public class FileManager {
             Files.write(foundPath, Collections.singletonList(contents), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             System.out.println("Could not write path: " + localPath + "\nException: " + ex.getLocalizedMessage());
-            // TODO figure out what game should do if write fails
+            return false;
         }
+
+        return true;
     }
 
     /**

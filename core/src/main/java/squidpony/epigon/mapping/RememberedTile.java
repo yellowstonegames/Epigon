@@ -7,8 +7,6 @@ import squidpony.squidgrid.gui.gdx.SColor;
 /**
  * Contains the player's memory of the tile. May eventually have more detail for "look" commands,
  * but right now is focused purely on drawing maps.
- *
- * @author Eben Howard
  */
 public class RememberedTile {
 
@@ -21,6 +19,7 @@ public class RememberedTile {
     public float front = 0f;
     public float back = 0f;
     public float miniMapColor = 0f;
+    public boolean seenInDebug = false;
 
     public RememberedTile(EpiTile tile) {
         remake(tile);

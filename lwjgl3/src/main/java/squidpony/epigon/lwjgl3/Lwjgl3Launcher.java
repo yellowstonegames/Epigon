@@ -6,9 +6,9 @@ import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Graphics.Monitor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
+
 import squidpony.epigon.Epigon;
 import squidpony.epigon.files.Config;
 
@@ -31,10 +31,10 @@ public class Lwjgl3Launcher {
 
         // need to cross-config set window size if it's not in the configs
         if (config.displayConfig.windowWidth <= 0) {
-            config.displayConfig.windowWidth = config.settings.defaultPixelWidth();
+            config.displayConfig.windowWidth = config.displayConfig.defaultPixelWidth();
         }
         if (config.displayConfig.windowHeight <= 0) {
-            config.displayConfig.windowHeight = config.settings.defaultPixelHeight();
+            config.displayConfig.windowHeight = config.displayConfig.defaultPixelHeight();
         }
 
         System.out.println("Files loaded!");
@@ -126,7 +126,7 @@ public class Lwjgl3Launcher {
             appConfig.setWindowPosition(x, y); // This doesn't take into account the upper left including title bar, just content (libgdx / lwjgl limitation)
         }
 
-        appConfig.setTitle(config.gameTitle);
+        appConfig.setTitle(Config.gameTitle);
         //uncomment if testing FPS
         appConfig.useVsync(false);
         appConfig.setWindowIcon(Files.FileType.Internal, "images/icons/libgdx128.png", "images/icons/libgdx64.png", "images/icons/libgdx32.png", "images/icons/libgdx16.png");

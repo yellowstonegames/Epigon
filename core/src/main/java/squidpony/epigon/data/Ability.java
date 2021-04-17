@@ -9,8 +9,6 @@ import java.util.*;
  * An ability is an action choice a creature, item, or condition can make.
  *
  * It represents an attempt to make a change to the game world in some way during normal game play.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Ability extends EpiData {
 

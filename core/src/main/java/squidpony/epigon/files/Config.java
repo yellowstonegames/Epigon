@@ -84,9 +84,7 @@ public class Config {
         } else {
             settings = fileManager.json().fromJson(Settings.class, text);
         }
-        settings.init();
         settings.calcSeed();
-        settings.adjustSecondaryToMaxHeight();
         text = fileManager.json().prettyPrint(settings);
         fileManager.writeFile(settingsConfigFilename, configPath, text);
 
@@ -97,6 +95,8 @@ public class Config {
         } else {
             displayConfig = fileManager.json().fromJson(ScreenDisplayConfig.class, text);
         }
+        displayConfig.init();
+        displayConfig.adjustSecondaryToMaxHeight();
         text = fileManager.json().prettyPrint(displayConfig);
         fileManager.writeFile(displayConfigFilename, configPath, text);
 

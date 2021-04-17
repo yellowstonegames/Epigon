@@ -27,8 +27,6 @@ import java.util.stream.Stream;
  *
  * Results may be based on using a specific recipe with specific items, or by looking for a result
  * in a recipe and then building it with that recipe.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class RecipeMixer {
 

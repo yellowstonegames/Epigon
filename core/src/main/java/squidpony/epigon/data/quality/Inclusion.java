@@ -6,8 +6,6 @@ import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * All possible types of mineral inclusions.
- *
- * @author Eben Howard - http(//squidpony.com
  */
 public enum Inclusion implements Material {
 

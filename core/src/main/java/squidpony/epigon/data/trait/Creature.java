@@ -11,8 +11,6 @@ import squidpony.squidmath.ProbabilityTable;
 
 /**
  * A specific creature in the world.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Creature {
 
@@ -33,21 +31,19 @@ public class Creature {
     public Weapon lastWieldedWeapon = null;
     public Physical lastUsedItem = null;
     public Technique currentTechnique = null;
-    
+
     public Culture culture = Culture.cultures.get("Beast");
     public String[] sayings = null;
     public Messaging.NounTrait genderPronoun = Messaging.NounTrait.UNSPECIFIED_GENDER;
-    
-    public int skillWithWeapon(Weapon w)
-    {
+
+    public int skillWithWeapon(Weapon w) {
         int skill = 1;
         for (int i = 0; i < w.skills.length; i++) {
             skill += skills.getOrDefault(w.skills[i], Rating.NONE).ordinal();
         }
         return skill;
     }
-    
-    
+
     /*
      * Properties Creatures Need to model real life
      * 

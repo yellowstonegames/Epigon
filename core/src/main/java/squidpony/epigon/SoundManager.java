@@ -13,8 +13,6 @@ import java.util.TreeMap;
 
 /**
  * Singleton class which controls sound output.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class SoundManager {
 

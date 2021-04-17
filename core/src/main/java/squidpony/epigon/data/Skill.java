@@ -9,8 +9,6 @@ import squidpony.squidmath.OrderedSet;
 
 /**
  * List of the possible skills such as Woodchopping, Archery, etc.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public enum Skill implements ConstantKey {
     COOKING, BAKING(COOKING), FRYING(COOKING), BOILING(COOKING),

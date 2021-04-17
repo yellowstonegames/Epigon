@@ -1,16 +1,15 @@
 package squidpony.epigon.display;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+
 import squidpony.ArrayTools;
-import squidpony.epigon.Epigon;
-import squidpony.epigon.data.LiveValue;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.Stat;
-import squidpony.epigon.mapping.EpiMap;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.RememberedTile;
 import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.gui.gdx.SparseLayers;
 import squidpony.squidgrid.gui.gdx.TextCellFactory;
@@ -18,10 +17,14 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.EnumOrderedSet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import squidpony.epigon.Epigon;
+import squidpony.epigon.data.LiveValue;
+import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.Stat;
+import squidpony.epigon.files.Config;
+import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.RememberedTile;
 
 /**
  * Handles the contents relevant to the current context mode, switching modes as needed.
@@ -82,14 +85,16 @@ public class ContextHandler {
     private EnumOrderedSet<ContextMode> cacheIsValid = new EnumOrderedSet<>(ContextMode.class);
     private float defaultFrontColor;
     private Epigon game;
+    private Config config;
 
     public Coord arrowLeft;
     public Coord arrowRight;
 
-    public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game) {
+    public ContextHandler(SparseLayers layers, SparseLayers mainMap, Epigon game, Config config) {
         this.layers = layers;
         this.mainMap = mainMap;
         this.game = game;
+        this.config = config;
 
         group = new Group();
         group.addActor(this.layers);
@@ -137,13 +142,13 @@ public class ContextHandler {
                     RememberedTile memory;
                     for (int i = 0; i < epiMap.width; i++) {
                         for (int j = 0; j < epiMap.height; j++) {
-                            if ((memory = epiMap.remembered[i][j]) != null) {
+                            memory = epiMap.remembered[i][j];
+                            if (memory != null) {
                                 miniMapFont.draw(batch, '\u0000',
                                     (epiMap.lighting.fovResult[i][j] > 0)
                                         ? SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_WHITE, 0.25f)
                                         : SColor.lerpFloatColors(memory.miniMapColor, SColor.FLOAT_BLACK, 0.2f),
                                     xo + widthInc * i, yOff + heightInc * j);
-
                             }
                         }
                     }

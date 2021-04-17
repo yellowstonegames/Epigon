@@ -2,7 +2,6 @@ package squidpony.epigon.data;
 
 import squidpony.squidmath.OrderedMap;
 
-
 /**
  * This is used to create specific recipes in a game world.
  *
@@ -24,8 +23,6 @@ import squidpony.squidmath.OrderedMap;
  * robin egg and almond flour. Both come from the same base cake recipe but if the first is used
  * then the special properties from a robin egg and almond flour do not get contributed as they
  * would in a more specific recipe.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class RecipeBlueprint extends EpiData {
 

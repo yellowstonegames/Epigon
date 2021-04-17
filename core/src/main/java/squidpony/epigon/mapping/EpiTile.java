@@ -17,8 +17,6 @@ import static squidpony.squidgrid.gui.gdx.SColor.*;
  *
  * Through this class, one can get how the tile should be displayed, a compiled description of
  * what's in it, and the resistance factor to light, movement, etc.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class EpiTile {
 

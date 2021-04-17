@@ -6,8 +6,6 @@ import squidpony.squidgrid.gui.gdx.SColor;
 
 /**
  * All possible types of stone.
- *
- * @author Eben Howard - http(//squidpony.com
  */
 public enum Stone implements Material {
 

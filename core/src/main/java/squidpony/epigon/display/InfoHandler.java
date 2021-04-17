@@ -77,7 +77,7 @@ public class InfoHandler {
         this.layers = layers;
         this.colorCenter = colorCenter;
         this.game = game;
-        
+
         width = layers.gridWidth;
         height = layers.gridHeight;
         layers.addLayer();
@@ -94,7 +94,7 @@ public class InfoHandler {
     }
 
     public void setTarget(Physical target) {
-        if (this.target == target){
+        if (this.target == target) {
             return;
         }
         this.target = target;
@@ -173,7 +173,7 @@ public class InfoHandler {
 
     public void prior() {
         layers.summon(arrowLeft.x, arrowLeft.y, arrowLeft.x + 1, arrowLeft.y - 2, '✔', -0x1.abed4ap125F,//SColor.CW_HONEYDEW,
-                SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
+            SColor.translucentColor(-0x1.abed4ap125F, 0.2f), 0.6f);
         infoMode = infoMode.prior();
         updateDisplay();
     }
@@ -218,6 +218,7 @@ public class InfoHandler {
      * Shows the changes passed in on the current stat display. Expected that the displayed target has already had its
      * values adjusted prior to calling this.
      *
+     * @param physical
      * @param changes a Map of the changes to stats
      */
     public void updateDisplay(Physical physical, OrderedMap<ConstantKey, Double> changes) {
@@ -288,7 +289,7 @@ public class InfoHandler {
             boolean offenseFound = false;
             for (WieldSlot slot : WieldSlot.ALL) {
                 Physical equipped = physical.creatureData.equippedBySlot.get(slot);
-                if (equipped == null){
+                if (equipped == null) {
                     continue;
                 }
                 put(3, yOffset, slot.shortCode());
@@ -305,16 +306,11 @@ public class InfoHandler {
                 put(3, yOffset++, "Offenseless");
             }
             yOffset++;
-            if(physical.conditions.isEmpty())
-            {
+            if (physical.conditions.isEmpty()) {
                 put(3, yOffset, "Condition: healthy ([/]for now...[/])");
-            }
-            else if(physical.conditions.size() == 1)
-            {
+            } else if (physical.conditions.size() == 1) {
                 put(3, yOffset, "Condition: " + physical.conditions.getAt(0).parent.adjective);
-            }
-            else 
-            {
+            } else {
                 StringBuilder sb = new StringBuilder("Conditions: ").append(physical.conditions.getAt(0).parent.adjective);
                 for (int i = 1; i < physical.conditions.size(); i++) {
                     sb.append(", ").append(physical.conditions.getAt(i).parent.adjective);
@@ -324,7 +320,7 @@ public class InfoHandler {
                 for (int i = 0; i < wrapped.size(); i++) {
                     put(3, yOffset++, wrapped.get(i));
                 }
-                
+
             }
         }
     }
@@ -472,18 +468,17 @@ public class InfoHandler {
     }
 
     private void damage(int originX, int originY, Color color, IRNG rng) {
-        layers.addAction(new DamageEffect(rng.nextFloat() * 1.9f +  1.2f, rng.between(2, 4), originX, originY,
+        layers.addAction(new DamageEffect(rng.nextFloat() * 1.9f + 1.2f, rng.between(2, 4), originX, originY,
             new float[]{
-                    SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
-                    SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
-                    SColor.toEditedFloat(color, 0f, 0.3f, 0f, -0.1f),
-                    SColor.toEditedFloat(color, 0f, 0.15f, 0.1f, 0f),
-                    SColor.toEditedFloat(color, 0f, 0f, 0.7f, 0f),
-                    SColor.toEditedFloat(color, 0f, -0.15f, 0.3f, 0f),
-                    SColor.toEditedFloat(color, 0f, -0.3f, 0f, 0f),
-                    SColor.toEditedFloat(color, 0f, -0.45f, -0.1f, 0.15f),
-                    SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
-            }));
+                SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),
+                SColor.toEditedFloat(color, 0f, -0.3f, 0f, -0.2f),
+                SColor.toEditedFloat(color, 0f, 0.3f, 0f, -0.1f),
+                SColor.toEditedFloat(color, 0f, 0.15f, 0.1f, 0f),
+                SColor.toEditedFloat(color, 0f, 0f, 0.7f, 0f),
+                SColor.toEditedFloat(color, 0f, -0.15f, 0.3f, 0f),
+                SColor.toEditedFloat(color, 0f, -0.3f, 0f, 0f),
+                SColor.toEditedFloat(color, 0f, -0.45f, -0.1f, 0.15f),
+                SColor.toEditedFloat(color, 0f, -0.6f, -0.2f, -0.3f),}));
     }
 
     public class DamageEffect extends PanelEffect {
@@ -519,7 +514,7 @@ public class InfoHandler {
                 color = SColor.lerpFloatColors(colors[idx], colors[idx + 1], (f * colors.length) % 1f);
             }
             layers.put(x, y, '█', SColor.translucentColor(layers.defaultPackedBackground, 0.5f), 1);
-            layers.put(x, y, Utilities.sparkles.charAt((int)(percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color, 2);
+            layers.put(x, y, Utilities.sparkles.charAt((int) (percent * (Utilities.sparkles.length() * cycles + 1)) % cycles), color, 2);
         }
     }
 }

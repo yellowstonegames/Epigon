@@ -2,8 +2,6 @@ package squidpony.epigon.display;
 
 /**
  * Contains the information to create display panels the size desired.
- *
- * @author Eben Howard
  */
 public class PanelSize {
 
@@ -12,9 +10,9 @@ public class PanelSize {
     public int cellWidth;
     public int cellHeight;
 
-    public PanelSize(){}
+    public PanelSize() {}
 
-    public PanelSize(int gridWidth, int gridHeight, int cellWidth, int cellHeight){
+    public PanelSize(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
         this.cellWidth = cellWidth;

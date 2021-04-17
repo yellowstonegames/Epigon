@@ -9,8 +9,6 @@ import squidpony.squidmath.FastNoise;
  *
  * Should only be created if a generic instance was interacted with in a way that caused it to
  * become different than others of it's type, such as damaged.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Terrain {
 

@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * Represents a specific Condition attached to a single physical object.
  * TODO: This should go away and be replaced with expanded features in Modification
- * @author Eben Howard - http://squidpony.com
  */
 public class Condition extends EpiData {
 
@@ -17,45 +16,44 @@ public class Condition extends EpiData {
     public List<Condition> suppressors;//lists the specific conditions that are currently suppressing this one
     public Physical attachedTo;
     public Element overrideElement;
-    private Condition()
-    {
+
+    private Condition() {
     }
-    public Condition(ConditionBlueprint blueprint)
-    {
+
+    public Condition(ConditionBlueprint blueprint) {
         this(blueprint, null);
     }
 
-    public Condition(ConditionBlueprint blueprint, Physical attached){
+    public Condition(ConditionBlueprint blueprint, Physical attached) {
         parent = blueprint;
         suppressors = new ArrayList<>();
         attach(attached);
     }
 
-    public Condition(ConditionBlueprint blueprint, Physical attached, Element element){
+    public Condition(ConditionBlueprint blueprint, Physical attached, Element element) {
         parent = blueprint;
         suppressors = new ArrayList<>();
         overrideElement = element;
         attach(attached);
     }
-    public void attach(Physical attachTo)
-    {
-        if(attachedTo != null)
-        {
+
+    public void attach(Physical attachTo) {
+        if (attachedTo != null) {
             wearOff();
         }
         attachedTo = attachTo;
         attachedTo.conditions.add(this);
         //RecipeMixer.applyModification(attachedTo, parent.modification);
-        if(parent.overlaySymbol != '\uffff') {
+        if (parent.overlaySymbol != '\uffff') {
             attachedTo.overlaySymbol = parent.overlaySymbol;
             attachedTo.overlayColor = overrideElement == null ? -0x1.0101p126F : overrideElement.floatColor; // SColor.GRAY
         }
-        if(parent.changes != null)
-        {
+        if (parent.changes != null) {
             ChangeTable.holdPhysical(attachedTo, parent.changes);
             attachedTo.statEffects.add(parent.changes);
         }
     }
+
     /**
      * Returns true if it has an ancestor that is the passed in blueprint.
      *
@@ -66,15 +64,15 @@ public class Condition extends EpiData {
         return parent.hasParent(condition);
     }
 
-    public boolean wearOff()
-    {
-        if(attachedTo == null) return false;
+    public boolean wearOff() {
+        if (attachedTo == null) {
+            return false;
+        }
 //        for (Modification m : parent.wearOffEffects)
 //        {             
 //            RecipeMixer.applyModification(attachedTo, m);
 //        }
-        if(parent.changes != null)
-        {
+        if (parent.changes != null) {
             ChangeTable.releasePhysical(attachedTo, parent.changes);
             attachedTo.statEffects.remove(parent.changes);
         }
@@ -82,16 +80,15 @@ public class Condition extends EpiData {
         attachedTo = null;
         return true;
     }
-    public boolean update()
-    {
-        if(parent.period != 0 && parent.changes != null && currentTick % parent.period == 0) {
+
+    public boolean update() {
+        if (parent.period != 0 && parent.changes != null && currentTick % parent.period == 0) {
 //            for (Modification m : parent.tickEffects)
 //            {
 //                RecipeMixer.applyModification(attachedTo, m);
-                ChangeTable.strikePhysical(attachedTo, parent.changes);
+            ChangeTable.strikePhysical(attachedTo, parent.changes);
         }
-        if(++currentTick >= parent.duration)
-        {
+        if (++currentTick >= parent.duration) {
             return wearOff();
         }
         return false;

@@ -8,8 +8,6 @@ import java.util.Set;
 
 /**
  * A single unit of ammunition.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public class Ammunition {
 

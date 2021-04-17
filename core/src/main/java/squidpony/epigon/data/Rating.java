@@ -9,14 +9,13 @@ import squidpony.squidgrid.gui.gdx.SColor;
  * values such as monster level and item worth.
  *
  * Colors based on classic MMORPG color range, modified somewhat for clarity between elements.
- *
- * @author Eben Howard - http://squidpony.com
  */
 public enum Rating {
     //0     1       2        3     4     5       6        7
     NONE, SLIGHT, TYPICAL, GOOD, HIGH, SUPERB, AMAZING, ULTIMATE;
 
     public static final Rating[] allRatings = values();
+
     public String asAdverb() {
         switch (this) {
             case NONE:
@@ -116,19 +115,19 @@ public enum Rating {
             return rvm.overwrite;
         }
 
-        if (rvm.overwriteDecrease != null){
+        if (rvm.overwriteDecrease != null) {
             return rvm.overwriteDecrease.lessThan(this) ? rvm.overwriteDecrease : this;
         }
 
-        if (rvm.overwriteIncrease != null){
+        if (rvm.overwriteIncrease != null) {
             return rvm.overwriteIncrease.greaterThan(this) ? rvm.overwriteIncrease : this;
         }
 
         if (rvm.deltaLevel != null) {
             return allRatings[MathUtils.clamp(
-                    ordinal() + rvm.deltaLevel,
-                    Math.max(0, rvm.deltaMin.ordinal()),
-                    Math.min(7, rvm.deltaMax.ordinal()))];
+                ordinal() + rvm.deltaLevel,
+                Math.max(0, rvm.deltaMin.ordinal()),
+                Math.min(7, rvm.deltaMax.ordinal()))];
         }
         return this;
     }
@@ -140,7 +139,7 @@ public enum Rating {
     public boolean lessThan(Rating other) {
         return this.ordinal() < other.ordinal();
     }
-    
+
     @Override
     public String toString() {
         return this.name().toLowerCase();

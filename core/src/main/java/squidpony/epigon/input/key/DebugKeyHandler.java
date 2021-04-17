@@ -14,6 +14,8 @@ import squidpony.epigon.files.Config;
  */
 public class DebugKeyHandler implements KeyHandler {
 
+    private final char debugToggleKey = '~';
+
     private final Epigon epigon;
     private final Config config;
 
@@ -23,10 +25,15 @@ public class DebugKeyHandler implements KeyHandler {
     }
 
     @Override
-    public void handle(char key, boolean alt, boolean ctrl, boolean shift) { // TODO - only the first 2 seem to be working currently
+    public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
         if (epigon.multiplexer.processedInput) {
             return;
         }
+
+        if (!config.debugConfig.debugActive && key != debugToggleKey) {
+            return; // only process if debug is turned on or attempting to toggle debug on
+        }
+
         Element el;
         switch (key) {
             case 'x':
@@ -46,7 +53,7 @@ public class DebugKeyHandler implements KeyHandler {
                 // chooses an element for the rain by the player's current position
                 Element drops = GauntRNG.getRandomElement(epigon.player.location.hashCode(), Element.allEnergy);
                 for (int i = 0; i < quantity; i++) {
-                    Coord end = epigon.rng.nextCoord(config.settings.worldGridWidth, config.settings.worldGridHeight);
+                    Coord end = epigon.rng.nextCoord(config.settings.worldWidth, config.settings.worldHeight);
                     if (epigon.map.contents[end.x][end.y].blockage != null) {
                         continue; // skip hitting blocking areas
                     }
@@ -61,7 +68,7 @@ public class DebugKeyHandler implements KeyHandler {
                 break;
             case 'Z':
                 epigon.message("Twinkle time");
-                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, config.settings.worldGridWidth, config.settings.worldGridHeight, 400)) {
+                for (Coord c : epigon.rng.getRandomUniqueCells(0, 0, config.settings.worldWidth, config.settings.worldHeight, 400)) {
                     epigon.fxHandlerPassive.twinkle(c, Element.LIGHT);
                 }
                 break;
@@ -74,14 +81,15 @@ public class DebugKeyHandler implements KeyHandler {
                 epigon.fxHandlerPassive.layeredSparkle(epigon.player.location, 8, Radius.CIRCLE);
                 break;
             case '|':
-                if (Config.instance().debugConfig.odinView) {
-                    epigon.message("Odinview disabled.");
-                    Config.instance().debugConfig.odinView = false;
+                if (config.debugConfig.debugActive) {
+                    epigon.setOdinView(!config.debugConfig.odinView);
                 } else {
-                    epigon.message("Showing all");
-                    Config.instance().debugConfig.odinView = true;
+                    epigon.setOdinView(false);
                 }
-                epigon.calcFOV(epigon.player.location.x, epigon.player.location.y);
+                break;
+            case debugToggleKey:
+                epigon.toggleDebug();
+                break;
             default:
                 return;
         }
