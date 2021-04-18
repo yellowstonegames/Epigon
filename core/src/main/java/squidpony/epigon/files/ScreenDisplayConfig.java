@@ -48,32 +48,60 @@ public class ScreenDisplayConfig {
     transient private static final int secondaryCellHeight = 20;
     // End constants
 
-    /**
-     * Using the current primary cell and grid heights, calculates the maximum whole-integer grid height for secondary cells.
-     *
-     * @return
-     */
-    public int calcSecondaryGridMaxHeight() { // NOTE - doing this here instead of in PanelSize because added remainders might give a bigger by 1 value
-        int height = mapSize.pixelHeight() + messageSize.pixelHeight();
-        return height / infoSize.cellHeight;
+    private void adjustPrimaryToMaxWidth() {
+        if (mapSize.pixelWidth() == messageSize.pixelWidth()) {
+            return; // no adjustments needed
+        }
+        if (mapSize.pixelWidth() > messageSize.pixelWidth()) {
+            int adjustedMessageGridWidth = mapSize.pixelWidth() / messageSize.cellWidth;
+            if (adjustedMessageGridWidth > messageSize.gridWidth) {
+                System.out.println("Message width expanded to " + adjustedMessageGridWidth);
+                messageSize.gridWidth = adjustedMessageGridWidth;
+            }
+        } else {
+            int adjustedMapGridWidth = messageSize.pixelWidth() / mapSize.cellWidth;
+            if (adjustedMapGridWidth > mapSize.gridWidth) {
+                System.out.println("Map width expanded to " + adjustedMapGridWidth);
+                mapSize.gridWidth = adjustedMapGridWidth;
+            }
+        }
     }
 
-    /**
-     * Makes the secondary panels as large as possible, adding height to the context since info is expected to be a specific size and not scrollable
-     */
-    public void adjustSecondaryToMaxHeight() {
-        int totalGridHeight = calcSecondaryGridMaxHeight();
-        int size = totalGridHeight - infoSize.gridHeight;
-        if (size < 0) {
-            System.err.println("Tried to adjust context to negative size: " + size);
+    private void adjustSecondaryToMaxHeight() {
+        // NOTE - doing this here instead of in PanelSize because added remainders might give a bigger by 1 value
+        int height = mapSize.pixelHeight() + messageSize.pixelHeight();
+        int totalGridHeight = height / infoSize.cellHeight;
+        int adjustedContextGridHeight = totalGridHeight - infoSize.gridHeight;
+        if (adjustedContextGridHeight < 0) {
+            System.err.println("Tried to adjust context to negative size: " + adjustedContextGridHeight);
             return; // don't change
-        } else if (size == contextSize.gridHeight) {
-            System.out.println("Context size already at optimal size: " + size);
+        } else if (adjustedContextGridHeight == contextSize.gridHeight) {
+            System.out.println("Context size already at optimal size: " + adjustedContextGridHeight);
             return;
         }
 
-        System.out.println("Adjusted context size from: " + contextSize.gridHeight + " to: " + size);
-        contextSize.gridHeight = size;
+        System.out.println("Adjusted context size from: " + contextSize.gridHeight + " to: " + adjustedContextGridHeight);
+        contextSize.gridHeight = adjustedContextGridHeight;
+    }
+
+    private void adjustSecondaryToMaxWidth() {
+        if (infoSize.pixelWidth() == contextSize.pixelWidth()) {
+            return; // no adjustments needed
+        }
+
+        if (infoSize.pixelWidth() > contextSize.pixelWidth()) {
+            int adjustedContextGridWidth = infoSize.pixelWidth() / contextSize.cellWidth;
+            if (adjustedContextGridWidth > contextSize.gridWidth) {
+                System.out.println("Context width expanded to " + adjustedContextGridWidth);
+                contextSize.gridWidth = adjustedContextGridWidth;
+            }
+        } else {
+            int adjustedInfoGridWidth = contextSize.pixelWidth() / infoSize.cellWidth;
+            if (adjustedInfoGridWidth > infoSize.gridWidth) {
+                System.out.println("Info width expanded to " + adjustedInfoGridWidth);
+                infoSize.gridWidth = adjustedInfoGridWidth;
+            }
+        }
     }
 
     /**
@@ -83,22 +111,31 @@ public class ScreenDisplayConfig {
         if (mapSize == null) {
             mapSize = new PanelSize(mapGridWidth, mapGridHeight, mapCellWidth, mapCellHeight);
         }
+
         if (messageSize == null) {
             messageSize = new PanelSize(mapGridWidth, messageGridHeight, mapCellWidth, mapCellHeight);
         }
-        if (infoSize == null) {
-            infoSize = new PanelSize(secondaryGridWidth, infoGridHeight, secondaryCellWidth, secondaryCellHeight);
-        }
-        if (contextSize == null) {
-            contextSize = new PanelSize(secondaryGridWidth, contextGridHeight, secondaryCellWidth, secondaryCellHeight);
-        }
+
+        // make sure there's enough message size to print at least one line
+        messageSize.gridHeight = Math.max(3, messageSize.gridHeight);
         if (messageCount <= 0) {
             messageCount = messageGridHeight - 2; // have to leave room for the border
         }
 
-        if (mapSize.pixelWidth() != messageSize.pixelWidth()) {
-            System.out.println("Map and message panels have different widths, may lead to weird behavior in some cases.");
+        if (infoSize == null) {
+            infoSize = new PanelSize(secondaryGridWidth, infoGridHeight, secondaryCellWidth, secondaryCellHeight);
         }
+
+        if (contextSize == null) {
+            contextSize = new PanelSize(secondaryGridWidth, contextGridHeight, secondaryCellWidth, secondaryCellHeight);
+        }
+
+        // TODO - validate against minimum workable sizes where possible
+
+        // Adjust panels to fill out space. Anchor size is primary area height, so no adjustments there
+        adjustPrimaryToMaxWidth();
+        adjustSecondaryToMaxHeight();
+        adjustSecondaryToMaxWidth();
     }
 
     public int defaultPixelWidth() {

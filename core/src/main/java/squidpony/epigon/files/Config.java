@@ -96,7 +96,6 @@ public class Config {
             displayConfig = fileManager.json().fromJson(ScreenDisplayConfig.class, text);
         }
         displayConfig.init();
-        displayConfig.adjustSecondaryToMaxHeight();
         text = fileManager.json().prettyPrint(displayConfig);
         fileManager.writeFile(displayConfigFilename, configPath, text);
 
