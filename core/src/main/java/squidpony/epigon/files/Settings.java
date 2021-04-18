@@ -2,6 +2,7 @@ package squidpony.epigon.files;
 
 import squidpony.epigon.GameMode;
 import squidpony.epigon.mapping.MapConstants;
+import squidpony.squidmath.CrossHash;
 
 /**
  * User accessible settings, should be displayed in-game.
@@ -25,13 +26,15 @@ public class Settings { // TODO - split Crawl and Dive into separate configs
 
     // In-flight values that shouldn't be saved to settings file
     transient public long seedValue;
-    // End contstants
+    // End constants
 
     public void calcSeed() {
         try {
             seedValue = Long.parseLong(seed);
         } catch (NumberFormatException ex) {
-            seedValue = seed.hashCode();
+            // gives us 64 bits of seed instead of 32.
+            // also works if seed is somehow null.
+            seedValue = CrossHash.hash64(seed);
         }
     }
 

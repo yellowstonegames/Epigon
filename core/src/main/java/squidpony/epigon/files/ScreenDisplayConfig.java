@@ -9,9 +9,9 @@ public class ScreenDisplayConfig {
 
     public final String[] advice = new String[]{
         "If you ever want to reset your settings, you can simply delete this file.",
-        "While grid and pixel sizes will attempt to be respected, there are some contraints internally that will override settings sizes in some cases.",
+        "While grid and pixel sizes will attempt to be respected, there are some constraints internally that will override settings sizes in some cases.",
         "The widest pixel size of map or message will be used to choose grid width of both.",
-        "Info has strict height and minimum width requirments. Where needed, context will be shrunk or grown to accommodate that.",
+        "Info has strict height and minimum width requirements. Where needed, context will be shrunk or grown to accommodate that.",
         "The widest pixel size of info or context will be used to choose the grid width of both."
     };
 
@@ -105,7 +105,7 @@ public class ScreenDisplayConfig {
     }
 
     /**
-     * Preforms needed initialization for cases where data needs to be pulled from constants instead of from the file.
+     * Performs needed initialization for cases where data needs to be pulled from constants instead of from the file.
      */
     public void init() {
         if (mapSize == null) {

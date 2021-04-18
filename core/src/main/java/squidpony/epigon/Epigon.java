@@ -330,7 +330,7 @@ public class Epigon extends Game {
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
         fallingSLayers.setDefaultForeground(SColor.LIME);
         fallingHandler = new FallingHandler(fallingSLayers);
-        mapSLayers.font.tweakWidth(15f).tweakHeight(28f).initBySize();
+//        mapSLayers.font.tweakWidth(mapSize.cellWidth).tweakHeight(mapSize.cellHeight).initBySize();
         font.tweakWidth(messageSize.cellWidth * 1.1f).initBySize();
         smallFont.tweakWidth(infoSize.cellWidth * 1.075f).initBySize();
 
