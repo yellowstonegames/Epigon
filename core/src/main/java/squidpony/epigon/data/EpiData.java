@@ -18,10 +18,9 @@ import java.io.Serializable;
  * <br>
  * Acts as an IRNG that stores its own state for its own random number generation, allowing the game to avoid relying so
  * heavily on the order in which a static RNG generates numbers for various purposes. The random number generation
- * algorithm this uses is MiniMover64RNG from Sarong. It is very, very fast and passes 32TB of PractRand.
- * About 33 million seeds are possible for this variant of MiniMover64RNG, which have a chance of being on different
- * subcycles with periods from 1,048,575 to 18,446,744,073,709,551,615. By restricting the seeds to a range that is
- * known to have no cycles shorter than a million states, seeding gets to be much faster.
+ * algorithm this uses is similar to LightRNG, but uses Pelle Evensen's Moremur mixer instead of SplittableRandom's
+ * mixer (Variant 13), uses a different increment (which shouldn't affect quality), and incoporates a XOR early on with
+ * the idHash of the EpiData to make results a little more varied.
  */
 public abstract class EpiData extends AbstractRNG implements Serializable, StatefulRandomness {
     protected static final long serialVersionUID = 0L;
