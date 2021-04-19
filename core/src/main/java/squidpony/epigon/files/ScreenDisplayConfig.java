@@ -76,7 +76,6 @@ public class ScreenDisplayConfig {
             System.err.println("Tried to adjust context to negative size: " + adjustedContextGridHeight);
             return; // don't change
         } else if (adjustedContextGridHeight == contextSize.gridHeight) {
-            System.out.println("Context size already at optimal size: " + adjustedContextGridHeight);
             return;
         }
 
