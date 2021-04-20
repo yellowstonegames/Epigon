@@ -253,7 +253,7 @@ public class Epigon extends Game {
 
         mapFont = DefaultResources.getCrispLeanFamily();
         mapFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
-        mapFont.setSmoothingMultiplier(1.5f);
+        mapFont.setSmoothingMultiplier(1.25f);
 
         TextCellFactory smallFont = mapFont.copy();
         smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
@@ -270,7 +270,7 @@ public class Epigon extends Game {
             messageSize.gridHeight,
             messageSize.cellWidth,
             messageSize.cellHeight,
-            mapFont);
+            mapFont.copy());
 
         messageSLayers.setDefaultBackground(unseenColor);
 
@@ -292,7 +292,7 @@ public class Epigon extends Game {
         contextSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
 
-        mapFont = mapFont.copy().width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize();
+        mapFont.width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize();
         mapSLayers = new SparseLayers(
             settings.worldWidth,
             settings.worldHeight,
@@ -305,7 +305,7 @@ public class Epigon extends Game {
             settings.worldHeight,
             mapSize.cellWidth,
             mapSize.cellHeight,
-            mapSLayers.font);
+            mapFont);
 
         mapHoverSLayers = new SparseLayers(settings.worldWidth, settings.worldHeight, mapSize.cellWidth, mapSize.cellHeight, mapFont);
 
@@ -335,8 +335,8 @@ public class Epigon extends Game {
         fallingHandler = new FallingHandler(fallingSLayers);
 //        mapSLayers.font.tweakWidth(mapSize.cellWidth).tweakHeight(mapSize.cellHeight).initBySize();
 
+//        mapFont.tweakWidth(mapSize.cellWidth * 1.1f).initBySize();
         // oversize slightly so that line drawing items meet smoothly
-        mapFont.tweakWidth(messageSize.cellWidth * 1.1f).initBySize();
         smallFont.tweakWidth(infoSize.cellWidth * 1.075f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
