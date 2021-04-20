@@ -100,7 +100,6 @@ public class Epigon extends Game {
     private Color unseenColor;
     private float unseenCreatureColorFloat;
     public ArrayList<Coord> toCursor;
-    private TextCellFactory mapFont;
 
     public boolean showingMenu = false;
     public Coord menuLocation = null;
@@ -251,11 +250,11 @@ public class Epigon extends Game {
         mapOverlayStage = new Stage(mapOverlayViewport, batch);
         fallingStage = new Stage(fallingViewport, batch);
 
-        mapFont = DefaultResources.getCrispLeanFamily();
-        mapFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
-        mapFont.setSmoothingMultiplier(1.25f);
+        TextCellFactory defaultFont = DefaultResources.getCrispLeanFamily();
+        defaultFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
+        defaultFont.setSmoothingMultiplier(1.25f);
 
-        TextCellFactory smallFont = mapFont.copy();
+        TextCellFactory smallFont = defaultFont.copy();
         smallFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         smallFont.setSmoothingMultiplier(1.5f);
 
@@ -270,7 +269,7 @@ public class Epigon extends Game {
             messageSize.gridHeight,
             messageSize.cellWidth,
             messageSize.cellHeight,
-            mapFont.copy());
+            defaultFont.copy());
 
         messageSLayers.setDefaultBackground(unseenColor);
 
@@ -292,6 +291,7 @@ public class Epigon extends Game {
         contextSLayers.setDefaultBackground(SColor.CW_ALMOST_BLACK);
         contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
 
+        TextCellFactory mapFont = defaultFont.copy();
         mapFont.width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize();
         mapSLayers = new SparseLayers(
             settings.worldWidth,
@@ -1669,7 +1669,7 @@ public class Epigon extends Game {
                 Camera camera = viewport.getCamera();
                 if (camera != null && camera.frustum != null) {
                     if (!camera.frustum.boundsInFrustum(layerX, yOff, 0f, textCellFactory.actualCellWidth, textCellFactory.actualCellHeight, 0f)
-                        || !camera.frustum.boundsInFrustum(layerX + textCellFactory.actualCellWidth * (sLayers.gridWidth - 1), layerY, 0f, textCellFactory.actualCellWidth, mapFont.actualCellHeight, 0f)) {
+                        || !camera.frustum.boundsInFrustum(layerX + textCellFactory.actualCellWidth * (sLayers.gridWidth - 1), layerY, 0f, textCellFactory.actualCellWidth, textCellFactory.actualCellHeight, 0f)) {
                         frustum = camera.frustum;
                     }
                 }
