@@ -1,5 +1,6 @@
 package squidpony.epigon.game;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import com.badlogic.gdx.Gdx;
@@ -10,28 +11,49 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
 import squidpony.ArrayTools;
 import squidpony.Messaging;
-import squidpony.epigon.data.Physical;
-import squidpony.epigon.data.VisualCondition;
-import squidpony.epigon.mapping.EpiTile;
-import squidpony.epigon.mapping.RememberedTile;
 import squidpony.squidai.DijkstraMap;
 import squidpony.squidgrid.LOS;
 import squidpony.squidgrid.Measurement;
 import squidpony.squidgrid.gui.gdx.*;
+import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.GreasedRegion;
 import squidpony.squidmath.StatefulRNG;
 
+import squidpony.epigon.data.Physical;
+import squidpony.epigon.data.VisualCondition;
+import squidpony.epigon.data.Weapon;
+import squidpony.epigon.data.WeightedTableWrapper;
+import squidpony.epigon.data.control.RecipeMixer;
+import squidpony.epigon.data.quality.Element;
+import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.display.FxHandler;
 import squidpony.epigon.files.Config;
+import squidpony.epigon.input.key.*;
+import squidpony.epigon.input.mouse.EquipmentMouseHandler;
+import squidpony.epigon.input.mouse.HelpMouseHandler;
+import squidpony.epigon.input.mouse.MapMouseHandler;
 import squidpony.epigon.mapping.EpiMap;
+import squidpony.epigon.mapping.EpiTile;
+import squidpony.epigon.mapping.RememberedTile;
+import squidpony.epigon.util.Utilities;
 
-import static squidpony.squidgrid.gui.gdx.SColor.lerpFloatColorsBlended;
+import static squidpony.squidgrid.gui.gdx.SColor.*;
 
 public class Crawl extends Epigon {
 
+    public SquidInput crawlInput; // TODO - create method to switch input without direct access
+    private SquidInput debugInput;
+    public KeyHandler mapKeys;
+    public KeyHandler equipmentKeys;
+    public KeyHandler helpKeys;
+    public KeyHandler debugKeys;
+    public SquidMouse mapMouse;
+    public SquidMouse equipmentMouse;
+    public SquidMouse helpMouse;
     private Stage mapStage, mapOverlayStage;
     private Viewport mapViewport, mapOverlayViewport;
 
@@ -60,6 +82,27 @@ public class Crawl extends Epigon {
         mapOverlayStage.addActor(mapOverlaySLayers);
     }
 
+
+    @Override
+    public void buildInputProcessors() {
+        super.buildInputProcessors();
+        mapKeys = new MapKeyHandler(this);
+        equipmentKeys = new EquipmentKeyHandler(this);
+        helpKeys = new HelpKeyHandler(this);
+        debugKeys = new DebugKeyHandler(this, config);
+
+        equipmentMouse = new SquidMouse(1, 1, new EquipmentMouseHandler().setEpigon(this));
+        helpMouse = new SquidMouse(1, 1, new HelpMouseHandler());
+        mapMouse = new SquidMouse(1, 1, new MapMouseHandler().setEpigon(this));
+
+
+        crawlInput = new SquidInput(mapKeys, mapMouse);
+        debugInput = new SquidInput(debugKeys);
+
+        multiplexer.prependProcessor(crawlInput);
+        multiplexer.prependProcessor(debugInput);
+    }
+
     @Override
     public void startGame() {
         super.startGame();
@@ -78,6 +121,13 @@ public class Crawl extends Epigon {
     public void internalResize(int width, int height) {
         float currentZoomX = (float) width / config.displayConfig.defaultPixelWidth();
         float currentZoomY = (float) height / config.displayConfig.defaultPixelHeight();
+
+        float cellWidth = currentZoomX * mapSize.cellWidth;
+        float cellHeight = currentZoomY * mapSize.cellHeight;
+        int offsetX = 0;
+        int offsetY = 0;
+        mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
+        equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
 
         int x = 0;
         int y = (int) (height - mapSize.pixelHeight() * currentZoomY);
@@ -249,10 +299,10 @@ public class Crawl extends Epigon {
         player.location = Coord.get(0, 0);
         changeLevel(depth);
 
-        mapInput.flush();
-        mapInput.setRepeatGap(220);
-        mapInput.setKeyHandler(mapKeys);
-        mapInput.setMouse(mapMouse);
+        crawlInput.flush();
+        crawlInput.setRepeatGap(220);
+        crawlInput.setKeyHandler(mapKeys);
+        crawlInput.setMouse(mapMouse);
     }
 
     /**
@@ -321,4 +371,112 @@ public class Crawl extends Epigon {
 
         mapSLayers.clear(2);
     }
+
+
+    public void changeLevel(int level) {
+        changeLevel(level, null);
+    }
+
+    public void changeLevel(int level, Coord location) {
+        map.contents[player.location.x][player.location.y].remove(player);
+
+        depth = level;
+        map = world[depth];
+        mapSLayers.clear();
+        for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
+            mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
+        }
+
+        setupLevel();
+
+        if (location == null) { // set up a valid random start location
+            //// when validating that map setup is deterministic, the following print should always be the same:
+            //System.out.println(rng.getState() + ", floors hash " + floors.hash64());
+            GreasedRegion floors2 = floors.copy();
+            floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
+            do {
+                location = floors2.singleRandom(rng);
+            }
+            while (map.contents[location.x][location.y].blockage != null);
+        }
+
+        player.location = location;
+        map.contents[player.location.x][player.location.y].add(player);
+        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
+
+        fxHandlerPassive.seen = fxHandler.seen = map.lighting.fovResult;
+        creatures = map.creatures;
+        simple = map.simpleChars();
+        lineDungeon = map.line;
+        calcFOV(player.location.x, player.location.y);
+        toPlayerDijkstra.initialize(simple);
+        monsterDijkstra.initialize(simple);
+        calcDijkstra();
+        contextHandler.setMap(map, world);
+    }
+
+
+    private void setupLevel() {
+        for (int x = 0; x < map.width; x++) {
+            for (int y = 0; y < map.height; y++) {
+                if (map.contents[x][y] == null) {
+                    map.contents[x][y] = new EpiTile();
+                }
+            }
+        }
+
+        simple = map.simpleChars();
+        lineDungeon = map.line;
+        prunedDungeon = ArrayTools.copy(lineDungeon);
+        wallColors = new float[map.width][map.height];
+        walls = MapUtility.generateLinesToBoxes(prunedDungeon, wallColors);
+        floors.refill(map.opacities(), 0.999);
+
+        if (map.populated) {
+            return;
+        }
+        map.populated = true;
+
+        GreasedRegion floors2 = floors.copy();
+        floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
+        floors2.copy().randomScatter(rng, 9)
+            .stream()
+            .filter(c -> map.contents[c.x][c.y].floor != null) // TODO - allow flying/floating objects
+            .forEach(c -> {
+                map.contents[c.x][c.y].add(RecipeMixer.applyModification(
+                    RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
+                    player.getRandomElement(Element.allEnergy).weaponModification()));
+            });
+        floors2.randomScatter(rng, 16);
+        for (Coord coord : floors2) {
+            if (map.contents[coord.x][coord.y].blockage == null) {
+                if (map.contents[coord.x][coord.y].floor == null) {
+                    continue; // TODO - allow spawning of flying things
+                }
+                Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[rootChaos.nextInt(RawCreature.ENTRIES.length)]);
+                p.color = Utilities.progressiveLighten(p.color);
+                Physical pMeat = RecipeMixer.buildPhysical(p);
+                RecipeMixer.applyModification(pMeat, dataStarter.makeMeats());
+                Physical[] held = new Physical[p.creatureData.equippedDistinct.size() + 1];
+                p.creatureData.equippedDistinct.toArray(held);
+                held[held.length - 1] = pMeat;
+                double[] weights = new double[held.length];
+                Arrays.fill(weights, 1.0);
+                weights[held.length - 1] = 3.0;
+                int[] mins = new int[held.length], maxes = new int[held.length];
+                Arrays.fill(mins, 1);
+                Arrays.fill(maxes, 1);
+                mins[held.length - 1] = 2;
+                maxes[held.length - 1] = 4;
+                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), held, weights, mins, maxes);
+                p.physicalDrops.add(pt);
+                p.location = coord;
+                map.contents[coord.x][coord.y].add(p);
+                p.appearance = mapSLayers.glyph(p.symbol, p.color, coord.x, coord.y);
+                p.appearance.setVisible(false);
+                map.creatures.put(coord, p);
+            }
+        }
+    }
+
 }

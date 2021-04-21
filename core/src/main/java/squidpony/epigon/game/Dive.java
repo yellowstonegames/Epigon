@@ -69,7 +69,7 @@ public class Dive extends Epigon {
         fallingSLayers = new SubcellLayers(
             100, // weird because falling uses a different view
             settings.diveWorldDepth,
-            mapSize.cellWidth * 0.5f,
+            mapSize.cellWidth,
             mapSize.cellHeight,
             defaultFont.copy());
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
@@ -81,7 +81,7 @@ public class Dive extends Epigon {
 
         fallingStage.addActor(fallingSLayers);
 
-        fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight >> 1);
+        fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight);
         finishY = fallingSLayers.worldY(settings.diveWorldDepth);
         timeToFall = Math.abs(finishY - startingY) * fallDelay / mapSize.cellHeight;
     }
@@ -95,7 +95,7 @@ public class Dive extends Epigon {
         fallingMouse = new SquidMouse(1, 1, new FallingMouseHandler());
         fallingInput = new SquidInput(fallingKeys, fallingMouse);
 
-        multiplexer.addProcessor(fallingInput);
+        multiplexer.prependProcessor(fallingInput);
     }
 
     @Override
@@ -184,10 +184,10 @@ public class Dive extends Epigon {
         player.location = Coord.get(w / 2, 0);
         fallDuration = 0;
 
-        mapInput.flush();
-        mapInput.setRepeatGap(Long.MAX_VALUE);
-        mapInput.setKeyHandler(fallingKeys);
-        mapInput.setMouse(fallingMouse);
+        fallingInput.flush();
+        fallingInput.setRepeatGap(Long.MAX_VALUE);
+        fallingInput.setKeyHandler(fallingKeys);
+        fallingInput.setMouse(fallingMouse);
         fallingHandler.show(map);
 
         paused = true;
@@ -204,8 +204,8 @@ public class Dive extends Epigon {
         message("");
         message("Try Again (t) or Quit (Shift-Q)?");
 
-        mapInput.flush();
-        mapInput.setKeyHandler(fallingGameOverKeys);
+        fallingInput.flush();
+        fallingInput.setKeyHandler(fallingGameOverKeys);
     }
 
     public void showFallingWin() {
@@ -227,7 +227,7 @@ public class Dive extends Epigon {
 //        }
         message("Try Again (t) or Quit (Shift-Q)?");
 
-        mapInput.flush();
-        mapInput.setKeyHandler(fallingGameOverKeys);
+        fallingInput.flush();
+        fallingInput.setKeyHandler(fallingGameOverKeys);
     }
 }

@@ -31,6 +31,15 @@ public class InputSpecialMultiplexer implements InputProcessor {
         processors = inputs;
     }
 
+    public void prependProcessor(SquidInput processor) {
+        SquidInput[] old = processors;
+        processors = new SquidInput[processors.length + 1];
+        processors[0] = processor;
+        for (int i = 0; i < old.length; i++) {
+            processors[i + 1] = old[i];
+        }
+    }
+
     /**
      * @return the number of processors in this multiplexer
      */

@@ -8,7 +8,7 @@ import squidpony.squidmath.Coord;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.game.Epigon;
+import squidpony.epigon.game.Crawl;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.MapOverlayHandler;
@@ -20,15 +20,15 @@ import squidpony.epigon.input.Verb;
  */
 public class EquipmentKeyHandler implements KeyHandler {
 
-    private final Epigon epigon;
+    private final Crawl crawl;
 
-    public EquipmentKeyHandler(Epigon epigon) {
-        this.epigon = epigon;
+    public EquipmentKeyHandler(Crawl crawl) {
+        this.crawl = crawl;
     }
 
     @Override
     public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-        if (epigon.multiplexer.processedInput) {
+        if (crawl.multiplexer.processedInput) {
             return;
         }
         int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
@@ -36,106 +36,106 @@ public class EquipmentKeyHandler implements KeyHandler {
         if (!ControlMapping.defaultEquipmentViewMapping.contains(verb)) {
             return;
         }
-        if (epigon.showingMenu) {
-            if (epigon.mapOverlayHandler.getSelected() == null || epigon.mapOverlayHandler.getSelected().interactableData == null
-                || epigon.mapOverlayHandler.getSelected().interactableData.isEmpty()) {
-                epigon.showingMenu = false;
-                epigon.menuLocation = null;
-                epigon.mapOverlayHandler.setSubselection(null);
-                epigon.maneuverOptions.clear();
-                epigon.interactionOptions.clear();
-                epigon.currentTarget = null;
-                epigon.mapOverlaySLayers.clear(1);
-                epigon.mapOverlaySLayers.clear(2);
-                epigon.multiplexer.processedInput = true;
-                epigon.infoHandler.updateDisplay();
+        if (crawl.showingMenu) {
+            if (crawl.mapOverlayHandler.getSelected() == null || crawl.mapOverlayHandler.getSelected().interactableData == null
+                || crawl.mapOverlayHandler.getSelected().interactableData.isEmpty()) {
+                crawl.showingMenu = false;
+                crawl.menuLocation = null;
+                crawl.mapOverlayHandler.setSubselection(null);
+                crawl.maneuverOptions.clear();
+                crawl.interactionOptions.clear();
+                crawl.currentTarget = null;
+                crawl.mapOverlaySLayers.clear(1);
+                crawl.mapOverlaySLayers.clear(2);
+                crawl.multiplexer.processedInput = true;
+                crawl.infoHandler.updateDisplay();
                 return;
             }
-            List<Interactable> interactableData = epigon.mapOverlayHandler.getSelected().interactableData;
-            Coord sub = epigon.mapOverlayHandler.getSubselection();
+            List<Interactable> interactableData = crawl.mapOverlayHandler.getSelected().interactableData;
+            Coord sub = crawl.mapOverlayHandler.getSubselection();
             switch (verb) {
                 case MOVE_DOWN:
                     if (sub.y + 1 < interactableData.size()) {
-                        epigon.mapOverlayHandler.setSubselection(sub.x, sub.y + 1);
+                        crawl.mapOverlayHandler.setSubselection(sub.x, sub.y + 1);
                     }
                     break;
                 case MOVE_UP:
                     if (sub.y > 0) {
-                        epigon.mapOverlayHandler.setSubselection(sub.x, sub.y - 1);
+                        crawl.mapOverlayHandler.setSubselection(sub.x, sub.y - 1);
                     }
                     break;
                 case CLOSE_SCREEN:
                 case MOVE_LEFT:
-                    epigon.showingMenu = false;
-                    epigon.menuLocation = null;
-                    epigon.mapOverlayHandler.setSubselection(null);
-                    epigon.maneuverOptions.clear();
-                    epigon.interactionOptions.clear();
-                    epigon.currentTarget = null;
-                    epigon.mapOverlaySLayers.clear(1);
-                    epigon.mapOverlaySLayers.clear(2);
-                    epigon.multiplexer.processedInput = true;
-                    epigon.infoHandler.updateDisplay();
+                    crawl.showingMenu = false;
+                    crawl.menuLocation = null;
+                    crawl.mapOverlayHandler.setSubselection(null);
+                    crawl.maneuverOptions.clear();
+                    crawl.interactionOptions.clear();
+                    crawl.currentTarget = null;
+                    crawl.mapOverlaySLayers.clear(1);
+                    crawl.mapOverlaySLayers.clear(2);
+                    crawl.multiplexer.processedInput = true;
+                    crawl.infoHandler.updateDisplay();
                     return;
                 case MOVE_RIGHT:
                 case INTERACT:
-                    if (epigon.mapOverlayHandler.getSubselection() != null) {
-                        Interactable interaction = epigon.interactionOptions.getAt(sub.y);
+                    if (crawl.mapOverlayHandler.getSubselection() != null) {
+                        Interactable interaction = crawl.interactionOptions.getAt(sub.y);
                         if (interaction == null) {
                             break;
                         }
-                        Physical selected = epigon.mapOverlayHandler.getSelected();
+                        Physical selected = crawl.mapOverlayHandler.getSelected();
                         if (interaction.consumes) {
-                            epigon.player.removeFromInventory(selected);
+                            crawl.player.removeFromInventory(selected);
                         }
-                        epigon.message(Messaging.transform(interaction.interaction.interact(epigon.player, selected, epigon),
-                            epigon.player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
-                        epigon.showingMenu = false;
-                        epigon.menuLocation = null;
-                        epigon.mapOverlayHandler.setSubselection(null);
-                        epigon.maneuverOptions.clear();
-                        epigon.interactionOptions.clear();
-                        epigon.currentTarget = null;
-                        epigon.mapOverlaySLayers.clear(1);
-                        epigon.mapOverlaySLayers.clear(2);
+                        crawl.message(Messaging.transform(interaction.interaction.interact(crawl.player, selected, crawl),
+                            crawl.player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
+                        crawl.showingMenu = false;
+                        crawl.menuLocation = null;
+                        crawl.mapOverlayHandler.setSubselection(null);
+                        crawl.maneuverOptions.clear();
+                        crawl.interactionOptions.clear();
+                        crawl.currentTarget = null;
+                        crawl.mapOverlaySLayers.clear(1);
+                        crawl.mapOverlaySLayers.clear(2);
                     }
                     break;
                 default:
                     return;
             }
 
-            epigon.multiplexer.processedInput = true;
-            epigon.infoHandler.updateDisplay();
+            crawl.multiplexer.processedInput = true;
+            crawl.infoHandler.updateDisplay();
             return;
         }
         switch (verb) {
             case MOVE_DOWN:
-                epigon.mapOverlayHandler.move(Direction.DOWN);
+                crawl.mapOverlayHandler.move(Direction.DOWN);
                 break;
             case MOVE_UP:
-                epigon.mapOverlayHandler.move(Direction.UP);
+                crawl.mapOverlayHandler.move(Direction.UP);
                 break;
             case MOVE_LEFT:
-                epigon.mapOverlayHandler.move(Direction.LEFT);
+                crawl.mapOverlayHandler.move(Direction.LEFT);
                 break;
             case MOVE_RIGHT:
-                epigon.mapOverlayHandler.move(Direction.RIGHT);
+                crawl.mapOverlayHandler.move(Direction.RIGHT);
                 break;
             case WIELD:
-                epigon.equipItem(epigon.mapOverlayHandler.getSelected());
+                crawl.equipItem(crawl.mapOverlayHandler.getSelected());
                 break;
             case DROP:
-                epigon.map.contents[epigon.player.location.x][epigon.player.location.y].contents.add(epigon.player.removeFromInventory(epigon.mapOverlayHandler.getSelected()));
+                crawl.map.contents[crawl.player.location.x][crawl.player.location.y].contents.add(crawl.player.removeFromInventory(crawl.mapOverlayHandler.getSelected()));
                 break;
             case INTERACT:
-                Physical selected = epigon.mapOverlayHandler.getSelected();
+                Physical selected = crawl.mapOverlayHandler.getSelected();
                 if (selected == null) {
                     break;
                 }
                 if (selected.interactableData != null && !selected.interactableData.isEmpty()) {
-                    epigon.buildInteractOptions(selected);
-                    epigon.menuLocation = epigon.showInteractOptions(selected, epigon.player, epigon.mapOverlayHandler.getSelection(), epigon.map);
-                    epigon.mapOverlayHandler.setSubselection(0, 0);
+                    crawl.buildInteractOptions(selected);
+                    crawl.menuLocation = crawl.showInteractOptions(selected, crawl.player, crawl.mapOverlayHandler.getSelection(), crawl.map);
+                    crawl.mapOverlayHandler.setSubselection(0, 0);
 //                        message("Interactions for " + selected.name + ": " + selected.interactableData
 //                            .stream()
 //                            .map(interact -> interact.phrasing)
@@ -147,50 +147,50 @@ public class EquipmentKeyHandler implements KeyHandler {
 //                        message(Messaging.transform(interaction.interaction.interact(player, selected, map),
 //                                player.name, Messaging.NounTrait.SECOND_PERSON_SINGULAR));
                 } else if (selected.wearableData != null || selected.weaponData != null) {
-                    if (epigon.player.creatureData.equippedDistinct.contains(selected)) {
-                        epigon.player.unequip(selected);
-                        epigon.player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
+                    if (crawl.player.creatureData.equippedDistinct.contains(selected)) {
+                        crawl.player.unequip(selected);
+                        crawl.player.addToInventory(selected); // Equip pulls from inventory if needed, but unequip does not put it back
                     } else {
-                        epigon.player.equipItem(selected);
+                        crawl.player.equipItem(selected);
                     }
                 } else {
-                    epigon.message("No interaction for " + selected.name);
+                    crawl.message("No interaction for " + selected.name);
                 }
                 break;
             case MESSAGE_PRIOR:
-                epigon.scrollMessages(-1);
+                crawl.scrollMessages(-1);
                 break;
             case MESSAGE_NEXT:
-                epigon.scrollMessages(1);
+                crawl.scrollMessages(1);
                 break;
             case CONTEXT_PRIOR:
-                epigon.contextHandler.prior();
+                crawl.contextHandler.prior();
                 break;
             case CONTEXT_NEXT:
-                epigon.contextHandler.next();
+                crawl.contextHandler.next();
                 break;
             case INFO_PRIOR:
-                epigon.infoHandler.prior();
+                crawl.infoHandler.prior();
                 break;
             case INFO_NEXT:
-                epigon.infoHandler.next();
+                crawl.infoHandler.next();
                 break;
             case HELP:
-                epigon.mapOverlayHandler.setMode(MapOverlayHandler.PrimaryMode.HELP);
-                epigon.mapInput.setKeyHandler(epigon.helpKeys);
-                epigon.mapInput.setMouse(epigon.helpMouse);
+                crawl.mapOverlayHandler.setMode(MapOverlayHandler.PrimaryMode.HELP);
+                crawl.crawlInput.setKeyHandler(crawl.helpKeys);
+                crawl.crawlInput.setMouse(crawl.helpMouse);
                 break;
             case EQUIPMENT:
             case CLOSE_SCREEN:
-                epigon.mapInput.setKeyHandler(epigon.mapKeys);
-                epigon.mapInput.setMouse(epigon.mapMouse);
-                epigon.mapOverlayHandler.hide();
+                crawl.crawlInput.setKeyHandler(crawl.mapKeys);
+                crawl.crawlInput.setMouse(crawl.mapMouse);
+                crawl.mapOverlayHandler.hide();
                 break;
             default:
                 //epigon.message("Can't " + verb.name + " from equipment view.");
                 return; // note, this will not change processedInput
-            }
-        epigon.multiplexer.processedInput = true;
-        epigon.infoHandler.updateDisplay();
+        }
+        crawl.multiplexer.processedInput = true;
+        crawl.infoHandler.updateDisplay();
     }
 }

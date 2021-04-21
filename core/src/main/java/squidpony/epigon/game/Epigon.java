@@ -35,7 +35,6 @@ import squidpony.epigon.data.control.DataPool;
 import squidpony.epigon.data.control.DataStarter;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.quality.Element;
-import squidpony.epigon.data.raw.RawCreature;
 import squidpony.epigon.data.trait.Grouping;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.*;
@@ -88,11 +87,9 @@ public abstract class Epigon extends Game {
     private SparseLayers messageSLayers;
 
     public InputSpecialMultiplexer multiplexer;
-    public SquidInput mapInput;
     public SquidInput contextInput;
     public SquidInput infoInput;
     public SquidInput messageInput;
-    public SquidInput debugInput;
     public SquidInput fallbackInput;
 
     private Color unseenColor;
@@ -148,14 +145,7 @@ public abstract class Epigon extends Game {
     private final StringBuilder tempSB = new StringBuilder(16);
 
     // input handlers
-    public KeyHandler mapKeys;
     public KeyHandler fallbackKeys;
-    public KeyHandler equipmentKeys;
-    public KeyHandler helpKeys;
-    public KeyHandler debugKeys;
-    public SquidMouse equipmentMouse;
-    public SquidMouse helpMouse;
-    public SquidMouse mapMouse;
     public SquidMouse contextMouse;
     public SquidMouse infoMouse;
     public SquidMouse messageMouse;
@@ -342,17 +332,8 @@ public abstract class Epigon extends Game {
     }
 
     public void buildInputProcessors(){
-        mapKeys = new MapKeyHandler(this);
         fallbackKeys = new FallbackKeyHandler(this, config);
-        equipmentKeys = new EquipmentKeyHandler(this);
-        helpKeys = new HelpKeyHandler(this);
-        debugKeys = new DebugKeyHandler(this, config);
 
-        // NOTE - a resize() operation is called after everything is initialized, so below values are set to min values for simplicity
-        // Upper left
-        equipmentMouse = new SquidMouse(1, 1, new EquipmentMouseHandler().setEpigon(this));
-        helpMouse = new SquidMouse(1, 1, new HelpMouseHandler());
-        mapMouse = new SquidMouse(1, 1, new MapMouseHandler().setEpigon(this));
         // Lower right
         contextMouse = new SquidMouse(1, 1, new ContextMouseHandler().setContextHandler(contextHandler));
         // Upper right
@@ -360,13 +341,11 @@ public abstract class Epigon extends Game {
         // Lower left
         messageMouse = new SquidMouse(1, 1, new MessageMouseHandler().setEpigon(this));
 
-        mapInput = new SquidInput(mapKeys, mapMouse);
         contextInput = new SquidInput(contextMouse);
         infoInput = new SquidInput(infoMouse);
         messageInput = new SquidInput(messageMouse);
-        debugInput = new SquidInput(debugKeys);
         fallbackInput = new SquidInput(fallbackKeys);
-        multiplexer = new InputSpecialMultiplexer(mapInput, messageInput, contextInput, infoInput, debugInput, fallbackInput);
+        multiplexer = new InputSpecialMultiplexer(messageInput, contextInput, infoInput, fallbackInput);
     }
 
     public static String style(CharSequence text) {
@@ -416,110 +395,6 @@ public abstract class Epigon extends Game {
         mapOverlayHandler.setPlayer(player);
 
         infoHandler.showPlayerHealthAndArmor();
-    }
-
-    private void setupLevel() {
-        for (int x = 0; x < map.width; x++) {
-            for (int y = 0; y < map.height; y++) {
-                if (map.contents[x][y] == null) {
-                    map.contents[x][y] = new EpiTile();
-                }
-            }
-        }
-
-        simple = map.simpleChars();
-        lineDungeon = map.line;
-        prunedDungeon = ArrayTools.copy(lineDungeon);
-        wallColors = new float[map.width][map.height];
-        walls = MapUtility.generateLinesToBoxes(prunedDungeon, wallColors);
-        floors.refill(map.opacities(), 0.999);
-
-        if (map.populated) {
-            return;
-        }
-        map.populated = true;
-
-        GreasedRegion floors2 = floors.copy();
-        floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
-        floors2.copy().randomScatter(rng, 9)
-            .stream()
-            .filter(c -> map.contents[c.x][c.y].floor != null) // TODO - allow flying/floating objects
-            .forEach(c -> {
-                map.contents[c.x][c.y].add(RecipeMixer.applyModification(
-                    RecipeMixer.buildWeapon(Weapon.randomPhysicalWeapon(player).copy(), player),
-                    player.getRandomElement(Element.allEnergy).weaponModification()));
-            });
-        floors2.randomScatter(rng, 16);
-        for (Coord coord : floors2) {
-            if (map.contents[coord.x][coord.y].blockage == null) {
-                if (map.contents[coord.x][coord.y].floor == null) {
-                    continue; // TODO - allow spawning of flying things
-                }
-                Physical p = RecipeMixer.buildCreature(RawCreature.ENTRIES[rootChaos.nextInt(RawCreature.ENTRIES.length)]);
-                p.color = Utilities.progressiveLighten(p.color);
-                Physical pMeat = RecipeMixer.buildPhysical(p);
-                RecipeMixer.applyModification(pMeat, dataStarter.makeMeats());
-                Physical[] held = new Physical[p.creatureData.equippedDistinct.size() + 1];
-                p.creatureData.equippedDistinct.toArray(held);
-                held[held.length - 1] = pMeat;
-                double[] weights = new double[held.length];
-                Arrays.fill(weights, 1.0);
-                weights[held.length - 1] = 3.0;
-                int[] mins = new int[held.length], maxes = new int[held.length];
-                Arrays.fill(mins, 1);
-                Arrays.fill(maxes, 1);
-                mins[held.length - 1] = 2;
-                maxes[held.length - 1] = 4;
-                WeightedTableWrapper<Physical> pt = new WeightedTableWrapper<>(p.nextLong(), held, weights, mins, maxes);
-                p.physicalDrops.add(pt);
-                p.location = coord;
-                map.contents[coord.x][coord.y].add(p);
-                p.appearance = mapSLayers.glyph(p.symbol, p.color, coord.x, coord.y);
-                p.appearance.setVisible(false);
-                map.creatures.put(coord, p);
-            }
-        }
-    }
-
-    public void changeLevel(int level) {
-        changeLevel(level, null);
-    }
-
-    public void changeLevel(int level, Coord location) {
-        map.contents[player.location.x][player.location.y].remove(player);
-
-        depth = level;
-        map = world[depth];
-        mapSLayers.clear();
-        for (int i = mapSLayers.glyphs.size() - 1; i >= 0; i--) {
-            mapSLayers.removeGlyph(mapSLayers.glyphs.get(i));
-        }
-
-        setupLevel();
-
-        if (location == null) { // set up a valid random start location
-            //// when validating that map setup is deterministic, the following print should always be the same:
-            //System.out.println(rng.getState() + ", floors hash " + floors.hash64());
-            GreasedRegion floors2 = floors.copy();
-            floors2.andNot(map.downStairPositions).andNot(map.upStairPositions);
-            do {
-                location = floors2.singleRandom(rng);
-            } while (map.contents[location.x][location.y].blockage != null);
-        }
-
-        player.location = location;
-        map.contents[player.location.x][player.location.y].add(player);
-        player.appearance = mapSLayers.glyph(player.symbol, player.color, player.location.x, player.location.y);
-
-        fxHandlerPassive.seen = fxHandler.seen = map.lighting.fovResult;
-        creatures = map.creatures;
-        simple = map.simpleChars();
-        lineDungeon = map.line;
-        calcFOV(player.location.x, player.location.y);
-        toPlayerDijkstra.initialize(simple);
-        monsterDijkstra.initialize(simple);
-        calcDijkstra();
-        contextHandler.setMap(map, world);
     }
 
     public void runTurn() {
@@ -1365,14 +1240,6 @@ public abstract class Epigon extends Game {
 
         // SquidMouse turns screen positions to cell positions, and needs to be told that cell sizes have changed
         internalResize(width, height); // make sure game-specific items are resized
-        // Top Left
-        float cellWidth = currentZoomX * mapSize.cellWidth;
-        float cellHeight = currentZoomY * mapSize.cellHeight;
-        int offsetX = 0;
-        int offsetY = 0;
-        mapMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
-        equipmentMouse.reinitialize(cellWidth, cellHeight, mapSize.gridWidth, mapSize.gridHeight, -offsetX, -offsetY);
-
         // Bottom Left
         messageViewport.update(width, height, false);
         int x = 0;
@@ -1381,10 +1248,10 @@ public abstract class Epigon extends Game {
         int pixelHeight = (int) (currentZoomY * messageSize.pixelHeight());
         messageViewport.setScreenBounds(x, y, pixelWidth, pixelHeight);
 
-        cellWidth = currentZoomX * messageSize.cellWidth;
-        cellHeight = currentZoomY * messageSize.cellHeight;
-        offsetX = 0;
-        offsetY = (int) (height - cellHeight * messageSize.gridHeight);
+        float cellWidth = currentZoomX * messageSize.cellWidth;
+        float cellHeight = currentZoomY * messageSize.cellHeight;
+        int offsetX = 0;
+        int offsetY = (int) (height - cellHeight * messageSize.gridHeight);
         messageMouse.reinitialize(cellWidth, cellHeight, messageSize.gridWidth, messageSize.gridHeight, -offsetX, -offsetY);
 
         // Top Right
