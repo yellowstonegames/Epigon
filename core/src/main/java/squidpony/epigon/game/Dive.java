@@ -69,7 +69,7 @@ public class Dive extends Epigon {
         fallingSLayers = new SubcellLayers(
             100, // weird because falling uses a different view
             settings.diveWorldDepth,
-            mapSize.cellWidth,
+            mapSize.cellWidth * 0.5f,
             mapSize.cellHeight,
             defaultFont.copy());
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
@@ -81,7 +81,7 @@ public class Dive extends Epigon {
 
         fallingStage.addActor(fallingSLayers);
 
-        fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight);
+        fallingStage.getCamera().position.y = startingY = fallingSLayers.worldY(mapSize.gridHeight / 2);
         finishY = fallingSLayers.worldY(settings.diveWorldDepth);
         timeToFall = Math.abs(finishY - startingY) * fallDelay / mapSize.cellHeight;
     }
