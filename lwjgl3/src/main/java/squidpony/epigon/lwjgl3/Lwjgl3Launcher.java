@@ -40,7 +40,7 @@ public class Lwjgl3Launcher {
         }
 
         System.out.println("Files loaded!");
-        Epigon epigon = new Crawl(config);
+        Epigon epigon = new Dive(config);
 
         //start independent listeners
         //load and initialize resources

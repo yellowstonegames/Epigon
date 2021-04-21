@@ -69,7 +69,7 @@ public class Dive extends Epigon {
         fallingSLayers = new SubcellLayers(
             100, // weird because falling uses a different view
             settings.diveWorldDepth,
-            mapSize.cellWidth,
+            mapSize.cellWidth * 0.5f,
             mapSize.cellHeight,
             defaultFont.copy());
         fallingSLayers.setDefaultBackground(colorCenter.desaturate(DB_INK, 0.8));
@@ -177,11 +177,11 @@ public class Dive extends Epigon {
         message("Falling..... Press SPACE to continue");
         int w = MapConstants.DIVE_HEADER[0].length();
         WobblyCanyonGenerator wcg = new WobblyCanyonGenerator(mapDecorator);
-        map = wcg.buildDive(worldGenerator.buildWorld(w, 23, config.settings.diveWorldDepth), w, config.settings.diveWorldDepth);
+        map = wcg.buildDive(world = worldGenerator.buildWorld(w, 23, config.settings.diveWorldDepth), w, config.settings.diveWorldDepth);
         contextHandler.setMap(map, world);
 
         // Start out in the horizontal middle and visual a bit down
-        player.location = Coord.get(w, 0);
+        player.location = Coord.get(w / 2, 0);
         fallDuration = 0;
 
         mapInput.flush();

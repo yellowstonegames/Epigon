@@ -78,7 +78,15 @@ public class FallingHandler {
     }
 
     public void show(EpiMap map) {
-        this.map = map;
+        int ow = map.width, oh = map.height;
+        this.map = new EpiMap(width, height);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                final int cx = x % ow, cy = y % oh;
+                this.map.contents[x][y] = map.contents[cx][cy];
+                this.map.remembered[x][y] = map.remembered[cx][cy];
+            }
+        }
         update(0);
         layers.setVisible(true);
     }
