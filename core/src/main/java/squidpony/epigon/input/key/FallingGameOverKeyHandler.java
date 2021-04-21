@@ -1,7 +1,5 @@
 package squidpony.epigon.input.key;
 
-import com.badlogic.gdx.Gdx;
-
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
@@ -12,11 +10,11 @@ import squidpony.epigon.input.Verb;
 /**
  * Handles input for actively falling in Falling mode
  */
-public class FallingGameOver implements KeyHandler {
+public class FallingGameOverKeyHandler implements KeyHandler {
 
     private final Dive dive;
 
-    public FallingGameOver(Dive dive) {
+    public FallingGameOverKeyHandler(Dive dive) {
         this.dive = dive;
     }
 
@@ -36,10 +34,9 @@ public class FallingGameOver implements KeyHandler {
                 dive.prepFall();
                 break;
             case QUIT:
-                Gdx.app.exit();
+                dive.exit();
                 break;
             default:
-                //message("Can't " + verb.name + " from falling view.");
                 return;
         }
         dive.multiplexer.processedInput = true;

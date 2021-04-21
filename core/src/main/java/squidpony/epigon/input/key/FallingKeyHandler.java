@@ -1,7 +1,5 @@
 package squidpony.epigon.input.key;
 
-import com.badlogic.gdx.Gdx;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -74,10 +72,9 @@ public class FallingKeyHandler implements KeyHandler {
                 // TODO
                 break;
             case QUIT:
-                Gdx.app.exit();
+                dive.exit();
                 break;
             default:
-                //message("Can't " + verb.name + " from falling view.");
                 return;
         }
         dive.multiplexer.processedInput = true;

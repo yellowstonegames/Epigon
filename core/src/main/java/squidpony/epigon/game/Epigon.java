@@ -751,33 +751,6 @@ public abstract class Epigon extends Game {
         toPlayerDijkstra.scan(blockage);
     }
 
-    /**
-     * Attempts to equip a random weapon from the player's inventory
-     */
-    public void equipItem() {
-        if (player.inventory.isEmpty()) {
-            message("Nothing equippable found.");
-        } else {
-            player.shuffleInPlace(player.inventory);
-            for (int i = 0; i < player.inventory.size(); i++) {
-                Physical chosen = player.inventory.get(i);
-                if (chosen.weaponData != null) {
-                    equipItem(chosen);
-                    return;
-                }
-            }
-        }
-    }
-
-    public void equipItem(Physical item) {
-        player.equipItem(item);
-        if (item.weaponData != null && item.radiance != null) { // TODO mix light sources from player held items
-//            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
-            // TODO - recalc lighting
-            calcFOV(player.location.x, player.location.y);
-        }
-    }
-
     public void scheduleMove(Direction dir) {
         awaitedMoves.add(player.location.translate(dir));
     }
@@ -1309,4 +1282,7 @@ public abstract class Epigon extends Game {
         super.dispose();
     }
 
+    public void exit(){
+        Gdx.app.exit();
+    }
 }

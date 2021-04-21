@@ -42,7 +42,6 @@ public class FallingHandler {
     private FxHandler fx;
 
     private int scrollOffsetY;
-    private boolean pressedUp; // attempting to hover
     public boolean reachedGoal = false;
     private int currentDepth = 0;
 
@@ -55,11 +54,10 @@ public class FallingHandler {
         height = layers.gridHeight;
         this.layers = layers;
 
-        trail = Physical.makeBasic("trail", (char)0x2801, SColor.GREEN_TEA_DYE);
+        trail = Physical.makeBasic("trail", (char) 0x2801, SColor.GREEN_TEA_DYE);
         colorCenter = new SquidColorCenter();
 
         layers.addLayer();//first added panel adds at level 1, used for cases when we need "extra background"
-        //layers.addLayer();//NOT USED: next adds at level 2, used for the cursor line
         layers.addLayer();//next adds at level 2, used for effects
         double[][] fov = new double[width][height];
         ArrayTools.fill(fov, 1);
@@ -69,7 +67,7 @@ public class FallingHandler {
         hide();
     }
 
-    public void setPlayer(Physical player){
+    public void setPlayer(Physical player) {
         this.player = player;
     }
 
@@ -91,7 +89,7 @@ public class FallingHandler {
         layers.setVisible(true);
     }
 
-    public void update(){
+    public void update() {
         update(scrollOffsetY);
     }
 
@@ -115,8 +113,6 @@ public class FallingHandler {
 
     private void clear() {
         layers.clear(0);
-
-        //doBorder(-scrollOffsetY, map.height);
     }
 
     private void doBorder() {
@@ -169,7 +165,7 @@ public class FallingHandler {
         }
     }
 
-    private void put(int x, int y, EpiTile tile){
+    private void put(int x, int y, EpiTile tile) {
         put(x, y, tile.getSymbol(), tile.getForegroundColor());
     }
 
@@ -197,9 +193,9 @@ public class FallingHandler {
         layers.wiggle(g, 0.2f);//, () -> layers.removeGlyph(g));
     }
 
-    private void smash(){
+    private void smash() {
         EpiTile tile = map.contents[player.location.x][player.location.y + currentDepth];
-        if (tile.blockage != null){
+        if (tile.blockage != null) {
             player.addToInventory(RecipeMixer.buildPhysical(tile.blockage));
             tile.blockage = null;
         }
@@ -210,28 +206,17 @@ public class FallingHandler {
     }
 
     private void doMovement(int x, int y) {
-//        if (y < 0) {
-//            pressedUp = true;
-//            y = 0;
-//        }
-
         Coord target = player.location.translate(x, y);
-//        if (target.equals(player.location)){
-//            return;
-//        }
 
-        // moving while falling makes you tired!
-        //player.stats.get(Stat.SLEEP).addActual(-1);
+        if (target.isWithinRectangle(0, scrollOffsetY - currentDepth, map.width, map.height)) {
 
-        if (target.isWithinRectangle(0, scrollOffsetY - currentDepth, map.width, map.height)) { //scrollOffsetY + 
-            
             EpiTile tile = map.contents[player.location.x][player.location.y + currentDepth];
             tile.blockage = null;
             Physical floor = tile.floor;
             Physical t = RecipeMixer.buildPhysical(trail);
             t.color = floor.color == SColor.TRANSPARENT.toFloatBits() ? SColor.RAINBOW[(target.x + target.y + 10) % 7].toFloatBits() : floor.color;
             tile.floor = t;
-            
+
             tile = map.contents[target.x][target.y + currentDepth];
             player.location = target;
             if (tile.blockage != null) {
@@ -241,19 +226,15 @@ public class FallingHandler {
             ListIterator<Physical> li = tile.contents.listIterator();
             while (li.hasNext()) {
                 Physical p = li.next();
-                if(p.unique)
-                {
+                if (p.unique) {
                     // reached goal at the bottom
                     reachedGoal = true;
                     //fx.layeredSparkle(target, 20, Radius.CIRCLE);
                     update();
                     return;
                 }
-                if(p.groupingData != null && player.inventory.contains(p))
-                    p.groupingData.quantity++;
-                else 
-                    player.addToInventory(p);
-                fx.twinkle(Coord.get(target.x, currentDepth + target.y), Element.FIRE);// have to have it lower due to border offset
+                if (p.groupingData != null && player.inventory.contains(p)) { p.groupingData.quantity++; } else { player.addToInventory(p); }
+                fx.twinkle(Coord.get(target.x, currentDepth + target.y), Element.FIRE);
                 li.remove();
             }
             update();
@@ -263,10 +244,9 @@ public class FallingHandler {
     }
 
     public void processInput() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q))
-            Gdx.app.exit();
-        if(reachedGoal)
-            return;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)) { Gdx.app.exit(); }
+        if (reachedGoal) { return; }
+
         int offX = 0, offY = 0;
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_8)) {
             --offY;
@@ -284,15 +264,13 @@ public class FallingHandler {
     }
 
     public void fall() {
-        if(reachedGoal)
-            return;
-        if (player.location.y + currentDepth <= scrollOffsetY){
+        if (reachedGoal) { return; }
+        if (player.location.y + currentDepth <= scrollOffsetY) {
             move(Direction.DOWN);
         }
 
         player.stats.get(Stat.NUTRITION).tick();
 
-//        pressedUp = false;
         update(scrollOffsetY + 1);
     }
 
