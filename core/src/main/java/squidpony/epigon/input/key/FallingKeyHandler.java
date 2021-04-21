@@ -9,7 +9,7 @@ import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Dive;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 
@@ -18,15 +18,15 @@ import squidpony.epigon.input.Verb;
  */
 public class FallingKeyHandler implements KeyHandler {
 
-    private final Epigon epigon;
+    private final Dive dive;
 
-    public FallingKeyHandler(Epigon epigon) {
-        this.epigon = epigon;
+    public FallingKeyHandler(Dive dive) {
+        this.dive = dive;
     }
 
     @Override
     public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-        if (epigon.multiplexer.processedInput) {
+        if (dive.multiplexer.processedInput) {
             return;
         }
         int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
@@ -36,38 +36,38 @@ public class FallingKeyHandler implements KeyHandler {
         }
         switch (verb) {
             case MOVE_UP:
-                if (!epigon.paused) {
-                    epigon.nextInput = Instant.now().plusMillis(epigon.inputDelay);
-                    epigon.fallingHandler.move(Direction.UP);
+                if (!dive.paused) {
+                    dive.nextInput = Instant.now().plusMillis(dive.inputDelay);
+                    dive.fallingHandler.move(Direction.UP);
                 }
                 break;
             case MOVE_DOWN:
-                if (!epigon.paused) {
-                    epigon.nextInput = Instant.now().plusMillis(epigon.inputDelay);
-                    epigon.fallingHandler.move(Direction.DOWN);
+                if (!dive.paused) {
+                    dive.nextInput = Instant.now().plusMillis(dive.inputDelay);
+                    dive.fallingHandler.move(Direction.DOWN);
                 }
                 break;
             case MOVE_LEFT:
-                if (!epigon.paused) {
-                    epigon.nextInput = Instant.now().plusMillis(epigon.inputDelay);
-                    epigon.fallingHandler.move(Direction.LEFT);
+                if (!dive.paused) {
+                    dive.nextInput = Instant.now().plusMillis(dive.inputDelay);
+                    dive.fallingHandler.move(Direction.LEFT);
                 }
                 break;
             case MOVE_RIGHT:
-                if (!epigon.paused) {
-                    epigon.nextInput = Instant.now().plusMillis(epigon.inputDelay);
-                    epigon.fallingHandler.move(Direction.RIGHT);
+                if (!dive.paused) {
+                    dive.nextInput = Instant.now().plusMillis(dive.inputDelay);
+                    dive.fallingHandler.move(Direction.RIGHT);
                 }
                 break;
             case PAUSE:
-                epigon.paused = !epigon.paused;
-                if (epigon.paused) {
-                    epigon.pausedAt = Instant.now();
-                    epigon.message("You are hovering, have a look around!");
+                dive.paused = !dive.paused;
+                if (dive.paused) {
+                    dive.pausedAt = Instant.now();
+                    dive.message("You are hovering, have a look around!");
                 } else { // need to calculate time offsets
-                    long pausedFor = epigon.pausedAt.until(Instant.now(), ChronoUnit.MILLIS);
-                    epigon.nextFall = epigon.nextFall.plusMillis(pausedFor);
-                    epigon.message("Falling once more!");
+                    long pausedFor = dive.pausedAt.until(Instant.now(), ChronoUnit.MILLIS);
+                    dive.nextFall = dive.nextFall.plusMillis(pausedFor);
+                    dive.message("Falling once more!");
                 }
                 break;
             case SAVE:
@@ -80,6 +80,6 @@ public class FallingKeyHandler implements KeyHandler {
                 //message("Can't " + verb.name + " from falling view.");
                 return;
         }
-        epigon.multiplexer.processedInput = true;
+        dive.multiplexer.processedInput = true;
     }
 }

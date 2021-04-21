@@ -8,7 +8,7 @@ import squidpony.squidmath.Coord;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.trait.Interactable;
 import squidpony.epigon.display.MapOverlayHandler;

@@ -2,7 +2,7 @@ package squidpony.epigon.display;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.StringKit;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.util.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.ClothingSlot;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 
 /**
  * Handles the content relevant to the current stat mode.

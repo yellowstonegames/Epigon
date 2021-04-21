@@ -1,9 +1,11 @@
-package squidpony.epigon;
+package squidpony.epigon.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import squidpony.squidgrid.gui.gdx.SquidInput;
+
+import java.util.Arrays;
 
 /** An {@link InputProcessor} that delegates to an ordered list of other InputProcessors. Delegation for an event stops if a
  * processor returns true, which indicates that the event was handled.
@@ -21,6 +23,12 @@ public class InputSpecialMultiplexer implements InputProcessor {
 
     public InputSpecialMultiplexer(SquidInput... processors) {
         this.processors = processors;
+    }
+
+    public void addProcessor(SquidInput processor){
+        SquidInput[] inputs = Arrays.copyOf(processors, processors.length + 1);
+        inputs[inputs.length - 1] = processor;
+        processors = inputs;
     }
 
     /**
@@ -84,7 +92,7 @@ public class InputSpecialMultiplexer implements InputProcessor {
             if (processors[i].scrolled(amountX, amountY)) return true;
         return false;
     }
-    
+
     public void process()
     {
         if(Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)
@@ -103,7 +111,7 @@ public class InputSpecialMultiplexer implements InputProcessor {
             for (int i = 0, n = processors.length; i < n; i++)
                 if (processors[i].keyDown(lastKeyCode) || processedInput) return;
         }
-        else 
+        else
         {
             for (int i = 0, n = processors.length; i < n; i++)
             {

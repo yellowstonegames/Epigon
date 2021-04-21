@@ -14,7 +14,7 @@ import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.slot.WieldSlot;
@@ -221,7 +221,7 @@ public class MapKeyHandler implements KeyHandler {
                 epigon.scheduleMove(Direction.NONE);
                 break;
             case REST:
-                epigon.prepFall();
+                // TODO - why was this previously: epigon.prepFall();
                 break;
             case INTERACT:
                 Optional<Physical> t;

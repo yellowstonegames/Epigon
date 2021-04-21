@@ -8,7 +8,7 @@ import java.util.List;
 import squidpony.squidmath.Coord;
 import squidpony.squidmath.StatefulRNG;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Weapon;
 

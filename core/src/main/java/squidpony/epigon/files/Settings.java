@@ -1,6 +1,5 @@
 package squidpony.epigon.files;
 
-import squidpony.epigon.GameMode;
 import squidpony.epigon.mapping.MapConstants;
 import squidpony.squidmath.CrossHash;
 
@@ -14,7 +13,7 @@ public class Settings { // TODO - split Crawl and Dive into separate configs
         "If the seed can be read as a long, it will be. Otherwise it will be read as a string."
     };
 
-    public GameMode mode = GameMode.CRAWL;
+    // public GameMode mode = GameMode.CRAWL; // TODO - figure out way to set up game mode choice after refactoring
 
     public String seed = "bananas";
 

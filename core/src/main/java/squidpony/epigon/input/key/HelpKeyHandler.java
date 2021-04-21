@@ -4,7 +4,7 @@ import squidpony.squidgrid.Direction;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.display.MapOverlayHandler;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;

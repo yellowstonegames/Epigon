@@ -4,7 +4,7 @@ import com.badlogic.gdx.InputAdapter;
 
 import squidpony.Messaging;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.trait.Interactable;
 

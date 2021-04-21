@@ -7,7 +7,7 @@ import squidpony.squidgrid.gui.gdx.SColor;
 import squidpony.squidgrid.mapping.DungeonUtility;
 import squidpony.squidmath.*;
 
-import static squidpony.epigon.Epigon.rootChaos;
+import static squidpony.epigon.game.Epigon.rootChaos;
 
 /**
  * This represents a single explorable map level.

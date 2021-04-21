@@ -1,7 +1,7 @@
 package squidpony.epigon.data.trait;
 
 import squidpony.Messaging;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.slot.BodySlot;
 import squidpony.squidai.Technique;

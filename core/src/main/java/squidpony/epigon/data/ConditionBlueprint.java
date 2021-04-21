@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.utils.TimeUtils;
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.quality.Element;
 import squidpony.squidmath.DiverRNG;
 import squidpony.squidmath.NumberTools;

@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import com.badlogic.gdx.utils.FloatArray;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.squidmath.Arrangement;
 import squidpony.squidmath.IntVLA;
 import squidpony.squidmath.OrderedMap;

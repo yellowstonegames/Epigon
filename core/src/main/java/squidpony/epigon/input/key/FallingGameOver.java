@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Dive;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 
@@ -14,15 +14,15 @@ import squidpony.epigon.input.Verb;
  */
 public class FallingGameOver implements KeyHandler {
 
-    private final Epigon epigon;
+    private final Dive dive;
 
-    public FallingGameOver(Epigon epigon) {
-        this.epigon = epigon;
+    public FallingGameOver(Dive dive) {
+        this.dive = dive;
     }
 
     @Override
     public void handle(char key, boolean alt, boolean ctrl, boolean shift) {
-        if (epigon.multiplexer.processedInput) {
+        if (dive.multiplexer.processedInput) {
             return;
         }
         int combined = SquidInput.combineModifiers(key, alt, ctrl, shift);
@@ -32,8 +32,8 @@ public class FallingGameOver implements KeyHandler {
         }
         switch (verb) {
             case TRY_AGAIN:
-                epigon.initPlayer();
-                epigon.prepFall();
+                dive.initPlayer();
+                dive.prepFall();
                 break;
             case QUIT:
                 Gdx.app.exit();
@@ -42,6 +42,6 @@ public class FallingGameOver implements KeyHandler {
                 //message("Can't " + verb.name + " from falling view.");
                 return;
         }
-        epigon.multiplexer.processedInput = true;
+        dive.multiplexer.processedInput = true;
     }
 }

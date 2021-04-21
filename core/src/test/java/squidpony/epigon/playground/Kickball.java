@@ -4,7 +4,7 @@ import squidpony.epigon.data.control.RecipeMixer;
 import squidpony.epigon.data.control.DataStarter;
 import com.badlogic.gdx.utils.JsonWriter;
 import squidpony.DataConverter;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.util.Utilities;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.*;

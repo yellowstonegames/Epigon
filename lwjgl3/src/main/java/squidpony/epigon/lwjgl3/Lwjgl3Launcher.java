@@ -9,7 +9,9 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Crawl;
+import squidpony.epigon.game.Dive;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.files.Config;
 
 public class Lwjgl3Launcher {
@@ -38,7 +40,7 @@ public class Lwjgl3Launcher {
         }
 
         System.out.println("Files loaded!");
-        Epigon epigon = new Epigon(config);
+        Epigon epigon = new Crawl(config);
 
         //start independent listeners
         //load and initialize resources

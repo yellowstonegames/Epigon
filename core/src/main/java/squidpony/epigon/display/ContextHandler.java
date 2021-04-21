@@ -17,7 +17,7 @@ import squidpony.squidmath.Coord;
 import squidpony.squidmath.EnumOrderedMap;
 import squidpony.squidmath.EnumOrderedSet;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.LiveValue;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;

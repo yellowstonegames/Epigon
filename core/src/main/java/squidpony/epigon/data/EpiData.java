@@ -1,7 +1,7 @@
 package squidpony.epigon.data;
 
 import squidpony.StringKit;
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.squidmath.*;
 
 import java.io.Serializable;

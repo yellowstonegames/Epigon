@@ -1,6 +1,6 @@
 package squidpony.epigon.data.slot;
 
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.util.Utilities;
 
 /**

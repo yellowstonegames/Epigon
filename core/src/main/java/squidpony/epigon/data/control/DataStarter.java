@@ -2,8 +2,8 @@ package squidpony.epigon.data.control;
 
 import com.badlogic.gdx.graphics.Color;
 import squidpony.Maker;
-import squidpony.epigon.ConstantKey;
-import squidpony.epigon.Epigon;
+import squidpony.epigon.util.ConstantKey;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.*;
 import squidpony.epigon.data.quality.Cloth;
@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
-import static squidpony.epigon.Epigon.rootChaos;
+import static squidpony.epigon.game.Epigon.rootChaos;
 import static squidpony.epigon.data.Physical.basePhysical;
 
 /**

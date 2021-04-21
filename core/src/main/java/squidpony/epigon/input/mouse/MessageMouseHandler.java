@@ -3,7 +3,7 @@ package squidpony.epigon.input.mouse;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 
 /**
  * Handles mouse input for the falling game mode

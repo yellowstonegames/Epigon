@@ -3,14 +3,11 @@ package squidpony.epigon.input.key;
 import squidpony.squidgrid.gui.gdx.SquidInput;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.files.Config;
 import squidpony.epigon.input.ControlMapping;
 import squidpony.epigon.input.Verb;
 
-/**
- * Handles input for actively falling in Falling mode
- */
 public class FallbackKeyHandler implements KeyHandler {
 
     private final Epigon epigon;
@@ -50,20 +47,23 @@ public class FallbackKeyHandler implements KeyHandler {
                     break;
             }
         } else {
-            switch (config.settings.mode) {
-                case DIVE:
-                    if (!ControlMapping.defaultFallingViewMapping.contains(verb)) {
-                        verb = null;
-                    }
-                    m = "dive";
-                    break;
-                default:
-                    if (!ControlMapping.defaultMapViewMapping.contains(verb)) {
-                        verb = null;
-                    }
-                    m = "map";
-                    break;
-            }
+            m = "this";
+
+            // TODO - clean this up
+//            switch (config.settings.mode) {
+//                case DIVE:
+//                    if (!ControlMapping.defaultFallingViewMapping.contains(verb)) {
+//                        verb = null;
+//                    }
+//                    m = "dive";
+//                    break;
+//                default:
+//                    if (!ControlMapping.defaultMapViewMapping.contains(verb)) {
+//                        verb = null;
+//                    }
+//                    m = "map";
+//                    break;
+//            }
         }
         if (verb == null) {
             epigon.message("Unknown input for " + m + " mode: " + key);

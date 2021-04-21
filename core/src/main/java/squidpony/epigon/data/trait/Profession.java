@@ -1,6 +1,6 @@
 package squidpony.epigon.data.trait;
 
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.data.EpiData;
 import squidpony.epigon.data.Modification;
 import squidpony.epigon.data.Rating;

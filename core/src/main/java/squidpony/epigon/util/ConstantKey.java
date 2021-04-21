@@ -1,5 +1,6 @@
-package squidpony.epigon;
+package squidpony.epigon.util;
 
+import squidpony.epigon.GauntRNG;
 import squidpony.squidmath.CrossHash;
 
 import java.io.Serializable;

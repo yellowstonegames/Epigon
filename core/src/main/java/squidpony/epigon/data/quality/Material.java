@@ -1,7 +1,7 @@
 package squidpony.epigon.data.quality;
 
 import com.badlogic.gdx.graphics.Color;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 
 /**
  * Created by Tommy Ettinger on 11/26/2017.

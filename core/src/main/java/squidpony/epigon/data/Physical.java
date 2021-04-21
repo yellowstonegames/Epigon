@@ -4,7 +4,7 @@ import squidpony.epigon.data.control.RecipeMixer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import squidpony.Maker;
-import squidpony.epigon.ConstantKey;
+import squidpony.epigon.util.ConstantKey;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.data.quality.Material;
 import squidpony.epigon.data.slot.BodySlot;

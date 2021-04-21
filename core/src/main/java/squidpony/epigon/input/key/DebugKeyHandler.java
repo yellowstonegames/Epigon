@@ -4,7 +4,7 @@ import squidpony.squidgrid.Radius;
 import squidpony.squidgrid.gui.gdx.SquidInput.KeyHandler;
 import squidpony.squidmath.Coord;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.GauntRNG;
 import squidpony.epigon.data.quality.Element;
 import squidpony.epigon.files.Config;

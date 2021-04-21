@@ -1,6 +1,6 @@
 package squidpony.epigon.data.trait;
 
-import squidpony.epigon.Epigon;
+import squidpony.epigon.game.Epigon;
 import squidpony.epigon.data.Physical;
 
 /**
