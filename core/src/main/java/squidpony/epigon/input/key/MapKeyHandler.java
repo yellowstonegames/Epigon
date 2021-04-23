@@ -1,7 +1,5 @@
 package squidpony.epigon.input.key;
 
-import com.badlogic.gdx.Gdx;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -31,8 +29,8 @@ public class MapKeyHandler implements KeyHandler {
 
     private final Crawl crawl;
 
-    public MapKeyHandler(Crawl epigon) {
-        this.crawl = epigon;
+    public MapKeyHandler(Crawl crawl) {
+        this.crawl = crawl;
     }
 
     @Override
@@ -214,8 +212,7 @@ public class MapKeyHandler implements KeyHandler {
                 crawl.crawlInput.setMouse(crawl.helpMouse);
                 break;
             case QUIT:
-                // TODO - confirmation
-                Gdx.app.exit();
+                crawl.exit();
                 return;
             case WAIT:
                 crawl.scheduleMove(Direction.NONE);

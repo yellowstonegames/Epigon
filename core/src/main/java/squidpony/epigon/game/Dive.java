@@ -13,7 +13,7 @@ import java.util.List;
 import squidpony.StringKit;
 import squidpony.epigon.data.Physical;
 import squidpony.epigon.data.Stat;
-import squidpony.epigon.input.key.FallingGameOver;
+import squidpony.epigon.input.key.FallingGameOverKeyHandler;
 import squidpony.epigon.input.key.FallingKeyHandler;
 import squidpony.epigon.input.mouse.FallingMouseHandler;
 import squidpony.epigon.mapping.MapConstants;
@@ -91,7 +91,7 @@ public class Dive extends Epigon {
         super.buildInputProcessors();
 
         fallingKeys = new FallingKeyHandler(this);
-        fallingGameOverKeys = new FallingGameOver(this);
+        fallingGameOverKeys = new FallingGameOverKeyHandler(this);
         fallingMouse = new SquidMouse(1, 1, new FallingMouseHandler());
         fallingInput = new SquidInput(fallingKeys, fallingMouse);
 

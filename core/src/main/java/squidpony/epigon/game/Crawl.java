@@ -82,7 +82,6 @@ public class Crawl extends Epigon {
         mapOverlayStage.addActor(mapOverlaySLayers);
     }
 
-
     @Override
     public void buildInputProcessors() {
         super.buildInputProcessors();
@@ -115,7 +114,6 @@ public class Crawl extends Epigon {
     public void initPlayer() {
         super.initPlayer();
     }
-
 
     @Override
     public void internalResize(int width, int height) {
@@ -372,7 +370,6 @@ public class Crawl extends Epigon {
         mapSLayers.clear(2);
     }
 
-
     public void changeLevel(int level) {
         changeLevel(level, null);
     }
@@ -414,7 +411,6 @@ public class Crawl extends Epigon {
         calcDijkstra();
         contextHandler.setMap(map, world);
     }
-
 
     private void setupLevel() {
         for (int x = 0; x < map.width; x++) {
@@ -479,4 +475,30 @@ public class Crawl extends Epigon {
         }
     }
 
+    /**
+     * Attempts to equip a random weapon from the player's inventory
+     */
+    public void equipItem() {
+        if (player.inventory.isEmpty()) {
+            message("Nothing equippable found.");
+        } else {
+            player.shuffleInPlace(player.inventory);
+            for (int i = 0; i < player.inventory.size(); i++) {
+                Physical chosen = player.inventory.get(i);
+                if (chosen.weaponData != null) {
+                    equipItem(chosen);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void equipItem(Physical item) {
+        player.equipItem(item);
+        if (item.weaponData != null && item.radiance != null) { // TODO mix light sources from player held items
+//            player.radiance = new Radiance((float) player.stats.get(Stat.SIGHT).actual(), item.radiance.color, item.radiance.flicker, item.radiance.strobe, item.radiance.flare);
+            // TODO - recalc lighting
+            calcFOV(player.location.x, player.location.y);
+        }
+    }
 }
