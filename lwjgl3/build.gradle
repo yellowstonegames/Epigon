@@ -24,14 +24,25 @@ run {
 	}
 }
 jar {
+	// Sets the file name of the output JAR, to be placed in lwjgl3/build/libs/
 	archiveFileName = "${appName}.jar"
-	duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-	from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	// Needed starting with Gradle 7.0.
+	// This makes any repeated files included by default, though we exclude the ones we don't need later.
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+	// Adds all of the files we built to the JAR.
+	dependsOn configurations.runtimeClasspath
+	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	// Gets rid of some files that are duplicated inside the JAR, and just act strangely. They aren't needed.
 	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 	dependencies {
 		exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
 	}
+	// Sets the main class, to be run when the jar is run.
 	manifest {
 		attributes 'Main-Class': project.mainClassName
 	}
+	doLast {
+		file(archiveFile).setExecutable(true, false)
+	}
+
 }
