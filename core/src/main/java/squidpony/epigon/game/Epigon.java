@@ -4,7 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.MathUtils;
@@ -64,8 +63,7 @@ public abstract class Epigon extends Game {
     public RecipeMixer mixer;
     public DataStarter dataStarter;
     public MapDecorator mapDecorator;
-    public static final char BOLD = '\0', ITALIC = '\0', REGULAR = '\0';
-//    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
+    public static final char BOLD = '\u4000', ITALIC = '\u8000', REGULAR = '\0';
 
     public Config config;
     public Settings settings;
@@ -182,11 +180,7 @@ public abstract class Epigon extends Game {
             glp.disable();
         }
 
-        defaultFont = new TextCellFactory().font("Iosevka_outlined.fnt");
-        defaultFont.width(displayConfig.mapSize.cellWidth).height(displayConfig.mapSize.cellHeight);
-        defaultFont.initBySize();
-
-//        defaultFont = DefaultResources.getCrispLeanFamily();
+        defaultFont = DefaultResources.getCrispLeanFamily();
         defaultFont.bmpFont.setFixedWidthGlyphs(Utilities.USABLE_CHARS);
         defaultFont.setSmoothingMultiplier(1.25f);
 
@@ -252,9 +246,6 @@ public abstract class Epigon extends Game {
             messageSize.cellWidth,
             messageSize.cellHeight,
             defaultFont.copy());
-        messageSLayers.font.bmpFont.getData().setScale(0.5f, 0.5f);
-        messageSLayers.font.width(messageSize.cellWidth).height(messageSize.cellHeight).initBySize();
-
 
         messageSLayers.setDefaultBackground(unseenColor);
 
@@ -277,8 +268,6 @@ public abstract class Epigon extends Game {
         contextSLayers.setDefaultForeground(SColor.CW_PALE_LIME);
 
         TextCellFactory mapFont = defaultFont.copy();
-        mapFont.bmpFont.getData().setScale(0.5f, 0.5f);
-        mapFont.bmpFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         mapFont.width(mapSize.cellWidth).height(mapSize.cellHeight).initBySize();
         mapSLayers = new SparseLayers(
             settings.worldWidth,
@@ -312,10 +301,7 @@ public abstract class Epigon extends Game {
         mapOverlayHandler = new MapOverlayHandler(mapOverlaySLayers);
 
         // oversize slightly so that line drawing items meet smoothly
-//        smallFont.tweakWidth(infoSize.cellWidth * 1.075f).initBySize();
-        smallFont.bmpFont.getData().setScale(0.3125f, 0.3125f);
-        smallFont.bmpFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        smallFont.width(infoSize.cellWidth).height(infoSize.cellHeight).initBySize();
+        smallFont.tweakWidth(infoSize.cellWidth * 1.075f).initBySize();
 
         // this makes animations very fast, which is good for multi-cell movement but bad for attack animations.
         //mapSLayers.setAnimationDuration(0.145f);
