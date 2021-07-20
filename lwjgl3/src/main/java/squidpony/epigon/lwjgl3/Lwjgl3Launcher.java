@@ -4,11 +4,13 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Graphics.Monitor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 
+import com.badlogic.gdx.backends.lwjgl3.audio.OpenALLwjgl3Audio;
 import squidpony.epigon.game.*;
 import squidpony.epigon.game.Epigon;
 import squidpony.epigon.files.Config;
@@ -128,12 +130,13 @@ public class Lwjgl3Launcher {
         }
 
         appConfig.setTitle(Config.gameTitle);
-        //uncomment if testing FPS
-        appConfig.useVsync(false);
+        //set to useVsync(false) if testing FPS
+        appConfig.useVsync(true);
         appConfig.setWindowIcon(Files.FileType.Internal, "images/icons/libgdx128.png", "images/icons/libgdx64.png", "images/icons/libgdx32.png", "images/icons/libgdx16.png");
-        Lwjgl3Application masterApplication = new Lwjgl3Application(epigon, appConfig) {
+        new Lwjgl3Application(epigon, appConfig) {
             @Override
             public void exit() {
+                ((OpenALLwjgl3Audio)Gdx.audio).dispose();
                 primaryWindowListener.closeRequested(); // have the primary window do it's thing before leaving
                 super.exit();
             }
