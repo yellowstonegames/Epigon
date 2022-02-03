@@ -6,7 +6,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.github.tommyettinger.merry.ObjectSet;
 
 //import com.badlogic.gdx.math.GridPoint2;
 //import com.badlogic.gdx.utils.ObjectMap;

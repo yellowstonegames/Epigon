@@ -136,8 +136,7 @@ public class Lwjgl3Launcher {
         new Lwjgl3Application(epigon, appConfig) {
             @Override
             public void exit() {
-                ((OpenALLwjgl3Audio)Gdx.audio).dispose();
-                primaryWindowListener.closeRequested(); // have the primary window do it's thing before leaving
+                primaryWindowListener.closeRequested(); // have the primary window do its thing before leaving
                 super.exit();
             }
         };
