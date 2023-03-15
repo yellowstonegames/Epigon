@@ -1,0 +1,11 @@
+{
+"advice": [
+	"If you ever want to reset your settings, you can simply delete this file.",
+	"If the seed can be read as a long, it will be. Otherwise it will be read as a string."
+],
+"diveWorldDepth": 61,
+"seed": "bananas",
+"worldDepth": 10,
+"worldHeight": 160,
+"worldWidth": 160
+}

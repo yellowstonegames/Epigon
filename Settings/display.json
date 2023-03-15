@@ -1,0 +1,41 @@
+{
+"advice": [
+	"If you ever want to reset your settings, you can simply delete this file.",
+	"While grid and pixel sizes will attempt to be respected, there are some constraints internally that will override settings sizes in some cases.",
+	"The widest pixel size of map or message will be used to choose grid width of both.",
+	"Info has strict height and minimum width requirements. Where needed, context will be shrunk or grown to accommodate that.",
+	"The widest pixel size of info or context will be used to choose the grid width of both."
+],
+"contextSize": {
+	"cellHeight": 20,
+	"cellWidth": 9,
+	"gridHeight": 17,
+	"gridWidth": 50
+},
+"fullscreen": false,
+"infoSize": {
+	"cellHeight": 20,
+	"cellWidth": 9,
+	"gridHeight": 30,
+	"gridWidth": 50
+},
+"mapSize": {
+	"cellHeight": 28,
+	"cellWidth": 28,
+	"gridHeight": 26,
+	"gridWidth": 51
+},
+"maximized": true,
+"messageSize": {
+	"cellHeight": 28,
+	"cellWidth": 14,
+	"gridHeight": 8,
+	"gridWidth": 102
+},
+"monitorIndex": 0,
+"monitorName": "Generic PnP Monitor",
+"windowHeight": 996,
+"windowWidth": 1920,
+"windowXPosition": 135,
+"windowYPosition": 122
+}
