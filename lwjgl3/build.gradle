@@ -3,7 +3,7 @@ apply plugin: 'application'
 sourceSets.main.resources.srcDirs += [ project.file('assets').path ]
 mainClassName = 'squidpony.epigon.lwjgl3.Lwjgl3Launcher'
 eclipse.project.name = appName + '-lwjgl3'
-sourceCompatibility = 1.17
+sourceCompatibility = 19
 
 dependencies {
 	api project(':core')

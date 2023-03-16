@@ -15,9 +15,10 @@ allprojects {
 
 configure(subprojects) {
 	apply plugin: 'java-library'
-	sourceCompatibility = 1.17
+	sourceCompatibility = 19
 	compileJava {
 		options.incremental = true
+		options.release.set(19)
 	}
 }
 

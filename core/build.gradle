@@ -1,10 +1,12 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
-sourceCompatibility = 1.17
+sourceCompatibility = 19
 
 dependencies {
 	api "com.badlogicgames.gdx:gdx:$gdxVersion"
-	api "com.github.yellowstonegames.SquidLib:squidlib:$squidlibVersion"
-	api "com.github.yellowstonegames.SquidLib:squidlib-extra:$squidlibVersion"
+	api "com.squidpony:squidlib:$squidlibVersion"
+	api "com.squidpony:squidlib-extra:$squidlibVersion"
+//	api "com.github.yellowstonegames.SquidLib:squidlib:$squidlibVersion"
+//	api "com.github.yellowstonegames.SquidLib:squidlib-extra:$squidlibVersion"
 
 }
