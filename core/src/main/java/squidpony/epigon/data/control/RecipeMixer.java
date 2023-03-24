@@ -367,7 +367,7 @@ public class RecipeMixer {
         if (blueprint.wearableData != null){
             physical.wearableData = new Wearable();
             physical.wearableData.slotsUsed = blueprint.wearableData.slotsUsed; // same backing list, if modification happens, that modification should split reference
-            physical.wearableData.worn = blueprint.wearableData.worn;
+            physical.wearableData.parent = blueprint.wearableData.parent;
         }
 
         physical.weaponData = blueprint.weaponData;
