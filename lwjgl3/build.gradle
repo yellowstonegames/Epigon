@@ -13,7 +13,6 @@ dependencies {
 }
 
 import org.gradle.internal.os.OperatingSystem
-
 run {
 	workingDir = project.file('assets').path
 	setIgnoreExitValue(true)
