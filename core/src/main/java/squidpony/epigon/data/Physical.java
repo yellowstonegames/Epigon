@@ -119,6 +119,7 @@ public class Physical extends EpiData {
     public Liquid liquidData;
     public Legible legibleData;
     public Wearable wearableData;
+    public HashSet<Physical> currentlyWorn = new HashSet<Physical>();
     public Weapon weaponData;
     public Zappable zappableData;
 
@@ -308,7 +309,7 @@ public class Physical extends EpiData {
 
         removeFromInventory(item);
         if (item.wearableData != null) {
-            item.wearableData.worn = true;
+            currentlyWorn.add(item);
         }
 
         for (BodySlot ws : slots) {
@@ -342,10 +343,9 @@ public class Physical extends EpiData {
     }
 
     /**
-     * Takes the item out of inventory and places it into equipped areas. Anything already equipped in the areas goes
-     * back into inventory.
+     * Removes items located in the provided slots and puts them back into inventory.
      *
-     * @param slots All the slots that will be filled when the item is equipped
+     * @param slots All the slots that will be emptied
      * @return an ArrayList of the items that were unequipped
      */
     public ArrayList<Physical> unequip(ArrayList<BodySlot> slots) {
@@ -378,7 +378,7 @@ public class Physical extends EpiData {
 
         for (Physical p : removing) {
             if (p.wearableData != null) {
-                p.wearableData.worn = false;
+                currentlyWorn.remove(p);
             }
 
             if (!p.attached) {
@@ -495,73 +495,73 @@ public class Physical extends EpiData {
         if (blocking != physical.blocking) {
             return false;
         }
-        if (radiance != null ? !radiance.equals(physical.radiance) : physical.radiance != null) {
+        if (!Objects.equals(radiance, physical.radiance)) {
             return false;
         }
-        if (parent != null ? !parent.equals(physical.parent) : physical.parent != null) {
+        if (!Objects.equals(parent, physical.parent)) {
             return false;
         }
-        if (possibleAliases != null ? !possibleAliases.equals(physical.possibleAliases) : physical.possibleAliases != null) {
+        if (!Objects.equals(possibleAliases, physical.possibleAliases)) {
             return false;
         }
-        if (modifications != null ? !modifications.equals(physical.modifications) : physical.modifications != null) {
+        if (!Objects.equals(modifications, physical.modifications)) {
             return false;
         }
-        if (elementalDamageMultiplier != null ? !elementalDamageMultiplier.equals(physical.elementalDamageMultiplier) : physical.elementalDamageMultiplier != null) {
+        if (!Objects.equals(elementalDamageMultiplier, physical.elementalDamageMultiplier)) {
             return false;
         }
-        if (inventory != null ? !inventory.equals(physical.inventory) : physical.inventory != null) {
+        if (!Objects.equals(inventory, physical.inventory)) {
             return false;
         }
-        if (optionalInventory != null ? !optionalInventory.equals(physical.optionalInventory) : physical.optionalInventory != null) {
+        if (!Objects.equals(optionalInventory, physical.optionalInventory)) {
             return false;
         }
-        if (physicalDrops != null ? !physicalDrops.equals(physical.physicalDrops) : physical.physicalDrops != null) {
+        if (!Objects.equals(physicalDrops, physical.physicalDrops)) {
             return false;
         }
-        if (elementDrops != null ? !elementDrops.equals(physical.elementDrops) : physical.elementDrops != null) {
+        if (!Objects.equals(elementDrops, physical.elementDrops)) {
             return false;
         }
         if (rarity != physical.rarity) {
             return false;
         }
-        if (rarityModifications != null ? !rarityModifications.equals(physical.rarityModifications) : physical.rarityModifications != null) {
+        if (!Objects.equals(rarityModifications, physical.rarityModifications)) {
             return false;
         }
-        if (creatureData != null ? !creatureData.equals(physical.creatureData) : physical.creatureData != null) {
+        if (!Objects.equals(creatureData, physical.creatureData)) {
             return false;
         }
-        if (mainMaterial != null ? !mainMaterial.equals(physical.mainMaterial) : physical.mainMaterial != null) {
+        if (!Objects.equals(mainMaterial, physical.mainMaterial)) {
             return false;
         }
-        if (ammunitionData != null ? !ammunitionData.equals(physical.ammunitionData) : physical.ammunitionData != null) {
+        if (!Objects.equals(ammunitionData, physical.ammunitionData)) {
             return false;
         }
-        if (containerData != null ? !containerData.equals(physical.containerData) : physical.containerData != null) {
+        if (!Objects.equals(containerData, physical.containerData)) {
             return false;
         }
-        if (groupingData != null ? !groupingData.equals(physical.groupingData) : physical.groupingData != null) {
+        if (!Objects.equals(groupingData, physical.groupingData)) {
             return false;
         }
-        if (interactableData != null ? !interactableData.equals(physical.interactableData) : physical.interactableData != null) {
+        if (!Objects.equals(interactableData, physical.interactableData)) {
             return false;
         }
-        if (liquidData != null ? !liquidData.equals(physical.liquidData) : physical.liquidData != null) {
+        if (!Objects.equals(liquidData, physical.liquidData)) {
             return false;
         }
-        if (legibleData != null ? !legibleData.equals(physical.legibleData) : physical.legibleData != null) {
+        if (!Objects.equals(legibleData, physical.legibleData)) {
             return false;
         }
-        if (wearableData != null ? !wearableData.equals(physical.wearableData) : physical.wearableData != null) {
+        if (!Objects.equals(wearableData, physical.wearableData)) {
             return false;
         }
-        if (weaponData != null ? !weaponData.equals(physical.weaponData) : physical.weaponData != null) {
+        if (!Objects.equals(weaponData, physical.weaponData)) {
             return false;
         }
-        if (zappableData != null ? !zappableData.equals(physical.zappableData) : physical.zappableData != null) {
+        if (!Objects.equals(zappableData, physical.zappableData)) {
             return false;
         }
-        return terrainData != null ? terrainData.equals(physical.terrainData) : physical.terrainData == null;
+        return Objects.equals(terrainData, physical.terrainData);
     }
 
     @Override
